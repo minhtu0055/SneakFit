@@ -13,5 +13,7 @@ namespace SneakFit.Data.Entities
 		public string Mota { get; set; }
 		public bool TrangThai { get; set; }
 		public Guid DanhMucId { get; set; }
-	}
+		public DanhMuc DanhMuc { get; set; }
+        public List<KhuyenMaiChiTiet> KhuyenMaiChiTiet { get; set; }
+    }
 }
