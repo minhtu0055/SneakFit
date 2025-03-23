@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace SneakFit.Data.Entities
 {
-    public class GioHang
+    public class DanhMuc
     {
         public Guid Id { get; set; }
-        public string UserId { get; set; }
-        public AppUser User { get; set; }
-        public List<GioHangChiTiet> GioHangChiTiet { get; set; }
+        public string TenDanhMuc { get; set; }
+        public List<SanPham> SanPham { get; set; }
     }
 }

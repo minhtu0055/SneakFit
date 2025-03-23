@@ -10,14 +10,21 @@ namespace SneakFit.Data.Entities
 	{
 		public Guid ID { get; set; }
 		public Guid MauSacId { get; set; }
-		public Guid KichThuocId { get; set; }
-		public Guid ChatLieuId { get; set; }
-		public Guid DeGiayId { get; set; }
-		public Guid ThuongHieuId { get; set; }
-		public Guid SanPhamId { get; set; }
-
+		public MauSac MauSac { get; set; }
+        public Guid KichThuocId { get; set; }
+		public KichThuoc KichThuoc { get; set; }
+        public Guid ChatLieuId { get; set; }
+		public ChatLieu ChatLieu { get; set; }
+        public Guid DeGiayId { get; set; }
+		public DeGiay DeGiay { get; set; }
+        public Guid ThuongHieuId { get; set; }
+		public ThuongHieu ThuongHieu { get; set; }
+        public Guid SanPhamId { get; set; }
 		public SanPham SanPham { get; set; }
 		public float Gia { get; set; }
 		public int SoLuong { get; set; }
-	}
+		public List<GioHangChiTiet> GioHangChiTiet { get; set; }
+		public List<HoaDonChiTiet> HoaDonChiTiet { get; set; }
+		public List<HinhAnhSanPham> HinhAnhSanPham { get; set; }
+    }
 }

@@ -14,6 +14,7 @@ namespace SneakFit.Data.Configuration
         public void Configure(EntityTypeBuilder<AppUser> builder)
         {
             builder.HasKey(x=>x.Id);
+            builder.HasOne(x => x.GioHang).WithOne(x => x.User).HasForeignKey<GioHang>(x => x.UserId);
         }
     }
 }

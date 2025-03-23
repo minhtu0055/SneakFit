@@ -12,5 +12,7 @@ namespace SneakFit.Data.Entities
         public string UrlHinhAnh { get; set; }  
         public DateTime NgaySinh { get; set; }
         public bool TrangThai { get; set; }
+        public List<HoaDon> HoaDon { get; set; }
+        public GioHang GioHang { get; set; }
     }
 }

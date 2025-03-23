@@ -13,10 +13,8 @@ namespace SneakFit.Data.Entities
         public int SoLuong { get; set; }
         public DateTime NgayTao { get; set; }
         public Guid GioHangId { get; set; }
-
         public GioHang GioHang { get; set; }
-        
-        public Guid SanPhamChiTietId { get; set; }
-        public SanPhamChitiet SanPhamChiTiet { get; set; }
+        public Guid? SanPhamChiTietId { get; set; }
+        public SanPhamChiTiet SanPhamChiTiet { get; set; }
     }
 }
