@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace SneakFit.Data.Entities
 {
-	public class SanPhamChitiet
+	public class SanPhamChiTiet
 	{
 		public Guid ID { get; set; }
 		public Guid MauSacId { get; set; }
