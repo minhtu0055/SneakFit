@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SneakFit.Application.Catalog.ChatLieu;
 using SneakFit.Application.Catalog.DeGiay;
 using SneakFit.Application.Catalog.ThuongHieu;
 using SneakFit.Data.EF;
@@ -15,6 +16,7 @@ builder.Services.AddDbContext<SneakFitDbContext>(options =>
 });
 builder.Services.AddScoped<IThuongHieuService, ThuongHieuService>(); // khai báo dịch vụ
 builder.Services.AddScoped<IDeGiayService, DeGiayService>(); // khai báo dịch vụ
+builder.Services.AddScoped<IChatLieuService, ChatLieuService>(); // khai báo dịch vụ
 
 
 
