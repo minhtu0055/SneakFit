@@ -10,7 +10,7 @@ namespace SneakFit.Application.Catalog.ThuongHieu
     public interface IThuongHieuService
     {
         Task<List<ThuongHieuViewModels>> GetAll();
-        Task<ThuongHieuViewModels> GetById(int id);
+        Task<ThuongHieuViewModels> GetById(Guid id);
         Task<ThuongHieuViewModels> Create(ThemThuongHieu request);
         Task<ThuongHieuViewModels> Update(SuaThuongHieu request);
     }
