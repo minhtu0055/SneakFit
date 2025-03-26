@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using SneakFit.Data.EF;
+using SneakFit.Data.Entities;
 using SneakFit.ViewModels.Catalog.ThuongHieu;
 
 namespace SneakFit.Application.Catalog.ThuongHieu
@@ -16,21 +18,57 @@ namespace SneakFit.Application.Catalog.ThuongHieu
         {
             _context = context;
         }
-        public Task<List<ThuongHieuViewModels>> GetAll()
+        public async Task<List<ThuongHieuViewModels>> GetAll()
         {
-            throw new NotImplementedException(); // Code
+            var list = await _context.ThuongHieu.Select(x => new ThuongHieuViewModels()
+            {
+                Id = x.Id,
+                TenThuongHieu = x.TenThuongHieu
+            }).ToListAsync();
+            return list;
         }
-        public Task<ThuongHieuViewModels> GetById(int id)
+        public async Task<ThuongHieuViewModels> GetById(Guid id)
         {
-            throw new NotImplementedException(); // Code
+            var getid = await _context.ThuongHieu.FindAsync(id);
+            if(getid == null)
+            {
+                throw new Exception($"Không tìm thấy id : {id} của thương hiêu");
+            }
+            return new ThuongHieuViewModels()
+            {
+                Id = getid.Id,
+                TenThuongHieu = getid.TenThuongHieu
+            };
         }
-        public Task<ThuongHieuViewModels> Create(ThemThuongHieu request)
+        public async Task<ThuongHieuViewModels> Create(ThemThuongHieu request)
         {
-            throw new NotImplementedException(); // Code
+            var newThuongHieu = new Data.Entities.ThuongHieu()
+            {
+                Id = Guid.NewGuid(),
+                TenThuongHieu = request.TenThuongHieu
+            };
+            _context.ThuongHieu.Add(newThuongHieu);
+            await _context.SaveChangesAsync();
+            return new ThuongHieuViewModels()
+            {
+                Id = newThuongHieu.Id,
+                TenThuongHieu = newThuongHieu.TenThuongHieu
+            };
         }
-        public Task<ThuongHieuViewModels> Update(SuaThuongHieu request)
+        public async Task<ThuongHieuViewModels> Update(SuaThuongHieu request)
         {
-            throw new NotImplementedException(); // Code
+            var getid = _context.ThuongHieu.Find(request.Id);
+            if(getid == null)
+            {
+                throw new Exception($"Không tìm thấy id : {request.Id} của thương hiêu");
+            }
+            getid.TenThuongHieu = request.TenThuongHieu;
+            await _context.SaveChangesAsync();
+            return new ThuongHieuViewModels()
+            {
+                Id = getid.Id,
+                TenThuongHieu = getid.TenThuongHieu
+            };
         }
     }
 }
