@@ -36,20 +36,19 @@ namespace SneakFit.BackEndAPI.Controllers
         {
             var result = await _deGiayService.Create(request);
             if (result.Id == Guid.Empty) return BadRequest();
-
-
-
-            return Ok();
+            return Ok(result);
         }
 
-        [HttpPut]
-        public async Task<IActionResult> Update([FromBody] SuaDeGiay request)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(Guid id, [FromBody] SuaDeGiay request)
         {
+            if (id != request.Id)
+                return BadRequest("ID không khớp");
+
             var result = await _deGiayService.Update(request);
             if (result == null) return NotFound();
 
-            return Ok();
+            return Ok(result);
         }
-
     }
 }
