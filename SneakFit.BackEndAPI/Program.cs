@@ -1,14 +1,18 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SneakFit.Application.Catalog.ChatLieu;
 using SneakFit.Application.Catalog.DeGiay;
+using SneakFit.Application.Catalog.KhuyenMai;
 using SneakFit.Application.Catalog.ThuongHieu;
 using SneakFit.Data.EF;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+   
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddDbContext<SneakFitDbContext>(options =>
 {
@@ -17,6 +21,7 @@ builder.Services.AddDbContext<SneakFitDbContext>(options =>
 builder.Services.AddScoped<IThuongHieuService, ThuongHieuService>(); // khai báo dịch vụ
 builder.Services.AddScoped<IDeGiayService, DeGiayService>(); // khai báo dịch vụ
 builder.Services.AddScoped<IChatLieuService, ChatLieuService>(); // khai báo dịch vụ
+builder.Services.AddScoped<IKhuyenMaiService, KhuyenMaiService>(); // khai báo dịch vụ
 
 
 

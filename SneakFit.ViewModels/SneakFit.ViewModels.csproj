@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SneakFit.Data\SneakFit.Data.csproj" />
+  </ItemGroup>
+
 </Project>
