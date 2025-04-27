@@ -17,61 +17,56 @@ namespace SneakFit.Application.Catalog.DeGiay
         {
             _context = context;
         }
-
         public async Task<List<DeGiayViewModels>> GetAll()
         {
-            return await _context.DeGiay
-                .Select(x => new DeGiayViewModels { Id = x.Id, TenDeGiay = x.TenDeGiay })
-                .ToListAsync();
+            var list = await _context.DeGiay.Select(x => new DeGiayViewModels()
+            {
+                Id = x.Id,
+                TenDeGiay = x.TenDeGiay
+            }).ToListAsync();
+            return list;
         }
-
-        public async Task<DeGiayViewModels?> GetById(Guid id)
+        public async Task<DeGiayViewModels> GetById(Guid id)
         {
-            var deGiay = await _context.DeGiay.FindAsync(id);
-            if (deGiay == null) throw new KeyNotFoundException("Không tìm thấy đôi giày!");
-
-            return new DeGiayViewModels { Id = deGiay.Id, TenDeGiay = deGiay.TenDeGiay };
+            var getid = await _context.DeGiay.FindAsync(id);
+            if (getid == null)
+            {
+                throw new Exception($"Không tìm thấy id : {id} của thương hiêu");
+            }
+            return new DeGiayViewModels()
+            {
+                Id = getid.Id,
+                TenDeGiay = getid.TenDeGiay
+            };
         }
-
         public async Task<DeGiayViewModels> Create(ThemDeGiay request)
         {
-            if (string.IsNullOrWhiteSpace(request.TenDeGiay))
-                throw new ArgumentException("Tên đế giày không được để trống.");
-
-            var deGiay = new SneakFit.Data.Entities.DeGiay
+            var newDeGiay = new Data.Entities.DeGiay()
             {
                 Id = Guid.NewGuid(),
                 TenDeGiay = request.TenDeGiay
             };
-
-            _context.DeGiay.Add(deGiay);
+            _context.DeGiay.Add(newDeGiay);
             await _context.SaveChangesAsync();
-
-
-            return new DeGiayViewModels
+            return new DeGiayViewModels()
             {
-                Id = deGiay.Id,
-                TenDeGiay = deGiay.TenDeGiay
+                Id = newDeGiay.Id,
+                TenDeGiay = newDeGiay.TenDeGiay
             };
         }
-
         public async Task<DeGiayViewModels> Update(SuaDeGiay request)
         {
-            var deGiay = await _context.DeGiay.FindAsync(request.Id);
-            if (deGiay == null)
-                throw new KeyNotFoundException("Không tìm thấy đôi giày!");
-
-            if (string.IsNullOrWhiteSpace(request.TenDeGiay))
-                throw new ArgumentException("Tên đôi giày không được để trống.");
-
-            deGiay.TenDeGiay = request.TenDeGiay;
-
-            await _context.SaveChangesAsync();
-
-            return new DeGiayViewModels
+            var getid = _context.DeGiay.Find(request.Id);
+            if (getid == null)
             {
-                Id = deGiay.Id,
-                TenDeGiay = deGiay.TenDeGiay
+                throw new Exception($"Không tìm thấy id : {request.Id} của thương hiêu");
+            }
+            getid.TenDeGiay = request.TenDeGiay;
+            await _context.SaveChangesAsync();
+            return new DeGiayViewModels()
+            {
+                Id = getid.Id,
+                TenDeGiay = getid.TenDeGiay
             };
         }
 
