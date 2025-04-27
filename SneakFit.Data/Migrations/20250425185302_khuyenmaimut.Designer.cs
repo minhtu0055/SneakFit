@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SneakFit.Data.EF;
 
@@ -11,9 +12,11 @@ using SneakFit.Data.EF;
 namespace SneakFit.Data.Migrations
 {
     [DbContext(typeof(SneakFitDbContext))]
-    partial class SneakFitDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250425185302_khuyenmaimut")]
+    partial class khuyenmaimut
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -210,6 +213,7 @@ namespace SneakFit.Data.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("UrlHinhAnh")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserName")
@@ -564,9 +568,6 @@ namespace SneakFit.Data.Migrations
                     b.Property<Guid>("MauSacId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("NgayTao")
-                        .HasColumnType("datetime2");
-
                     b.Property<Guid>("SanPhamId")
                         .HasColumnType("uniqueidentifier");
 
@@ -575,9 +576,6 @@ namespace SneakFit.Data.Migrations
 
                     b.Property<Guid>("ThuongHieuId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("TrangThai")
-                        .HasColumnType("bit");
 
                     b.HasKey("ID");
 

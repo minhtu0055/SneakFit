@@ -4,17 +4,28 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SneakFit.Application.Catalog.ChatLieu;
+using SneakFit.Application.Catalog.DanhMuc;
 using SneakFit.Application.Catalog.DeGiay;
+using SneakFit.Application.Catalog.KichThuoc;
+using SneakFit.Application.Catalog.MauSac;
+using SneakFit.Application.Catalog.SanPham;
+using SneakFit.Application.Catalog.SanPhamChiTiet;
+using SneakFit.Application.Catalog.SanPhamChiTietChiTiet;
+using SneakFit.Application.Catalog.KhuyenMai;
 using SneakFit.Application.Catalog.ThuongHieu;
 using SneakFit.Application.System;
 using SneakFit.Data.EF;
 using SneakFit.Data.Entities;
+using System.Text.Json.Serialization;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+   
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddDbContext<SneakFitDbContext>(options =>
 {
@@ -40,6 +51,12 @@ builder.Services.AddScoped<IUserService, UserService>(); // khai báo dịch v�
 builder.Services.AddScoped<UserManager<AppUser>, UserManager<AppUser>>();
 builder.Services.AddScoped<SignInManager<AppUser>, SignInManager<AppUser>>();
 builder.Services.AddScoped<RoleManager<IdentityRole>, RoleManager<IdentityRole>>();
+builder.Services.AddScoped<IKichThuocService, KichThuocService>(); // khai báo dịch vụ
+builder.Services.AddScoped<IMauSacService, MauSacService>(); // khai báo dịch vụ
+builder.Services.AddScoped<IDanhMucService, DanhMucService>(); // khai báo dịch vụ
+builder.Services.AddScoped<ISanPhamService, SanPhamService>(); // khai báo dịch vụ
+builder.Services.AddScoped<ISanPhamChiTetService, SanPhamChiTietChiTetService>(); // khai báo dịch vụ
+builder.Services.AddScoped<IKhuyenMaiService, KhuyenMaiService>(); // khai báo dịch vụ
 
 
 builder.Services.AddEndpointsApiExplorer();
