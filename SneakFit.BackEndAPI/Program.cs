@@ -7,14 +7,18 @@ using SneakFit.Application.Catalog.MauSac;
 using SneakFit.Application.Catalog.SanPham;
 using SneakFit.Application.Catalog.SanPhamChiTiet;
 using SneakFit.Application.Catalog.SanPhamChiTietChiTiet;
+using SneakFit.Application.Catalog.KhuyenMai;
 using SneakFit.Application.Catalog.ThuongHieu;
 using SneakFit.Data.EF;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
+   
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddDbContext<SneakFitDbContext>(options =>
 {
@@ -28,6 +32,8 @@ builder.Services.AddScoped<IMauSacService, MauSacService>(); // khai báo dịch
 builder.Services.AddScoped<IDanhMucService, DanhMucService>(); // khai báo dịch vụ
 builder.Services.AddScoped<ISanPhamService, SanPhamService>(); // khai báo dịch vụ
 builder.Services.AddScoped<ISanPhamChiTetService, SanPhamChiTietChiTetService>(); // khai báo dịch vụ
+builder.Services.AddScoped<IKhuyenMaiService, KhuyenMaiService>(); // khai báo dịch vụ
+
 
 
 

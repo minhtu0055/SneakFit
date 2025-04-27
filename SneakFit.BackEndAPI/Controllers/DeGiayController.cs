@@ -45,8 +45,7 @@ namespace SneakFit.BackEndAPI.Controllers
             }
             request.Id = id;
             var degiay = await _deGiayService.Update(request);
-            return Ok(degiay);
+            return Ok(degiay);       
         }
-
     }
 }
