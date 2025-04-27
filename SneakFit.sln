@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SneakFit.BackEndAPI", "Snea
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SneakFit.ViewModels", "SneakFit.ViewModels\SneakFit.ViewModels.csproj", "{B7557329-5B19-4F0C-9C6C-1260396011B6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SneakFit.Admin", "SneakFit.WebApp\SneakFit.Admin.csproj", "{C37E857D-478D-4EDB-9444-B369E54909E9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SneakFit.ApiIntegration", "SneakFit.ApiIntegration\SneakFit.ApiIntegration.csproj", "{4E4B5144-F790-49B2-A0C6-4CA856F11FDB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +37,14 @@ Global
 		{B7557329-5B19-4F0C-9C6C-1260396011B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B7557329-5B19-4F0C-9C6C-1260396011B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B7557329-5B19-4F0C-9C6C-1260396011B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C37E857D-478D-4EDB-9444-B369E54909E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C37E857D-478D-4EDB-9444-B369E54909E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C37E857D-478D-4EDB-9444-B369E54909E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C37E857D-478D-4EDB-9444-B369E54909E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E4B5144-F790-49B2-A0C6-4CA856F11FDB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E4B5144-F790-49B2-A0C6-4CA856F11FDB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E4B5144-F790-49B2-A0C6-4CA856F11FDB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E4B5144-F790-49B2-A0C6-4CA856F11FDB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
