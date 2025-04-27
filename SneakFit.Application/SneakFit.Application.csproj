@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SneakFit.Data\SneakFit.Data.csproj" />
     <ProjectReference Include="..\SneakFit.ViewModels\SneakFit.ViewModels.csproj" />
   </ItemGroup>
