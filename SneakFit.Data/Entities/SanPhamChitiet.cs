@@ -23,7 +23,9 @@ namespace SneakFit.Data.Entities
 		public SanPham SanPham { get; set; }
 		public float Gia { get; set; }
 		public int SoLuong { get; set; }
-		public List<GioHangChiTiet> GioHangChiTiet { get; set; }
+		public bool TrangThai { get; set; }
+        public DateTime NgayTao { get; set; }
+        public List<GioHangChiTiet> GioHangChiTiet { get; set; }
 		public List<HoaDonChiTiet> HoaDonChiTiet { get; set; }
 		public List<HinhAnhSanPham> HinhAnhSanPham { get; set; }
     }
