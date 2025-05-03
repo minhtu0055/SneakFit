@@ -14,6 +14,7 @@ namespace SneakFit.Application.Catalog.KhuyenMai
 {
     public class KhuyenMaiService : IKhuyenMaiService
     {
+        //demokhuyemai
         private readonly SneakFitDbContext _context;
 
         public KhuyenMaiService(SneakFitDbContext context)
