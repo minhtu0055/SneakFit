@@ -19,7 +19,6 @@ namespace SneakFit.Application.Catalog.VoucherRP
         {
             _context = context;
         }
-
         public async Task<VoucherViewModels> Create(CreateVoucher request)
         {
             var vc = new Voucher()
@@ -35,12 +34,10 @@ namespace SneakFit.Application.Catalog.VoucherRP
                 ThoiGianKetThuc = request.ThoiGianKetThuc,
                 TrangThai = DateTime.Now >= request.ThoiGianBatDau ? TrangThaiGiamGia.HoatDong : TrangThaiGiamGia.HetHan,
             };
-
             _context.Voucher.Add(vc);
             await _context.SaveChangesAsync();
             return await GetById(vc.Id);
         }
-
         public async Task<PagedResult<VoucherViewModels>> GetAllPaging(GetVoucherPagingRequest request)
         {
             var query = _context.Voucher.AsQueryable();
@@ -53,7 +50,6 @@ namespace SneakFit.Application.Catalog.VoucherRP
                 query = query.Where(x => x.TrangThai == request.Status.Value);
             }
             int totalRow = await query.CountAsync();
-
             var dt = await query.Skip((request.PageIndex - 1) * request.PageSize)
                 .Take(request.PageSize)
                 .Select(x => new VoucherViewModels()
@@ -69,7 +65,6 @@ namespace SneakFit.Application.Catalog.VoucherRP
                     ThoiGianKetThuc = x.ThoiGianKetThuc,
                     TrangThai = x.TrangThai
                 }).ToListAsync();
-
             var PageResult = new PagedResult<VoucherViewModels>()
             {
                 TotalRecords = totalRow,
@@ -79,12 +74,10 @@ namespace SneakFit.Application.Catalog.VoucherRP
             };
             return PageResult;
         }
-
         public async Task<VoucherViewModels> GetByCode(string code)
         {
             var voucher = await _context.Voucher.FirstOrDefaultAsync(x => x.MaVoucher == code);
             if (voucher == null) throw new Exception($"Không tìm thấy voucher có mã: {code}");
-
             return new VoucherViewModels
             {
                 Id = voucher.Id,
@@ -99,7 +92,6 @@ namespace SneakFit.Application.Catalog.VoucherRP
                 TrangThai = voucher.TrangThai
             };
         }
-
         public async Task<VoucherViewModels> GetById(Guid id)
         {
             var voucher = await _context.Voucher.
@@ -120,7 +112,6 @@ namespace SneakFit.Application.Catalog.VoucherRP
                 TrangThai = voucher.TrangThai
             };
         }
-
         public async Task<VoucherViewModels> Update(UpdateVoucher request)
         {
             var voucher = await _context.Voucher.FindAsync(request.Id);
@@ -138,7 +129,6 @@ namespace SneakFit.Application.Catalog.VoucherRP
             await _context.SaveChangesAsync();
             return await GetById(voucher.Id);
         }
-
         public async Task<bool> UpdateTrangThai(Guid Id, TrangThaiGiamGia status)
         {
             var voucher = await _context.Voucher.FindAsync(Id);
@@ -148,7 +138,6 @@ namespace SneakFit.Application.Catalog.VoucherRP
 
             return await _context.SaveChangesAsync() > 0;
         }
-
         public async Task<bool> UseVoucher(string code)
         {
             var voucher = await _context.Voucher.FirstOrDefaultAsync(x => x.MaVoucher == code);
@@ -156,15 +145,12 @@ namespace SneakFit.Application.Catalog.VoucherRP
             {
                 return false;
             }
-
             voucher.SoLuong--;
-
             // Nếu hết thì cập nhật trạng thái
             if (voucher.SoLuong == 0)
             {
                 voucher.TrangThai = TrangThaiGiamGia.HetHan;
             }
-
             await _context.SaveChangesAsync();
             return true;
         }

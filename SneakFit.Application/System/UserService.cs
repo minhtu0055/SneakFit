@@ -28,7 +28,6 @@ namespace SneakFit.Application.System
             _signInManager = signInManager;
             _config = configuration;
         }
-
         public async Task<ApiResult<string>> Authenticate(LoginRequest request)
         {
             var user = await _userManager.FindByNameAsync(request.UserName); // kiểm tra người dùng có tồn tại trong hệ thống hay không

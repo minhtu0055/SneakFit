@@ -16,7 +16,6 @@ namespace SneakFit.ViewModels.Catalog.KhuyenMai
         public DateTime NgayTao { get; set; }
         public DateTime ThoiGianBatDau { get; set; }
         public DateTime ThoiGianKetThuc { get; set; }
-        public DateTime? ThoiGianCapNhat { get; set; }
         public LoaiGiamGia LoaiGiamGia { get; set; }
         public decimal GiaTriGiamGia { get; set; }
         public TrangThaiGiamGia TrangThai { get; set; }

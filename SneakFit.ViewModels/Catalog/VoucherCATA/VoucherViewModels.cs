@@ -1,4 +1,5 @@
 ﻿using SneakFit.Data.Enums;
+using SneakFit.ViewModels.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,11 +22,9 @@ namespace SneakFit.ViewModels.Catalog.VoucherCATA
         public TrangThaiGiamGia TrangThai { get; set; }
     }
 
-    public class GetVoucherPagingRequest
+    public class GetVoucherPagingRequest : PagingRequestBase
     {
         public string? Keyword { get; set; }
         public TrangThaiGiamGia? Status { get; set; }
-        public int PageIndex { get; set; }
-        public int PageSize { get; set; }
     }
 }
