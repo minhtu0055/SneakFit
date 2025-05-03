@@ -11,7 +11,7 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
 
-    <title>Demo : Dashboard - Analytics | sneat - Bootstrap Dashboard PRO</title>
+    <title>SneakFit</title>
 
     <meta name="description" content="" />
 
@@ -24,23 +24,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
           rel="stylesheet" />
 
-    <link rel="stylesheet" href="../assets/vendor/fonts/boxicons.css" />
+    <link rel="stylesheet" href="~/assets/vendor/fonts/boxicons.css" />
 
     <!-- Core CSS -->
-    <link rel="stylesheet" href="../assets/vendor/css/core.css" class="template-customizer-core-css" />
-    <link rel="stylesheet" href="../assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
-    <link rel="stylesheet" href="../assets/css/demo.css" />
+    <link rel="stylesheet" href="~/assets/vendor/css/core.css" class="template-customizer-core-css" />
+    <link rel="stylesheet" href="~/assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
+    <link rel="stylesheet" href="~/assets/css/demo.css" />
 
     <!-- Vendors CSS -->
-    <link rel="stylesheet" href="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
-    <link rel="stylesheet" href="../assets/vendor/libs/apex-charts/apex-charts.css" />
-
+    <link rel="stylesheet" href="~/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+    <link rel="stylesheet" href="~/assets/vendor/libs/apex-charts/apex-charts.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
     <!-- Page CSS -->
     <!-- Helpers -->
-    <script src="../assets/vendor/js/helpers.js"></script>
+    <script src="~/assets/vendor/js/helpers.js"></script>
     <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
-    <script src="../assets/js/config.js"></script>
+    <script src="~/assets/js/config.js"></script>
 </head>
 
 <body>
@@ -48,7 +48,6 @@
     <div class="layout-wrapper layout-content-navbar">
         <div class="layout-container">
             <!-- Menu -->
-
             <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
                 <div class="app-brand demo">
                     <a href="index.html" class="app-brand-link">
@@ -95,16 +94,13 @@
                                 </g>
                             </svg>
                         </span>
-                        <span class="app-brand-text demo menu-text fw-bold ms-2">sneat</span>
+                        <span class="app-brand-text demo menu-text fw-bold ms-2">SneakFit</span>
                     </a>
-
                     <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
                         <i class="bx bx-chevron-left bx-sm d-flex align-items-center justify-content-center"></i>
                     </a>
                 </div>
-
                 <div class="menu-inner-shadow"></div>
-
                 <ul class="menu-inner py-1">
                     <!-- Dashboards -->
                     <li class="menu-item active open">
@@ -210,12 +206,33 @@
     </div>
     <!-- Core JS -->
     <!-- build:js assets/vendor/js/core.js -->
-    <script src="../assets/vendor/libs/jquery/jquery.js"></script>
+    <script src="~/assets/vendor/libs/jquery/jquery.js"></script>
     <script src="~/assets/vendor/libs/popper/popper.js"></script>
     <script src="~/assets/vendor/js/bootstrap.js"></script>
     <script src="~/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
     <script src="~/assets/vendor/js/menu.js"></script>
     <!-- endbuild -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+    <script>
+        // Cấu hình toastr
+        toastr.options = { 
+            "closeButton": true, 
+            "debug": false, 
+            "newestOnTop": true, 
+            "progressBar": true, 
+            "positionClass": "toast-top-right", 
+            "preventDuplicates": false, 
+            "onclick": null, 
+            "showDuration": "300", 
+            "hideDuration": "1000", 
+            "timeOut": "5000", 
+            "extendedTimeOut": "1000", 
+            "showEasing": "swing", 
+            "hideEasing": "linear", 
+            "showMethod": "fadeIn", 
+            "hideMethod": "fadeOut" 
+        }
+    </script>
     <!-- Vendors JS -->
     <script src="~/assets/vendor/libs/apex-charts/apexcharts.js"></script>
     <!-- Main JS -->
@@ -224,5 +241,6 @@
     <script src="~/assets/js/dashboards-analytics.js"></script>
     <!-- Place this tag before closing body tag for github widget button. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
+    @RenderSection("Scripts", required: false)
 </body>
 </html>

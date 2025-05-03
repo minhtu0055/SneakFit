@@ -1,20 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SneakFit.ViewModels.Common;
+﻿using SneakFit.ViewModels.Common;
 using SneakFit.ViewModels.System.User;
 
-namespace SneakFit.Application.System
+namespace SneakFit.ApiIntegration.Services
 {
-    public interface IUserService
+    public interface IUserApiClient
     {
         Task<ApiResult<string>> Authenticate(LoginRequest request);
         Task<ApiResult<bool>> Register(RegisterRequest request);
         Task<ApiResult<PagedResult<UserViewModels>>> GetUsersPaging(GetUserPagingRequest request);
         Task<ApiResult<UserViewModels>> GetById(Guid id);
         Task<bool> TrangThai(Guid id, bool trangThai);
-
     }
 }

@@ -2,7 +2,8 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SneakFit.Application.System;
-using SneakFit.ViewModels.System;
+using SneakFit.ViewModels.Common;
+using SneakFit.ViewModels.System.User;
 
 namespace SneakFit.BackEndAPI.Controllers
 {
@@ -53,6 +54,15 @@ namespace SneakFit.BackEndAPI.Controllers
         {
             var users = await _userService.GetById(id);
             return Ok(users);
+        }
+        [HttpPut("{id}/trangthai")]
+        public async Task<IActionResult> TrangThai(Guid id, [FromBody]bool trangThai)
+        {
+            var result = await _userService.TrangThai(id, trangThai);
+            if (!result)
+                return NotFound(new ApiErrorResult<bool>($"Không tìm thấy user có ID: {id}"));
+
+            return Ok(new ApiSuccessResult<bool>(result));
         }
     }
 }

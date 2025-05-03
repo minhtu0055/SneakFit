@@ -11,7 +11,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using SneakFit.Data.Entities;
 using SneakFit.ViewModels.Common;
-using SneakFit.ViewModels.System;
+using SneakFit.ViewModels.System.User;
+using static Azure.Core.HttpHeader;
 
 namespace SneakFit.Application.System
 {
@@ -133,20 +134,15 @@ namespace SneakFit.Application.System
             }
             return new ApiErrorResult<bool>("Đăng ký không thành công");
         }
-        public async Task<ApiResult<bool>> TrangThai(Guid id, bool trangThai)
+        public async Task<bool> TrangThai(Guid id, bool trangThai)
         {
             var user = await _userManager.FindByIdAsync(id.ToString());
             if (user == null)
-            {
-                return new ApiErrorResult<bool>("User không tồn tại");
-            }
+                return false;
+
             user.TrangThai = trangThai;
             var result = await _userManager.UpdateAsync(user);
-            if (result.Succeeded)
-            {
-                return new ApiSuccessResult<bool>();
-            }
-            return new ApiErrorResult<bool>("Cập nhật trạng thái không thành công");
+            return result.Succeeded;
         }
     }
 }
