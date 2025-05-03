@@ -1,0 +1,140 @@
+﻿@using SneakFit.ViewModels.Common
+@model PagedResult<SneakFit.ViewModels.System.User.UserViewModels>
+@{
+	ViewData["Title"] = "Danh sách người dùng";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="text-end mb-4">
+	<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createUserModal">
+		<i class="bx bx-plus me-1"></i> Thêm mới người dùng
+	</button>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="createUserModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Thêm mới người dùng</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				@await Html.PartialAsync("Create", new SneakFit.ViewModels.System.User.RegisterRequest())
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="card">
+	<div class="card-header">
+		<div class="row">
+			<div class="col-md-6 col-xs-12">
+				<form asp-action="Index" method="get">
+					<div class="row">
+						<div class="col-md-9">
+							<input type="text" value="@ViewBag.TuKhoa" name="tuKhoa" class="form-control" />
+						</div>
+						<div class="col-md-2 mb-2 d-flex align-items-end">
+							<div class="btn-group w-100">
+								<button type="submit" class="btn btn-primary">
+									<i class="bx bx-search"></i> Tìm
+								</button>
+								<button type="button" onclick="window.location.href='/User/Index'" class="btn btn-dark">
+									<i class="bx bx-reset"></i> Reset
+								</button>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div class="table-responsive text-nowrap">
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Tên Người Dùng</th>
+					<th>Email</th>
+					<th>Ngày Sinh</th>
+					<th>Trạng Thái</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody class="table-border-bottom-0">
+				@foreach (var item in Model.Items)
+				{
+					<tr>
+						<td>
+							@Html.DisplayFor(modelItem => item.UserName)
+						</td>
+						<td>
+							@Html.DisplayFor(modelItem => item.Email)
+						</td>
+						<td>
+							@Html.DisplayFor(modelItem => item.NgaySinh)
+						</td>
+						<td>
+							<div class="form-check form-switch">
+								<input class="form-check-input" type="checkbox" role="switch" id="switch-@item.Id" @(item.TrangThai ? "checked" : "") onchange="capNhatTrangThai('@item.Id', this.checked)">
+								<label class="form-check-label" for="switch-@item.Id">@(item.TrangThai ? "Hoạt động" : "Ngưng hoạt động")</label>
+							</div>
+						</td>
+						<td>
+							<div class="dropdown">
+								<button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+									<i class="bx bx-dots-vertical-rounded"></i>
+								</button>
+								<div class="dropdown-menu">
+									<a class="dropdown-item" href="@Url.Action("Edit","User", new {id = item.Id})">
+										<i class="bx bx-edit-alt me-1"></i> Edit
+									</a>
+									<a class="dropdown-item" href="@Url.Action("RoleAssign","User", new {id = item.Id})">
+										<i class="bx bx-key me-1"></i> Gán quyền
+									</a>
+								</div>
+							</div>
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+	@await Component.InvokeAsync("Pager", Model)
+</div>
+@section Scripts {
+	<script>
+		// Hiển thị thông báo toast nếu có
+		$(document).ready(function () {
+			var successMessage = '@TempData["success"]';
+			if (successMessage) {
+				toastr.success(successMessage);
+			}
+		});
+		function capNhatTrangThai(id, trangThai) {
+			// Cập nhật label ngay lập tức
+			var label = $(`label[for="switch-${id}"]`);
+			label.text(trangThai ? "Hoạt động" : "Ngưng hoạt động");
+
+			$.ajax({
+				url: '/User/CapNhatTrangThai',
+				type: 'POST',
+				data: { id: id, trangThai: trangThai },
+				success: function (result) {
+					if (result.success) {
+						toastr.success("Cập nhật trạng thái thành công");
+					} else {
+						toastr.error("Cập nhật trạng thái thất bại");
+						// Hoàn tác trạng thái nếu thất bại
+						$(`#switch-${id}`).prop('checked', !trangThai);
+						label.text(!trangThai ? "Hoạt động" : "Ngưng hoạt động");
+					}
+				},
+				error: function () {
+					toastr.error("Có lỗi xảy ra");
+					// Hoàn tác trạng thái nếu thất bại
+					$(`#switch-${id}`).prop('checked', !trangThai);
+					label.text(!trangThai ? "Hoạt động" : "Ngưng hoạt động");
+				}
+			});
+		}
+	</script>
+}
