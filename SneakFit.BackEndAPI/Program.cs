@@ -17,6 +17,7 @@ using SneakFit.Application.System;
 using SneakFit.Data.EF;
 using SneakFit.Data.Entities;
 using System.Text.Json.Serialization;
+using SneakFit.Application.Catalog.VoucherRP;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -56,7 +57,8 @@ builder.Services.AddScoped<IMauSacService, MauSacService>(); // khai báo dịch
 builder.Services.AddScoped<IDanhMucService, DanhMucService>(); // khai báo dịch vụ
 builder.Services.AddScoped<ISanPhamService, SanPhamService>(); // khai báo dịch vụ
 builder.Services.AddScoped<ISanPhamChiTetService, SanPhamChiTietChiTetService>(); // khai báo dịch vụ
-builder.Services.AddScoped<IKhuyenMaiService, KhuyenMaiService>(); // khai báo dịch vụ
+builder.Services.AddScoped<IKhuyenMaiService, KhuyenMaiService>();
+builder.Services.AddScoped<IVoucherService, VoucherService>(); // khai báo dịch vụ
 
 
 builder.Services.AddEndpointsApiExplorer();
