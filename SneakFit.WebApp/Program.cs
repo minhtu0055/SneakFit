@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using SneakFit.ApiIntegration.Services;
+using SneakFit.ApiIntegration.Services.SPCT;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,9 +18,10 @@ builder.Services.AddSession(options =>
 });
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+// Register API Clients
 builder.Services.AddScoped<IUserApiClient, UserApiClient>();
-
-
+builder.Services.AddScoped<ISpctApiClient, SpctApiClient>();
 
 builder.Services.AddRazorPages();
 var app = builder.Build();

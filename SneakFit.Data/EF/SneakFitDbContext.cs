@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SneakFit.Data.Configuration;
 using SneakFit.Data.Entities;
+using SneakFit.Data.Extensions;
 
 namespace SneakFit.Data.EF
 {
@@ -21,7 +22,7 @@ namespace SneakFit.Data.EF
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server=GIGABYTE\\SQLEXPRESS;Database=SneakFit;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true");       
+            optionsBuilder.UseSqlServer("Server=LAPTOP-PH9VPOUT\\SQLEXPRESS;Database=SneakFit;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true");       
         }
         public DbSet<ChatLieu> ChatLieu { get; set; }
         public DbSet<DanhMuc> DanhMuc { get; set; }
@@ -43,6 +44,7 @@ namespace SneakFit.Data.EF
         {
             base.OnModelCreating(builder);
             builder.ApplyConfiguration(new AppUserConfiguration());
+            builder.Seed();
         }
     }
 }

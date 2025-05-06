@@ -1,0 +1,242 @@
+﻿@using SneakFit.ViewModels.Common
+@model PagedResult<SneakFit.ViewModels.Catalog.SanPhamChiTiet.SPCTViewModels>
+@{
+	ViewData["Title"] = "Danh sách sản phẩm chi tiết";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="text-end mb-4">
+	<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createSPCTModal">
+		<i class="bx bx-plus me-1"></i> Thêm mới sản phẩm chi tiết
+	</button>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="createSPCTModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Thêm mới sản phẩm chi tiết</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				@await Html.PartialAsync("Create", new SneakFit.ViewModels.Catalog.SanPhamChiTiet.ThemSPCT())
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="card">
+	<div class="card-header">
+		<div class="row">
+			<div class="col-md-6 col-xs-12">
+				<form asp-action="Index" method="get">
+					<div class="row">
+						<div class="col-md-9">
+							<input type="text" value="@ViewBag.TuKhoa" name="tuKhoa" class="form-control" placeholder="Tìm kiếm sản phẩm..." />
+						</div>
+						<div class="col-md-2 mb-2 d-flex align-items-end">
+							<div class="btn-group w-100">
+								<button type="submit" class="btn btn-primary">
+									<i class="bx bx-search"></i> Tìm
+								</button>
+								<button type="button" onclick="window.location.href='/SPCT/Index'" class="btn btn-dark">
+									<i class="bx bx-reset"></i> Reset
+								</button>
+							</div>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div class="table-responsive text-nowrap">
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Danh Mục</th>
+					<th>Giá</th>
+					<th>Số Lượng</th>
+					<th>Ngày Tạo</th>
+					<th>Trạng Thái</th>
+					<th>Thao Tác</th>
+				</tr>
+			</thead>
+			<tbody class="table-border-bottom-0">
+				@foreach (var item in Model.Items)
+				{
+					<tr>
+						<td>@item.TenDanhMuc</td>
+						<td>@item.Gia.ToString("N0") VNĐ</td>
+						<td>@item.SoLuong</td>
+						<td>@item.NgayTao.ToString("dd/MM/yyyy")</td>
+						<td>
+							<div class="form-check form-switch">
+								<input class="form-check-input" type="checkbox" role="switch" id="switch-@item.Id" @(item.TrangThai ? "checked" : "") onchange="capNhatTrangThai('@item.Id', this.checked)">
+								<label class="form-check-label" for="switch-@item.Id">@(item.TrangThai ? "Hoạt động" : "Ngưng hoạt động")</label>
+							</div>
+						</td>
+						<td>
+							<div class="dropdown">
+								<button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+									<i class="bx bx-dots-vertical-rounded"></i>
+								</button>
+								<div class="dropdown-menu">
+									<a class="dropdown-item" href="@Url.Action("Edit","SPCT", new {id = item.Id})">
+										<i class="bx bx-edit-alt me-1"></i> Sửa
+									</a>
+									<a class="dropdown-item" href="#" onclick="showUpdatePriceModal('@item.Id', '@item.Gia')">
+										<i class="bx bx-dollar me-1"></i> Cập nhật giá
+									</a>
+									<a class="dropdown-item" href="#" onclick="showUpdateQuantityModal('@item.Id', '@item.SoLuong')">
+										<i class="bx bx-package me-1"></i> Cập nhật số lượng
+									</a>
+								</div>
+							</div>
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+	@await Component.InvokeAsync("Pager", Model)
+</div>
+
+<!-- Modal Cập nhật giá -->
+<div class="modal fade" id="updatePriceModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Cập nhật giá</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" id="priceProductId" />
+				<div class="mb-3">
+					<label class="form-label">Giá mới</label>
+					<input type="number" id="newPrice" class="form-control" min="0" step="1000" />
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+				<button type="button" class="btn btn-primary" onclick="updatePrice()">Cập nhật</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modal Cập nhật số lượng -->
+<div class="modal fade" id="updateQuantityModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Cập nhật số lượng</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" id="quantityProductId" />
+				<div class="mb-3">
+					<label class="form-label">Số lượng thêm/bớt</label>
+					<input type="number" id="quantityChange" class="form-control" />
+					<small class="text-muted">Nhập số âm để giảm số lượng</small>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+				<button type="button" class="btn btn-primary" onclick="updateQuantity()">Cập nhật</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section Scripts {
+	<script>
+		$(document).ready(function () {
+			var successMessage = '@TempData["success"]';
+			if (successMessage) {
+				toastr.success(successMessage);
+			}
+		});
+
+		function capNhatTrangThai(id, trangThai) {
+			var label = $(`label[for="switch-${id}"]`);
+			label.text(trangThai ? "Hoạt động" : "Ngưng hoạt động");
+
+			$.ajax({
+				url: '/SPCT/CapNhatTrangThai',
+				type: 'POST',
+				data: { id: id, trangThai: trangThai },
+				success: function (result) {
+					if (result.success) {
+						toastr.success(result.message);
+					} else {
+						toastr.error(result.message);
+						$(`#switch-${id}`).prop('checked', !trangThai);
+						label.text(!trangThai ? "Hoạt động" : "Ngưng hoạt động");
+					}
+				},
+				error: function () {
+					toastr.error("Có lỗi xảy ra");
+					$(`#switch-${id}`).prop('checked', !trangThai);
+					label.text(!trangThai ? "Hoạt động" : "Ngưng hoạt động");
+				}
+			});
+		}
+
+		function showUpdatePriceModal(id, currentPrice) {
+			$('#priceProductId').val(id);
+			$('#newPrice').val(currentPrice);
+			$('#updatePriceModal').modal('show');
+		}
+
+		function updatePrice() {
+			var id = $('#priceProductId').val();
+			var newPrice = $('#newPrice').val();
+
+			$.ajax({
+				url: '/SPCT/CapNhatGia',
+				type: 'POST',
+				data: { id: id, giaMoi: newPrice },
+				success: function (result) {
+					if (result.success) {
+						toastr.success(result.message);
+						$('#updatePriceModal').modal('hide');
+						location.reload();
+					} else {
+						toastr.error(result.message);
+					}
+				},
+				error: function () {
+					toastr.error("Có lỗi xảy ra");
+				}
+			});
+		}
+
+		function showUpdateQuantityModal(id, currentQuantity) {
+			$('#quantityProductId').val(id);
+			$('#quantityChange').val('');
+			$('#updateQuantityModal').modal('show');
+		}
+
+		function updateQuantity() {
+			var id = $('#quantityProductId').val();
+			var quantityChange = $('#quantityChange').val();
+
+			$.ajax({
+				url: '/SPCT/CapNhatSoLuong',
+				type: 'POST',
+				data: { id: id, themSoLuong: quantityChange },
+				success: function (result) {
+					if (result.success) {
+						toastr.success(result.message);
+						$('#updateQuantityModal').modal('hide');
+						location.reload();
+					} else {
+						toastr.error(result.message);
+					}
+				},
+				error: function () {
+					toastr.error("Có lỗi xảy ra");
+				}
+			});
+		}
+	</script>
+}

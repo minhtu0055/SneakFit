@@ -10,6 +10,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using System.IO;
 using SneakFit.Data.Entities;
+using SneakFit.ViewModels.Common;
+using SneakFit.Data.Enums;
 
 namespace SneakFit.Application.Catalog.SanPhamChiTietChiTiet
 {
@@ -36,9 +38,6 @@ namespace SneakFit.Application.Catalog.SanPhamChiTietChiTiet
                 .Select(x => new SPCTViewModels()
                 {
                     Id = x.ID,
-                    TenSanPham = x.SanPham.TenSanPham,
-                    HinhAnh = x.HinhAnhSanPham.Select(h => h.UrlHinhAnh).FirstOrDefault(),
-                    MoTa = x.SanPham.Mota,
                     Gia = x.Gia,
                     SoLuong = x.SoLuong,
                     MauSacId = x.MauSacId,
@@ -76,15 +75,13 @@ namespace SneakFit.Application.Catalog.SanPhamChiTietChiTiet
             return new SPCTViewModels()
             {
                 Id = entity.ID,
-                TenSanPham = entity.SanPham.TenSanPham,
-                HinhAnh = entity.HinhAnhSanPham.Select(h => h.UrlHinhAnh).FirstOrDefault(),
-                MoTa = entity.SanPham.Mota,
                 Gia = entity.Gia,
                 SoLuong = entity.SoLuong,
                 MauSacId = entity.MauSacId,
                 KichThuocId = entity.KichThuocId,
                 ChatLieuId = entity.ChatLieuId,
                 DeGiayId = entity.DeGiayId,
+
                 ThuongHieuId = entity.ThuongHieuId,
                 SanPhamId = entity.SanPhamId,
                 DanhMucId = entity.SanPham.DanhMucId,
@@ -95,17 +92,74 @@ namespace SneakFit.Application.Catalog.SanPhamChiTietChiTiet
             };
         }
 
+        public async Task<PagedResult<SPCTViewModels>> GetAllPaging(PhanTrangSPCT request)
+        {
+            var query = from spct in _context.SanPhamChiTiet
+                        join sp in _context.SanPham on spct.SanPhamId equals sp.Id
+                        join dm in _context.DanhMuc on sp.DanhMucId equals dm.Id
+                        select new { spct, sp, dm };
+
+            if (!string.IsNullOrEmpty(request.TuKhoa))
+                query = query.Where(x => x.sp.TenSanPham.Contains(request.TuKhoa));
+
+            if (request.DanhMucId.HasValue)
+                query = query.Where(x => x.sp.DanhMucId == request.DanhMucId);
+
+            if (request.GiaThapNhat.HasValue)
+                query = query.Where(x => x.spct.Gia >= (float)request.GiaThapNhat.Value);
+
+            if (request.GiaCaoNhat.HasValue)
+                query = query.Where(x => x.spct.Gia <= (float)request.GiaCaoNhat.Value);
+
+            if (request.LocTrangthai == true)
+                query = query.Where(x => x.spct.TrangThai == request.TrangThai);
+
+            int totalRow = await query.CountAsync();
+
+            var data = await query.Skip((request.PageIndex - 1) * request.PageSize)
+                .Take(request.PageSize)
+                .Select(x => new SPCTViewModels()
+                {
+                    Id = x.spct.ID,
+                    Gia = x.spct.Gia,
+                    SoLuong = x.spct.SoLuong,
+                    MauSacId = x.spct.MauSacId,
+                    KichThuocId = x.spct.KichThuocId,
+                    ChatLieuId = x.spct.ChatLieuId,
+                    DeGiayId = x.spct.DeGiayId,
+                    ThuongHieuId = x.spct.ThuongHieuId,
+                    SanPhamId = x.spct.SanPhamId,
+                    DanhMucId = x.sp.DanhMucId,
+                    TrangThai = x.spct.TrangThai,
+                    TenDanhMuc = x.dm.TenDanhMuc,
+                    NgayTao = x.spct.NgayTao,
+                    Images = x.spct.HinhAnhSanPham.Select(h => h.UrlHinhAnh).ToList()
+                }).ToListAsync();
+
+            var pagedResult = new PagedResult<SPCTViewModels>()
+            {
+                TotalRecords = totalRow,
+                PageSize = request.PageSize,
+                PageIndex = request.PageIndex,
+                Items = data
+            };
+            return pagedResult;
+        }
+
+        public async Task<bool> UpdateTrangThai(Guid id, bool trangThai)
+        {
+            var spct = await _context.SanPhamChiTiet.FindAsync(id);
+            if (spct == null)
+                throw new Exception($"Không tìm thấy khuyến mãi có id: {id}");
+            spct.TrangThai = trangThai;
+            return await _context.SaveChangesAsync() > 0;
+        }
         public async Task<SPCTViewModels> Create(ThemSPCT request)
         {
             var newSanPhamChiTiet = new Data.Entities.SanPhamChiTiet()
             {
                 ID = Guid.NewGuid(),
                 SanPhamId = request.SanPhamId,
-                MauSacId = request.MauSacId,
-                KichThuocId = request.KichThuocId,
-                ChatLieuId = request.ChatLieuId,
-                DeGiayId = request.DeGiayId,
-                ThuongHieuId = request.ThuongHieuId,
                 Gia = (float)request.Gia,
                 SoLuong = request.SoLuong,
                 TrangThai = true,
@@ -114,24 +168,6 @@ namespace SneakFit.Application.Catalog.SanPhamChiTietChiTiet
             };
             _context.SanPhamChiTiet.Add(newSanPhamChiTiet);
 
-            // Xử lý upload ảnh nếu có
-            if (request.Images != null && request.Images.Count > 0)
-            {
-                foreach (var image in request.Images)
-                {
-                    if (image.Length > 0)
-                    {
-                        var fileName = await SaveFile(image);
-                        var hinhAnhSanPham = new Data.Entities.HinhAnhSanPham()
-                        {
-                            Id = Guid.NewGuid(),
-                            SanPhamChiTietId = newSanPhamChiTiet.ID,
-                            UrlHinhAnh = fileName
-                        };
-                        _context.HinhAnhSanPham.Add(hinhAnhSanPham);
-                    }
-                }
-            }
 
             await _context.SaveChangesAsync();
             return await GetById(newSanPhamChiTiet.ID);
@@ -195,7 +231,7 @@ namespace SneakFit.Application.Catalog.SanPhamChiTietChiTiet
 
             await _context.SaveChangesAsync();
             return await GetById(entity.ID);
-        }
+        }   
 
         public async Task<bool> UpdateGia(Guid id, decimal gia)
         {
