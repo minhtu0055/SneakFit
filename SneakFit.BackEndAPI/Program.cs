@@ -13,11 +13,12 @@ using SneakFit.Application.Catalog.SanPhamChiTiet;
 using SneakFit.Application.Catalog.SanPhamChiTietChiTiet;
 using SneakFit.Application.Catalog.KhuyenMai;
 using SneakFit.Application.Catalog.ThuongHieu;
+using SneakFit.Application.Catalog.Voucher;
 using SneakFit.Application.System;
 using SneakFit.Data.EF;
 using SneakFit.Data.Entities;
 using System.Text.Json.Serialization;
-using SneakFit.Application.Catalog.VoucherRP;
+
 
 
 var builder = WebApplication.CreateBuilder(args);

@@ -10,18 +10,17 @@ namespace SneakFit.BackEndAPI.Controllers
     public class MauSacController : ControllerBase
     {
         private readonly IMauSacService _mauSacService;
-
         public MauSacController(IMauSacService mauSacService)
         {
             _mauSacService = mauSacService;
         }
-        [HttpGet("GetAll")]
-        public async Task<IActionResult> GetAll()
+        [HttpGet("paging")]
+        public async Task<IActionResult> GetAllPaging([FromQuery] MauSacPagingRequest request)
         {
-            var list = await _mauSacService.GetAll();
-            return Ok(list);
+            var result = await _mauSacService.GetAllPaging(request);
+            return Ok(result);
         }
-        [HttpGet("GetById")]
+        [HttpGet("GetById/{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
             var getid = await _mauSacService.GetById(id);
