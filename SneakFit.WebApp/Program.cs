@@ -18,6 +18,10 @@ builder.Services.AddSession(options =>
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<IUserApiClient, UserApiClient>();
+builder.Services.AddScoped<IChatLieuApiClient, ChatLieuApiClient>();
+builder.Services.AddScoped<IDeGiayApiClient, DeGiayApiClient>();
+builder.Services.AddScoped<IMauSacApiClient, MauSacApiClient>();
+builder.Services.AddScoped<IKichThuocApiClient, KichThuocApiClient>();
 
 
 

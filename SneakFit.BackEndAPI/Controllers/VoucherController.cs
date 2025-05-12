@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using SneakFit.Application.Catalog.VoucherRP;
+using SneakFit.Application.Catalog.Voucher;
 using SneakFit.Data.Enums;
-using SneakFit.ViewModels.Catalog.VoucherCATA;
+using SneakFit.ViewModels.Catalog.Voucher;
 
 namespace SneakFit.BackEndAPI.Controllers
 {

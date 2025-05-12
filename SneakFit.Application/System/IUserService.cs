@@ -15,6 +15,5 @@ namespace SneakFit.Application.System
         Task<ApiResult<PagedResult<UserViewModels>>> GetUsersPaging(GetUserPagingRequest request);
         Task<ApiResult<UserViewModels>> GetById(Guid id);
         Task<bool> TrangThai(Guid id, bool trangThai);
-
     }
 }

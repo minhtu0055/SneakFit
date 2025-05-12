@@ -14,13 +14,13 @@ namespace SneakFit.BackEndAPI.Controllers
         {
             _deGiayService = deGiayService;
         }
-        [HttpGet("GetAll")]
-        public async Task<IActionResult> GetAll()
+        [HttpGet("paging")]
+        public async Task<IActionResult> GetAllPaging([FromQuery] DeGiayPagingRequest request)
         {
-            var list = await _deGiayService.GetAll();
-            return Ok(list);
+            var result = await _deGiayService.GetAllPaging(request);
+            return Ok(result);
         }
-        [HttpGet("GetById")]
+        [HttpGet("GetById/{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
             var getid = await _deGiayService.GetById(id);

@@ -1,0 +1,33 @@
+﻿@model SneakFit.ViewModels.Catalog.MauSac.ThemMauSac
+
+<form asp-controller="MauSac" asp-action="Create" id="createChatLieuForm" method="post" data-confirm="Bạn có chắc chắn muốn làm điều đó không?">
+    <div class="mb-3">
+        <label asp-for="TenMauSac" class="form-label">Tên Màu Sắc</label>
+        <input asp-for="TenMauSac" class="form-control" placeholder="Nhập tên màu sắc"
+               pattern="^[a-zA-ZÀ-ỹ\s]+$" 
+               oninput="validateInput(this)"
+               maxlength="50"
+               title="Vui lòng chỉ nhập chữ cái"></input>
+        <span asp-validation-for="TenMauSac" class="text-danger"></span>
+        <span id="customError" class="text-danger" style="display: none;">Vui lòng chỉ nhập chữ cái</span>
+    </div>
+    <div class="text-end">
+        <button type="submit" class="btn btn-primary">Thêm</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    </div>
+</form>
+
+<script>
+function validateInput(input) {
+    const pattern = /^[a-zA-ZÀ-ỹ\s]+$/;
+    const errorSpan = document.getElementById('customError');
+    
+    if (!pattern.test(input.value) && input.value !== '') {
+        errorSpan.style.display = 'block';
+        input.setCustomValidity('Vui lòng chỉ nhập chữ cái');
+    } else {
+        errorSpan.style.display = 'none';
+        input.setCustomValidity('');
+    }
+}
+</script>

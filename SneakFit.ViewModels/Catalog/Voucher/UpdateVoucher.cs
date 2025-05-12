@@ -1,14 +1,13 @@
 ﻿using SneakFit.Data.Enums;
-using SneakFit.ViewModels.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SneakFit.ViewModels.Catalog.VoucherCATA
+namespace SneakFit.ViewModels.Catalog.Voucher
 {
-    public class VoucherViewModels
+    public class UpdateVoucher
     {
         public Guid Id { get; set; }
         public string MaVoucher { get; set; }
@@ -16,15 +15,8 @@ namespace SneakFit.ViewModels.Catalog.VoucherCATA
         public decimal GiaTriGiamGia { get; set; }
         public decimal DieuKienApDung { get; set; }
         public int SoLuong { get; set; }
-        public DateTime NgayTao { get; set; }
         public DateTime ThoiGianBatDau { get; set; }
         public DateTime ThoiGianKetThuc { get; set; }
         public TrangThaiGiamGia TrangThai { get; set; }
-    }
-
-    public class GetVoucherPagingRequest : PagingRequestBase
-    {
-        public string? Keyword { get; set; }
-        public TrangThaiGiamGia? Status { get; set; }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SneakFit.Data.EF;
 using SneakFit.ViewModels.Catalog.MauSac;
+using SneakFit.ViewModels.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,14 +18,29 @@ namespace SneakFit.Application.Catalog.MauSac
         {
             _context = context;
         }
-        public async Task<List<MauSacViewModels>> GetAll()
+        public async Task<PagedResult<MauSacViewModels>> GetAllPaging(MauSacPagingRequest request)
         {
-            var list = await _context.MauSac.Select(x => new MauSacViewModels()
+            var query = _context.MauSac.AsQueryable();
+            if (!string.IsNullOrEmpty(request.Keyword))
             {
-                Id = x.Id,
-                TenMauSac = x.TenMauSac
-            }).ToListAsync();
-            return list;
+                query = query.Where(x => x.TenMauSac.Contains(request.Keyword));
+            }
+            int totalRow = await query.CountAsync();
+            var data = await query.Skip((request.PageIndex - 1) * request.PageSize)
+                .Take(request.PageSize)
+                .Select(x => new MauSacViewModels()
+                {
+                    Id = x.Id,
+                    TenMauSac = x.TenMauSac
+                }).ToListAsync();
+            var PageResult = new PagedResult<MauSacViewModels>()
+            {
+                TotalRecords = totalRow,
+                PageSize = request.PageSize,
+                PageIndex = request.PageIndex,
+                Items = data,
+            };
+            return PageResult;
         }
         public async Task<MauSacViewModels> GetById(Guid id)
         {
@@ -41,6 +57,13 @@ namespace SneakFit.Application.Catalog.MauSac
         }
         public async Task<MauSacViewModels> Create(ThemMauSac request)
         {
+            // Kiểm tra xem tên chất liệu đã tồn tại chưa
+            var existingChatLieu = await _context.MauSac
+                .FirstOrDefaultAsync(x => x.TenMauSac.ToLower() == request.TenMauSac.ToLower());
+            if (existingChatLieu != null)
+            {
+                throw new Exception("Tên màu sắc đã tồn tại!");
+            }
             var newMauSac = new Data.Entities.MauSac()
             {
                 Id = Guid.NewGuid(),
@@ -60,6 +83,14 @@ namespace SneakFit.Application.Catalog.MauSac
             if (getid == null)
             {
                 throw new Exception($"Không tìm thấy id : {request.Id} của thương hiêu");
+            }
+            // Kiểm tra xem tên chất liệu đã tồn tại chưa (trừ chính bản ghi hiện tại)
+            var existingChatLieu = await _context.MauSac
+                .FirstOrDefaultAsync(x => x.TenMauSac.ToLower() == request.TenMauSac.ToLower()
+                                        && x.Id != request.Id);
+            if (existingChatLieu != null)
+            {
+                throw new Exception("Tên màu sắc đã tồn tại!");
             }
             getid.TenMauSac = request.TenMauSac;
             await _context.SaveChangesAsync();
