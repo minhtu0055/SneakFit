@@ -1,0 +1,183 @@
+﻿@using SneakFit.Data.Enums
+@using SneakFit.ViewModels.Common
+@model PagedResult<SneakFit.ViewModels.Catalog.Voucher.VoucherViewModels>
+
+@{
+    ViewData["Title"] = "Danh sách Voucher";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="text-end mb-4">
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createVoucherModal">
+        <i class="bx bx-plus me-1"></i> Tạo voucher mới
+    </button>
+</div>
+
+<!-- Modal Create -->
+<div class="modal fade" id="createVoucherModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm mới voucher</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @await Html.PartialAsync("Create", new SneakFit.ViewModels.Catalog.Voucher.CreateVoucher())
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+    {
+        <div class="alert alert-danger m-3">
+            @ViewBag.ErrorMessage
+        </div>
+    }
+    @if (!string.IsNullOrEmpty(ViewBag.SuccessMsg))
+    {
+        <div class="alert alert-success m-3" id="msgAlert">
+            @ViewBag.SuccessMsg
+        </div>
+    }
+
+    <div class="card-header">
+        <div class="row">
+            <form asp-action="Index" method="get">
+                <div class="row">
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label">Mã voucher</label>
+                        <input type="text" value="@ViewBag.Keyword" name="keyword" class="form-control" placeholder="Nhập mã voucher..." />
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <label class="form-label">Trạng thái</label>
+                        <select name="trangThai" class="form-select" asp-items="ViewBag.StatusSelectList"></select>
+                    </div>
+                    <div class="col-md-2 mb-2 d-flex align-items-end">
+                        <div class="btn-group w-100">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bx bx-search"></i> Tìm
+                            </button>
+                            <button type="button" onclick="window.location.href='/Voucher/Index'" class="btn btn-dark">
+                                <i class="bx bx-reset"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="table-responsive text-nowrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>MÃ VOUCHER</th>
+                    <th>LOẠI GIẢM GIÁ</th>
+                    <th>GIÁ TRỊ GIẢM</th>
+                    <th>ĐIỀU KIỆN</th>
+                    <th>SỐ LƯỢNG</th>
+                    <th>THỜI GIAN</th>
+                    <th>TRẠNG THÁI</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody class="table-border-bottom-0">
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.MaVoucher)
+                        </td>
+                        <td>
+                            @(item.LoaiGiamGia == LoaiGiamGia.PhamTram ? "Phần trăm" : "Số tiền")
+                        </td>
+                        <td>
+                            @(item.LoaiGiamGia == LoaiGiamGia.PhamTram ? item.GiaTriGiamGia + "%" : item.GiaTriGiamGia.ToString("N0") + " đ")
+                        </td>
+                        <td>
+                            @item.DieuKienApDung.ToString("N0") đ
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-label-dark">@item.SoLuong</span>
+                        </td>
+                        <td>
+                            @($"{item.ThoiGianBatDau:dd/MM/yyyy HH:mm} - {item.ThoiGianKetThuc:dd/MM/yyyy HH:mm}")
+                        </td>
+                        <td>
+                            <span class="badge bg-label-@(item.TrangThai == TrangThaiGiamGia.HoatDong ? "success" : "danger")">
+                                @Html.DisplayFor(modelItem => item.TrangThai)
+                            </span>
+                        </td>
+                        <td>
+                            <div class="dropdown">
+                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="@Url.Action("Details","Voucher", new {id = item.Id})">
+                                        <i class="bx bx-show-alt me-1"></i> Chi tiết
+                                    </a>
+                                    <a class="dropdown-item" href="@Url.Action("Update","Voucher", new {id = item.Id})">
+                                        <i class="bx bx-edit-alt me-1"></i> Sửa
+                                    </a>
+                                    @if (item.TrangThai == TrangThaiGiamGia.HoatDong)
+                                    {
+                                        <a class="dropdown-item" href="@Url.Action("UpdateStatus","Voucher", new {id = item.Id, trangThai = TrangThaiGiamGia.KhongHoatDong})">
+                                            <i class="bx bx-block me-1"></i> Hủy kích hoạt
+                                        </a>
+                                    }
+                                    else if (item.TrangThai == TrangThaiGiamGia.KhongHoatDong)
+                                    {
+                                        <a class="dropdown-item" href="@Url.Action("UpdateStatus","Voucher", new {id = item.Id, trangThai = TrangThaiGiamGia.HoatDong})">
+                                            <i class="bx bx-check me-1"></i> Kích hoạt
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @await Component.InvokeAsync("Pager", Model)
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            var successMessage = '@TempData["success"]';
+            if (successMessage) {
+                toastr.success(successMessage);
+            }
+        });
+
+        function trangThaiGiamGia(id, trangThai) {
+            var label = $(`label[for="switch-${id}"]`);
+            label.text(trangThai ? "Hoạt động" : "Ngưng hoạt động");
+
+            $.ajax({
+                url: '/Voucher/UpdateStatus',
+                type: 'POST',
+                data: { id: id, trangThai: trangThai },
+                success: function (result) {
+                    if (result.success) {
+                        toastr.success("Cập nhật trạng thái thành công");
+                    } else {
+                        toastr.error("Cập nhật trạng thái thất bại");
+                        $(`#switch-${id}`).prop('checked', !trangThai);
+                        label.text(!trangThai ? "Hoạt động" : "Ngưng hoạt động");
+                    }
+                },
+                error: function () {
+                    toastr.error("Có lỗi xảy ra");
+                    $(`#switch-${id}`).prop('checked', !trangThai);
+                    label.text(!trangThai ? "Hoạt động" : "Ngưng hoạt động");
+                }
+            });
+        }
+    </script>
+}

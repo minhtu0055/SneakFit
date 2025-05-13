@@ -22,6 +22,7 @@ builder.Services.AddScoped<IChatLieuApiClient, ChatLieuApiClient>();
 builder.Services.AddScoped<IDeGiayApiClient, DeGiayApiClient>();
 builder.Services.AddScoped<IMauSacApiClient, MauSacApiClient>();
 builder.Services.AddScoped<IKichThuocApiClient, KichThuocApiClient>();
+builder.Services.AddScoped<IVoucherApiClient, VoucherApiClient>();
 
 
 
