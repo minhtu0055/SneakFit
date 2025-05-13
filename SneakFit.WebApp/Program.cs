@@ -18,6 +18,7 @@ builder.Services.AddSession(options =>
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<IUserApiClient, UserApiClient>();
+builder.Services.AddScoped<IKhuyenMaiApiClient, KhuyenMaiApiClient>();
 
 
 

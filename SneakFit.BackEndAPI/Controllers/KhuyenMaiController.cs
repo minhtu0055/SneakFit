@@ -22,6 +22,7 @@ namespace SneakFit.BackEndAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllPaging([FromQuery] PhanTrangKhuyenMai request)
         {
+
             var result = await _khuyenMaiService.GetAllPaging(request);
             return Ok(new ApiSuccessResult<PagedResult<KhuyenMaiViewModels>>(result));
         }
