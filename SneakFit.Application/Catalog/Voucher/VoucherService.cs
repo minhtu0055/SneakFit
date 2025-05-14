@@ -2,7 +2,7 @@
 using SneakFit.Data.EF;
 using SneakFit.Data.Entities;
 using SneakFit.Data.Enums;
-using SneakFit.ViewModels.Catalog.VoucherCATA;
+using SneakFit.ViewModels.Catalog.Voucher;
 using SneakFit.ViewModels.Common;
 using System;
 using System.Collections.Generic;
@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SneakFit.Application.Catalog.VoucherRP
+namespace SneakFit.Application.Catalog.Voucher
 {
     public class VoucherService : IVoucherService
     {
@@ -21,7 +21,7 @@ namespace SneakFit.Application.Catalog.VoucherRP
         }
         public async Task<VoucherViewModels> Create(CreateVoucher request)
         {
-            var vc = new Voucher()
+            var vc = new SneakFit.Data.Entities.Voucher()
             {
                 Id = Guid.NewGuid(),
                 MaVoucher = request.MaVoucher,
@@ -50,7 +50,7 @@ namespace SneakFit.Application.Catalog.VoucherRP
                 query = query.Where(x => x.TrangThai == request.Status.Value);
             }
             int totalRow = await query.CountAsync();
-            var dt = await query.Skip((request.PageIndex - 1) * request.PageSize)
+            var data = await query.Skip((request.PageIndex - 1) * request.PageSize)
                 .Take(request.PageSize)
                 .Select(x => new VoucherViewModels()
                 {
@@ -70,7 +70,7 @@ namespace SneakFit.Application.Catalog.VoucherRP
                 TotalRecords = totalRow,
                 PageSize = request.PageSize,
                 PageIndex = request.PageIndex,
-                Items = dt,
+                Items = data,
             };
             return PageResult;
         }

@@ -1,14 +1,14 @@
-﻿using System;
+﻿using SneakFit.ViewModels.Common;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace SneakFit.ViewModels.Catalog.ChatLieu
 {
-    public class ThemChatLieu
+    public class ChatLieuPagingRequest : PagingRequestBase
     {
-        public string TenChatLieu { get; set; }
+        public string? Keyword { get; set; }
     }
 }

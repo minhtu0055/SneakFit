@@ -1,14 +1,9 @@
 ﻿using SneakFit.ViewModels.Catalog.DeGiay;
 using SneakFit.ViewModels.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SneakFit.Application.Catalog.DeGiay
+namespace SneakFit.ApiIntegration.Services
 {
-   public  interface IDeGiayService
+    public interface IDeGiayApiClient
     {
         Task<PagedResult<DeGiayViewModels>> GetAllPaging(DeGiayPagingRequest request);
         Task<DeGiayViewModels> GetById(Guid id);
