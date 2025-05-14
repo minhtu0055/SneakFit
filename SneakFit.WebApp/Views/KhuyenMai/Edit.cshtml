@@ -1,0 +1,122 @@
+﻿@using SneakFit.Data.Enums
+@model SneakFit.ViewModels.Catalog.KhuyenMai.SuaKhuyenMai
+@{
+    ViewData["Title"] = "Chỉnh sửa khuyến mãi";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <h2 class="mt-4">Sửa khuyến mãi</h2>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+        <li class="breadcrumb-item active">Chỉnh sửa khuyến mãi</li>
+    </ol>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <a class="btn btn-success" asp-action="Index" asp-controller="KhuyenMai">Về danh sách</a>
+        </div>
+
+        <div class="card-body">
+            <form asp-action="Edit" method="post" id="edit-form">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+
+                <div class="form-group">
+                    <label asp-for="TenKhuyenMai"></label>
+                    <input asp-for="TenKhuyenMai" class="form-control" />
+                    <span asp-validation-for="TenKhuyenMai" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="MoTa"></label>
+                    <textarea asp-for="MoTa" class="form-control"></textarea>
+                    <span asp-validation-for="MoTa" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="ThoiGianBatDau"></label>
+                    <input asp-for="ThoiGianBatDau" type="datetime-local" class="form-control" />
+                    <span asp-validation-for="ThoiGianBatDau" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="ThoiGianKetThuc"></label>
+                    <input asp-for="ThoiGianKetThuc" type="datetime-local" class="form-control" />
+                    <span asp-validation-for="ThoiGianKetThuc" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label>Loại giảm giá</label>
+                    <select asp-for="LoaiGiamGia" class="form-control" asp-items="ViewBag.DiscountTypes" id="DiscountType"></select>
+                    <span asp-validation-for="LoaiGiamGia" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="GiaTriGiamGia"></label>
+                    <div class="input-group">
+                        <input asp-for="GiaTriGiamGia" class="form-control" />
+                        <span class="input-group-text discount-unit">VNĐ</span>
+                    </div>
+                    <span asp-validation-for="GiaTriGiamGia" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label>Sản phẩm áp dụng</label>
+                    <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                        <table class="table table-bordered">
+                            <thead style="position: sticky; top: 0; background-color: white; z-index: 1;">
+                                <tr>
+                                    <th>CHỌN</th>
+                                    <th>TÊN</th>
+                                    <th>GIÁ</th>
+                                    <th>DANH MỤC</th>
+                                </tr>
+                            </thead>
+                            @* <tbody> *@
+                            @*     @foreach (var sp in (IEnumerable<SneakFit.ViewModels.Catalog.SanPhamChiTiet.SPCTViewModels>)ViewBag.SanPhams) *@
+                            @*     { *@
+                            @*         var isSelected = Model.SanPhamIds != null && Model.SanPhamIds.Contains(sp.Id); *@
+                            @*         <tr> *@
+                            @*             <td class="text-center"> *@
+                            @*                 <input type="checkbox" name="SanPhamIds" value="@sp.Id" class="form-check-input" @(isSelected ? "checked" : "") /> *@
+                            @*             </td> *@
+                            @*             <td>@sp.TenSanPham</td> *@
+                            @*             <td>@sp.Gia.ToString("N0")đ</td> *@
+                            @*             <td>@sp.TenDanhMuc</td> *@
+                            @*         </tr> *@
+                            @*     } *@
+                            @* </tbody> *@
+                        </table>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="TrangThai"></label>
+                    <select asp-for="TrangThai" class="form-control" asp-items="Html.GetEnumSelectList<TrangThaiGiamGia>()"></select>
+                    <span asp-validation-for="TrangThai" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mt-3">
+                    <button type="submit" class="btn btn-primary">Cập nhật</button>
+                    <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            function updateDiscountUnit() {
+                var discountType = $("#DiscountType").val();
+                var unit = discountType == "0" ? "%" : "VNĐ";
+                $(".discount-unit").text(unit);
+            }
+
+            $("#DiscountType").change(updateDiscountUnit);
+            updateDiscountUnit();
+        });
+    </script>
+}

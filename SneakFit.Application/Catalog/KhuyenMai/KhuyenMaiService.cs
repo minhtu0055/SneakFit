@@ -26,10 +26,10 @@ namespace SneakFit.Application.Catalog.KhuyenMai
         public async Task<KhuyenMaiViewModels> Create(ThemKhuyenMai request)
         {
             // Kiểm tra nếu danh sách sản phẩm trống
-            if (request.SanPhamIds == null || !request.SanPhamIds.Any())
-            {
-                throw new Exception("Danh sách sản phẩm không thể trống.");
-            }
+            //if (request.SanPhamIds == null || !request.SanPhamIds.Any())
+            //{
+            //    throw new Exception("Danh sách sản phẩm không thể trống.");
+            //}
 
             // Tạo đối tượng Khuyến Mại mới
             var khuyenMai = new Data.Entities.KhuyenMai()
@@ -198,8 +198,10 @@ namespace SneakFit.Application.Catalog.KhuyenMai
             foreach (var sanPhamId in request.SanPhamIds)
             {
                 var sanPham = await _context.SanPham.FindAsync(sanPhamId);
-                if (sanPham == null)
-                    throw new Exception($"Không tìm thấy sản phẩm có id: {sanPhamId}");
+                if (request.SanPhamIds == null || !request.SanPhamIds.Any())
+                {
+                    throw new Exception("Danh sách sản phẩm không thể trống.");
+                }
 
                 var khuyenMaiChiTiet = new KhuyenMaiChiTiet()
                 {
