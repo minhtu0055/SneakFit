@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SneakFit.Data.EF;
 using SneakFit.ViewModels.Catalog.ChatLieu;
+using SneakFit.ViewModels.Catalog.MauSac;
 using SneakFit.ViewModels.Common;
 using System;
 using System.Collections.Generic;
@@ -98,6 +99,14 @@ namespace SneakFit.Application.Catalog.ChatLieu
                 Id = chatLieu.Id,
                 TenChatLieu = chatLieu.TenChatLieu
             };
+        }
+        public async Task<List<ChatLieuViewModels>> GetAll()
+        {
+            return await _context.ChatLieu.Select(x => new ChatLieuViewModels
+            {
+                Id = x.Id,
+                TenChatLieu = x.TenChatLieu
+            }).ToListAsync();
         }
     }
 }

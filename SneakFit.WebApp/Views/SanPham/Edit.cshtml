@@ -1,0 +1,29 @@
+@model SneakFit.ViewModels.Catalog.SanPham.SuaSanPham
+<form asp-controller="SanPham" asp-action="Edit" id="editSanPhamForm" method="post">
+    <input type="hidden" asp-for="Id" />
+    <div class="mb-3">
+        <label asp-for="TenSanPham" class="form-label">Tên sản phẩm</label>
+        <input asp-for="TenSanPham" class="form-control" placeholder="Nhập tên sản phẩm" maxlength="100" required />
+        <span asp-validation-for="TenSanPham" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Mota" class="form-label">Mô tả</label>
+        <textarea asp-for="Mota" class="form-control" placeholder="Nhập mô tả" rows="3" maxlength="500"></textarea>
+        <span asp-validation-for="Mota" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="DanhMucId" class="form-label">Danh mục</label>
+        <select asp-for="DanhMucId" class="form-control" asp-items="ViewBag.DanhMucs">
+            <option value="">-- Chọn danh mục --</option>
+        </select>
+        <span asp-validation-for="DanhMucId" class="text-danger"></span>
+    </div>
+    @* <div class="form-check mb-3">
+        <input asp-for="TrangThai" class="form-check-input" type="checkbox" />
+        <label asp-for="TrangThai" class="form-check-label">Hoạt động</label>
+    </div> *@
+    <div class="text-end">
+        <button type="submit" class="btn btn-primary">Lưu</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+    </div>
+</form> 

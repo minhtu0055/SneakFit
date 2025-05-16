@@ -4,6 +4,8 @@ using System.Net.Http.Headers;
 using System.Net.Http;
 using System.Text;
 using SneakFit.ViewModels.Catalog.DeGiay;
+using SneakFit.ViewModels.Catalog.MauSac;
+using SneakFit.ViewModels.Catalog.SanPham;
 
 namespace SneakFit.ApiIntegration.Services
 {
@@ -81,6 +83,21 @@ namespace SneakFit.ApiIntegration.Services
                 return JsonConvert.DeserializeObject<DeGiayViewModels>(result);
 
             throw new Exception("Không thể cập nhật chất liệu");
+        }
+        public async Task<List<DeGiayViewModels>> GetAll()
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            var response = await client.GetAsync($"/api/degiay/GetAll");
+            var body = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                // Nếu API trả về array
+                var result = JsonConvert.DeserializeObject<List<DeGiayViewModels>>(body);
+                return result ?? new List<DeGiayViewModels>();
+            }
+            throw new Exception("Không thể lấy danh sách sản phẩm");
         }
     }
 }

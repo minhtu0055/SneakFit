@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Text;
 using SneakFit.ViewModels.System.User;
 using SneakFit.ViewModels.Catalog.KichThuoc;
+using SneakFit.ViewModels.Catalog.MauSac;
 
 namespace SneakFit.ApiIntegration.Services
 {
@@ -83,6 +84,22 @@ namespace SneakFit.ApiIntegration.Services
                 return JsonConvert.DeserializeObject<KichThuocViewModels>(result);
 
             throw new Exception("Không thể cập nhật kích thước");
+        }
+        
+        public async Task<List<KichThuocViewModels>> GetAll()
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            var response = await client.GetAsync($"/api/kichthuoc/GetAll");
+            var body = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                // Nếu API trả về array
+                var result = JsonConvert.DeserializeObject<List<KichThuocViewModels>>(body);
+                return result ?? new List<KichThuocViewModels>();
+            }
+            throw new Exception("Không thể lấy danh sách sản phẩm");
         }
     }
 }

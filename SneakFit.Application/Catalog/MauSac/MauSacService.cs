@@ -100,5 +100,13 @@ namespace SneakFit.Application.Catalog.MauSac
                 TenMauSac = getid.TenMauSac
             };
         }
+        public async Task<List<MauSacViewModels>> GetAll()
+        {
+            return await _context.MauSac.Select(x => new MauSacViewModels
+            {
+                Id = x.Id,
+                TenMauSac = x.TenMauSac
+            }).ToListAsync();
+        }
     }
 }

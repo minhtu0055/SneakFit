@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SneakFit.Application.Catalog.SanPham;
+using SneakFit.ViewModels.Catalog.ChatLieu;
 using SneakFit.ViewModels.Catalog.SanPham;
 using SneakFit.ViewModels.Catalog.ThuongHieu;
 
@@ -15,6 +16,12 @@ namespace SneakFit.BackEndAPI.Controllers
         public SanPhamController(ISanPhamService sanPhamService)
         {
             _sanPhamService = sanPhamService;
+        }
+        [HttpGet("paging")]
+        public async Task<IActionResult> GetAllPaging([FromQuery] SanPhamPagingRequest request)
+        {
+            var result = await _sanPhamService.GetAllPaging(request);
+            return Ok(result);
         }
         [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll()

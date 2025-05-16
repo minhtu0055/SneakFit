@@ -57,5 +57,11 @@ namespace SneakFit.BackEndAPI.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+        [HttpGet("getall")]
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _chatLieuService.GetAll();
+            return Ok(result);
+        }
     }
 }

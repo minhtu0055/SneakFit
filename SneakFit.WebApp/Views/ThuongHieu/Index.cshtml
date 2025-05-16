@@ -1,0 +1,187 @@
+@using SneakFit.ViewModels.Common
+@model PagedResult<SneakFit.ViewModels.Catalog.ThuongHieu.ThuongHieuViewModels>
+@{
+    ViewData["Title"] = "Danh sách thương hiệu";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="text-end mb-4">
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#taoThuongHieuModal">
+        <i class="bx bx-plus me-1"></i> Thêm mới thương hiệu
+    </button>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="taoThuongHieuModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm mới thương hiệu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="createModalContent">
+                <!-- Nội dung form sẽ được load bằng Ajax -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Edit -->
+<div class="modal fade" id="editThuongHieuModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chỉnh sửa thương hiệu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="editModalContent">
+                <!-- Nội dung form sẽ được load bằng Ajax -->
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-md-6 col-xs-12">
+                <form asp-action="Index" method="get">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <input type="text" value="@ViewBag.Keyword" placeholder="Tìm kiếm theo tên thương hiệu" name="Keyword" class="form-control" />
+                        </div>
+                        <div class="col-md-2 mb-2 d-flex align-items-end">
+                            <div class="btn-group w-100">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bx bx-search"></i> Tìm
+                                </button>
+                                <button type="button" onclick="window.location.href='/ThuongHieu/Index'" class="btn btn-dark">
+                                    <i class="bx bx-reset"></i> Reset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="table-responsive text-nowrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Tên Thương Hiệu</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody class="table-border-bottom-0">
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TenThuongHieu)
+                        </td>
+                        <td>
+                            <div class="dropdown">
+                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item edit-thuonghieu" href="javascript:void(0)" data-id="@item.Id" data-bs-toggle="modal" data-bs-target="#editThuongHieuModal">
+                                        <i class="bx bx-edit-alt me-1"></i> Sửa
+                                    </a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    @await Component.InvokeAsync("Pager", Model)
+</div>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Thêm mới
+            $('[data-bs-target="#taoThuongHieuModal"]').click(function () {
+                $.ajax({
+                    url: '/ThuongHieu/Create',
+                    type: 'GET',
+                    success: function (result) {
+                        $('#createModalContent').html(result);
+                    },
+                    error: function (err) {
+                        toastr.error('Có lỗi xảy ra khi tải form');
+                    }
+                });
+            });
+            // Submit create
+            $(document).on('submit', '#createThuongHieuForm', function (e) {
+                e.preventDefault();
+                var formData = $(this).serialize();
+                $.ajax({
+                    url: '/ThuongHieu/Create',
+                    type: 'POST',
+                    data: formData,
+                    success: function (result) {
+                        if (result.success) {
+                            $('#taoThuongHieuModal').modal('hide');
+                            toastr.success('Thêm mới thành công');
+                            setTimeout(function() {
+                                window.location.reload();
+                            }, 1000);
+                        } else {
+                            toastr.error(result.message);
+                        }
+                    },
+                    error: function (err) {
+                        toastr.error('Có lỗi xảy ra khi thêm mới');
+                    }
+                });
+            });
+            // Edit
+            $('.edit-thuonghieu').click(function () {
+                var id = $(this).data('id');
+                $.ajax({
+                    url: '/ThuongHieu/Edit/' + id,
+                    type: 'GET',
+                    success: function (result) {
+                        $('#editModalContent').html(result);
+                    },
+                    error: function (err) {
+                        toastr.error('Có lỗi xảy ra khi tải form');
+                    }
+                });
+            });
+            // Submit edit
+            $(document).on('submit', '#editThuongHieuForm', function (e) {
+                e.preventDefault();
+                var formData = $(this).serialize();
+                $.ajax({
+                    url: '/ThuongHieu/Edit',
+                    type: 'POST',
+                    data: formData,
+                    success: function (result) {
+                        if (result.success) {
+                            $('#editThuongHieuModal').modal('hide');
+                            toastr.success('Cập nhật thành công');
+                            setTimeout(function() {
+                                window.location.reload();
+                            }, 1000);
+                        } else {
+                            toastr.error(result.message);
+                        }
+                    },
+                    error: function (err) {
+                        toastr.error('Có lỗi xảy ra khi cập nhật');
+                    }
+                });
+            });
+            // Toast
+            var successMessage = '@TempData["SuccessMessage"]';
+            if (successMessage) {
+                toastr.success(successMessage);
+            }
+            var errorMessage = '@TempData["ErrorMessage"]';
+            if (errorMessage) {
+                toastr.error(errorMessage);
+            }
+        });
+    </script>
+} 

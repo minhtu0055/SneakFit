@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using SneakFit.ViewModels.Catalog.MauSac;
 using SneakFit.ViewModels.Catalog.ThuongHieu;
 using SneakFit.ViewModels.Common;
 
-namespace SneakFit.Application.Catalog.ThuongHieu
+namespace SneakFit.ApiIntegration.Services
 {
-    public interface IThuongHieuService
+    public interface IThuongHieuApiClient
     {
         Task<PagedResult<ThuongHieuViewModels>> GetAllPaging(ThuongHieuPagingRequest request);
         Task<List<ThuongHieuViewModels>> GetAll();

@@ -47,5 +47,11 @@ namespace SneakFit.BackEndAPI.Controllers
             var mausac = await _mauSacService.Update(request);
             return Ok(mausac);
         }
+        [HttpGet("getall")]
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _mauSacService.GetAll();
+            return Ok(result);
+        }
     }
 }

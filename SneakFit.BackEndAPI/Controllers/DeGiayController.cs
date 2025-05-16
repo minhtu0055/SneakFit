@@ -47,5 +47,11 @@ namespace SneakFit.BackEndAPI.Controllers
             var degiay = await _deGiayService.Update(request);
             return Ok(degiay);       
         }
+        [HttpGet("getall")]
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _deGiayService.GetAll();
+            return Ok(result);
+        }
     }
 }

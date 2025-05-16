@@ -1,0 +1,277 @@
+﻿using Newtonsoft.Json;
+using SneakFit.ViewModels.Catalog.SanPhamChiTiet;
+using SneakFit.ViewModels.Common;
+using System.Net.Http.Headers;
+using System.Text;
+
+namespace SneakFit.ApiIntegration.Services
+{
+    public class SpctApiClient : ISpctApiClient
+    {
+        private readonly IConfiguration _configuration;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public SpctApiClient(IConfiguration configuration, IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor)
+        {
+            _configuration = configuration;
+            _httpClientFactory = httpClientFactory;
+            _httpContextAccessor = httpContextAccessor;
+        }
+
+        public async Task<PagedResult<SPCTViewModels>> GetAllPaging(PhanTrangSPCT request)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var response = await client.GetAsync($"/api/spct/paging?pageIndex={request.PageIndex}&pageSize={request.PageSize}&tuKhoa={request.TuKhoa}");
+            var body = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                var pagedResult = JsonConvert.DeserializeObject<PagedResult<SPCTViewModels>>(body);
+                return pagedResult ?? new PagedResult<SPCTViewModels>();
+            }
+            throw new Exception("Không thể lấy danh sách sản phẩm chi tiết");
+        }
+
+        public async Task<SPCTViewModels> GetById(Guid id)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var response = await client.GetAsync($"/api/spct/GetById/{id}");
+            var body = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                var spct = JsonConvert.DeserializeObject<SPCTViewModels>(body);
+                return spct;
+            }
+            throw new Exception("Không thể lấy thông tin sản phẩm chi tiết");
+        }
+
+        public async Task<SPCTViewModels> Create(ThemSPCT request)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var form = new MultipartFormDataContent();
+
+            if (request.Images?.Count > 0)
+            {
+                foreach (var image in request.Images)
+                {
+                    byte[] data;
+                    using (var br = new BinaryReader(image.OpenReadStream()))
+                    {
+                        data = br.ReadBytes((int)image.Length);
+                    }
+                    ByteArrayContent bytes = new ByteArrayContent(data);
+                    form.Add(bytes, "Images", image.FileName);
+                }
+            }
+
+            if (request.SanPhamId != Guid.Empty)
+                form.Add(new StringContent(request.SanPhamId.ToString()), "SanPhamId");
+            if (request.MauSacId != Guid.Empty)
+                form.Add(new StringContent(request.MauSacId.ToString()), "MauSacId");
+            if (request.KichThuocId != Guid.Empty)
+                form.Add(new StringContent(request.KichThuocId.ToString()), "KichThuocId");
+            if (request.ChatLieuId != Guid.Empty)
+                form.Add(new StringContent(request.ChatLieuId.ToString()), "ChatLieuId");
+            if (request.DeGiayId != Guid.Empty)
+                form.Add(new StringContent(request.DeGiayId.ToString()), "DeGiayId");
+            if (request.ThuongHieuId != Guid.Empty)
+                form.Add(new StringContent(request.ThuongHieuId.ToString()), "ThuongHieuId");
+            form.Add(new StringContent(request.Gia.ToString()), "Gia");
+            form.Add(new StringContent(request.SoLuong.ToString()), "SoLuong");
+
+            var response = await client.PostAsync($"/api/spct/Create", form);
+            var body = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                var spct = JsonConvert.DeserializeObject<SPCTViewModels>(body);
+                return spct;
+            }
+            throw new Exception("Không thể tạo sản phẩm chi tiết");
+        }
+
+        public async Task<SPCTViewModels> Update(SuaSPCT request)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var form = new MultipartFormDataContent();
+            form.Add(new StringContent(request.Id.ToString()), "Id");
+            form.Add(new StringContent(request.MauSacId.ToString()), "MauSacId");
+            form.Add(new StringContent(request.KichThuocId.ToString()), "KichThuocId");
+            form.Add(new StringContent(request.ChatLieuId.ToString()), "ChatLieuId");
+            form.Add(new StringContent(request.DeGiayId.ToString()), "DeGiayId");
+            form.Add(new StringContent(request.ThuongHieuId.ToString()), "ThuongHieuId");
+            form.Add(new StringContent(request.Gia.ToString()), "Gia");
+            form.Add(new StringContent(request.SoLuong.ToString()), "SoLuong");
+            form.Add(new StringContent(request.TrangThai.ToString()), "TrangThai");
+
+            if (request.Images != null)
+            {
+                foreach (var image in request.Images)
+                {
+                    var streamContent = new StreamContent(image.OpenReadStream());
+                    form.Add(streamContent, "Images", image.FileName);
+                }
+            }
+
+            var response = await client.PutAsync($"/api/spct/Edit/{request.Id}", form);
+            var body = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                var spct = JsonConvert.DeserializeObject<SPCTViewModels>(body);
+                return spct;
+            }
+            throw new Exception("Không thể cập nhật sản phẩm chi tiết");
+        }
+
+        public async Task<bool> UpdateGia(Guid id, decimal giaMoi)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var json = JsonConvert.SerializeObject(giaMoi);
+            var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await client.PatchAsync($"/api/spct/{id}/gia", httpContent);
+            var body = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonConvert.DeserializeObject<bool>(body);
+                return result;
+            }
+            throw new Exception("Không thể cập nhật giá");
+        }
+
+        public async Task<bool> UpdateSoLuong(Guid id, int themSoLuong)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var json = JsonConvert.SerializeObject(themSoLuong);
+            var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await client.PutAsync($"/api/spct/{id}/soluong", httpContent);
+            var body = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonConvert.DeserializeObject<bool>(body);
+                return result;
+            }
+            throw new Exception("Không thể cập nhật số lượng");
+        }
+
+        public async Task<bool> UpdateTrangThai(Guid id, bool trangThai)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var json = JsonConvert.SerializeObject(trangThai);
+            var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await client.PatchAsync($"/api/spct/{id}/trangThai", httpContent);
+            var body = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonConvert.DeserializeObject<bool>(body);
+                return result;
+            }
+            throw new Exception("Không thể cập nhật trạng thái");
+        }
+
+        public async Task<int> AddImage(Guid id, IFormFile file)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var form = new MultipartFormDataContent();
+            var streamContent = new StreamContent(file.OpenReadStream());
+            form.Add(streamContent, "file", file.FileName);
+
+            var response = await client.PostAsync($"/api/SPCT/{id}/images", form);
+            var body = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonConvert.DeserializeObject<int>(body);
+                return result;
+            }
+            throw new Exception("Không thể thêm ảnh");
+        }
+
+        public async Task<int> RemoveImage(Guid imageId)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var response = await client.DeleteAsync($"/api/spct/images/{imageId}");
+            var body = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonConvert.DeserializeObject<int>(body);
+                return result;
+            }
+            throw new Exception("Không thể xóa ảnh");
+        }
+
+        public async Task<List<string>> GetListImages(Guid id)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var response = await client.GetAsync($"/api/spct/{id}/images");
+            var body = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                var images = JsonConvert.DeserializeObject<List<string>>(body);
+                return images ?? new List<string>();
+            }
+            return new List<string>();
+        }
+
+        public async Task<List<SPCTViewModels>> GetAll()
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var response = await client.GetAsync($"/api/spct/GetAll");
+            var body = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonConvert.DeserializeObject<List<SPCTViewModels>>(body);
+                return result ?? new List<SPCTViewModels>();
+            }
+            throw new Exception("Không thể lấy danh sách sản phẩm");
+        }
+    }
+}

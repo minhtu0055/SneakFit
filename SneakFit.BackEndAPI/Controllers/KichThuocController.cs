@@ -48,5 +48,11 @@ namespace SneakFit.BackEndAPI.Controllers
             var kichthuoc = await _kichThuocService.Update(request);
             return Ok(kichthuoc);
         }
+        [HttpGet("getall")]
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _kichThuocService.GetAll();
+            return Ok(result);
+        }
     }
 }

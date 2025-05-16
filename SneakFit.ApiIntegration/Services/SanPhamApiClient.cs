@@ -1,0 +1,164 @@
+﻿using Newtonsoft.Json;
+using SneakFit.ViewModels.Catalog.SanPham;
+using SneakFit.ViewModels.Common;
+using System.Net.Http.Headers;
+using System.Text;
+
+namespace SneakFit.ApiIntegration.Services
+{
+    public class SanPhamApiClient : ISanPhamApiClient
+    {
+        private readonly IConfiguration _configuration;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public SanPhamApiClient(IConfiguration configuration, IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor)
+        {
+            _configuration = configuration;
+            _httpClientFactory = httpClientFactory;
+            _httpContextAccessor = httpContextAccessor;
+        }
+
+        public async Task<PagedResult<SanPhamViewModels>> GetAllPaging(SanPhamPagingRequest request)
+        {
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+                var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+                if (!string.IsNullOrEmpty(sessions))
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+                var response = await client.GetAsync($"/api/SanPham/paging?pageIndex={request.PageIndex}&pageSize={request.PageSize}&tuKhoa={request.Keyword}");
+                var body = await response.Content.ReadAsStringAsync();
+                if (response.IsSuccessStatusCode)
+                {
+                    var settings = new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore,
+                        MissingMemberHandling = MissingMemberHandling.Ignore
+                    };
+                    var apiResult = JsonConvert.DeserializeObject<ApiSuccessResult<PagedResult<SanPhamViewModels>>>(body, settings);
+                    return apiResult?.ResultObj ?? new PagedResult<SanPhamViewModels>();
+                }
+                throw new Exception("Không thể lấy danh sách sản phẩm");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi khi lấy danh sách sản phẩm: {ex.Message}");
+            }
+        }
+
+        public async Task<SanPhamViewModels> GetById(Guid id)
+        {
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+                var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+                if (!string.IsNullOrEmpty(sessions))
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+                var response = await client.GetAsync($"/api/SanPham/GetById/{id}");
+                var body = await response.Content.ReadAsStringAsync();
+                if (response.IsSuccessStatusCode)
+                {
+                    var settings = new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore,
+                        MissingMemberHandling = MissingMemberHandling.Ignore
+                    };
+                    var apiResult = JsonConvert.DeserializeObject<ApiSuccessResult<SanPhamViewModels>>(body, settings);
+                    if (apiResult?.ResultObj == null)
+                        throw new Exception($"API trả về dữ liệu không hợp lệ: {body}");
+                    return apiResult.ResultObj;
+                }
+                throw new Exception($"API trả về lỗi - Status: {response.StatusCode}, Body: {body}");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi khi lấy thông tin sản phẩm: {ex.Message}");
+            }
+        }
+
+        public async Task<SanPhamViewModels> Create(ThemSanPham request)
+        {
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+                var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+                if (!string.IsNullOrEmpty(sessions))
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+                var json = JsonConvert.SerializeObject(request);
+                var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await client.PostAsync("/api/SanPham/Create", httpContent);
+                var body = await response.Content.ReadAsStringAsync();
+                if (response.IsSuccessStatusCode)
+                {
+                    var settings = new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore,
+                        MissingMemberHandling = MissingMemberHandling.Ignore
+                    };
+                    var apiResult = JsonConvert.DeserializeObject<ApiSuccessResult<SanPhamViewModels>>(body, settings);
+                    return apiResult?.ResultObj;
+                }
+                throw new Exception("Tạo sản phẩm thất bại");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi khi tạo sản phẩm: {ex.Message}");
+            }
+        }
+
+        public async Task<SanPhamViewModels> Update(SuaSanPham request)
+        {
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+                var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+                if (!string.IsNullOrEmpty(sessions))
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+                var json = JsonConvert.SerializeObject(request);
+                var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await client.PutAsync($"/api/SanPham/Update/{request.Id}", httpContent);
+                var body = await response.Content.ReadAsStringAsync();
+                if (response.IsSuccessStatusCode)
+                {
+                    var settings = new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore,
+                        MissingMemberHandling = MissingMemberHandling.Ignore
+                    };
+                    var apiResult = JsonConvert.DeserializeObject<ApiSuccessResult<SanPhamViewModels>>(body, settings);
+                    return apiResult?.ResultObj;
+                }
+                throw new Exception("Cập nhật sản phẩm thất bại");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi khi cập nhật sản phẩm: {ex.Message}");
+            }
+        }
+
+        public async Task<List<SanPhamViewModels>> GetAll()
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var response = await client.GetAsync($"/api/sanpham/GetAll");
+            var body = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                // Nếu API trả về array
+                var result = JsonConvert.DeserializeObject<List<SanPhamViewModels>>(body);
+                return result ?? new List<SanPhamViewModels>();
+            }
+            throw new Exception("Không thể lấy danh sách sản phẩm");
+
+        }
+    }
+}

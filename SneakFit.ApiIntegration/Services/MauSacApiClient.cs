@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Text;
 using SneakFit.ViewModels.System.User;
 using SneakFit.ViewModels.Catalog.MauSac;
+using SneakFit.ViewModels.Catalog.DeGiay;
 
 namespace SneakFit.ApiIntegration.Services
 {
@@ -83,6 +84,22 @@ namespace SneakFit.ApiIntegration.Services
                 return JsonConvert.DeserializeObject<MauSacViewModels>(result);
 
             throw new Exception("Không thể cập nhật màu sắc");
+        }
+
+        public async Task<List<MauSacViewModels>> GetAll()
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            var response = await client.GetAsync($"/api/mausac/GetAll");
+            var body = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                // Nếu API trả về array
+                var result = JsonConvert.DeserializeObject<List<MauSacViewModels>>(body);
+                return result ?? new List<MauSacViewModels>();
+            }
+            throw new Exception("Không thể lấy danh sách sản phẩm");
         }
     }
 }
