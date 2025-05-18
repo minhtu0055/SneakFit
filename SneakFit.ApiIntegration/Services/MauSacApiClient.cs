@@ -39,7 +39,7 @@ namespace SneakFit.ApiIntegration.Services
             if (response.IsSuccessStatusCode)
                 return JsonConvert.DeserializeObject<MauSacViewModels>(result);
 
-            throw new Exception("Không thể tạo chất liệu");
+            throw new Exception("Không thể tạo màu sắc");
         }
 
         public async Task<PagedResult<MauSacViewModels>> GetAllPaging(MauSacPagingRequest request)
@@ -99,7 +99,7 @@ namespace SneakFit.ApiIntegration.Services
                 var result = JsonConvert.DeserializeObject<List<MauSacViewModels>>(body);
                 return result ?? new List<MauSacViewModels>();
             }
-            throw new Exception("Không thể lấy danh sách sản phẩm");
+            throw new Exception("Không thể lấy danh sách màu sắc");
         }
     }
 }

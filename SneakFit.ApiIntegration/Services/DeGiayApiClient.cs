@@ -38,7 +38,7 @@ namespace SneakFit.ApiIntegration.Services
             if (response.IsSuccessStatusCode)
                 return JsonConvert.DeserializeObject<DeGiayViewModels>(result);
 
-            throw new Exception("Không thể tạo chất liệu");
+            throw new Exception("Không thể tạo đế giày");
         }
 
         public async Task<PagedResult<DeGiayViewModels>> GetAllPaging(DeGiayPagingRequest request)
@@ -82,7 +82,7 @@ namespace SneakFit.ApiIntegration.Services
             if (response.IsSuccessStatusCode)
                 return JsonConvert.DeserializeObject<DeGiayViewModels>(result);
 
-            throw new Exception("Không thể cập nhật chất liệu");
+            throw new Exception("Không thể cập nhật đế giày");
         }
         public async Task<List<DeGiayViewModels>> GetAll()
         {
@@ -97,7 +97,7 @@ namespace SneakFit.ApiIntegration.Services
                 var result = JsonConvert.DeserializeObject<List<DeGiayViewModels>>(body);
                 return result ?? new List<DeGiayViewModels>();
             }
-            throw new Exception("Không thể lấy danh sách sản phẩm");
+            throw new Exception("Không thể lấy danh sách đế giày");
         }
     }
 }

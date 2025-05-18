@@ -99,7 +99,7 @@ namespace SneakFit.ApiIntegration.Services
                 var result = JsonConvert.DeserializeObject<List<ChatLieuViewModels>>(body);
                 return result ?? new List<ChatLieuViewModels>();
             }
-            throw new Exception("Không thể lấy danh sách sản phẩm");
+            throw new Exception("Không thể lấy danh sách chất liệu");
         }
     }
 }

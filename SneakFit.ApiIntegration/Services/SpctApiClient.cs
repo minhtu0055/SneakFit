@@ -31,8 +31,15 @@ namespace SneakFit.ApiIntegration.Services
             var body = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)
             {
-                var pagedResult = JsonConvert.DeserializeObject<PagedResult<SPCTViewModels>>(body);
-                return pagedResult ?? new PagedResult<SPCTViewModels>();
+                var settings = new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore,
+                    MissingMemberHandling = MissingMemberHandling.Ignore
+                };
+                var apiResult = JsonConvert.DeserializeObject<ApiSuccessResult<PagedResult<SPCTViewModels>>>(body, settings);
+                var pagedResult = apiResult?.ResultObj ?? new PagedResult<SPCTViewModels>();
+                pagedResult.Items = pagedResult.Items ?? new List<SPCTViewModels>();
+                return pagedResult;
             }
             throw new Exception("Không thể lấy danh sách sản phẩm chi tiết");
         }

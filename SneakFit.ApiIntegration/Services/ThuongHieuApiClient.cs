@@ -39,7 +39,7 @@ namespace SneakFit.ApiIntegration.Services.ThuongHieu
             client.BaseAddress = new Uri(_configuration["BaseAddress"]);
             var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
-            var response = await client.GetAsync($"/api/thuonghieu/getbyid/{id}");
+            var response = await client.GetAsync($"/api/thuonghieu/getbyid?id={id}");
             var body = await response.Content.ReadAsStringAsync();
             var thuonghieu = JsonConvert.DeserializeObject<ThuongHieuViewModels>(body);
             return thuonghieu;
@@ -60,7 +60,7 @@ namespace SneakFit.ApiIntegration.Services.ThuongHieu
             if (response.IsSuccessStatusCode)
                 return JsonConvert.DeserializeObject<ThuongHieuViewModels>(result);
 
-            throw new Exception("Không thể tạo chất liệu");
+            throw new Exception("Không thể tạo thương hiệu");
         }
 
         public async Task<ThuongHieuViewModels> Update(SuaThuongHieu request)
@@ -78,7 +78,7 @@ namespace SneakFit.ApiIntegration.Services.ThuongHieu
             if (response.IsSuccessStatusCode)
                 return JsonConvert.DeserializeObject<ThuongHieuViewModels>(result);
 
-            throw new Exception("Không thể cập nhật màu sắc");
+            throw new Exception("Không thể cập nhật thương hiệu");
         }
         
         public async Task<List<ThuongHieuViewModels>> GetAll()
@@ -94,7 +94,7 @@ namespace SneakFit.ApiIntegration.Services.ThuongHieu
                 var result = JsonConvert.DeserializeObject<List<ThuongHieuViewModels>>(body);
                 return result ?? new List<ThuongHieuViewModels>();
             }
-            throw new Exception("Không thể lấy danh sách sản phẩm");
+            throw new Exception("Không thể lấy danh sách thương hiệu");
         }
     }
 }
