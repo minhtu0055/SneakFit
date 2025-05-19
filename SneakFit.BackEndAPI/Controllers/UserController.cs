@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using SneakFit.Application.System;
+using SneakFit.Application.System.User;
 using SneakFit.ViewModels.Common;
 using SneakFit.ViewModels.System.User;
 
@@ -63,6 +63,17 @@ namespace SneakFit.BackEndAPI.Controllers
                 return NotFound(new ApiErrorResult<bool>($"Không tìm thấy user có ID: {id}"));
 
             return Ok(new ApiSuccessResult<bool>(result));
+        }
+        [HttpPut("{id}/role")]
+        public async Task<IActionResult> RoleAssign(Guid id, [FromBody] RoleAssignRequest request)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var result = await _userService.RoleAssign(id, request);
+            if (!result.IsSuccessed)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
         }
     }
 }

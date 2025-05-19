@@ -33,7 +33,7 @@ namespace SneakFit.ApiIntegration.Services
                 var response = await client.GetAsync($"/api/khuyenMai?pageIndex={request.PageIndex}" +
                     $"&pageSize={request.PageSize}" +
                     $"&keyword={request.Keyword}" +
-                    $"&status={request.TrangThai}");
+                    $"&trangthai={request.TrangThai}");
                 var body = await response.Content.ReadAsStringAsync();
                 if (response.IsSuccessStatusCode)
                 {
@@ -60,13 +60,13 @@ namespace SneakFit.ApiIntegration.Services
         {
             try
             {
-                var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token"); // lấy chuỗi session từ token
-                var client = _httpClientFactory.CreateClient(sessions);
+                var client = _httpClientFactory.CreateClient();
                 client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+                var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions); // thiết lập header bearer thường được dùng với JWT
 
                 //Gửi yều cầu get đến api 
-                var response = await client.GetAsync($"/api/khuyenMai/{id}"); // await đảm bảo gọi API bất đồng bộ, không làm chặn chương trình
+                var response = await client.GetAsync($"/api/khuyenMai/GetById/{id}"); // await đảm bảo gọi API bất đồng bộ, không làm chặn chương trình
                 var body = await response.Content.ReadAsStringAsync(); // đọc nội dung phần hồi từ API dưới dạng Json
 
                 //Kiểm tra phản hồi
@@ -124,7 +124,7 @@ namespace SneakFit.ApiIntegration.Services
                 var json = JsonConvert.SerializeObject(request);
                 var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var response = await client.PutAsync($"/api/khuyenMai/{request.Id}", httpContent);
+                var response = await client.PutAsync($"/api/khuyenMai/Edit/{request.Id}", httpContent);
                 var result = await response.Content.ReadAsStringAsync();
                 if (response.IsSuccessStatusCode)
                 {
@@ -152,7 +152,7 @@ namespace SneakFit.ApiIntegration.Services
                 var json = JsonConvert.SerializeObject(trangThai);
                 var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var response = await client.PatchAsync($"/api/khuyenMai/{id}/status", httpContent);
+                var response = await client.PatchAsync($"/api/khuyenMai/{id}/TrangThai", httpContent);
                 var result = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
