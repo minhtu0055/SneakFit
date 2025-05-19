@@ -83,5 +83,16 @@ namespace SneakFit.ApiIntegration.Services
 
             throw new Exception("Không thể cập nhật chất liệu");
         }
+        public async Task<List<ChatLieuViewModels>> GetAll()
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+            var response = await client.GetAsync($"/api/chatlieu/getall");
+            var body = await response.Content.ReadAsStringAsync();
+            var categories = JsonConvert.DeserializeObject<List<ChatLieuViewModels>>(body);
+            return categories;
+        }
     }
 }

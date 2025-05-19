@@ -17,7 +17,7 @@ namespace SneakFit.Admin.Controllers
            // _sanPhamApiClient = sanPhamApiClient;
         }
 
-        public async Task<IActionResult> Index(string keyword, TrangThaiGiamGia? trangThai, int pageIndex = 1, int pageSize = 10)
+        public async Task<IActionResult> Index(string? keyword, TrangThaiGiamGia? trangThai, int pageIndex = 1, int pageSize = 10)
         {
             var request = new PhanTrangKhuyenMai()
             {
@@ -31,7 +31,13 @@ namespace SneakFit.Admin.Controllers
 
             ViewBag.Keyword = keyword;
             ViewBag.TrangThai = trangThai;
-            ViewBag.StatusSelectList = GetTrangThaiSelectList(trangThai);
+            ViewBag.DanhSachTrangThai = new List<SelectListItem>()
+            {
+                new SelectListItem("Tất cả", "", !trangThai.HasValue),
+                new SelectListItem("Không hoạt động", TrangThaiGiamGia.KhongHoatDong.ToString(), trangThai == TrangThaiGiamGia.KhongHoatDong),
+                new SelectListItem("Đang hoạt động", TrangThaiGiamGia.HoatDong.ToString(), trangThai == TrangThaiGiamGia.HoatDong),
+                new SelectListItem("Đã hết hạn", TrangThaiGiamGia.HetHan.ToString(), trangThai == TrangThaiGiamGia.HetHan)
+            };
 
             return View(data);
         }
@@ -39,8 +45,12 @@ namespace SneakFit.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            SetLoaiGiamGiaViewBag();
-          //  await SetSanPhamViewBag();
+            //ViewBag.Products = products;
+            ViewBag.LoaiGiamGia = new List<SelectListItem>()
+            {
+                new SelectListItem("Giảm theo phần trăm", ((int)LoaiGiamGia.PhamTram).ToString()),
+                new SelectListItem("Giảm theo số tiền", ((int)LoaiGiamGia.SoTien).ToString())
+            };
             return View();
         }
 
@@ -49,11 +59,21 @@ namespace SneakFit.Admin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                SetLoaiGiamGiaViewBag();
-              //  await SetSanPhamViewBag();
+                //var products = await _productApiClient.GetAll();
+                // Đảm bảo danh sách hình ảnh không null
+                //foreach (var product in products)
+                //{
+                //    product.Images = product.Images ?? new List<string>();
+                //}
+                //ViewBag.Products = products;
+
+                ViewBag.LoaiGiamGia = new List<SelectListItem>()
+                {
+                    new SelectListItem("Giảm theo phần trăm", ((int)LoaiGiamGia.PhamTram).ToString()),
+                new SelectListItem("Giảm theo số tiền", ((int)LoaiGiamGia.SoTien).ToString())
+                };
                 return View(request);
             }
-
             try
             {
                 var result = await _khuyenMaiApiClient.Create(request);
@@ -63,8 +83,11 @@ namespace SneakFit.Admin.Controllers
             catch (Exception ex)
             {
                 ModelState.AddModelError("", ex.Message);
-                SetLoaiGiamGiaViewBag();
-               // await SetSanPhamViewBag();
+                ViewBag.LoaiGiamGia = new List<SelectListItem>()
+                {
+                    new SelectListItem("Giảm theo phần trăm", ((int)LoaiGiamGia.PhamTram).ToString()),
+                    new SelectListItem("Giảm theo số tiền", ((int)LoaiGiamGia.SoTien).ToString())
+                };
                 return View(request);
             }
         }
@@ -74,12 +97,9 @@ namespace SneakFit.Admin.Controllers
         {
             var result = await _khuyenMaiApiClient.GetById(id);
             if (result == null)
-            {
-                TempData["ErrorMsg"] = "Không tìm thấy khuyến mãi.";
-                return RedirectToAction("Index");
-            }
+                return NotFound();
 
-            var editModel = new SuaKhuyenMai()
+            var Request = new SuaKhuyenMai()
             {
                 Id = result.Id,
                 TenKhuyenMai = result.TenKhuyenMai,
@@ -89,12 +109,23 @@ namespace SneakFit.Admin.Controllers
                 ThoiGianBatDau = result.ThoiGianBatDau,
                 ThoiGianKetThuc = result.ThoiGianKetThuc,
                 TrangThai = result.TrangThai,
-                SanPhamIds = result.SanPhamIds
+                //SanPhamIds = result.Products?.Select(p => p.ProductId).ToList() ?? new List<Guid>()
             };
 
-            SetLoaiGiamGiaViewBag();
-           // await SetSanPhamViewBag();
-            return View(editModel);
+            //var products = await _productApiClient.GetAll();
+            // Đảm bảo danh sách hình ảnh không null
+            //foreach (var product in products)
+            //{
+            //    product.Images = product.Images ?? new List<string>();
+            //}
+            //ViewBag.Products = products;
+
+            ViewBag.LoaiGiamGia = new List<SelectListItem>()
+            {
+                new SelectListItem("Giảm theo phần trăm", LoaiGiamGia.PhamTram.ToString("d"), result.LoaiGiamGia == LoaiGiamGia.PhamTram),
+                new SelectListItem("Giảm theo số tiền", LoaiGiamGia.SoTien.ToString("d"), result.LoaiGiamGia == LoaiGiamGia.SoTien)
+            };
+            return View(Request);
         }
 
         [HttpPost]
@@ -102,8 +133,11 @@ namespace SneakFit.Admin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                SetLoaiGiamGiaViewBag();
-              //  await SetSanPhamViewBag();
+                ViewBag.LoaiGiamGia = new List<SelectListItem>()
+                {
+                    new SelectListItem("Giảm theo phần trăm", LoaiGiamGia.PhamTram.ToString("d"), request.LoaiGiamGia == LoaiGiamGia.PhamTram),
+                    new SelectListItem("Giảm theo số tiền", LoaiGiamGia.SoTien.ToString("d"), request.LoaiGiamGia == LoaiGiamGia.SoTien)
+                };
                 return View(request);
             }
 
@@ -116,8 +150,11 @@ namespace SneakFit.Admin.Controllers
             catch (Exception ex)
             {
                 ModelState.AddModelError("", ex.Message);
-                SetLoaiGiamGiaViewBag();
-               // await SetSanPhamViewBag();
+                ViewBag.LoaiGiamGia = new List<SelectListItem>()
+                {
+                    new SelectListItem("Giảm theo phần trăm", LoaiGiamGia.PhamTram.ToString("d"), request.LoaiGiamGia == LoaiGiamGia.PhamTram),
+                    new SelectListItem("Giảm theo số tiền", LoaiGiamGia.SoTien.ToString("d"), request.LoaiGiamGia == LoaiGiamGia.SoTien)
+                };
                 return View(request);
             }
         }
@@ -156,32 +193,6 @@ namespace SneakFit.Admin.Controllers
             }
 
             return RedirectToAction("Index");
-        }
-
-        private void SetLoaiGiamGiaViewBag()
-        {
-            ViewBag.DiscountTypes = new List<SelectListItem>()
-            {
-                new SelectListItem("Giảm theo phần trăm", ((int)LoaiGiamGia.PhamTram).ToString()),
-                new SelectListItem("Giảm theo số tiền", ((int)LoaiGiamGia.SoTien).ToString())
-            };
-        }
-
-        //private async Task SetSanPhamViewBag()
-        //{
-        //    var products = await _sanPhamApiClient.GetAll();
-        //    ViewBag.SanPhams = products;
-        //}
-
-        private List<SelectListItem> GetTrangThaiSelectList(TrangThaiGiamGia? trangThai)
-        {
-            return new List<SelectListItem>()
-        {
-            new SelectListItem("Tất cả", "", !trangThai.HasValue),
-            new SelectListItem("Không hoạt động", ((int)TrangThaiGiamGia.KhongHoatDong).ToString(), (int?)trangThai == (int)TrangThaiGiamGia.KhongHoatDong),
-            new SelectListItem("Hoạt động", ((int)TrangThaiGiamGia.HoatDong).ToString(), (int?)trangThai == (int)TrangThaiGiamGia.HoatDong),
-            new SelectListItem("Hết hạn", ((int)TrangThaiGiamGia.HetHan).ToString(), (int?)trangThai == (int)TrangThaiGiamGia.HetHan)
-        };
         }
     }
 }

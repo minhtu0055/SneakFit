@@ -8,9 +8,9 @@ namespace SneakFit.ViewModels.Catalog.KhuyenMai
 {
     public class KhuyenMaiSanPhamViewModels
     {
-        public Guid? SanPhamId { get; set; }
+        public Guid SanPhamId { get; set; }
         public string TenSanPham { get; set; }       
-        public decimal GiaBan { get; set; }
+        public decimal GiaGoc { get; set; }
         public decimal GiaKhuyenMai { get; set; }
     }
 }

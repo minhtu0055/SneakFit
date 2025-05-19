@@ -11,7 +11,7 @@ namespace SneakFit.Data.Entities
         public Guid Id { get; set; }
         public Guid? KhuyenMaiId { get; set; }
         public KhuyenMai KhuyenMai { get; set; }
-        public Guid? SanPhamId { get; set; }
+        public Guid SanPhamId { get; set; }
         public SanPham SanPham { get; set; }
     }
 }
