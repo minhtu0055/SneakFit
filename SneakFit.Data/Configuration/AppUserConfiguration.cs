@@ -14,6 +14,12 @@ namespace SneakFit.Data.Configuration
         public void Configure(EntityTypeBuilder<AppUser> builder)
         {
             builder.HasKey(x=>x.Id);
+            builder.Property(u => u.UrlHinhAnh).HasMaxLength(50);
+            builder.Property(x => x.UserName).IsRequired().HasMaxLength(50);
+            builder.Property(x => x.Email).IsRequired().HasMaxLength(50);
+            builder.Property(x => x.NgaySinh).IsRequired();
+            builder.Property(x => x.PasswordHash).IsRequired().HasMaxLength(50);
+            builder.Property(x => x.TrangThai).IsRequired();
             builder.HasOne(x => x.GioHang).WithOne(x => x.User).HasForeignKey<GioHang>(x => x.UserId);
         }
     }
