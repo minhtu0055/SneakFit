@@ -1,5 +1,7 @@
 ﻿using Newtonsoft.Json;
+using SneakFit.Data.Entities;
 using SneakFit.Data.Enums;
+using SneakFit.ViewModels.Catalog.KhuyenMai;
 using SneakFit.ViewModels.Catalog.Voucher;
 using SneakFit.ViewModels.Common;
 using System.Net.Http.Headers;
@@ -32,7 +34,7 @@ namespace SneakFit.ApiIntegration.Services
                 var json = JsonConvert.SerializeObject(request);
                 var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var response = await client.PostAsync("/api/voucher", httpContent);
+                var response = await client.PostAsync("/api/voucher/create", httpContent);
                 var result = await response.Content.ReadAsStringAsync();
                 if (response.IsSuccessStatusCode)
                 {
@@ -47,35 +49,39 @@ namespace SneakFit.ApiIntegration.Services
             }
         }
 
-        public async Task<ApiResult<PagedResult<VoucherViewModels>>> GetAllPaging(GetVoucherPagingRequest request)
+        public async Task<PagedResult<VoucherViewModels>> GetAllPaging(GetVoucherPagingRequest request)
         {
             try
             {
                 var client = _httpClientFactory.CreateClient();
                 client.BaseAddress = new Uri(_configuration["BaseAddress"]);
                 var sessions = _contextAccessor.HttpContext.Session.GetString("Token");
+                if (string.IsNullOrEmpty(sessions))
+                {
+                    throw new Exception("Vui lòng đăng nhập lại");
+                }
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
 
-                var response = await client.GetAsync($"/api/vouchers?pageIndex={request.PageIndex}" +
+                var response = await client.GetAsync($"/api/voucher?pageIndex={request.PageIndex}" +
                     $"&pageSize={request.PageSize}" +
                     $"&keyword={request.Keyword}" +
                     $"&status={request.Status}");
+                    
                 var body = await response.Content.ReadAsStringAsync();
-                var voucher = JsonConvert.DeserializeObject<ApiSuccessResult<PagedResult<VoucherViewModels>>>(body);
-                return voucher;
-                //if(response.IsSuccessStatusCode)
-                //{
-                //    var setting = new JsonSerializerSettings
-                //    {
-                //        NullValueHandling = NullValueHandling.Ignore,
-                //        MissingMemberHandling = MissingMemberHandling.Ignore,
-                //    };
-                //    var apiResult = JsonConvert.DeserializeObject<ApiSuccessResult<PagedResult<VoucherViewModels>>>(body, setting);
-                //    var pageResult = apiResult?.ResultObj ?? new PagedResult<VoucherViewModels>();
-                //    pageResult.Items = pageResult.Items ?? new List<VoucherViewModels>();
-                //    return pageResult;
-                //}
-                //throw new Exception("Không thể lấy danh sách Voucher");
+                if (response.IsSuccessStatusCode)
+                {
+                    var setting = new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore,
+                        MissingMemberHandling = MissingMemberHandling.Ignore,
+                    };
+                    var apiResult = JsonConvert.DeserializeObject<ApiSuccessResult<PagedResult<VoucherViewModels>>>(body, setting);
+                    if (apiResult?.ResultObj != null)
+                    {
+                        return apiResult.ResultObj;
+                    }
+                }
+                throw new Exception("Không thể lấy danh sách Voucher");
             }
             catch (Exception ex)
             {
@@ -93,7 +99,7 @@ namespace SneakFit.ApiIntegration.Services
                 var sessions = _contextAccessor.HttpContext.Session.GetString("Token");
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
 
-                var response = await client.GetAsync($"/api/vouchers/code/{code}");
+                var response = await client.GetAsync($"/api/voucher/code/{code}");
                 var body = await response.Content.ReadAsStringAsync();
                 if (response.IsSuccessStatusCode)
                 {
@@ -115,20 +121,24 @@ namespace SneakFit.ApiIntegration.Services
                 var client = _httpClientFactory.CreateClient();
                 client.BaseAddress = new Uri(_configuration["BaseAddress"]);
                 var sessions = _contextAccessor.HttpContext.Session.GetString("Token");
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions); // thiết lập header bearer thường được dùng với JWT
 
-                var response = await client.GetAsync($"/api/vouchers/{id}");
-                var body = await response.Content.ReadAsStringAsync();
+                //Gửi yều cầu get đến api 
+                var response = await client.GetAsync($"/api/voucher/GetById/{id}"); // await đảm bảo gọi API bất đồng bộ, không làm chặn chương trình
+                var body = await response.Content.ReadAsStringAsync(); // đọc nội dung phần hồi từ API dưới dạng Json
+
+                //Kiểm tra phản hồi
                 if (response.IsSuccessStatusCode)
                 {
                     var voucher = JsonConvert.DeserializeObject<ApiSuccessResult<VoucherViewModels>>(body);
                     return voucher.ResultObj;
                 }
-                throw new Exception("Không thể tìm thấy thông tin voucher");
+
+                throw new Exception("Không thể lấy thông tin Voucher");
             }
             catch (Exception ex)
             {
-                throw new Exception($"Lỗi khi lấy thông tin voucher: {ex.Message}");
+                throw new Exception($"Lỗi khi lấy thông tin Voucher: {ex.Message}");
             }
         }
 
@@ -144,15 +154,16 @@ namespace SneakFit.ApiIntegration.Services
                 var json = JsonConvert.SerializeObject(request);
                 var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var response = await client.PutAsync($"/api/vouchers/{request.Id}", httpContent);
+                var response = await client.PutAsync($"/api/voucher/Edit/{request.Id}", httpContent);
                 var result = await response.Content.ReadAsStringAsync();
+
                 if (response.IsSuccessStatusCode)
                 {
                     var apiResult = JsonConvert.DeserializeObject<ApiSuccessResult<VoucherViewModels>>(result);
                     return apiResult.ResultObj;
                 }
 
-                throw new Exception("Không thể cập nhật voucher");
+                throw new Exception($"Không thể cập nhật voucher. Status code: {response.StatusCode}, Response: {result}");
             }
             catch (Exception ex)
             {
@@ -172,7 +183,7 @@ namespace SneakFit.ApiIntegration.Services
                 var json = JsonConvert.SerializeObject(status);
                 var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var response = await client.PatchAsync($"/api/vouchers/{Id}/status", httpContent);
+                var response = await client.PatchAsync($"/api/voucher/{Id}/status", httpContent);
                 var result = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
@@ -198,7 +209,7 @@ namespace SneakFit.ApiIntegration.Services
                 var sessions = _contextAccessor.HttpContext.Session.GetString("Token");
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
 
-                var response = await client.PostAsync($"/api/vouchers/code/{code}/use", null);
+                var response = await client.PostAsync($"/api/voucher/code/{code}/use", null);
                 var result = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)

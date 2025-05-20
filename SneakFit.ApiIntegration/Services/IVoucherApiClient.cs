@@ -11,7 +11,7 @@ namespace SneakFit.ApiIntegration.Services
         Task<VoucherViewModels> GetById(Guid id); //Lấy theo ID
         Task<VoucherViewModels> GetByCode(string code); // Lấy theo mã
         Task<bool> UpdateTrangThai(Guid Id, TrangThaiGiamGia status);
-        Task<ApiResult<PagedResult<VoucherViewModels>>> GetAllPaging(GetVoucherPagingRequest request); // lấy dang sách voucher phân trang 
+        Task<PagedResult<VoucherViewModels>> GetAllPaging(GetVoucherPagingRequest request); // lấy dang sách voucher phân trang 
         Task<bool> UseVoucher(string code);
     }
 }
