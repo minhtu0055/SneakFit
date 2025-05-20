@@ -92,11 +92,11 @@ namespace SneakFit.Admin.Controllers
 
             return Json(new { success = false, message = "Cập nhật thất bại" });
         }
-        [HttpGet("getall")]
+        [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var result = await _mauSacApiClient.GetAll();
-            return Ok(result);
+            var mauSacs = await _mauSacApiClient.GetAll();
+            return Json(mauSacs);
         }
     }
 }

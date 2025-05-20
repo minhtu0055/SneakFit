@@ -24,6 +24,11 @@ namespace SneakFit.ViewModels.Catalog.SanPhamChiTiet
         public Guid DanhMucId { get; set; }
         public bool TrangThai { get; set; }
         public string TenDanhMuc { get; set; }
+        public string MaKichThuoc { get; set; }
+        public string TenMauSac { get; set; }
+        public string TenChatLieu { get; set; }
+        public string TenDeGiay { get; set; }
+        public string TenThuongHieu { get; set; }
 
         public List<string> Images { get; set; }
     }

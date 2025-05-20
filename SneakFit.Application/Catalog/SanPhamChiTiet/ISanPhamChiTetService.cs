@@ -22,5 +22,6 @@ namespace SneakFit.Application.Catalog.SanPhamChiTiet
         Task<int> AddImage(Guid idSanPham, IFormFile image);
         Task<int> RemoveImage(Guid imageId);
         Task<List<string>> GetListImages(Guid idSanPham);
+        Task<int> CreateMultiple(ThemNhieuSPCTRequest request);
     }
 }

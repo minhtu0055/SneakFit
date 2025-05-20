@@ -10,6 +10,7 @@ using SneakFit.ViewModels.Catalog.ThuongHieu;
 using SneakFit.ViewModels.Catalog.SanPham;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace SneakFit.Admin.Controllers
 {
@@ -52,13 +53,29 @@ namespace SneakFit.Admin.Controllers
             var request = new PhanTrangSPCT()
             {
                 TuKhoa = tuKhoa,
-                //TrangThai = trangThai,
                 PageIndex = pageIndex,
                 PageSize = pageSize
             };
             var data = await _spctApiClient.GetAllPaging(request);
             ViewBag.TuKhoa = tuKhoa;
-            //ViewBag.TrangThai = trangThai?.ToString().ToLower();
+
+            // Load all data cần thiết song song
+            var mauSacs = await _mauSacApiClient.GetAll();
+            var kichThuocs = await _kichThuocApiClient.GetAll();
+            var chatLieus = await _chatLieuApiClient.GetAll();
+            var deGiays = await _deGiayApiClient.GetAll();
+            var thuongHieus = await _thuongHieuApiClient.GetAll();
+            var sanPhams = await _sanPhamApiClient.GetAll();
+
+            // Sử dụng Dictionary để truy xuất nhanh hơn vì mỗi lần truy xuất sẽ không phải gọi lại API
+            // 1 Dictionary gồm 1 key và 1 value
+            ViewBag.MauSacs = mauSacs.ToDictionary(x => x.Id, x => x.TenMauSac);
+            ViewBag.KichThuocs = kichThuocs.ToDictionary(x => x.Id, x => x.MaKichThuoc.ToString());
+            ViewBag.ChatLieus = chatLieus.ToDictionary(x => x.Id, x => x.TenChatLieu);
+            ViewBag.DeGiays = deGiays.ToDictionary(x => x.Id, x => x.TenDeGiay);
+            ViewBag.ThuongHieus = thuongHieus.ToDictionary(x => x.Id, x => x.TenThuongHieu);
+            ViewBag.SanPhams = sanPhams.ToDictionary(x => x.Id, x => x.TenSanPham);
+
             if (TempData["result"] != null)
             {
                 ViewBag.SuccessMsg = TempData["result"];
@@ -66,49 +83,54 @@ namespace SneakFit.Admin.Controllers
             return View(data);
         }
 
+        private async Task LoadCombobox()
+        {
+            var mauSacs = await _mauSacApiClient.GetAll();
+            var kichThuocs = await _kichThuocApiClient.GetAll();
+            var chatLieus = await _chatLieuApiClient.GetAll();
+            var deGiays = await _deGiayApiClient.GetAll();
+            var thuongHieus = await _thuongHieuApiClient.GetAll();
+            var sanPhams = await _sanPhamApiClient.GetAll();
+
+            ViewBag.MauSacs = mauSacs.Select(x => new SelectListItem()
+            {
+                Text = x.TenMauSac,
+                Value = x.Id.ToString()
+            });
+            ViewBag.KichThuocs = kichThuocs.Select(x => new SelectListItem()
+            {
+                Text = x.MaKichThuoc.ToString(),
+                Value = x.Id.ToString()
+            });
+            ViewBag.ChatLieus = chatLieus.Select(x => new SelectListItem()
+            {
+                Text = x.TenChatLieu,
+                Value = x.Id.ToString()
+            });
+            ViewBag.DeGiays = deGiays.Select(x => new SelectListItem()
+            {
+                Text = x.TenDeGiay,
+                Value = x.Id.ToString()
+            });
+            ViewBag.ThuongHieus = thuongHieus.Select(x => new SelectListItem()
+            {
+                Text = x.TenThuongHieu,
+                Value = x.Id.ToString()
+            });
+            ViewBag.SanPhams = sanPhams.Select(x => new SelectListItem()
+            {
+                Text = x.TenSanPham,
+                Value = x.Id.ToString()
+            });
+        }
+
         [HttpGet]
         public async Task<IActionResult> Create()
         {
             try 
             {
-                var mauSacs = await _mauSacApiClient.GetAll();
-                var kichThuocs = await _kichThuocApiClient.GetAll();
-                var chatLieus = await _chatLieuApiClient.GetAll();
-                var deGiays = await _deGiayApiClient.GetAll();
-                var thuongHieus = await _thuongHieuApiClient.GetAll();
-                var sanPhams = await _sanPhamApiClient.GetAll();
-
-                ViewBag.MauSacs = mauSacs.Select(x => new SelectListItem()
-                {
-                    Text = x.TenMauSac,
-                    Value = x.Id.ToString()
-                });
-                ViewBag.KichThuocs = kichThuocs.Select(x => new SelectListItem()
-                {
-                    Text = x.MaKichThuoc.ToString(),
-                    Value = x.Id.ToString()
-                });
-                ViewBag.ChatLieus = chatLieus.Select(x => new SelectListItem()
-                {
-                    Text = x.TenChatLieu,
-                    Value = x.Id.ToString()
-                });
-                ViewBag.DeGiays = deGiays.Select(x => new SelectListItem()
-                {
-                    Text = x.TenDeGiay,
-                    Value = x.Id.ToString()
-                });
-                ViewBag.ThuongHieus = thuongHieus.Select(x => new SelectListItem()
-                {
-                    Text = x.TenThuongHieu,
-                    Value = x.Id.ToString()
-                });
-                ViewBag.SanPhams = sanPhams.Select(x => new SelectListItem()
-                {
-                    Text = x.TenSanPham,
-                    Value = x.Id.ToString()
-                });
-                return PartialView("Create"); // Trả về partial view thay vì view hoàn chỉnh
+                await LoadCombobox();
+                return PartialView("Create");
             }
             catch (Exception ex)
             {
@@ -123,43 +145,7 @@ namespace SneakFit.Admin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                var mauSacs = await _mauSacApiClient.GetAll();
-                var kichThuocs = await _kichThuocApiClient.GetAll();
-                var chatLieus = await _chatLieuApiClient.GetAll();
-                var deGiays = await _deGiayApiClient.GetAll();
-                var thuongHieus = await _thuongHieuApiClient.GetAll();
-                var sanPhams = await _sanPhamApiClient.GetAll();
-
-                ViewBag.MauSacs = mauSacs.Select(x => new SelectListItem()
-                {
-                    Text = x.TenMauSac,
-                    Value = x.Id.ToString()
-                });
-                ViewBag.KichThuocs = kichThuocs.Select(x => new SelectListItem()
-                {
-                    Text = x.MaKichThuoc.ToString(),
-                    Value = x.Id.ToString()
-                });
-                ViewBag.ChatLieus = chatLieus.Select(x => new SelectListItem()
-                {
-                    Text = x.TenChatLieu,
-                    Value = x.Id.ToString()
-                });
-                ViewBag.DeGiays = deGiays.Select(x => new SelectListItem()
-                {
-                    Text = x.TenDeGiay,
-                    Value = x.Id.ToString()
-                });
-                ViewBag.ThuongHieus = thuongHieus.Select(x => new SelectListItem()
-                {
-                    Text = x.TenThuongHieu,
-                    Value = x.Id.ToString()
-                });
-                ViewBag.SanPhams = sanPhams.Select(x => new SelectListItem()
-                {
-                    Text = x.TenSanPham,
-                    Value = x.Id.ToString()
-                });
+                await LoadCombobox();
                 return View(request);
             }
 
@@ -181,94 +167,45 @@ namespace SneakFit.Admin.Controllers
             return View(request);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetMauSacById(Guid id)
+        [HttpPost]
+        public async Task<IActionResult> CreateMultiple([FromBody] List<SPCTViewModels> items)
         {
-            try
-            {
-                var mauSac = await _mauSacApiClient.GetById(id);
-                return Json(new { success = true, resultObj = mauSac });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Lỗi khi lấy thông tin màu sắc");
-                return Json(new { success = false, message = "Có lỗi xảy ra khi lấy thông tin màu sắc" });
-            }
-        }
+            if (items == null || !items.Any())
+                return Json(new { success = false, message = "Dữ liệu không hợp lệ hoặc chưa chọn màu/kích thước" });
 
-        [HttpGet]
-        public async Task<IActionResult> GetKichThuocById(Guid id)
-        {
             try
             {
-                var kichThuoc = await _kichThuocApiClient.GetById(id);
-                return Json(new { success = true, resultObj = kichThuoc });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Lỗi khi lấy thông tin kích thước");
-                return Json(new { success = false, message = "Có lỗi xảy ra khi lấy thông tin kích thước" });
-            }
-        }
+                int result = 0;
+                foreach (var item in items)
+                {
+                    var request = new ThemSPCT
+                    {
+                        // Gán các trường tương ứng từ item sang request
+                        SanPhamId = item.SanPhamId,
+                        ThuongHieuId = item.ThuongHieuId,
+                        ChatLieuId = item.ChatLieuId,
+                        DeGiayId = item.DeGiayId,
+                        MauSacId = item.MauSacId,
+                        KichThuocId = item.KichThuocId,
+                        SoLuong = item.SoLuong,
+                        Gia = item.Gia
+                        // ... các trường khác nếu cần
+                    };
 
-        [HttpGet]
-        public async Task<IActionResult> GetChatLieuById(Guid id)
-        {
-            try
-            {
-                var chatLieu = await _chatLieuApiClient.GetById(id);
-                return Json(new { success = true, resultObj = chatLieu });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Lỗi khi lấy thông tin chất liệu");
-                return Json(new { success = false, message = "Có lỗi xảy ra khi lấy thông tin chất liệu" });
-            }
-        }
+                    var res = await _spctApiClient.Create(request);
+                    if (res != null) result++;
+                }
 
-        [HttpGet]
-        public async Task<IActionResult> GetDeGiayById(Guid id)
-        {
-            try
-            {
-                var deGiay = await _deGiayApiClient.GetById(id);
-                return Json(new { success = true, resultObj = deGiay });
+                if (result > 0)
+                {
+                    return Json(new { success = true, message = $"Thêm mới {result} sản phẩm chi tiết thành công" });
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Lỗi khi lấy thông tin đế giày");
-                return Json(new { success = false, message = "Có lỗi xảy ra khi lấy thông tin đế giày" });
+                return Json(new { success = false, message = ex.Message });
             }
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetThuongHieuById(Guid id)
-        {
-            try
-            {
-                var thuongHieu = await _thuongHieuApiClient.GetById(id);
-                return Json(new { success = true, resultObj = thuongHieu });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Lỗi khi lấy thông tin thương hiệu");
-                return Json(new { success = false, message = "Có lỗi xảy ra khi lấy thông tin thương hiệu" });
-            }
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetSanPhamById(Guid id)
-        {
-            try
-            {
-                var sanPham = await _sanPhamApiClient.GetById(id);
-                return Json(new { success = true, resultObj = sanPham });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Lỗi khi lấy thông tin sản phẩm");
-                return Json(new { success = false, message = "Có lỗi xảy ra khi lấy thông tin sản phẩm" });
-            }
+            return Json(new { success = false, message = "Thêm sản phẩm chi tiết thất bại" });
         }
 
         [HttpPost]

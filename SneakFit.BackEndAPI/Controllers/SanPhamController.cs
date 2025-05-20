@@ -40,7 +40,7 @@ namespace SneakFit.BackEndAPI.Controllers
         }
 
         [HttpPost("Create")]
-        public async Task<IActionResult> Create([FromForm] ThemSanPham request)
+        public async Task<IActionResult> Create([FromBody] ThemSanPham request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

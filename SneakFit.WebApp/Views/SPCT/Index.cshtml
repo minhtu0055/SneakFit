@@ -71,12 +71,24 @@
                         foreach (var item in Model.Items)
                         {
                             <tr>
-                                <td class="sanpham" data-id="@item.SanPhamId">@item.TenSanPham</td>
-                                <td class="mausac" data-id="@item.MauSacId"></td>
-                                <td class="kichthuoc" data-id="@item.KichThuocId"></td>
-                                <td class="chatlieu" data-id="@item.ChatLieuId"></td>
-                                <td class="degiay" data-id="@item.DeGiayId"></td>
-                                <td class="thuonghieu" data-id="@item.ThuongHieuId"></td>
+                                <td class="sanpham" data-id="@item.SanPhamId">
+                                    @(ViewBag.SanPhams.ContainsKey(item.SanPhamId) ? ViewBag.SanPhams[item.SanPhamId] : "N/A")
+                                </td>
+                                <td class="mausac" data-id="@item.MauSacId">
+                                    @(ViewBag.MauSacs.ContainsKey(item.MauSacId) ? ViewBag.MauSacs[item.MauSacId] : "N/A")
+                                </td>
+                                <td class="kichthuoc" data-id="@item.KichThuocId">
+                                    @(ViewBag.KichThuocs.ContainsKey(item.KichThuocId) ? ViewBag.KichThuocs[item.KichThuocId] : "N/A")
+                                </td>
+                                <td class="chatlieu" data-id="@item.ChatLieuId">
+                                    @(ViewBag.ChatLieus.ContainsKey(item.ChatLieuId) ? ViewBag.ChatLieus[item.ChatLieuId] : "N/A")
+                                </td>
+                                <td class="degiay" data-id="@item.DeGiayId">
+                                    @(ViewBag.DeGiays.ContainsKey(item.DeGiayId) ? ViewBag.DeGiays[item.DeGiayId] : "N/A")
+                                </td>
+                                <td class="thuonghieu" data-id="@item.ThuongHieuId">
+                                    @(ViewBag.ThuongHieus.ContainsKey(item.ThuongHieuId) ? ViewBag.ThuongHieus[item.ThuongHieuId] : "N/A")
+                                </td>
                                 <td>@item.Gia.ToString("N0") VNĐ</td>
                                 <td>@item.SoLuong</td>
                                 <td>
@@ -186,16 +198,13 @@
 </div>
 
 @section Scripts {
-@*     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
-    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script> *@
     <script>
         $(document).ready(function () {
             // Xử lý nút thêm mới
             // $('#btnAddNew').click(function () {
             //     $('#listContainer').hide();
             //     $('#createFormContainer').show();
-                
+
             //     // Load form thêm mới
             //     $.ajax({
             //         url: '/SPCT/Create',
@@ -249,47 +258,6 @@
                         toastr.error('Có lỗi xảy ra khi thêm mới');
                     }
                 });
-            });
-
-            // Load dữ liệu cho các trường
-            function loadEntityData(selector, url, propertyName) {
-                $(selector).each(function() {
-                    var td = $(this);
-                    var id = td.data('id');
-                    if (id) {
-                        $.ajax({
-                            url: url + id,
-                            type: 'GET',
-                            success: function(result) {
-                                // Kiểm tra kỹ hơn cấu trúc dữ liệu trả về
-                                if (result && result.resultObj) {
-                                    td.text(result.resultObj[propertyName] || 'Không xác định');
-                                } else {
-                                    td.text('Lỗi dữ liệu');
-                                    console.error('Dữ liệu không hợp lệ:', result);
-                                }
-                            },
-                            error: function(xhr, status, error) {
-                                td.text('Lỗi');
-                                console.error('Lỗi khi tải dữ liệu:', error);
-                                console.error('URL:', url + id);
-                                console.error('Status:', status);
-                            }
-                        });
-                    } else {
-                        td.text('N/A');
-                    }
-                });
-            }
-
-            // Load tất cả dữ liệu với đường dẫn API chính xác
-            $(document).ready(function() {
-                loadEntityData('.mausac', '/SPCT/GetMauSacById/', 'tenMauSac');
-                loadEntityData('.kichthuoc', '/SPCT/GetKichThuocById/', 'maKichThuoc');
-                loadEntityData('.chatlieu', '/SPCT/GetChatLieuById/', 'tenChatLieu');
-                loadEntityData('.degiay', '/SPCT/GetDeGiayById/', 'tenDeGiay');
-                loadEntityData('.thuonghieu', '/SPCT/GetThuongHieuById/', 'tenThuongHieu');
-                loadEntityData('.sanpham', '/SPCT/GetSanPhamById/', 'tenSanPham');
             });
 
             // Hàm cập nhật trạng thái

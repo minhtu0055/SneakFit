@@ -1,4 +1,5 @@
 ﻿@model SneakFit.ViewModels.Catalog.SanPhamChiTiet.ThemSPCT
+@using SneakFit.ViewModels.Common
 
 @{
     ViewData["Title"] = "Tạo mới sản phẩm chi tiết";
@@ -21,128 +22,144 @@
 
     <div class="card">
         <div class="card-body">
-            <div class="col-md-8 mx-auto">
+            <div class="col-md-12 mx-auto">
                 <form asp-action="Create" method="post" id="create-form">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                    <h5 class="mb-4">THÊM SẢN PHẨM</h5>
+                    <!-- Phần 1: Thông tin sản phẩm -->
+                    <div class="section-block mb-4" style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
+                        <h5 class="mb-4" style="text-align: center;">THÊM SẢN PHẨM</h5>
 
-                    <div class="mb-3">
-                        <label asp-for="SanPhamId" class="form-label">Tên sản phẩm</label>
-                        @* <input asp-for="SanPhamId" class="form-control" placeholder="Nhập tên sản phẩm..." /> *@
-                        <select asp-for="SanPhamId" class="form-select" asp-items="ViewBag.SanPhams">
-                            <option value="">-- Chọn sản phẩm --</option>
-                        </select>
-                        <span asp-validation-for="SanPhamId" class="text-danger"></span>
-                    </div>
-
-                    @* <div class="mb-3"></div>
-                        <label asp-for="SanPhamId" class="form-label">Sản phẩm</label>
-                        <select asp-for="SanPhamId" class="form-select" asp-items="ViewBag.SanPhams">
-                            <option value="">-- Chọn sản phẩm --</option>
-                        </select>
-                        <span asp-validation-for="SanPhamId" class="text-danger"></span>
-                    </div> *@
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="ThuongHieuId" class="form-label">Thương hiệu</label>
+                        <div class="mb-3">
+                            <label asp-for="SanPhamId" class="form-label">Tên sản phẩm</label>
                             <div class="input-group">
-                                <select asp-for="ThuongHieuId" class="form-select" asp-items="ViewBag.ThuongHieus">
-                                    <option value="">-- Chọn thương hiệu --</option>
+                                <select asp-for="SanPhamId" class="form-select" asp-items="ViewBag.SanPhams" style=" border-radius: 8px">
+                                    <option value="">-- Chọn sản phẩm --</option>
                                 </select>
-                                <button type="button" class="btn btn-primary" id="addThuongHieu">
+                                <button type="button" class="btn btn-primary ms-2" style="border-radius: 8px; width: 40px; height: 40px; padding: 0;" onclick="openAddSanPhamModal()">
                                     <i class="bx bx-plus"></i>
                                 </button>
                             </div>
-                            <span asp-validation-for="ThuongHieuId" class="text-danger"></span>
+                            <span asp-validation-for="SanPhamId" class="text-danger"></span>
                         </div>
 
-                        @* <div class="col-md-6 mb-3">
-                            <label asp-for="TrangThai" class="form-label">Trạng thái</label>
-                            <div class="input-group">
-                                <select asp-for="TrangThai" class="form-select">
-                                    <option value="">-- Chọn trạng thái --</option>
-                                    <option value="KinhDoanh">Kinh Doanh</option>
-                                </select>
-                                <button type="button" class="btn btn-primary">
-                                    <i class="bx bx-plus"></i>
-                                </button>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="ThuongHieuId" class="form-label">Thương hiệu</label>
+                                <div class="input-group">
+                                    <select asp-for="ThuongHieuId" class="form-select" asp-items="ViewBag.ThuongHieus" style="border-radius: 8px">
+                                        <option value="">-- Chọn thương hiệu --</option>
+                                    </select>
+                                    <button type="button" class="btn btn-primary ms-2" style="border-radius: 8px; width: 40px; height: 40px; padding: 0;" onclick="openAddThuongHieuModal()">
+                                        <i class="bx bx-plus"></i>
+                                    </button>
+                                </div>
+                                <span asp-validation-for="ThuongHieuId" class="text-danger"></span>
                             </div>
-                            <span asp-validation-for="TrangThai" class="text-danger"></span>
-                        </div> *@
-                    </div>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="ChatLieuId" class="form-label">Chất liệu</label>
-                            <div class="input-group">
-                                <select asp-for="ChatLieuId" class="form-select" asp-items="ViewBag.ChatLieus">
-                                    <option value="">-- Chọn chất liệu --</option>
-                                </select>
-                                <button type="button" class="btn btn-primary" id="addChatLieu">
-                                    <i class="bx bx-plus"></i>
-                                </button>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="ChatLieuId" class="form-label">Chất liệu</label>
+                                <div class="input-group">
+                                    <select asp-for="ChatLieuId" class="form-select" asp-items="ViewBag.ChatLieus" style="border-radius: 8px">
+                                        <option value="">-- Chọn chất liệu --</option>
+                                    </select>
+                                    <button type="button" class="btn btn-primary ms-2" style="border-radius: 8px; width: 40px; height: 40px; padding: 0;" onclick="openAddChatLieuModal()">
+                                        <i class="bx bx-plus"></i>
+                                    </button>
+                                </div>
+                                <span asp-validation-for="ChatLieuId" class="text-danger"></span>
                             </div>
-                            <span asp-validation-for="ChatLieuId" class="text-danger"></span>
                         </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="DeGiayId" class="form-label">Đế giày</label>
-                            <div class="input-group">
-                                <select asp-for="DeGiayId" class="form-select" asp-items="ViewBag.DeGiays">
-                                    <option value="">-- Chọn đế giày --</option>
-                                </select>
-                                <button type="button" class="btn btn-primary" id="addDeGiay">
-                                    <i class="bx bx-plus"></i>
-                                </button>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="DeGiayId" class="form-label">Đế giày</label>
+                                <div class="input-group">
+                                    <select asp-for="DeGiayId" class="form-select" asp-items="ViewBag.DeGiays" style="border-radius: 8px">
+                                        <option value="">-- Chọn đế giày --</option>
+                                    </select>
+                                    <button type="button" class="btn btn-primary ms-2" style="border-radius: 8px; width: 40px; height: 40px; padding: 0;" onclick="openAddDeGiayModal()">
+                                        <i class="bx bx-plus"></i>
+                                    </button>
+                                </div>
+                                <span asp-validation-for="DeGiayId" class="text-danger"></span>
                             </div>
-                            <span asp-validation-for="DeGiayId" class="text-danger"></span>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Trạng thái</label>
+                                <div class="input-group">
+                                    <select class="form-select" name="TrangThai" id="trangThaiSelect" style="border-radius: 8px">
+                                        <option value="true">Hoạt động</option>
+                                        <option value="false">Ngưng hoạt động</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <h5 class="mt-4 mb-3">KÍCH CỠ VÀ MÀU SẮC</h5>
+                    <!-- Phần 2: Kích cỡ và màu sắc -->
+                    <div class="section-block mb-4" style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
+                        <h5 class="mb-4" style="text-align: center;">KÍCH CỠ VÀ MÀU SẮC</h5>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Kích cỡ</label>
-                            <div id="selectedSizes" class="mb-2"></div>
-                            <button type="button" class="btn btn-primary" id="openSizeSelector">
+                        <div class="mb-3 d-flex align-items-center">
+                            <label class="form-label me-3" style="min-width: 80px;">Kích cỡ</label>
+                            <div id="selectedSizes" class="mb-2 d-flex flex-wrap gap-2"></div>
+                            <button type="button" class="btn btn-primary ms-2" onclick="openSizeModal()" style="border-radius: 8px; width: 40px; height: 40px; padding: 0;">
                                 <i class="bx bx-plus"></i>
                             </button>
                         </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Màu sắc</label>
-                            <div id="selectedColors" class="mb-2"></div>
-                            <button type="button" class="btn btn-primary" id="openColorSelector">
+                        <div class="mb-3 d-flex align-items-center">
+                            <label class="form-label me-3" style="min-width: 80px;">Màu sắc</label>
+                            <div id="selectedColors" class="mb-2 d-flex flex-wrap gap-2"></div>
+                            <button type="button" class="btn btn-primary ms-2" onclick="openColorModal()" style="border-radius: 8px; width: 40px; height: 40px; padding: 0;">
                                 <i class="bx bx-plus"></i>
                             </button>
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label asp-for="Gia" class="form-label">Giá</label>
-                        <div class="input-group">
-                            <input asp-for="Gia" class="form-control" placeholder="Nhập giá sản phẩm..." />
-                            <span class="input-group-text">VNĐ</span>
+                    <!-- Phần 3: Chi tiết sản phẩm -->
+                    <div class="section-block mb-4" style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
+                        <h5 class="mb-4" style="text-align: center;">CHI TIẾT SẢN PHẨM</h5>
+
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div>
+                                <button type="button" class="btn btn-primary me-2" id="btnChinhGia">
+                                    Chỉnh sửa giá chung
+                                </button>
+                                <button type="button" class="btn btn-primary me-2" id="btnChinhSoLuong">
+                                    Chỉnh sửa số lượng
+                                </button>
+                                <button type="submit" class="btn btn-primary" id="btnHoanTat">
+                                    <i class="bx bx-check me-1"></i> Hoàn tất
+                                </button>
+                            </div>
                         </div>
-                        <span asp-validation-for="Gia" class="text-danger"></span>
-                    </div>
 
-                    <div class="mb-3">
-                        <label asp-for="SoLuong" class="form-label">Số lượng</label>
-                        <input asp-for="SoLuong" class="form-control" placeholder="Nhập số lượng..." />
-                        <span asp-validation-for="SoLuong" class="text-danger"></span>
-                    </div>
+                        <div class="table-responsive" style=" border-radius: 8px">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr style="background-color: mediumpurple; color: white;">
+                                        <th>
+                                            <input type="checkbox" id="selectAll" />
+                                        </th>
+                                        <th>STT</th>
+                                        <th>Tên Sản Phẩm</th>
+                                        <th>Màu Sắc</th>
+                                        <th>Kích Thước</th>
+                                        <th>Số Lượng</th>
+                                        <th>Giá Bán</th>
+                                        <th>Hành Động</th>
+                                        <th>Upload Ảnh</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="productDetailList">
+                                    <!-- Dữ liệu sẽ được thêm vào đây bằng JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
 
-                    <div class="mb-3">
-                        <button type="submit" class="btn btn-primary me-2">
-                            <i class="bx bx-save me-1"></i> Tạo mới
-                        </button>
-                        <a asp-action="Index" class="btn btn-secondary">
-                            <i class="bx bx-arrow-back me-1"></i> Quay lại
-                        </a>
+                        @* @await Component.InvokeAsync("Pager", Model) *@
                     </div>
                 </form>
             </div>
@@ -153,123 +170,578 @@
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
-    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script>
+@* <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js"></script> *@
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/4.0.0/jquery.validate.unobtrusive.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Thêm thư viện color picker -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-minicolors/2.3.6/jquery.minicolors.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-minicolors/2.3.6/jquery.minicolors.min.js"></script>
 
     <script>
-        $(document).ready(function () {
-            // Helper để tạo thông báo
-            function showToast(message, type) {
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    icon: type,
-                    title: message,
-                    showConfirmButton: false,
-                    timer: 3000
+        // Biến toàn cục
+        let selectedSizes = [];
+        let selectedColors = [];
+        let spctItems = [];
+
+        // Hàm mở modal thêm sản phẩm
+        function openAddSanPhamModal() {
+            $.get('/SanPham/Create', function(html) {
+                $('#modalAddSanPhamContent').html(html);
+                $('#modalAddSanPham').modal('show');
+            });
+        }
+
+        // Hàm mở modal thêm thương hiệu
+        function openAddThuongHieuModal() {
+            $.get('/ThuongHieu/Create', function(html) {
+                $('#modalAddThuongHieuContent').html(html);
+                $('#modalAddThuongHieu').modal('show');
+            });
+        }
+
+        // Hàm mở modal thêm đế giày
+        function openAddDeGiayModal() {
+            $.get('/DeGiay/Create', function(html) {
+                $('#modalAddDeGiayContent').html(html);
+                $('#modalAddDeGiay').modal('show');
+            });
+        }
+
+        // Hàm mở modal thêm chất liệu
+        function openAddChatLieuModal() {
+            $.get('/ChatLieu/Create', function(html) {
+                $('#modalAddChatLieuContent').html(html);
+                $('#modalAddChatLieu').modal('show');
+            });
+        }
+
+        // Hàm mở modal kích thước
+        function openSizeModal() {
+            $.get('/KichThuoc/GetAll', function(sizes) {
+                const sizeGrid = $('#sizeModal .size-grid');
+                sizeGrid.empty();
+                sizes.forEach(size => {
+                    const isSelected = selectedSizes.some(s => s.id == size.id);
+                    sizeGrid.append(`
+                        <button type="button" class="size-btn ${isSelected ? 'selected' : ''}"
+                            style="padding: 7px; border: 2px solid ${isSelected ? '#007bff' : '#ddd'}; border-radius: 5px; background: ${isSelected ? '#e3f0ff' : 'white'}; color: ${isSelected ? '#007bff' : 'black'}; font-weight:bold; margin-bottom:4px;"
+                            data-size-id="${size.id}"
+                            data-size-name="${size.maKichThuoc}">${size.maKichThuoc}</button>
+                    `);
                 });
+                $('#sizeModal').modal('show');
+            });
+        }
+
+        // Hàm mở modal màu sắc
+        function openColorModal() {
+            $.get('/MauSac/GetAll', function(colors) {
+                const colorGrid = $('#colorModal .color-grid');
+                colorGrid.empty();
+                colors.forEach(color => {
+                    let colorHex = color.tenMauSac && /^#[0-9A-Fa-f]{6}$/.test(color.tenMauSac) ? color.tenMauSac : '#000000';
+                    const isSelected = selectedColors.some(c => c.id == color.id);
+                    colorGrid.append(`
+                        <div class="color-item" style="text-align: center;">
+                            <button type="button" class="color-btn ${isSelected ? 'selected' : ''}"
+                                style="width: 30px; height: 30px; border-radius: 5px; margin-bottom: 5px; background-color: ${colorHex}; border:2px solid ${isSelected ? '#007bff' : '#888'}; box-shadow:${isSelected ? '0 0 0 2px #007bff' : 'none'};"
+                                data-color-id="${color.id}"
+                                data-color-name="${colorHex}">
+                            </button>
+                            <input type="text" class="form-control form-control-sm mt-1 text-center" value="${colorHex}" readonly style="background:${colorHex}; color:${getContrastYIQ(colorHex)}; font-weight:bold; border:none;" />
+                        </div>
+                    `);
+                });
+                $('#colorModal').modal('show');
+            });
+        }
+
+        // Xử lý sự kiện khi trang load xong
+        $(document).ready(function() {
+            // Xử lý submit form trong modal thương hiệu
+            $(document).on('submit', '#createThuongHieuForm', function(e) {
+                e.preventDefault();
+                handleFormSubmit(this, '/ThuongHieu/Create', 'ThuongHieuId', 'tenThuongHieu');
+            });
+
+            // Xử lý submit form trong modal sản phẩm
+            $(document).on('submit', '#createSanPhamForm', function(e) {
+                e.preventDefault();
+                handleFormSubmit(this, '/SanPham/Create', 'SanPhamId', 'tenSanPham');
+            });
+
+            // Xử lý submit form trong modal đế giày
+            $(document).on('submit', '#createDeGiayForm', function(e) {
+                e.preventDefault();
+                handleFormSubmit(this, '/DeGiay/Create', 'DeGiayId', 'tenDeGiay');
+            });
+
+            // Xử lý submit form trong modal chất liệu
+            $(document).on('submit', '#createChatLieuForm', function(e) {
+                e.preventDefault();
+                handleFormSubmit(this, '/ChatLieu/Create', 'ChatLieuId', 'tenChatLieu');
+            });
+
+            renderSelectedSizes();
+            renderSelectedColors();
+
+            // Khởi tạo color picker cho ô nhập mã màu (luôn hiển thị)
+            $('#newColorHex').minicolors({
+                control: 'hue',
+                format: 'hex',
+                theme: 'bootstrap',
+                swatches: []
+            });
+        });
+
+        // Hàm xử lý chung cho việc submit form
+        function handleFormSubmit(form, url, selectId, nameField) {
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: $(form).serialize(),
+                success: function(res) {
+                    if(res.success) {
+                        // Đóng modal
+                        $(form).closest('.modal').modal('hide');
+
+                        // Reload lại dropdown
+                        $.get(url.replace('/Create', '/getall'), function(data) {
+                            const select = $(`select[name="${selectId}"]`);
+                            select.empty();
+                            select.append(`<option value="">-- Chọn ${selectId.replace('Id', '')} --</option>`);
+                            data.forEach(function(item) {
+                                select.append(`<option value="${item.id}">${item[nameField]}</option>`);
+                            });
+                        });
+                    } else {
+                        // Hiển thị lại form với lỗi
+                        $(form).closest('.modal-content').html(res);
+                    }
+                }
+            });
+        }
+
+        // Xác nhận chọn kích thước
+        $('#confirmSizeSelection').on('click', function() {
+            selectedSizes = [];
+            $('#sizeModal .size-btn.selected').each(function() {
+                selectedSizes.push({
+                    id: $(this).data('size-id'),
+                    name: $(this).data('size-name')
+                });
+            });
+            $('#sizeModal').modal('hide');
+            renderSelectedSizes();
+            generateProductDetails();
+        });
+
+        // Xác nhận chọn màu sắc
+        $('#confirmColorSelection').on('click', function() {
+            selectedColors = [];
+            $('#colorModal .color-btn.selected').each(function() {
+                selectedColors.push({
+                    id: $(this).data('color-id'),
+                    name: $(this).data('color-name')
+                });
+            });
+            $('#colorModal').modal('hide');
+            renderSelectedColors();
+            generateProductDetails();
+        });
+
+        // Toggle chọn size với hiệu ứng
+        $(document).on('click', '.size-btn', function() {
+            $(this).toggleClass('selected');
+            if ($(this).hasClass('selected'))
+                $(this).css({'border':'2px solid #007bff','background':'#e3f0ff','color':'#007bff'});
+            else
+                $(this).css({'border':'2px solid #ddd','background':'white','color':'black'});
+        });
+
+        // Toggle chọn màu
+        $(document).on('click', '.color-btn', function() {
+            $(this).toggleClass('selected');
+            if ($(this).hasClass('selected'))
+                $(this).css({'border':'2px solid #007bff','box-shadow':'0 0 0 2px #007bff'});
+            else
+                $(this).css({'border':'2px solid #888','box-shadow':'none'});
+        });
+
+        function generateProductDetails() {
+            const tbody = $('#productDetailList');
+            tbody.empty();
+            let stt = 1;
+            const tenSanPham = $('select[name="SanPhamId"] option:selected').text();
+            const sanPhamId = $('select[name="SanPhamId"]').val();
+            const thuongHieuId = $('select[name="ThuongHieuId"]').val();
+            const chatLieuId = $('select[name="ChatLieuId"]').val();
+            const deGiayId = $('select[name="DeGiayId"]').val();
+            const trangThai = $('#trangThaiSelect').val();
+
+            // Kiểm tra các trường bắt buộc
+            if (!sanPhamId || !thuongHieuId || !chatLieuId || !deGiayId) {
+                Swal.fire('Lỗi', 'Vui lòng chọn đầy đủ thông tin sản phẩm, thương hiệu, chất liệu và đế giày', 'error');
+                return;
             }
 
-            // Xử lý form submit
-            $("#create-form").on('submit', function(e) {
-                e.preventDefault();
-                var form = $(this);
-                
-                if (!$(this).valid()) {
-                    return false;
-                }
+            // Kiểm tra đã chọn màu sắc và kích thước
+            if (selectedColors.length === 0 || selectedSizes.length === 0) {
+                Swal.fire('Lỗi', 'Vui lòng chọn ít nhất một màu sắc và một kích thước', 'error');
+                return;
+            }
 
-                $.ajax({
-                    url: form.attr('action'),
-                    type: 'POST',
-                    data: form.serialize(),
-                    success: function(result) {
-                        if (result.success) {
-                            showToast('Thêm mới sản phẩm chi tiết thành công', 'success');
-                            setTimeout(function() {
-                                window.location.href = '/SPCT/Index';
-                            }, 1500);
-                        } else {
-                            showToast(result.message || 'Có lỗi xảy ra', 'error');
-                        }
-                    },
-                    error: function() {
-                        showToast('Có lỗi xảy ra khi xử lý yêu cầu', 'error');
-                    }
+            // Tạo tổ hợp sản phẩm chi tiết
+            selectedColors.forEach(color => {
+                selectedSizes.forEach(size => {
+                    tbody.append(`
+                        <tr
+                            data-sanpham-id="${sanPhamId}"
+                            data-thuonghieu-id="${thuongHieuId}"
+                            data-chatlieu-id="${chatLieuId}"
+                            data-degiay-id="${deGiayId}"
+                            data-mausac-id="${color.id}"
+                            data-kichthuoc-id="${size.id}"
+                            data-trangthai="${trangThai}">
+                            <td><input type="checkbox" class="product-checkbox" /></td>
+                            <td class="stt">${stt++}</td>
+                            <td class="product-name">${tenSanPham}</td>
+                            <td class="product-color">${color.name}</td>
+                            <td class="product-size">${size.name}</td>
+                            <td><input type="number" class="form-control quantity-input" min="1" value="1" style="width: 80px;" /></td>
+                            <td>
+                                <div class="input-group" style="width: 200px;">
+                                    <input type="text" class="form-control price-input" value="1000000" />
+                                    <span class="input-group-text">VNĐ</span>
+                                </div>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-danger btn-sm delete-row">
+                                    <i class="bx bx-trash"></i>
+                                </button>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-light btn-sm upload-image">
+                                    <i class="bx bx-upload"></i> Upload
+                                </button>
+                            </td>
+                        </tr>
+                    `);
+                });
+            });
+        }
+
+        $('#btnHoanTat').on('click', function(e) {
+            e.preventDefault();
+            let spctList = [];
+            $('#productDetailList tr').each(function() {
+                spctList.push({
+                    SanPhamId: $(this).data('sanpham-id'),
+                    ThuongHieuId: $(this).data('thuonghieu-id'),
+                    ChatLieuId: $(this).data('chatlieu-id'),
+                    DeGiayId: $(this).data('degiay-id'),
+                    MauSacId: $(this).data('mausac-id'),
+                    KichThuocId: $(this).data('kichthuoc-id'),
+                    SoLuong: $(this).find('.quantity-input').val(),
+                    Gia: $(this).find('.price-input').val(),
+                    TrangThai: $(this).data('trangthai') === "true"
                 });
             });
 
-            // Validate form
-            var validator = $("#create-form").validate({
-                rules: {
-                    SanPhamId: {
-                        required: true
-                    },
-                    MauSacId: {
-                        required: true
-                    },
-                    KichThuocId: {
-                        required: true
-                    },
-                    ChatLieuId: {
-                        required: true
-                    },
-                    DeGiayId: {
-                        required: true
-                    },
-                    ThuongHieuId: {
-                        required: true
-                    },
-                    Gia: {
-                        required: true,
-                        min: 0,
-                        number: true
-                    },
-                    SoLuong: {
-                        required: true,
-                        min: 0,
-                        digits: true
+            $.ajax({
+                url: '/SPCT/CreateMultiple',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(spctList),
+                success: function(res) {
+                    if(res.success) {
+                        Swal.fire('Thành công', res.message, 'success').then(() => {
+                            window.location.href = '/SPCT/Index';
+                        });
+                    } else {
+                        Swal.fire('Lỗi', res.message, 'error');
                     }
-                },
-                messages: {
-                    SanPhamId: {
-                        required: "Vui lòng chọn sản phẩm"
-                    },
-                    MauSacId: {
-                        required: "Vui lòng chọn màu sắc"
-                    },
-                    KichThuocId: {
-                        required: "Vui lòng chọn kích thước"
-                    },
-                    ChatLieuId: {
-                        required: "Vui lòng chọn chất liệu"
-                    },
-                    DeGiayId: {
-                        required: "Vui lòng chọn đế giày"
-                    },
-                    ThuongHieuId: {
-                        required: "Vui lòng chọn thương hiệu"
-                    },
-                    Gia: {
-                        required: "Vui lòng nhập giá sản phẩm",
-                        min: "Giá sản phẩm phải lớn hơn 0",
-                        number: "Vui lòng nhập số hợp lệ"
-                    },
-                    SoLuong: {
-                        required: "Vui lòng nhập số lượng",
-                        min: "Số lượng phải lớn hơn 0",
-                        digits: "Vui lòng nhập số nguyên"
-                    }
-                },
-                errorElement: 'span',
-                errorClass: 'text-danger',
-                highlight: function(element) {
-                    $(element).addClass('is-invalid');
-                },
-                unhighlight: function(element) {
-                    $(element).removeClass('is-invalid');
                 }
             });
         });
+
+        // Xử lý nút thêm kích thước mới
+        $('#addNewSize').on('click', function() {
+            $.get('/KichThuoc/Create', function(html) {
+                $('#modalAddKichThuocContent').html(html);
+                $('#modalAddKichThuoc').modal('show');
+            });
+        });
+
+        // Xử lý nút thêm màu sắc mới
+        $('#addNewColor').on('click', function() {
+            $.get('/MauSac/Create', function(html) {
+                $('#modalAddMauSacContent').html(html);
+                $('#modalAddMauSac').modal('show');
+            });
+        });
+
+        // Xử lý submit form trong modal kích thước
+        $(document).on('submit', '#createKichThuocForm', function(e) {
+            e.preventDefault();
+            handleFormSubmit(this, '/KichThuoc/Create', 'KichThuocId', 'maKichThuoc');
+        });
+
+        // Xử lý submit form trong modal màu sắc
+        $(document).on('submit', '#createMauSacForm', function(e) {
+            e.preventDefault();
+            handleFormSubmit(this, '/MauSac/Create', 'MauSacId', 'name');
+        });
+
+        // Hiển thị selectedSizes và selectedColors ra ngoài với nút xóa
+        function renderSelectedSizes() {
+            const container = $('#selectedSizes');
+            container.empty();
+            selectedSizes.forEach(size => {
+                container.append(`
+                    <div class="selected-item size-item d-inline-flex align-items-center me-2 mb-2" style="border:1px solid #ddd; border-radius:5px; padding:2px 8px; background:#fff;">
+                        <span>${size.name}</span>
+                        <button type="button" class="btn btn-link btn-sm text-danger ms-1 remove-size" data-size-id="${size.id}" style="font-size:18px;">&minus;</button>
+                    </div>
+                `);
+            });
+        }
+        function renderSelectedColors() {
+            const container = $('#selectedColors');
+            container.empty();
+            selectedColors.forEach(color => {
+                // Đảm bảo color.name là mã màu hợp lệ, nếu không thì dùng #000
+                let colorHex = color.name && /^#[0-9A-Fa-f]{6}$/.test(color.name) ? color.name : '#000000';
+                container.append(`
+                    <div class="selected-item color-item d-inline-flex align-items-center me-2 mb-2" style="border:1px solid #ddd; border-radius:5px; padding:2px 8px; background:${colorHex}; color:${getContrastYIQ(colorHex)};">
+                        <span>${colorHex}</span>
+                        <button type="button" class="btn btn-link btn-sm text-danger ms-1 remove-color" data-color-id="${color.id}" style="font-size:18px;">&minus;</button>
+                    </div>
+                `);
+            });
+        }
+        // Hàm lấy màu chữ phù hợp với nền
+        function getContrastYIQ(hexcolor){
+            hexcolor = hexcolor.replace('#', '');
+            if(hexcolor.length === 3) hexcolor = hexcolor[0]+hexcolor[0]+hexcolor[1]+hexcolor[1]+hexcolor[2]+hexcolor[2];
+            var r = parseInt(hexcolor.substr(0,2),16);
+            var g = parseInt(hexcolor.substr(2,2),16);
+            var b = parseInt(hexcolor.substr(4,2),16);
+            var yiq = ((r*299)+(g*587)+(b*114))/1000;
+            return (yiq >= 128) ? '#000' : '#fff';
+        }
+        // Xóa kích thước đã chọn
+        $(document).on('click', '.remove-size', function() {
+            const id = $(this).data('size-id');
+            selectedSizes = selectedSizes.filter(s => s.id != id);
+            renderSelectedSizes();
+            generateProductDetails();
+        });
+        // Xóa màu đã chọn
+        $(document).on('click', '.remove-color', function() {
+            const id = $(this).data('color-id');
+            selectedColors = selectedColors.filter(c => c.id != id);
+            renderSelectedColors();
+            generateProductDetails();
+        });
+
+        // Khi bấm '+ Thêm màu sắc', gọi API thêm màu mới vào DB và load lại danh sách màu
+        $(document).on('click', '#addNewColorHex', function() {
+            let hex = $('#newColorHex').val();
+            if (!/^#[0-9A-Fa-f]{6}$/.test(hex)) {
+                Swal.fire('Lỗi', 'Vui lòng nhập đúng định dạng mã màu HEX, ví dụ: #FF0000', 'error');
+                return;
+            }
+            // Gọi API thêm màu mới
+            $.ajax({
+                url: '/MauSac/Create',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ TenMauSac: hex }),
+                success: function(res) {
+                    if(res.success || res === true) {
+                        openColorModal();
+                    } else {
+                        Swal.fire('Lỗi', res.message || 'Không thể thêm màu mới', 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Lỗi', 'Không thể thêm màu mới', 'error');
+                }
+            });
+        });
+        // Cho phép click vào mã màu để sửa trực tiếp
+        $(document).on('click', '.color-item input[type="text"]', function() {
+            $(this).removeAttr('readonly').focus();
+        });
+        // Khi blur hoặc Enter, cập nhật lại màu nền và mã màu
+        $(document).on('blur', '.color-item input[type="text"]', function() {
+            let val = $(this).val();
+            if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+                $(this).css({'background':val,'color':getContrastYIQ(val)});
+                $(this).attr('readonly', true);
+                // Cập nhật lại button màu phía trên nếu có
+                $(this).closest('.color-item').find('.color-btn').css('background-color', val).data('color-name', val);
+            }
+        });
+        $(document).on('keydown', '.color-item input[type="text"]', function(e) {
+            if (e.key === 'Enter') {
+                $(this).blur();
+            }
+        });
     </script>
 }
+
+<!-- Template cho hàng sản phẩm -->
+<template id="productRowTemplate">
+    <tr>
+        <td>
+            <input type="checkbox" class="product-checkbox" />
+        </td>
+        <td class="stt"></td>
+        <td class="product-name"></td>
+        <td>
+            <input type="number" class="form-control quantity-input" min="1" value="1" style="width: 80px;" />
+        </td>
+        <td>
+            <div class="input-group" style="width: 200px;">
+                <input type="text" class="form-control price-input" value="1000000" />
+                <span class="input-group-text">VNĐ</span>
+            </div>
+        </td>
+        <td>
+            <button type="button" class="btn btn-danger btn-sm delete-row">
+                <i class="bx bx-trash"></i>
+            </button>
+        </td>
+        <td>
+            <button type="button" class="btn btn-light btn-sm upload-image">
+                <i class="bx bx-upload"></i> Upload
+            </button>
+        </td>
+    </tr>
+</template>
+
+<!-- Modal Thêm Thương Hiệu -->
+<div class="modal fade" id="modalAddThuongHieu" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm thương hiệu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalAddThuongHieuContent"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Kích Thước -->
+<div class="modal fade" id="sizeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chọn kích cỡ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="size-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 12px;">
+                    <!-- Kích thước sẽ được thêm vào đây bằng JavaScript -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="confirmSizeSelection" style="margin-left: 3px">Thêm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Màu Sắc -->
+<div class="modal fade" id="colorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chọn màu sắc</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex align-items-center mb-3">
+                    <input type="text" id="newColorHex" class="form-control me-2" style="width: 120px;" placeholder="#000000" />
+                    <button class="btn btn-primary" id="addNewColorHex">+ Thêm màu sắc</button>
+                </div>
+                <div class="color-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 12px;">
+                    <!-- Màu sắc sẽ được thêm vào đây bằng JavaScript -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="confirmColorSelection" style="margin-left: 3px">Thêm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Thêm Sản Phẩm -->
+<div class="modal fade" id="modalAddSanPham" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm sản phẩm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalAddSanPhamContent"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Thêm Đế Giày -->
+<div class="modal fade" id="modalAddDeGiay" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm đế giày</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalAddDeGiayContent"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Thêm Chất Liệu -->
+<div class="modal fade" id="modalAddChatLieu" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm chất liệu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalAddChatLieuContent"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Thêm Kích Thước -->
+<div class="modal fade" id="modalAddKichThuoc" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm kích thước</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalAddKichThuocContent"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Thêm Màu Sắc -->
+<div class="modal fade" id="modalAddMauSac" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm màu sắc</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalAddMauSacContent"></div>
+        </div>
+    </div>
+</div>

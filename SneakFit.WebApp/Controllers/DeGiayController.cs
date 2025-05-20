@@ -29,9 +29,9 @@ namespace SneakFit.Admin.Controllers
             return View(data);
         }
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-             return PartialView("Create");
+             return  PartialView("Create");
         }
 
         [HttpPost]

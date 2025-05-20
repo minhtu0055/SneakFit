@@ -104,7 +104,7 @@ namespace SneakFit.Admin.Controllers
             return PartialView("Edit", editModel);
         }
 
-        [HttpPost]
+        [HttpPut]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(SuaSanPham request)
         {

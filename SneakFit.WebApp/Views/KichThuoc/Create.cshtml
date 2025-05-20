@@ -1,8 +1,8 @@
 ﻿@model SneakFit.ViewModels.Catalog.KichThuoc.ThemKichThuoc
 
-<form asp-controller="KichThuoc" asp-action="Create" id="createChatLieuForm" method="post" data-confirm="Bạn có chắc chắn muốn làm điều đó không?">
+<form asp-controller="KichThuoc" asp-action="Create" id="createKichThuocForm" method="post" data-confirm="Bạn có chắc chắn muốn làm điều đó không?">
     <div class="mb-3">
-        <label asp-for="MaKichThuoc" class="form-label">Tên Chất Liệu</label>
+        <label asp-for="MaKichThuoc" class="form-label">Kích Thước</label>
         <input asp-for="MaKichThuoc" class="form-control" placeholder="Nhập kích thước"
                pattern="^[0-9]+$" 
                oninput="validateInput(this)"

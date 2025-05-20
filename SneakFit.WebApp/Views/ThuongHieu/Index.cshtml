@@ -17,7 +17,7 @@
                 <h5 class="modal-title">Thêm mới thương hiệu</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" id="createModalContent">
+            <div class="modal-body" id="thuonghieu-create-modal-content">
                 <!-- Nội dung form sẽ được load bằng Ajax -->
             </div>
         </div>
@@ -31,7 +31,7 @@
                 <h5 class="modal-title">Chỉnh sửa thương hiệu</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" id="editModalContent">
+            <div class="modal-body" id="thuonghieu-edit-modal-content">
                 <!-- Nội dung form sẽ được load bằng Ajax -->
             </div>
         </div>
@@ -98,51 +98,26 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
-            // Thêm mới
             $('[data-bs-target="#taoThuongHieuModal"]').click(function () {
                 $.ajax({
                     url: '/ThuongHieu/Create',
                     type: 'GET',
                     success: function (result) {
-                        $('#createModalContent').html(result);
+                        $('#thuonghieu-create-modal-content').html(result);
                     },
                     error: function (err) {
                         toastr.error('Có lỗi xảy ra khi tải form');
                     }
                 });
             });
-            // Submit create
-            $(document).on('submit', '#createThuongHieuForm', function (e) {
-                e.preventDefault();
-                var formData = $(this).serialize();
-                $.ajax({
-                    url: '/ThuongHieu/Create',
-                    type: 'POST',
-                    data: formData,
-                    success: function (result) {
-                        if (result.success) {
-                            $('#taoThuongHieuModal').modal('hide');
-                            toastr.success('Thêm mới thành công');
-                            setTimeout(function() {
-                                window.location.reload();
-                            }, 1000);
-                        } else {
-                            toastr.error(result.message);
-                        }
-                    },
-                    error: function (err) {
-                        toastr.error('Có lỗi xảy ra khi thêm mới');
-                    }
-                });
-            });
-            // Edit
+
             $('.edit-thuonghieu').click(function () {
                 var id = $(this).data('id');
                 $.ajax({
                     url: '/ThuongHieu/Edit/' + id,
                     type: 'GET',
                     success: function (result) {
-                        $('#editModalContent').html(result);
+                        $('#thuonghieu-edit-modal-content').html(result);
                     },
                     error: function (err) {
                         toastr.error('Có lỗi xảy ra khi tải form');
@@ -184,4 +159,4 @@
             }
         });
     </script>
-} 
+}

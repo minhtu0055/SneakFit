@@ -329,5 +329,32 @@ namespace SneakFit.Application.Catalog.SanPhamChiTietChiTiet
                 .Select(i => i.UrlHinhAnh)
                 .ToListAsync();
         }
+
+        public async Task<int> CreateMultiple(ThemNhieuSPCTRequest request)
+        {
+            int count = 0;
+            foreach (var item in request.Items)
+            {
+                var newSanPhamChiTiet = new Data.Entities.SanPhamChiTiet()
+                {
+                    ID = Guid.NewGuid(),
+                    SanPhamId = request.SanPhamId,
+                    ThuongHieuId = request.ThuongHieuId,
+                    DeGiayId = request.DeGiayId,
+                    ChatLieuId = request.ChatLieuId,
+                    TrangThai = request.TrangThai,
+                    MauSacId = item.MauSacId,
+                    KichThuocId = item.KichThuocId,
+                    SoLuong = item.SoLuong,
+                    Gia = (float)item.Gia,
+                    NgayTao = DateTime.Now,
+                    HinhAnhSanPham = new List<HinhAnhSanPham>()
+                };
+                _context.SanPhamChiTiet.Add(newSanPhamChiTiet);
+                count++;
+            }
+            await _context.SaveChangesAsync();
+            return count;
+        }
     }
 }

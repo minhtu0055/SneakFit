@@ -5,11 +5,11 @@
         <label asp-for="TenThuongHieu" class="form-label">Tên Thương Hiệu</label>
         <input asp-for="TenThuongHieu" class="form-control" placeholder="Nhập tên thương hiệu"
                pattern="^[a-zA-ZÀ-ỹ\s]+$"
-               oninput="validateInput(this)"
+               oninput="validateThuongHieuEditInput(this)"
                maxlength="50"
                title="Vui lòng chỉ nhập chữ cái" />
         <span asp-validation-for="TenThuongHieu" class="text-danger"></span>
-        <span id="customError" class="text-danger" style="display: none;">Vui lòng chỉ nhập chữ cái</span>
+        <span id="thuonghieu-edit-validation-error" class="text-danger" style="display: none;">Vui lòng chỉ nhập chữ cái</span>
     </div>
     <div class="text-end">
         <button type="submit" class="btn btn-primary">
@@ -21,9 +21,9 @@
     </div>
 </form>
 <script>
-function validateInput(input) {
+function validateThuongHieuEditInput(input) {
     const pattern = /^[a-zA-ZÀ-ỹ\s]+$/;
-    const errorSpan = document.getElementById('customError');
+    const errorSpan = document.getElementById('thuonghieu-edit-validation-error');
     if (!pattern.test(input.value) && input.value !== '') {
         errorSpan.style.display = 'block';
         input.setCustomValidity('Vui lòng chỉ nhập chữ cái');
@@ -32,4 +32,4 @@ function validateInput(input) {
         input.setCustomValidity('');
     }
 }
-</script> 
+</script>

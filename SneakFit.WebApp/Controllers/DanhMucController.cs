@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SneakFit.Admin.Controllers;
 using SneakFit.ApiIntegration.Services;
 using SneakFit.ViewModels.Catalog.DanhMuc;
+using SneakFit.ViewModels.Catalog.MauSac;
 using SneakFit.ViewModels.Common;
 
 namespace SneakFit.WebApp.Controllers
@@ -28,61 +29,76 @@ namespace SneakFit.WebApp.Controllers
             ViewBag.Keyword = keyword;
             return View(data);
         }
-
         [HttpGet]
         public IActionResult Create()
         {
-            return View();
+            return PartialView("Create");
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ThemDanhMuc request)
         {
             if (!ModelState.IsValid)
-                return View(request);
+                return Json(new { success = false, message = "Dữ liệu không hợp lệ" });
 
-            var result = await _danhMucApiClient.Create(request);
-            if (result != null)
+            try
             {
-                TempData["SuccessMessage"] = "Thêm mới danh mục thành công";
-                return RedirectToAction("Index");
+                var result = await _danhMucApiClient.Create(request);
+                if (result != null)
+                {
+                    return Json(new { success = true });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
             }
 
-            ModelState.AddModelError("", "Thêm danh mục thất bại");
-            return View(request);
+            return Json(new { success = false, message = "Thêm màu sắc thất bại" });
         }
 
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
         {
-            var result = await _danhMucApiClient.GetById(id);
-            if (result != null)
-            {
-                var danhmuc = new SuaDanhMuc()
-                {
-                    Id = result.Id,
-                    TenDanhMuc = result.TenDanhMuc
-                };
-                return View(danhmuc);
-            }
-            return RedirectToAction("Index");
-        }
+            var chatLieu = await _danhMucApiClient.GetById(id);
+            if (chatLieu == null)
+                return NotFound();
 
+            var editModel = new SuaDanhMuc
+            {
+                Id = chatLieu.Id,
+                TenDanhMuc = chatLieu.TenDanhMuc
+            };
+            return PartialView("Edit", editModel);
+        }
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(SuaDanhMuc request)
         {
             if (!ModelState.IsValid)
-                return View(request);
+                return Json(new { success = false, message = "Dữ liệu không hợp lệ" });
 
-            var result = await _danhMucApiClient.Update(request);
-            if (result != null)
+            try
             {
-                TempData["SuccessMessage"] = "Cập nhật danh mục thành công";
-                return RedirectToAction("Index");
+                var result = await _danhMucApiClient.Update(request);
+                if (result != null)
+                {
+                    return Json(new { success = true });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
             }
 
-            ModelState.AddModelError("", "Cập nhật danh mục thất bại");
-            return View(request);
+            return Json(new { success = false, message = "Cập nhật thất bại" });
+        }
+        [HttpGet("getall")]
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _danhMucApiClient.GetAll();
+            return Ok(result);
         }
     }
 }

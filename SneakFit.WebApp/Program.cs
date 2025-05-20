@@ -26,6 +26,7 @@ builder.Services.AddScoped<IKichThuocApiClient, KichThuocApiClient>();
 builder.Services.AddScoped<ISanPhamApiClient, SanPhamApiClient>();
 builder.Services.AddScoped<ISpctApiClient, SpctApiClient>();
 builder.Services.AddScoped<IThuongHieuApiClient, ThuongHieuApiClient>();
+builder.Services.AddScoped<IDanhMucApiClient, DanhMucApiClient>();
 
 
 

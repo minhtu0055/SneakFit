@@ -151,5 +151,14 @@ namespace SneakFit.BackEndAPI.Controllers
             var images = await _sanPhamChiTetService.GetListImages(id);
             return Ok(new ApiSuccessResult<List<string>>(images));
         }
+
+        [HttpPost("CreateMultiple")]
+        public async Task<IActionResult> CreateMultiple([FromBody] ThemNhieuSPCTRequest request)
+        {
+            if (request.Items == null || !request.Items.Any())
+                return BadRequest(new ApiErrorResult<int>("Chưa chọn màu sắc/kích thước"));
+            var count = await _sanPhamChiTetService.CreateMultiple(request);
+            return Ok(new ApiSuccessResult<int>(count));
+        }
     }
 }

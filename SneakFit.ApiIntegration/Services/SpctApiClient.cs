@@ -280,5 +280,25 @@ namespace SneakFit.ApiIntegration.Services
             }
             throw new Exception("Không thể lấy danh sách sản phẩm");
         }
+
+        public async Task<int> CreateMultiple(ThemNhieuSPCTRequest request)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var json = JsonConvert.SerializeObject(request);
+            var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync($"/api/spct/CreateMultiple", httpContent);
+            var body = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonConvert.DeserializeObject<int>(body);
+                return result;
+            }
+            throw new Exception("Không thể thêm nhiều sản phẩm chi tiết");
+        }
     }
 }

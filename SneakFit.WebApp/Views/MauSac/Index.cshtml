@@ -1,16 +1,16 @@
-﻿@using SneakFit.ViewModels.Common
+@using SneakFit.ViewModels.Common
 @model PagedResult<SneakFit.ViewModels.Catalog.MauSac.MauSacViewModels>
 @{
 	ViewData["Title"] = "Danh sách màu sắc";
 	Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <div class="text-end mb-4">
-	<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#taoChatLieuModal">
-		<i class="bx bx-plus me-1"></i> Thêm mới chất liệu
+	<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#taoMauSacModal">
+		<i class="bx bx-plus me-1"></i> Thêm mới màu sắc
 	</button>
 </div>
 <!-- Modal -->
-<div class="modal fade" id="taoChatLieuModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="taoMauSacModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -24,14 +24,14 @@
     </div>
 </div>
 <!-- Modal Edit -->
-<div class="modal fade" id="editChatLieuModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="editMauSacModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Chỉnh sửa màu sắc</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" id="editModalContent">
+            <div class="modal-body" id="mausac-edit-modal-content">
                 <!-- Nội dung form sẽ được load bằng Ajax -->
             </div>
         </div>
@@ -82,7 +82,7 @@
 									<i class="bx bx-dots-vertical-rounded"></i>
 								</button>
 								<div class="dropdown-menu">
-									<a class="dropdown-item edit-chatlieu" href="javascript:void(0)" data-id="@item.Id" data-bs-toggle="modal" data-bs-target="#editChatLieuModal">
+									<a class="dropdown-item edit-mausac" href="javascript:void(0)" data-id="@item.Id" data-bs-toggle="modal" data-bs-target="#editMauSacModal">
 										<i class="bx bx-edit-alt me-1"></i> Sửa
 									</a>
 								</div>
@@ -97,11 +97,9 @@
 </div>
 @section Scripts {
 	<script>
-		// Hiển thị thông báo toast nếu có
 		$(document).ready(function () {
 			// Xử lý khi click vào nút thêm mới
-            $('[data-bs-target="#taoChatLieuModal"]').click(function () {
-                // Gọi Ajax để lấy form create
+            $('[data-bs-target="#taoMauSacModal"]').click(function () {
                 $.ajax({
                     url: '/MauSac/Create',
                     type: 'GET',
@@ -115,7 +113,7 @@
             });
 
             // Xử lý submit form create bằng Ajax
-            $(document).on('submit', '#createChatLieuForm', function (e) {
+            $(document).on('submit', '#createMauSacForm', function (e) {
                 e.preventDefault();
                 var formData = $(this).serialize();
                 $.ajax({
@@ -124,7 +122,7 @@
                     data: formData,
                     success: function (result) {
                         if (result.success) {
-                            $('#taoChatLieuModal').modal('hide');
+                            $('#taoMauSacModal').modal('hide');
                             toastr.success('Thêm mới thành công');
                             setTimeout(function() {
                                 window.location.reload();
@@ -139,14 +137,13 @@
                 });
             });
 			// Xử lý khi click vào nút edit
-            $('.edit-chatlieu').click(function () {
+            $('.edit-mausac').click(function () {
                 var id = $(this).data('id');
-                // Gọi Ajax để lấy form edit
                 $.ajax({
                     url: '/MauSac/Edit/' + id,
                     type: 'GET',
                     success: function (result) {
-                        $('#editModalContent').html(result);
+                        $('#mausac-edit-modal-content').html(result);
                     },
                     error: function (err) {
                         toastr.error('Có lỗi xảy ra khi tải form');
@@ -155,7 +152,7 @@
             });
 
             // Xử lý submit form edit bằng Ajax
-            $(document).on('submit', '#editChatLieuForm', function (e) {
+            $(document).on('submit', '#mausac-edit-form', function (e) {
                 e.preventDefault();
                 var formData = $(this).serialize();
                 $.ajax({
@@ -164,7 +161,7 @@
                     data: formData,
                     success: function (result) {
                         if (result.success) {
-                            $('#editChatLieuModal').modal('hide');
+                            $('#editMauSacModal').modal('hide');
                             toastr.success('Cập nhật thành công');
                             setTimeout(function() {
                                 window.location.reload();
