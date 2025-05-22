@@ -1,0 +1,356 @@
+﻿@using SneakFit.ViewModels.Catalog.Voucher
+@using SneakFit.Data.Enums
+@model UpdateVoucher
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Cập nhật Voucher";
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">Cập nhật voucher</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">Danh sách voucher</a></li>
+        <li class="breadcrumb-item active">Cập nhật</li>
+    </ol>
+    <div class="card mb-4">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-6 col-xs-12">
+                    <a class="btn btn-success" asp-action="Index">
+                        <i class="bx bx-arrow-back me-1"></i> Về danh sách
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="col-md-8 mx-auto">
+                <form asp-action="Edit" method="post" id="edit-form" class="needs-validation" novalidate>
+                    <div asp-validation-summary="All" class="alert alert-danger mb-4" role="alert">
+                        <h5 class="alert-heading">Vui lòng kiểm tra lại các thông tin sau:</h5>
+                        <ul class="mb-0">
+                            <li>Vui lòng điền đầy đủ thông tin bắt buộc</li>
+                            <li>Kiểm tra định dạng và giá trị hợp lệ</li>
+                        </ul>
+                    </div>
+
+                    <input type="hidden" asp-for="Id" />
+
+                    <div class="mb-3 row">
+                        <label asp-for="MaVoucher" class="col-sm-3 col-form-label">Mã voucher <span class="text-danger">*</span></label>
+                        <div class="col-sm-9">
+                            <input asp-for="MaVoucher" class="form-control" placeholder="Nhập mã voucher..." />
+                            <div class="invalid-feedback">
+                                Vui lòng nhập mã voucher (3-20 ký tự, chỉ bao gồm chữ in hoa và số)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label asp-for="LoaiGiamGia" class="col-sm-3 col-form-label">Loại Giảm giá <span class="text-danger">*</span></label>
+                        <div class="col-sm-9">
+                            <select asp-for="LoaiGiamGia" asp-items="@ViewBag.LoaiGiamGia" class="form-select">
+                                <option value="">-- Chọn loại giảm giá --</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Vui lòng chọn loại giảm giá
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label asp-for="GiaTriGiamGia" class="col-sm-3 col-form-label">Giá trị giảm giá <span class="text-danger">*</span></label>
+                        <div class="col-sm-9">
+                            <div class="input-group has-validation">
+                                <input asp-for="GiaTriGiamGia" class="form-control" type="number" step="0.01" />
+                                <span class="input-group-text discount-unit"></span>
+                                <div class="invalid-feedback">
+                                    Vui lòng nhập giá trị giảm giá hợp lệ
+                                </div>
+                            </div>
+                            <small class="form-text text-muted discount-hint"></small>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label asp-for="DieuKienApDung" class="col-sm-3 col-form-label">Điều kiện áp dụng <span class="text-danger">*</span></label>
+                        <div class="col-sm-9">
+                            <div class="input-group has-validation">
+                                <input asp-for="DieuKienApDung" class="form-control" type="number" step="1000" />
+                                <span class="input-group-text">VNĐ</span>
+                                <div class="invalid-feedback">
+                                    Vui lòng nhập điều kiện áp dụng (phải là bội số của 1000)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label asp-for="SoLuong" class="col-sm-3 col-form-label">Số Lượng <span class="text-danger">*</span></label>
+                        <div class="col-sm-9">
+                            <div class="input-group has-validation">
+                                <input asp-for="SoLuong" class="form-control" type="number" min="1" />
+                                <div class="invalid-feedback">
+                                    Vui lòng nhập số lượng voucher (phải lớn hơn 0)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label asp-for="ThoiGianBatDau" class="col-sm-3 col-form-label">Thời gian bắt đầu <span class="text-danger">*</span></label>
+                        <div class="col-sm-9">
+                            <div class="input-group has-validation">
+                                <input asp-for="ThoiGianBatDau" type="datetime-local" class="form-control" />
+                                <div class="invalid-feedback">
+                                    Vui lòng chọn thời gian bắt đầu hợp lệ
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label asp-for="ThoiGianKetThuc" class="col-sm-3 col-form-label">Thời gian kết thúc <span class="text-danger">*</span></label>
+                        <div class="col-sm-9">
+                            <div class="input-group has-validation">
+                                <input asp-for="ThoiGianKetThuc" type="datetime-local" class="form-control" />
+                                <div class="invalid-feedback">
+                                    Vui lòng chọn thời gian kết thúc hợp lệ
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <div class="col-sm-9 offset-sm-3">
+                            <button type="submit" class="btn btn-primary me-2">
+                                <i class="bx bx-save me-1"></i> Cập nhật
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary">
+                                <i class="bx bx-arrow-back me-1"></i> Quay lại
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function () {
+            // Hàm cập nhật đơn vị giảm giá và các thuộc tính của input giá trị giảm
+            function capNhatLoaiGiamGia() {
+                var loaiGiamGia = $("#LoaiGiamGia").val();
+                var unit = loaiGiamGia == "@((int)LoaiGiamGia.PhamTram)" ? "%" : "VNĐ";
+                $(".discount-unit").text(unit);
+
+                // Cập nhật hint text
+                var hint = loaiGiamGia == "@((int)LoaiGiamGia.PhamTram)" 
+                    ? "Giá trị giảm giá phải từ 0% đến 100%" 
+                    : "Giá trị giảm giá phải lớn hơn 0 VNĐ";
+                $(".discount-hint").text(hint);
+
+                if (loaiGiamGia == "@((int)LoaiGiamGia.PhamTram)") {
+                    $("#GiaTriGiamGia").attr({
+                        "step": "0.01",
+                        "max": "100",
+                        "min": "0"
+                    });
+                } else {
+                    $("#GiaTriGiamGia").attr({
+                        "step": "1000",
+                        "min": "0"
+                    }).removeAttr("max");
+                }
+            }
+
+            $("#LoaiGiamGia").change(capNhatLoaiGiamGia);
+            capNhatLoaiGiamGia();
+
+            // Cấu hình validation cho form
+            $("#edit-form").validate({
+                errorElement: 'div',
+                errorClass: 'invalid-feedback',
+                validClass: 'valid-feedback',
+                
+                highlight: function(element, errorClass, validClass) {
+                    $(element).addClass('is-invalid').removeClass('is-valid');
+                    $(element).closest('.input-group').addClass('is-invalid');
+                },
+                
+                unhighlight: function(element, errorClass, validClass) {
+                    $(element).addClass('is-valid').removeClass('is-invalid');
+                    $(element).closest('.input-group').removeClass('is-invalid');
+                },
+                
+                errorPlacement: function(error, element) {
+                    if (element.closest('.input-group').length) {
+                        element.closest('.input-group').after(error);
+                    } else {
+                        element.after(error);
+                    }
+                },
+
+                rules: {
+                    MaVoucher: {
+                        required: true,
+                        minlength: 3,
+                        maxlength: 20,
+                        pattern: "^[A-Z0-9]+$"
+                    },
+                    LoaiGiamGia: {
+                        required: true
+                    },
+                    GiaTriGiamGia: {
+                        required: true,
+                        min: 0,
+                        max: function() {
+                            return $("#LoaiGiamGia").val() == "@((int)LoaiGiamGia.PhamTram)" ? 100 : 999999999;
+                        },
+                        validateDiscount: true
+                    },
+                    DieuKienApDung: {
+                        required: true,
+                        min: 0,
+                        step: 1000
+                    },
+                    SoLuong: {
+                        required: true,
+                        min: 1,
+                        digits: true
+                    },
+                    ThoiGianBatDau: {
+                        required: true,
+                        validateStartDate: true
+                    },
+                    ThoiGianKetThuc: {
+                        required: true,
+                        validateEndDate: true
+                    }
+                },
+
+                messages: {
+                    MaVoucher: {
+                        required: "Vui lòng nhập mã voucher",
+                        minlength: "Mã voucher phải có ít nhất 3 ký tự",
+                        maxlength: "Mã voucher không được vượt quá 20 ký tự",
+                        pattern: "Mã voucher chỉ được chứa chữ in hoa và số"
+                    },
+                    LoaiGiamGia: {
+                        required: "Vui lòng chọn loại giảm giá"
+                    },
+                    GiaTriGiamGia: {
+                        required: "Vui lòng nhập giá trị giảm",
+                        min: "Giá trị giảm phải lớn hơn 0",
+                        max: "Giá trị giảm không được vượt quá 100%",
+                        validateDiscount: function() {
+                            return $("#LoaiGiamGia").val() == "@((int)LoaiGiamGia.PhamTram)" 
+                                ? "Giá trị giảm giá không được vượt quá 100%" 
+                                : "Giá trị giảm giá phải lớn hơn 0 VNĐ";
+                        }
+                    },
+                    DieuKienApDung: {
+                        required: "Vui lòng nhập điều kiện áp dụng",
+                        min: "Điều kiện áp dụng phải lớn hơn 0",
+                        step: "Điều kiện áp dụng phải là bội số của 1000"
+                    },
+                    SoLuong: {
+                        required: "Vui lòng nhập số lượng voucher",
+                        min: "Số lượng voucher phải lớn hơn 0",
+                        digits: "Số lượng phải là số nguyên"
+                    },
+                    ThoiGianBatDau: {
+                        required: "Vui lòng chọn thời gian bắt đầu",
+                        validateStartDate: "Thời gian bắt đầu phải sau thời điểm hiện tại"
+                    },
+                    ThoiGianKetThuc: {
+                        required: "Vui lòng chọn thời gian kết thúc",
+                        validateEndDate: "Thời gian kết thúc phải sau thời gian bắt đầu"
+                    }
+                },
+
+                // Hiển thị lỗi ngay khi người dùng nhập liệu
+                onkeyup: function(element) {
+                    $(element).valid();
+                },
+                onchange: function(element) {
+                    $(element).valid();
+                },
+                submitHandler: function (form) {
+                    var formData = $(form).serialize();
+                    $.ajax({
+                        url: '@Url.Action("Edit", "Voucher")',
+                        type: 'POST',
+                        data: formData,
+                        success: function (result) {
+                            if (result.success) {
+                                Swal.fire({
+                                    title: 'Thành công!',
+                                    text: 'Cập nhật voucher thành công',
+                                    icon: 'success'
+                                }).then(() => {
+                                    window.location.href = '@Url.Action("Index", "Voucher")';
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: 'Lỗi!',
+                                    text: result.message || 'Có lỗi xảy ra khi cập nhật voucher',
+                                    icon: 'error'
+                                });
+                            }
+                        },
+                        error: function (xhr) {
+                            var errorMessage = 'Có lỗi xảy ra khi cập nhật voucher';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                errorMessage = xhr.responseJSON.message;
+                            }
+                            Swal.fire({
+                                title: 'Lỗi!',
+                                text: errorMessage,
+                                icon: 'error'
+                            });
+                        }
+                    });
+                    return false;
+                }
+            });
+
+            // Thêm phương thức validation tùy chỉnh
+            $.validator.addMethod("validateDiscount", function(value, element) {
+                var loaiGiamGia = $("#LoaiGiamGia").val();
+                var giaTri = parseFloat(value);
+                
+                if (isNaN(giaTri)) return false;
+                
+                if (loaiGiamGia == "@((int)LoaiGiamGia.PhamTram)") {
+                    return giaTri >= 0 && giaTri <= 100;
+                } else {
+                    return giaTri > 0;
+                }
+            });
+
+            $.validator.addMethod("validateStartDate", function (value, element) {
+                var startDate = new Date(value);
+                var now = new Date();
+                return startDate > now;
+            });
+
+            $.validator.addMethod("validateEndDate", function (value, element) {
+                var endDate = new Date(value);
+                var startDate = new Date($("#ThoiGianBatDau").val());
+                return endDate > startDate;
+            });
+
+            // Ẩn validation summary nếu không có lỗi
+            if (!$("#edit-form").valid()) {
+                $(".alert-danger").hide();
+            }
+        });
+    </script>
+} 

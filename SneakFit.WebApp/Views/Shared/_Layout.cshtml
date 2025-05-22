@@ -168,6 +168,12 @@
                                     <div class="text-truncate" data-i18n="Category">Danh Mục</div>
                                 </a>
                             </li>
+                            <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Voucher" ? "active open" : "")">
+                                <a asp-action="Index" asp-controller="Voucher" class="menu-link">
+                                    <i class="menu-icon tf-icons bx bxs-offer"></i>
+                                    <div class="text-truncate" data-i18n="Combo">Voucher</div>
+                                </a>
+                            </li>
                         </ul>
                     </li>
                     <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Khuyến Mại" ? "active open" : "")">
