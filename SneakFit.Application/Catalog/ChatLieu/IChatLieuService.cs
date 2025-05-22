@@ -14,5 +14,6 @@ namespace SneakFit.Application.Catalog.ChatLieu
         Task<ChatLieuViewModels> GetById(Guid id);
         Task<ChatLieuViewModels> Create(ThemChatLieu request);
         Task<ChatLieuViewModels> Update(SuaChatLieu request);
+        Task<List<ChatLieuViewModels>> GetAll();
     }
 }

@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SneakFit.Data.Configuration;
 using SneakFit.Data.Entities;
+using SneakFit.Data.Extensions;
 
 namespace SneakFit.Data.EF
 {
@@ -21,7 +23,11 @@ namespace SneakFit.Data.EF
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server=DESKTOP-KF3B918\\SQLEXPRESS;Database=SneakFit;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true");       
+            optionsBuilder.UseSqlServer("Server=GIGABYTE\\SQLEXPRESS;Database=SneakFit;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true");       
+        }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Seed();
         }
         public DbSet<ChatLieu> ChatLieu { get; set; }
         public DbSet<DanhMuc> DanhMuc { get; set; }
@@ -39,10 +45,6 @@ namespace SneakFit.Data.EF
         public DbSet<SanPhamChiTiet> SanPhamChiTiet { get; set; }
         public DbSet<ThuongHieu> ThuongHieu { get; set; }
         public DbSet<Voucher> Voucher { get; set; }
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            base.OnModelCreating(builder);
-            builder.ApplyConfiguration(new AppUserConfiguration());
-        }
+        
     }
 }

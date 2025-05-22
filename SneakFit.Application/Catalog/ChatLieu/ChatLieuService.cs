@@ -42,6 +42,16 @@ namespace SneakFit.Application.Catalog.ChatLieu
             };
             return PageResult;
         }
+        public async Task<List<ChatLieuViewModels>> GetAll()
+        {
+            var categories = await _context.ChatLieu
+                .Select(x => new ChatLieuViewModels()
+                {
+                    Id = x.Id,
+                    TenChatLieu = x.TenChatLieu,
+                }).ToListAsync();
+            return categories;
+        }
         public async Task<ChatLieuViewModels> GetById(Guid id)
         {
             var chatLieu = await _context.ChatLieu.FindAsync(id);

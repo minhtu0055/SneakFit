@@ -14,7 +14,7 @@ using SneakFit.ViewModels.Common;
 using SneakFit.ViewModels.System.User;
 using static Azure.Core.HttpHeader;
 
-namespace SneakFit.Application.System
+namespace SneakFit.Application.System.User
 {
     public class UserService : IUserService
     {
@@ -48,7 +48,8 @@ namespace SneakFit.Application.System
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Role, string.Join(";",roles)),
-                new Claim(ClaimTypes.Name, request.UserName)
+                new Claim(ClaimTypes.Name, request.UserName),
+                new Claim("SessionId", Guid.NewGuid().ToString()) // Thêm một claim để phân biệt các phiên đăng nhập
             };
             // Tạo một khóa đối xứng SymmetricSecurityKey là cùng một khóa được dùng để ký và xác minh jwt
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Tokens:Key"])); // chuyển đổi khóa bí mật thành mảng byte[], jwt yều cầu khóa dưới dạng byte[], không phải string
@@ -57,7 +58,7 @@ namespace SneakFit.Application.System
             var token = new JwtSecurityToken(_config["Tokens:Issuer"],
                 _config["Tokens:Issuer"],
                 claims,
-                expires: DateTime.Now.AddHours(3),
+                expires: DateTime.Now.AddHours(24),
                 signingCredentials: creds);
             return new ApiSuccessResult<string>(new JwtSecurityTokenHandler().WriteToken(token));
         }
@@ -142,6 +143,34 @@ namespace SneakFit.Application.System
             user.TrangThai = trangThai;
             var result = await _userManager.UpdateAsync(user);
             return result.Succeeded;
+        }
+        public async Task<ApiResult<bool>> RoleAssign(Guid id, RoleAssignRequest request)
+        {
+            var user = await _userManager.FindByIdAsync(id.ToString());
+            if (user == null)
+            {
+                return new ApiErrorResult<bool>("Tài khoản không tồn tại");
+            }
+            var removedRoles = request.Roles.Where(x => x.Selected == false).Select(x => x.Name).ToList();
+            foreach (var roleName in removedRoles)
+            {
+                if (await _userManager.IsInRoleAsync(user, roleName) == true)
+                {
+                    await _userManager.RemoveFromRoleAsync(user, roleName);
+                }
+            }
+            await _userManager.RemoveFromRolesAsync(user, removedRoles);
+
+            var addedRoles = request.Roles.Where(x => x.Selected).Select(x => x.Name).ToList();
+            foreach (var roleName in addedRoles)
+            {
+                if (await _userManager.IsInRoleAsync(user, roleName) == false)
+                {
+                    await _userManager.AddToRoleAsync(user, roleName);
+                }
+            }
+
+            return new ApiSuccessResult<bool>();
         }
     }
 }

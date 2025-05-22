@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SneakFit.Data.EF;
 using SneakFit.ViewModels.Catalog.SanPham;
-using SneakFit.ViewModels.Catalog.SanPham;
 using System;
 using System.Collections.Generic;
 using System.Linq;

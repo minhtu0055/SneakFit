@@ -1,0 +1,155 @@
+﻿@using SneakFit.Data.Enums
+@using SneakFit.ViewModels.Common
+@model PagedResult<SneakFit.ViewModels.Catalog.KhuyenMai.KhuyenMaiViewModels>
+@{
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="text-end mb-4">
+	<a asp-action="Create" asp-controller="KhuyenMai" class="btn btn-primary">
+		<i class="bx bx-plus me-1"></i> Tạo khuyến mại mới
+	</a>
+</div>
+<div class="card">
+	<div class="card-header">
+		<div class="row">
+			<form asp-action="Index" method="get">
+				<div class="row">
+					<div class="col-md-4 mb-2">
+						<label class="form-label">Tên khuyến mãi</label>
+						<input type="text" value="@ViewBag.Keyword" name="keyword" class="form-control" placeholder="Nhập tên khuyến mại..." />
+					</div>
+					<div class="col-md-3 mb-2">
+						<label class="form-label">Trạng thái</label>
+						<select name="trangThai" class="form-select" asp-items="@ViewBag.DanhSachTrangThai">
+						</select>
+					</div>
+					<div class="col-md-2 mb-2 d-flex align-items-end">
+						<div class="btn-group w-100">
+							<button type="submit" class="btn btn-primary">
+								<i class="bx bx-search"></i> Tìm
+							</button>
+							<a asp-action="Index" class="btn btn-dark">
+								<i class="bx bx-reset"></i> Reset
+							</a>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<div class="table-responsive text-nowrap">
+		<table class="table">
+			<thead>
+				<tr>
+					<th>TÊN KHUYẾN MẠI</th>
+					<th>THỜI GIAN</th>
+					<th>GIẢM GIÁ</th>
+					<th class="text-center">SỐ SẢN PHẨM</th>
+					<th>TRẠNG THÁI</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody class="table-border-bottom-0">
+				@foreach (var item in Model.Items)
+				{
+					<tr>
+						<td>
+							<div>@item.TenKhuyenMai</div>
+							<small class="text-muted">@item.MoTa</small>
+						</td>
+						<td>
+							<div class="text-muted">
+								<div><i class="bx bx-calendar me-1"></i>Từ: @item.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm")</div>
+								<div><i class="bx bx-calendar me-1"></i>Đến: @item.ThoiGianKetThuc.ToString("dd/MM/yyyy HH:mm")</div>
+							</div>
+						</td>
+						<td>
+							@if (item.LoaiGiamGia == LoaiGiamGia.PhamTram)
+							{
+								<span class="badge bg-label-info">@item.GiaTriGiamGia%</span>
+							}
+							else
+							{
+								<span class="badge bg-label-primary">@item.GiaTriGiamGia.ToString("N0")đ</span>
+							}
+						</td>
+						<td class="text-center">
+							<span class="badge bg-label-dark text-center">@(item.SanPhams?.Count ?? 0)</span>
+						</td>
+						<td>
+							<span class="badge bg-label-@GetStatusColor(item.TrangThai) me-1">
+								@GetStatusName(item.TrangThai)
+							</span>
+						</td>
+						<td>
+							<div class="dropdown">
+								<button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+									<i class="bx bx-dots-vertical-rounded"></i>
+								</button>
+								<div class="dropdown-menu">
+									<a class="dropdown-item" href="@Url.Action("Edit", new { id = item.Id })">
+										<i class="bx bx-edit-alt me-1"></i> Sửa
+									</a>
+									<a class="dropdown-item" href="@Url.Action("Details", new { id = item.Id })">
+										<i class="bx bx-detail me-1"></i> Chi tiết
+									</a>
+									@if (item.TrangThai != TrangThaiGiamGia.HetHan)
+									{
+										<form id="cancel-@item.Id" asp-action="UpdateStatus" asp-controller="KhuyenMai" method="post" style="display: inline;">
+											<input type="hidden" name="id" value="@item.Id" />
+											<button type="button" class="dropdown-item text-danger"
+													onclick="confirmCancel(@item.Id)">
+												<i class="bx bx-x-circle me-1"></i> Hủy khuyến mại
+											</button>
+										</form>
+									}
+								</div>
+							</div>
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+	@await Component.InvokeAsync("Pager", Model)
+</div>
+@section Scripts {
+	<script>
+		function confirmCancel(id) {
+			if (confirm('Bạn có chắc muốn hủy khuyến mãi này?')) {
+				document.getElementById('cancel-' + id).submit();
+			}
+		}
+	</script>
+}
+@functions {
+	string GetStatusName(TrangThaiGiamGia status)
+	{
+		switch (status)
+		{
+			case TrangThaiGiamGia.HoatDong:
+				return "Đang hoạt động";
+			case TrangThaiGiamGia.KhongHoatDong:
+				return "Chưa hoạt động";
+			case TrangThaiGiamGia.HetHan:
+				return "Đã hết hạn";
+			default:
+				return status.ToString();
+		}
+	}
+	string GetStatusColor(TrangThaiGiamGia status)
+	{
+		switch (status)
+		{
+			case TrangThaiGiamGia.HoatDong:
+				return "success";
+			case TrangThaiGiamGia.KhongHoatDong:
+				return "warning";
+			case TrangThaiGiamGia.HetHan:
+				return "danger";
+			default:
+				return "danger";
+		}
+	}
+}

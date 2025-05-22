@@ -15,6 +15,7 @@ namespace SneakFit.Data.Entities
 		public Guid DanhMucId { get; set; }
 		public DanhMuc DanhMuc { get; set; }
         public List<KhuyenMaiChiTiet> KhuyenMaiChiTiet { get; set; }
+        public List<SanPhamChiTiet> SanPhamChiTiet { get; set; }
        
     }
 }

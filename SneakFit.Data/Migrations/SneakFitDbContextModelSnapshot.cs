@@ -555,8 +555,8 @@ namespace SneakFit.Data.Migrations
                     b.Property<Guid>("DeGiayId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<float>("Gia")
-                        .HasColumnType("real");
+                    b.Property<decimal>("Gia")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<Guid>("KichThuocId")
                         .HasColumnType("uniqueidentifier");
@@ -829,7 +829,7 @@ namespace SneakFit.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("SneakFit.Data.Entities.SanPham", "SanPham")
-                        .WithMany()
+                        .WithMany("SanPhamChiTiet")
                         .HasForeignKey("SanPhamId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -904,6 +904,8 @@ namespace SneakFit.Data.Migrations
             modelBuilder.Entity("SneakFit.Data.Entities.SanPham", b =>
                 {
                     b.Navigation("KhuyenMaiChiTiet");
+
+                    b.Navigation("SanPhamChiTiet");
                 });
 
             modelBuilder.Entity("SneakFit.Data.Entities.SanPhamChiTiet", b =>
