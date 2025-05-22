@@ -15,13 +15,13 @@ namespace SneakFit.BackEndAPI.Controllers
         {
             _kichThuocService = kichThuocService;
         }
-        [HttpGet("GetAll")]
-        public async Task<IActionResult> GetAll()
+        [HttpGet("paging")]
+        public async Task<IActionResult> GetAllPaging([FromQuery] KichThuocPagingRequest request)
         {
-            var list = await _kichThuocService.GetAll();
-            return Ok(list);
+            var result = await _kichThuocService.GetAllPaging(request);
+            return Ok(result);
         }
-        [HttpGet("GetById")]
+        [HttpGet("GetById/{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
             var getid = await _kichThuocService.GetById(id);

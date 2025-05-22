@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using SneakFit.Application.Catalog.VoucherRP;
+using SneakFit.Application.Catalog.Voucher;
 using SneakFit.Data.Enums;
-using SneakFit.ViewModels.Catalog.VoucherCATA;
+using SneakFit.ViewModels.Catalog.KhuyenMai;
+using SneakFit.ViewModels.Catalog.Voucher;
+using SneakFit.ViewModels.Common;
 
 namespace SneakFit.BackEndAPI.Controllers
 {
@@ -17,13 +19,20 @@ namespace SneakFit.BackEndAPI.Controllers
         }
 
         // API tạo voucher mới
-        [HttpPost]
+        [HttpPost("Create")]
         public async Task<IActionResult> Create([FromBody] CreateVoucher request)
         {
             if (request == null) return BadRequest("Invalid data.");
 
-            var result = await _voucherService.Create(request);
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
+            try
+            {
+                var result = await _voucherService.Create(request);
+                return CreatedAtAction(nameof(GetById), new { id = result.Id }, new ApiSuccessResult<VoucherViewModels>(result));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiErrorResult<VoucherViewModels>(ex.Message));
+            }
         }
 
         // API lấy tất cả các voucher phân trang
@@ -31,11 +40,11 @@ namespace SneakFit.BackEndAPI.Controllers
         public async Task<IActionResult> GetAll([FromQuery] GetVoucherPagingRequest request)
         {
             var result = await _voucherService.GetAllPaging(request);
-            return Ok(result);
+            return Ok(new ApiSuccessResult<PagedResult<VoucherViewModels>>(result));
         }
 
         // API lấy thông tin voucher theo mã
-        [HttpGet("get-by-code/{code}")]
+        [HttpGet("getbycode/{code}")]
         public async Task<IActionResult> GetByCode(string code)
         {
             try
@@ -50,28 +59,34 @@ namespace SneakFit.BackEndAPI.Controllers
         }
 
         // API lấy thông tin voucher theo ID
-        [HttpGet("get-by-id/{id}")]
+        [HttpGet("getbyid/{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            try
-            {
-                var result = await _voucherService.GetById(id);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+            var result = await _voucherService.GetById(id);
+            if (result == null)
+                return NotFound(new ApiErrorResult<VoucherViewModels>($"Không tìm thấy Voucher có ID: {id}"));
+            return Ok(new ApiSuccessResult<VoucherViewModels>(result));
         }
 
         // API cập nhật thông tin voucher
-        [HttpPut("update/{id}")]
-        public async Task<IActionResult> Update([FromBody] UpdateVoucher request)
+        [HttpPut("Edit/{id}")]
+        public async Task<IActionResult> Update(Guid Id, [FromBody] UpdateVoucher request)
         {
-            if (request == null) return BadRequest("Invalid data.");
-
-            var result = await _voucherService.Update(request);
-            return Ok(result);
+            if (!ModelState.IsValid)
+                return BadRequest(new ApiErrorResult<VoucherViewModels>());
+            
+            try
+            {
+                request.Id = Id;
+                var result = await _voucherService.Update(request);
+                if (result == null)
+                    return NotFound(new ApiErrorResult<VoucherViewModels>($"Không tìm thấy Voucher có ID: {Id}"));
+                return Ok(new ApiSuccessResult<VoucherViewModels>(result));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiErrorResult<VoucherViewModels>(ex.Message));
+            }
         }
 
         // API cập nhật trạng thái voucher
@@ -80,8 +95,8 @@ namespace SneakFit.BackEndAPI.Controllers
         {
             var result = await _voucherService.UpdateTrangThai(id, status);
             if (result)
-                return Ok(new { message = "Cập nhật trạng thái thành công" });
-            return NotFound("Voucher không tồn tại");
+                return BadRequest(new ApiErrorResult<bool>("Cập nhật trạng thái không thành công"));
+            return Ok(new ApiSuccessResult<bool>(true));
         }
 
         // API sử dụng voucher

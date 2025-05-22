@@ -14,7 +14,7 @@ namespace SneakFit.ViewModels.Catalog.SanPhamChiTiet
 
         [Required(ErrorMessage = "Giá sản phẩm không được để trống")]
         [Range(0, double.MaxValue, ErrorMessage = "Giá sản phẩm phải lớn hơn 0")]
-        public float Gia { get; set; }
+        public decimal Gia { get; set; }
 
         [Required(ErrorMessage = "Số lượng sản phẩm không được để trống")]
         [Range(0, int.MaxValue, ErrorMessage = "Số lượng sản phẩm phải lớn hơn 0")]

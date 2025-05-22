@@ -13,11 +13,14 @@ using SneakFit.Application.Catalog.SanPhamChiTiet;
 using SneakFit.Application.Catalog.SanPhamChiTietChiTiet;
 using SneakFit.Application.Catalog.KhuyenMai;
 using SneakFit.Application.Catalog.ThuongHieu;
-using SneakFit.Application.System;
+using SneakFit.Application.Catalog.Voucher;
 using SneakFit.Data.EF;
 using SneakFit.Data.Entities;
 using System.Text.Json.Serialization;
-using SneakFit.Application.Catalog.VoucherRP;
+using SneakFit.Application.System.User;
+using Microsoft.AspNetCore.DataProtection;
+using SneakFit.Application.System.Role;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -42,13 +45,28 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
     options.User.RequireUniqueEmail = true; // yêu cầu mỗi email phải là duy nhất, không thể hai toàn khoản có trùng email
     options.Lockout.MaxFailedAccessAttempts = 5; // sau 5 lần nhập sai mật khẩu 
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5); // khóa tài khoản trong 5 phút
+    // Thêm cấu hình này để hỗ trợ nhiều phiên đăng nhập
+    options.SignIn.RequireConfirmedAccount = false;
+    options.SignIn.RequireConfirmedEmail = false;
+    options.SignIn.RequireConfirmedPhoneNumber = false;
 }).AddEntityFrameworkStores<SneakFitDbContext>() // sử dụng addentity để lưu trữ dữ liệu người dùng vào database
             .AddDefaultTokenProviders(); // cung cấp các token cho tính năng: xác thực  
+// Thêm cấu hình này ngay sau phần AddIdentity
+builder.Services.Configure<SecurityStampValidatorOptions>(options =>
+{
+    // Kéo dài thời gian xác thực security stamp lên 1 ngày
+    options.ValidationInterval = TimeSpan.FromDays(1);
+});            
+// Thêm sau phần khai báo các dịch vụ
+builder.Services.AddDataProtection()
+    .SetApplicationName("SneakFit")
+    .SetDefaultKeyLifetime(TimeSpan.FromDays(14)); // Đặt thời gian sống cho key
 //Declare DI
 builder.Services.AddScoped<IThuongHieuService, ThuongHieuService>(); // khai báo dịch vụ
 builder.Services.AddScoped<IDeGiayService, DeGiayService>(); // khai báo dịch vụ
 builder.Services.AddScoped<IChatLieuService, ChatLieuService>(); // khai báo dịch vụ
 builder.Services.AddScoped<IUserService, UserService>(); // khai báo dịch vụ
+builder.Services.AddScoped<IRoleService, RoleService>(); // khai báo dịch vụ
 builder.Services.AddScoped<UserManager<AppUser>, UserManager<AppUser>>();
 builder.Services.AddScoped<SignInManager<AppUser>, SignInManager<AppUser>>();
 builder.Services.AddScoped<RoleManager<IdentityRole>, RoleManager<IdentityRole>>();
@@ -92,6 +110,7 @@ builder.Services.AddSwaggerGen(x =>
         }
     });
 });
+
 string issuer = builder.Configuration.GetValue<string>("Tokens:Issuer");
 string signingKey = builder.Configuration.GetValue<string>("Tokens:Key");
 byte[] signingKeyBytes = System.Text.Encoding.UTF8.GetBytes(signingKey);

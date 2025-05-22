@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using SneakFit.ViewModels.Common;
 using SneakFit.ViewModels.System.User;
 
-namespace SneakFit.Application.System
+namespace SneakFit.Application.System.User
 {
     public interface IUserService
     {
@@ -15,6 +15,6 @@ namespace SneakFit.Application.System
         Task<ApiResult<PagedResult<UserViewModels>>> GetUsersPaging(GetUserPagingRequest request);
         Task<ApiResult<UserViewModels>> GetById(Guid id);
         Task<bool> TrangThai(Guid id, bool trangThai);
-
+        Task<ApiResult<bool>> RoleAssign(Guid id, RoleAssignRequest request);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -24,6 +25,10 @@ namespace SneakFit.Data.EF
         {
             optionsBuilder.UseSqlServer("Server=LAPTOP-PH9VPOUT\\SQLEXPRESS;Database=SneakFit;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true");       
         }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Seed();
+        }
         public DbSet<ChatLieu> ChatLieu { get; set; }
         public DbSet<DanhMuc> DanhMuc { get; set; }
         public DbSet<DeGiay> DeGiay { get; set; }
@@ -40,11 +45,5 @@ namespace SneakFit.Data.EF
         public DbSet<SanPhamChiTiet> SanPhamChiTiet { get; set; }
         public DbSet<ThuongHieu> ThuongHieu { get; set; }
         public DbSet<Voucher> Voucher { get; set; }
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            base.OnModelCreating(builder);
-            builder.ApplyConfiguration(new AppUserConfiguration());
-            builder.Seed();
-        }
     }
 }

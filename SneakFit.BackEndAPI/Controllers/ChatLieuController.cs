@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SneakFit.Application.Catalog.ChatLieu;
 using SneakFit.ViewModels.Catalog.ChatLieu;
+using SneakFit.ViewModels.Catalog.Voucher;
 
 namespace SneakFit.BackEndAPI.Controllers
 {
@@ -15,22 +16,20 @@ namespace SneakFit.BackEndAPI.Controllers
         {
             _chatLieuService = chatLieuService;
         }
-
-        [HttpGet("GetAll")]
-        public async Task<IActionResult> GetAll()
+        [HttpGet("paging")]
+        public async Task<IActionResult> GetAllPaging([FromQuery] ChatLieuPagingRequest request)
         {
-            var result = await _chatLieuService.GetAll();
+            var result = await _chatLieuService.GetAllPaging(request);
             return Ok(result);
         }
-
-        [HttpGet("{id}")]
+        [HttpGet("getbyid/{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
             var result = await _chatLieuService.GetById(id);
             return Ok(result);
         }
 
-        [HttpPost]
+        [HttpPost("create")]
         public async Task<IActionResult> Create([FromBody] ThemChatLieu request)
         {
             if (!ModelState.IsValid)
@@ -41,7 +40,7 @@ namespace SneakFit.BackEndAPI.Controllers
             return CreatedAtAction(nameof(GetById), new { id = chatlieus.Id }, chatlieus);
         }
 
-        [HttpPut("Update/{id}")]
+        [HttpPut("edit/{id}")]
         public async Task<IActionResult> Update([FromBody] SuaChatLieu request)
         {
             try
@@ -57,6 +56,12 @@ namespace SneakFit.BackEndAPI.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
+        }
+        [HttpGet("GetAll")]
+        public async Task<IActionResult> GetAll()
+        {
+            var categories = await _chatLieuService.GetAll();
+            return Ok(categories);
         }
     }
 }

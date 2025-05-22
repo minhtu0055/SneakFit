@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SneakFit.ViewModels.Catalog.VoucherCATA
+namespace SneakFit.ViewModels.Catalog.Voucher
 {
     public class VoucherViewModels
     {
@@ -22,9 +22,5 @@ namespace SneakFit.ViewModels.Catalog.VoucherCATA
         public TrangThaiGiamGia TrangThai { get; set; }
     }
 
-    public class GetVoucherPagingRequest : PagingRequestBase
-    {
-        public string? Keyword { get; set; }
-        public TrangThaiGiamGia? Status { get; set; }
-    }
+    
 }

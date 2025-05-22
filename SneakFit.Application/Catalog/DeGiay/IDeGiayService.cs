@@ -1,4 +1,5 @@
 ﻿using SneakFit.ViewModels.Catalog.DeGiay;
+using SneakFit.ViewModels.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace SneakFit.Application.Catalog.DeGiay
 {
    public  interface IDeGiayService
     {
-        Task<List<DeGiayViewModels>> GetAll();
+        Task<PagedResult<DeGiayViewModels>> GetAllPaging(DeGiayPagingRequest request);
         Task<DeGiayViewModels> GetById(Guid id);
         Task<DeGiayViewModels> Create(ThemDeGiay request);
         Task<DeGiayViewModels> Update(SuaDeGiay request);

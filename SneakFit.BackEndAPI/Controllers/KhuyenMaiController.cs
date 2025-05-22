@@ -17,28 +17,22 @@ namespace SneakFit.BackEndAPI.Controllers
         {
             _khuyenMaiService = khuyenMaiService;
         }
-
-        // GET: api/KhuyenMai
         [HttpGet]
         public async Task<IActionResult> GetAllPaging([FromQuery] PhanTrangKhuyenMai request)
         {
             var result = await _khuyenMaiService.GetAllPaging(request);
             return Ok(new ApiSuccessResult<PagedResult<KhuyenMaiViewModels>>(result));
         }
-
-        // GET: api/KhuyenMai/{id}
-        [HttpGet("{id}")]
+        [HttpGet("GetById/{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
             var result = await _khuyenMaiService.GetById(id);
             if (result == null)
                 return NotFound(new ApiErrorResult<KhuyenMaiViewModels>($"Không tìm thấy khuyến mãi có ID: {id}"));
-
             return Ok(new ApiSuccessResult<KhuyenMaiViewModels>(result));
         }
 
-        // POST: api/KhuyenMai
-        [HttpPost]
+        [HttpPost("Create")]
         public async Task<IActionResult> Create([FromBody] ThemKhuyenMai request)
         {
             if (!ModelState.IsValid)
@@ -48,18 +42,16 @@ namespace SneakFit.BackEndAPI.Controllers
             return CreatedAtAction(nameof(GetById), new { id = result.Id }, new ApiSuccessResult<KhuyenMaiViewModels>(result));
         }
 
-        // PUT: api/KhuyenMai/{id}
-        [HttpPut("{id}")]
+        [HttpPut("Edit/{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] SuaKhuyenMai request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(new ApiErrorResult<KhuyenMaiViewModels>());
-
             request.Id = id;
             var result = await _khuyenMaiService.Update(request);
             return Ok(new ApiSuccessResult<KhuyenMaiViewModels>(result));
         }
-        [HttpPatch("{id}/trangThai")]
+        [HttpPatch("{id}/TrangThai")]
         public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] TrangThaiGiamGia trangThai)
         {
             var result = await _khuyenMaiService.UpdateStatus(id, trangThai);

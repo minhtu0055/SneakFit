@@ -1,4 +1,5 @@
 ﻿using SneakFit.ViewModels.Catalog.ChatLieu;
+using SneakFit.ViewModels.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +10,10 @@ namespace SneakFit.Application.Catalog.ChatLieu
 {
     public interface IChatLieuService
     {
-        Task<List<ChatLieuViewModels>> GetAll();
+        Task<PagedResult<ChatLieuViewModels>> GetAllPaging(ChatLieuPagingRequest request);
         Task<ChatLieuViewModels> GetById(Guid id);
         Task<ChatLieuViewModels> Create(ThemChatLieu request);
         Task<ChatLieuViewModels> Update(SuaChatLieu request);
+        Task<List<ChatLieuViewModels>> GetAll();
     }
 }

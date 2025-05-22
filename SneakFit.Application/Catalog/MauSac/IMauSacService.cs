@@ -1,4 +1,5 @@
 ﻿using SneakFit.ViewModels.Catalog.MauSac;
+using SneakFit.ViewModels.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace SneakFit.Application.Catalog.MauSac
 {
     public interface IMauSacService
     {
-        Task<List<MauSacViewModels>> GetAll();
+        Task<PagedResult<MauSacViewModels>> GetAllPaging(MauSacPagingRequest request);
         Task<MauSacViewModels> GetById(Guid id);
         Task<MauSacViewModels> Create(ThemMauSac request);
         Task<MauSacViewModels> Update(SuaMauSac request);

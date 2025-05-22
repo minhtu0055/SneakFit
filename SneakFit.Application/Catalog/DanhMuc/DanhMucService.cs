@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SneakFit.Data.EF;
 using SneakFit.ViewModels.Catalog.DanhMuc;
-using SneakFit.ViewModels.Catalog.DanhMuc;
 using System;
 using System.Collections.Generic;
 using System.Linq;

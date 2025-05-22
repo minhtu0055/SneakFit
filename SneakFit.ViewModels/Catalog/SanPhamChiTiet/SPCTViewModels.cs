@@ -9,7 +9,10 @@ namespace SneakFit.ViewModels.Catalog.SanPhamChiTiet
     public class SPCTViewModels
     {
         public Guid Id { get; set; }
-        public float Gia { get; set; }
+        public string TenSanPham { get; set; }
+        public string HinhAnh { get; set; }
+        public string MoTa { get; set; }
+        public decimal Gia { get; set; }
         public int SoLuong { get; set; }
         public DateTime NgayTao { get; set; }
         public Guid MauSacId { get; set; }

@@ -1,15 +1,10 @@
 ﻿using SneakFit.Data.Enums;
-using SneakFit.ViewModels.Catalog.VoucherCATA;
+using SneakFit.ViewModels.Catalog.Voucher;
 using SneakFit.ViewModels.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SneakFit.Application.Catalog.VoucherRP
+namespace SneakFit.ApiIntegration.Services
 {
-    public interface IVoucherService
+    public interface IVoucherApiClient
     {
         Task<VoucherViewModels> Create(CreateVoucher request); // Thêm 
         Task<VoucherViewModels> Update(UpdateVoucher request); // Sửa
