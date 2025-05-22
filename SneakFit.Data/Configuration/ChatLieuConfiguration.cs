@@ -13,7 +13,6 @@ namespace SneakFit.Data.Configuration
     {
         public void Configure(EntityTypeBuilder<ChatLieu> builder)
         {
-            builder.ToTable("ChatLieu");
             builder.HasKey(c => c.Id);
             builder.Property(c => c.TenChatLieu).IsRequired().HasMaxLength(50);
         }

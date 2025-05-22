@@ -18,7 +18,11 @@ namespace SneakFit.Data.Configuration
             builder.Property(x => x.SoLuong).IsRequired();
             builder.Property(x => x.TrangThai).IsRequired();
             builder.Property(x => x.NgayTao).IsRequired();
-
+            builder.HasOne(x => x.ChatLieu).WithMany(x => x.SanPhamChiTiet).HasForeignKey(x => x.ChatLieuId);
+            builder.HasOne(x => x.MauSac).WithMany(x => x.SanPhamChiTiet).HasForeignKey(x => x.MauSacId);
+            builder.HasOne(x => x.KichThuoc).WithMany(x => x.SanPhamChiTiet).HasForeignKey(x => x.KichThuocId);
+            builder.HasOne(x => x.DeGiay).WithMany(x => x.SanPhamChiTiet).HasForeignKey(x => x.DeGiayId);
+            builder.HasOne(x => x.KichThuoc).WithMany(x => x.SanPhamChiTiet).HasForeignKey(x => x.KichThuocId);
         }
     }
 }

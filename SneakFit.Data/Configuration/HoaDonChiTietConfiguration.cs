@@ -16,6 +16,8 @@ namespace SneakFit.Data.Configuration
             builder.HasKey(x => x.Id);
             builder.Property(x => x.SoLuong).IsRequired();
             builder.Property(x => x.GiaBan).HasColumnType("decimal(18,2)").IsRequired();
+            builder.HasOne(x => x.SanPhamChiTiet).WithMany(x => x.HoaDonChiTiet).HasForeignKey(x => x.SanPhamChiTietId);
+            builder.HasOne(x => x.HoaDon).WithMany(x => x.HoaDonChiTiet).HasForeignKey(x => x.HoaDonId);
         }
     }
 }

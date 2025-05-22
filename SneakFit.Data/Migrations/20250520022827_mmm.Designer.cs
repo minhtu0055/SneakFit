@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SneakFit.Data.EF;
 
@@ -11,9 +12,11 @@ using SneakFit.Data.EF;
 namespace SneakFit.Data.Migrations
 {
     [DbContext(typeof(SneakFitDbContext))]
-    partial class SneakFitDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250520022827_mmm")]
+    partial class mmm
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -236,14 +239,14 @@ namespace SneakFit.Data.Migrations
                         {
                             Id = new Guid("69bd714f-9576-45ba-b5b7-f00649be00de"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "eb20ebc6-8bbd-4ef9-a5f1-e446134f2110",
+                            ConcurrencyStamp = "6073709c-14ce-4c9a-99b6-0e6ad6e49404",
                             Email = "tupmph49568@gmail.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NgaySinh = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NormalizedEmail = "tupmph49568@gmail.com",
                             NormalizedUserName = "Admin",
-                            PasswordHash = "AQAAAAIAAYagAAAAEFg5UlMETjVR0HHV2ctqAtZaOTcX7JwTvDGwkucYcoQIUAtSIDZ/QWl6O8dimLBCMQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEFlNK8hcziWGdQzUmzTDKz5Jse7Tj699Q9kPe/3gZOCKpGCVhP10bAG4B/MQl3Fx2Q==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
                             TrangThai = true,
@@ -342,9 +345,6 @@ namespace SneakFit.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("NgayTao")
-                        .HasColumnType("datetime2");
-
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
@@ -371,7 +371,7 @@ namespace SneakFit.Data.Migrations
                     b.Property<DateTime>("NgayTao")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("SanPhamChiTietId")
+                    b.Property<Guid?>("SanPhamChiTietId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("SoLuong")
@@ -770,9 +770,7 @@ namespace SneakFit.Data.Migrations
 
                     b.HasOne("SneakFit.Data.Entities.SanPhamChiTiet", "SanPhamChiTiet")
                         .WithMany("GioHangChiTiet")
-                        .HasForeignKey("SanPhamChiTietId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("SanPhamChiTietId");
 
                     b.Navigation("GioHang");
 

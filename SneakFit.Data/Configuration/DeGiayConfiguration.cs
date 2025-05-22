@@ -13,7 +13,6 @@ namespace SneakFit.Data.Configuration
     {
         public void Configure(EntityTypeBuilder<DeGiay> builder)
         {
-            builder.ToTable("DeGiay");
             builder.HasKey(dg => dg.Id);
             builder.Property(dg => dg.TenDeGiay).IsRequired().HasMaxLength(50);
         }

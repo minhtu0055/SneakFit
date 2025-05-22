@@ -13,7 +13,6 @@ namespace SneakFit.Data.Configuration
     {
         public void Configure(EntityTypeBuilder<KichThuoc> builder)
         {
-            builder.ToTable("KichThuoc");
             builder.HasKey(k => k.Id);
             builder.Property(k => k.MaKichThuoc).IsRequired();
         }

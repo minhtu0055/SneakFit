@@ -13,7 +13,6 @@ namespace SneakFit.Data.Configuration
     {
         public void Configure(EntityTypeBuilder<KhuyenMai> builder)
         {
-            builder.ToTable("KhuyenMai");
             builder.HasKey(x => x.Id);
             builder.Property(x => x.TenKhuyenMai).IsRequired().HasMaxLength(50);
             builder.Property(x => x.MoTa).HasMaxLength(200);

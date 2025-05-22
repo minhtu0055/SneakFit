@@ -11,7 +11,6 @@ namespace SneakFit.Data.Entities
         public Guid Id { get; set; }
         public int SoLuong { get; set; }
         public decimal GiaBan { get; set; }
-        public Guid KhuyenMaiId { get; set; }
         public Guid HoaDonId { get; set; }
         public Guid SanPhamChiTietId { get; set; }
         public  HoaDon HoaDon { get; set; }

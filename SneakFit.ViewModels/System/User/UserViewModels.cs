@@ -8,7 +8,7 @@ namespace SneakFit.ViewModels.System.User
 {
     public class UserViewModels
     {
-        public string Id { get; set; }
+        public Guid Id { get; set; }
         public string UserName { get; set; }
         public DateTime NgaySinh { get; set; }
         public string? UrlHinhAnh { get; set; }

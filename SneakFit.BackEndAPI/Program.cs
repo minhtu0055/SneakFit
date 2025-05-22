@@ -20,6 +20,7 @@ using System.Text.Json.Serialization;
 using SneakFit.Application.System.User;
 using Microsoft.AspNetCore.DataProtection;
 using SneakFit.Application.System.Role;
+using SneakFit.Application.Catalog.GioHang;
 
 
 
@@ -35,7 +36,7 @@ builder.Services.AddDbContext<SneakFitDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
-builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
+builder.Services.AddIdentity<AppUser, IdentityRole<Guid>>(options =>
 {
     options.Password.RequireDigit = true; //yêu có ít nhất 1 chữ số 
     options.Password.RequireLowercase = true; // yêu cầu có ít nhất chứ thường
@@ -69,7 +70,8 @@ builder.Services.AddScoped<IUserService, UserService>(); // khai báo dịch v�
 builder.Services.AddScoped<IRoleService, RoleService>(); // khai báo dịch vụ
 builder.Services.AddScoped<UserManager<AppUser>, UserManager<AppUser>>();
 builder.Services.AddScoped<SignInManager<AppUser>, SignInManager<AppUser>>();
-builder.Services.AddScoped<RoleManager<IdentityRole>, RoleManager<IdentityRole>>();
+builder.Services.AddScoped<RoleManager<IdentityRole<Guid>>, RoleManager<IdentityRole<Guid>>>();
+builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IKichThuocService, KichThuocService>(); // khai báo dịch vụ
 builder.Services.AddScoped<IMauSacService, MauSacService>(); // khai báo dịch vụ
 builder.Services.AddScoped<IDanhMucService, DanhMucService>(); // khai báo dịch vụ
@@ -77,6 +79,7 @@ builder.Services.AddScoped<ISanPhamService, SanPhamService>(); // khai báo dị
 builder.Services.AddScoped<ISanPhamChiTetService, SanPhamChiTietChiTetService>(); // khai báo dịch vụ
 builder.Services.AddScoped<IKhuyenMaiService, KhuyenMaiService>();
 builder.Services.AddScoped<IVoucherService, VoucherService>(); // khai báo dịch vụ
+builder.Services.AddScoped<IGioHangService, GioHangService>(); // khai báo dịch vụ
 
 
 builder.Services.AddEndpointsApiExplorer();
