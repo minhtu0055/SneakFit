@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SneakFit.Data.Configuration;
@@ -12,7 +13,7 @@ using SneakFit.Data.Extensions;
 
 namespace SneakFit.Data.EF
 {
-    public class SneakFitDbContext : IdentityDbContext<AppUser>
+    public class SneakFitDbContext : IdentityDbContext<AppUser, IdentityRole<Guid>, Guid>
     {
         public SneakFitDbContext()
         {
@@ -23,10 +24,32 @@ namespace SneakFit.Data.EF
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server=GIGABYTE\\SQLEXPRESS;Database=SneakFit;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true");       
+            optionsBuilder.UseSqlServer("Server=LAPTOP-R3R9CLAI\\SQLEXPRESS;Database=SneakFit1;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true");       
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.ApplyConfiguration(new ChatLieuConfiguration());
+            modelBuilder.ApplyConfiguration(new VoucherConfiguration());
+            modelBuilder.ApplyConfiguration(new DanhMucConfiguration());
+            modelBuilder.ApplyConfiguration(new DeGiayConfiguration());
+            modelBuilder.ApplyConfiguration(new GioHangChiTietConfiguration());
+            modelBuilder.ApplyConfiguration(new HinhAnhSanPhamConfiguration());
+            modelBuilder.ApplyConfiguration(new HoaDonChiTietConfiguration());
+            modelBuilder.ApplyConfiguration(new HoaDonConfiguration());
+            modelBuilder.ApplyConfiguration(new KhuyenMaiChiTietConfiguration());
+            modelBuilder.ApplyConfiguration(new KhuyenMaiConfiguration());
+            modelBuilder.ApplyConfiguration(new KichThuocConfiguration());
+            modelBuilder.ApplyConfiguration(new MauSacConfiguration());
+            modelBuilder.ApplyConfiguration(new SanPhamChiTietConfiguration());
+            modelBuilder.ApplyConfiguration(new SanPhamConfiguration());
+            modelBuilder.ApplyConfiguration(new ThuongHieuConfiguration());
+            modelBuilder.ApplyConfiguration(new SanPhamConfiguration());
+
+            modelBuilder.Entity<IdentityUserClaim<Guid>>();
+            modelBuilder.Entity<IdentityUserRole<Guid>>().HasKey(x => new { x.UserId, x.RoleId });
+            modelBuilder.Entity<IdentityUserLogin<Guid>>().HasKey(x => x.UserId);
+            modelBuilder.Entity<IdentityRoleClaim<Guid>>();
+            modelBuilder.Entity<IdentityUserToken<Guid>>().HasKey(x => x.UserId);
             modelBuilder.Seed();
         }
         public DbSet<ChatLieu> ChatLieu { get; set; }

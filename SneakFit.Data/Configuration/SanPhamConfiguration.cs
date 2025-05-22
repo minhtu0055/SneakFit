@@ -17,6 +17,7 @@ namespace SneakFit.Data.Configuration
             builder.Property(x => x.TenSanPham).IsRequired().HasMaxLength(50);
             builder.Property(x => x.Mota).HasMaxLength(200);
             builder.Property(x => x.TrangThai).IsRequired();
+            builder.HasOne(x => x.DanhMuc).WithMany(x => x.SanPham).HasForeignKey(x => x.DanhMucId);
         }
     }
 }

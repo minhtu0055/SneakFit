@@ -13,7 +13,6 @@ namespace SneakFit.Data.Configuration
     {
         public void Configure(EntityTypeBuilder<Voucher> builder)
         {
-            builder.ToTable("Vouchers");
             builder.HasKey(x => x.Id);
             builder.Property(x => x.MaVoucher).IsRequired().HasMaxLength(50);
             builder.Property(x => x.GiaTriGiamGia).HasColumnType("decimal(18,2)").IsRequired();

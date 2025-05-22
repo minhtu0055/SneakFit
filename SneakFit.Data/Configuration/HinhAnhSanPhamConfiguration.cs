@@ -13,9 +13,9 @@ namespace SneakFit.Data.Configuration
     {
         public void Configure(EntityTypeBuilder<HinhAnhSanPham> builder)
         {
-            builder.ToTable("HinhAnhSanPham");
             builder.HasKey(h => h.Id);
-            builder.Property(h => h.UrlHinhAnh).IsRequired().HasMaxLength(50);
+            builder.Property(h => h.UrlHinhAnh).IsRequired().HasMaxLength(100);
+            builder.HasOne(x => x.SanPhamChiTiet).WithMany(x => x.HinhAnhSanPham).HasForeignKey(x => x.SanPhamChiTietId);
         }
     }
 }

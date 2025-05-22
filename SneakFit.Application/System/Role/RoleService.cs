@@ -11,9 +11,9 @@ namespace SneakFit.Application.System.Role
 {
     public class RoleService : IRoleService
     {
-        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly RoleManager<IdentityRole<Guid>> _roleManager;
 
-        public RoleService(RoleManager<IdentityRole> roleManager)
+        public RoleService(RoleManager<IdentityRole<Guid>> roleManager)
         {
             _roleManager = roleManager;
         }
@@ -22,7 +22,7 @@ namespace SneakFit.Application.System.Role
             var roles = await _roleManager.Roles
                 .Select(x => new RoleViewModel()
                 {
-                    Id = x.Id,
+                    Id = x.Id.ToString(),
                     Name = x.Name
                 }).ToListAsync();
 

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SneakFit.Data.EF;
 
@@ -11,9 +12,11 @@ using SneakFit.Data.EF;
 namespace SneakFit.Data.Migrations
 {
     [DbContext(typeof(SneakFitDbContext))]
-    partial class SneakFitDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250520015523_checktesst")]
+    partial class checktesst
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,6 +24,45 @@ namespace SneakFit.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NormalizedName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("IdentityRole");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "8d04dce2-969a-435d-bba4-df3f325983dc",
+                            Name = "Admin",
+                            NormalizedName = "Admin"
+                        },
+                        new
+                        {
+                            Id = "8d04dce2-969a-435d-bba4-df3f325984dc",
+                            Name = "Nhân Viên",
+                            NormalizedName = "Nhân Viên"
+                        },
+                        new
+                        {
+                            Id = "8d04dce2-979a-435d-bba4-df3f325983dc",
+                            Name = "Khách Hàng",
+                            NormalizedName = "Khách Hàng"
+                        });
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
                 {
@@ -40,26 +82,6 @@ namespace SneakFit.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Roles");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("8d04dce2-969a-435d-bba4-df3f325983dc"),
-                            Name = "Admin",
-                            NormalizedName = "ADMIN"
-                        },
-                        new
-                        {
-                            Id = new Guid("8d04dce2-969a-435d-bba4-df3f325984dc"),
-                            Name = "Nhân Viên",
-                            NormalizedName = "NHÂN VIÊN"
-                        },
-                        new
-                        {
-                            Id = new Guid("8d04dce2-979a-435d-bba4-df3f325983dc"),
-                            Name = "Khách Hàng",
-                            NormalizedName = "KHÁCH HÀNG"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -236,17 +258,17 @@ namespace SneakFit.Data.Migrations
                         {
                             Id = new Guid("69bd714f-9576-45ba-b5b7-f00649be00de"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "eb20ebc6-8bbd-4ef9-a5f1-e446134f2110",
+                            ConcurrencyStamp = "50f4a692-4c79-4154-b877-6939187e984f",
                             Email = "tupmph49568@gmail.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NgaySinh = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NormalizedEmail = "tupmph49568@gmail.com",
                             NormalizedUserName = "Admin",
-                            PasswordHash = "AQAAAAIAAYagAAAAEFg5UlMETjVR0HHV2ctqAtZaOTcX7JwTvDGwkucYcoQIUAtSIDZ/QWl6O8dimLBCMQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEP272MDrgPGxakJxhoi/umNDRP+IV0feT/Q/IOHBx4qON+HFIKRJEbTaY3JYUrcMgw==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
-                            TrangThai = true,
+                            TrangThai = false,
                             TwoFactorEnabled = false,
                             UserName = "Admin"
                         });
@@ -322,18 +344,6 @@ namespace SneakFit.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("DeGiay");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("9f4d4a6e-2bfa-4e8c-9d2c-3f6a7e9b87cb"),
-                            TenDeGiay = "Cao Su"
-                        },
-                        new
-                        {
-                            Id = new Guid("8f8d4a1e-2bfa-4e8c-9d2c-3f6a7e9b81cb"),
-                            TenDeGiay = "Nhựa"
-                        });
                 });
 
             modelBuilder.Entity("SneakFit.Data.Entities.GioHang", b =>
@@ -341,9 +351,6 @@ namespace SneakFit.Data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("NgayTao")
-                        .HasColumnType("datetime2");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
@@ -371,7 +378,7 @@ namespace SneakFit.Data.Migrations
                     b.Property<DateTime>("NgayTao")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("SanPhamChiTietId")
+                    b.Property<Guid?>("SanPhamChiTietId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("SoLuong")
@@ -770,9 +777,7 @@ namespace SneakFit.Data.Migrations
 
                     b.HasOne("SneakFit.Data.Entities.SanPhamChiTiet", "SanPhamChiTiet")
                         .WithMany("GioHangChiTiet")
-                        .HasForeignKey("SanPhamChiTietId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("SanPhamChiTietId");
 
                     b.Navigation("GioHang");
 
