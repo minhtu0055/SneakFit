@@ -124,11 +124,8 @@
 
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <div>
-                                <button type="button" class="btn btn-primary me-2" id="btnChinhGia">
-                                    Chỉnh sửa giá chung
-                                </button>
-                                <button type="button" class="btn btn-primary me-2" id="btnChinhSoLuong">
-                                    Chỉnh sửa số lượng
+                                <button type="button" class="btn btn-primary me-2" id="btnChinhGiavaSoLuong">
+                                    Sửa giá và số lượng chung
                                 </button>
                                 <button type="submit" class="btn btn-primary" id="btnHoanTat">
                                     <i class="bx bx-check me-1"></i> Hoàn tất
@@ -177,11 +174,58 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-minicolors/2.3.6/jquery.minicolors.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-minicolors/2.3.6/jquery.minicolors.min.js"></script>
 
+    <style>
+        .selected-item {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            margin-top: 12px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            padding: 2px 16px 2px 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #fff;
+            min-width: 48px;
+            min-height: 32px;
+        }
+        .selected-item .remove-x {
+            position: absolute;
+            top: -7px;
+            right: -7px;
+            width: 20px;
+            height: 20px;
+            background: #ff4d4f;
+            color: #fff;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            z-index: 2;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+            transition: background 0.2s;
+        }
+        .selected-item .remove-x:hover {
+            background: #d9363e;
+        }
+        #selectedSizes, #selectedColors {
+            margin-top: 12px;
+        }
+        /* Đảm bảo SweetAlert2 luôn nổi trên modal */
+        .swal2-container {
+            z-index: 10000 !important;
+        }
+    </style>
+
     <script>
         // Biến toàn cục
         let selectedSizes = [];
         let selectedColors = [];
         let spctItems = [];
+        let selectedColorId = null;
 
         // Hàm mở modal thêm sản phẩm
         function openAddSanPhamModal() {
@@ -217,6 +261,15 @@
 
         // Hàm mở modal kích thước
         function openSizeModal() {
+            // Kiểm tra các trường bắt buộc trước khi mở modal
+            const sanPhamId = $('select[name="SanPhamId"]').val();
+            const thuongHieuId = $('select[name="ThuongHieuId"]').val();
+            const chatLieuId = $('select[name="ChatLieuId"]').val();
+            const deGiayId = $('select[name="DeGiayId"]').val();
+            if (!sanPhamId || !thuongHieuId || !chatLieuId || !deGiayId) {
+                Swal.fire('Lỗi', 'Vui lòng chọn đầy đủ thông tin sản phẩm chi tiết', 'error');
+                return;
+            }
             $.get('/KichThuoc/GetAll', function(sizes) {
                 const sizeGrid = $('#sizeModal .size-grid');
                 sizeGrid.empty();
@@ -233,94 +286,80 @@
             });
         }
 
-        // Hàm mở modal màu sắc
+        // Hàm mở modal màu sắc (chỉ input mã màu, có thể sửa, có thể chọn)
         function openColorModal() {
+            // Kiểm tra các trường bắt buộc trước khi mở modal
+            const sanPhamId = $('select[name="SanPhamId"]').val();
+            const thuongHieuId = $('select[name="ThuongHieuId"]').val();
+            const chatLieuId = $('select[name="ChatLieuId"]').val();
+            const deGiayId = $('select[name="DeGiayId"]').val();
+            if (!sanPhamId || !thuongHieuId || !chatLieuId || !deGiayId) {
+                Swal.fire('Lỗi', 'Vui lòng chọn đầy đủ thông tin sản phẩm chi tiết', 'error');
+                return;
+            }
             $.get('/MauSac/GetAll', function(colors) {
                 const colorGrid = $('#colorModal .color-grid');
                 colorGrid.empty();
                 colors.forEach(color => {
-                    let colorHex = color.tenMauSac && /^#[0-9A-Fa-f]{6}$/.test(color.tenMauSac) ? color.tenMauSac : '#000000';
+                    let colorHex = color.maMauSac && /^#[0-9A-Fa-f]{6}$/.test(color.maMauSac) ? color.maMauSac : '#000000';
+                    // Kiểm tra nếu màu này đã được chọn trước đó
                     const isSelected = selectedColors.some(c => c.id == color.id);
                     colorGrid.append(`
-                        <div class="color-item" style="text-align: center;">
-                            <button type="button" class="color-btn ${isSelected ? 'selected' : ''}"
-                                style="width: 30px; height: 30px; border-radius: 5px; margin-bottom: 5px; background-color: ${colorHex}; border:2px solid ${isSelected ? '#007bff' : '#888'}; box-shadow:${isSelected ? '0 0 0 2px #007bff' : 'none'};"
-                                data-color-id="${color.id}"
-                                data-color-name="${colorHex}">
-                            </button>
-                            <input type="text" class="form-control form-control-sm mt-1 text-center" value="${colorHex}" readonly style="background:${colorHex}; color:${getContrastYIQ(colorHex)}; font-weight:bold; border:none;" />
-                        </div>
+                        <input type="text"
+                            class="form-control form-control-sm ma-mau-input mb-2${isSelected ? ' selected' : ''}"
+                            value="${colorHex}"
+                            data-color-id="${color.id}"
+                            data-color-name="${color.tenMauSac}"
+                            style="width:110px; background:${colorHex}; color:${getContrastYIQ(colorHex)}; font-weight:bold; text-align:center; cursor:pointer; margin-right:10px; margin-bottom:10px; border:${isSelected ? '3px solid #0056b3' : '2px solid #888'};${isSelected ? 'box-shadow:0 0 0 2px #b3d1ff;' : ''}"
+                            readonly
+                        />
                     `);
                 });
                 $('#colorModal').modal('show');
             });
         }
 
-        // Xử lý sự kiện khi trang load xong
-        $(document).ready(function() {
-            // Xử lý submit form trong modal thương hiệu
-            $(document).on('submit', '#createThuongHieuForm', function(e) {
-                e.preventDefault();
-                handleFormSubmit(this, '/ThuongHieu/Create', 'ThuongHieuId', 'tenThuongHieu');
-            });
-
-            // Xử lý submit form trong modal sản phẩm
-            $(document).on('submit', '#createSanPhamForm', function(e) {
-                e.preventDefault();
-                handleFormSubmit(this, '/SanPham/Create', 'SanPhamId', 'tenSanPham');
-            });
-
-            // Xử lý submit form trong modal đế giày
-            $(document).on('submit', '#createDeGiayForm', function(e) {
-                e.preventDefault();
-                handleFormSubmit(this, '/DeGiay/Create', 'DeGiayId', 'tenDeGiay');
-            });
-
-            // Xử lý submit form trong modal chất liệu
-            $(document).on('submit', '#createChatLieuForm', function(e) {
-                e.preventDefault();
-                handleFormSubmit(this, '/ChatLieu/Create', 'ChatLieuId', 'tenChatLieu');
-            });
-
-            renderSelectedSizes();
-            renderSelectedColors();
-
-            // Khởi tạo color picker cho ô nhập mã màu (luôn hiển thị)
-            $('#newColorHex').minicolors({
-                control: 'hue',
-                format: 'hex',
-                theme: 'bootstrap',
-                swatches: []
-            });
+        // Hiệu ứng hover đậm hơn cho input mã màu
+        $(document).on('mouseenter', '.ma-mau-input', function() {
+            if (!$(this).hasClass('selected')) {
+                $(this).css('border', '3px solid rgb(250, 121, 15)');
+                $(this).css('box-shadow', '0 0 0 2px rgb(46, 190, 222)');
+            }
         });
-
-        // Hàm xử lý chung cho việc submit form
-        function handleFormSubmit(form, url, selectId, nameField) {
-            $.ajax({
-                url: url,
-                type: 'POST',
-                data: $(form).serialize(),
-                success: function(res) {
-                    if(res.success) {
-                        // Đóng modal
-                        $(form).closest('.modal').modal('hide');
-
-                        // Reload lại dropdown
-                        $.get(url.replace('/Create', '/getall'), function(data) {
-                            const select = $(`select[name="${selectId}"]`);
-                            select.empty();
-                            select.append(`<option value="">-- Chọn ${selectId.replace('Id', '')} --</option>`);
-                            data.forEach(function(item) {
-                                select.append(`<option value="${item.id}">${item[nameField]}</option>`);
-                            });
-                        });
-                    } else {
-                        // Hiển thị lại form với lỗi
-                        $(form).closest('.modal-content').html(res);
-                    }
-                }
+        $(document).on('mouseleave', '.ma-mau-input', function() {
+            if (!$(this).hasClass('selected')) {
+                $(this).css('border', '2px solid #888');
+                $(this).css('box-shadow', 'none');
+            }
+        });
+        // Cho phép chọn nhiều màu sắc 1 lúc
+        $(document).on('click', '.ma-mau-input', function() {
+            $(this).toggleClass('selected');
+            if ($(this).hasClass('selected')) {
+                $(this).css({'border':'3px solid rgb(250, 121, 15)','box-shadow':'0 0 0 2px rgb(86, 211, 57)'});
+            } else {
+                $(this).css({'border':'2px solid #888','box-shadow':'none'});
+            }
+        });
+        // Khi bấm Thêm, lấy tất cả các màu đã chọn
+        $('#confirmColorSelection').on('click', function() {
+            let selectedInputs = $('.ma-mau-input.selected');
+            if (selectedInputs.length === 0) {
+                Swal.fire('Lỗi', 'Vui lòng chọn ít nhất một màu!', 'error');
+                return;
+            }
+            selectedColors = [];
+            selectedInputs.each(function() {
+                selectedColors.push({
+                    id: $(this).data('color-id'),
+                    name: $(this).val(),
+                    ten: $(this).data('color-name')
+                });
             });
-        }
+            $('#colorModal').modal('hide');
+            renderSelectedColors();
+            generateProductDetails();
+        });
 
         // Xác nhận chọn kích thước
         $('#confirmSizeSelection').on('click', function() {
@@ -331,22 +370,17 @@
                     name: $(this).data('size-name')
                 });
             });
+            // Kiểm tra các trường bắt buộc
+            const sanPhamId = $('select[name="SanPhamId"]').val();
+            const thuongHieuId = $('select[name="ThuongHieuId"]').val();
+            const chatLieuId = $('select[name="ChatLieuId"]').val();
+            const deGiayId = $('select[name="DeGiayId"]').val();
+            if (!sanPhamId || !thuongHieuId || !chatLieuId || !deGiayId) {
+                Swal.fire('Lỗi', 'Vui lòng chọn đầy đủ thông tin sản phẩm chi tiết', 'error');
+                return;
+            }
             $('#sizeModal').modal('hide');
             renderSelectedSizes();
-            generateProductDetails();
-        });
-
-        // Xác nhận chọn màu sắc
-        $('#confirmColorSelection').on('click', function() {
-            selectedColors = [];
-            $('#colorModal .color-btn.selected').each(function() {
-                selectedColors.push({
-                    id: $(this).data('color-id'),
-                    name: $(this).data('color-name')
-                });
-            });
-            $('#colorModal').modal('hide');
-            renderSelectedColors();
             generateProductDetails();
         });
 
@@ -357,15 +391,6 @@
                 $(this).css({'border':'2px solid #007bff','background':'#e3f0ff','color':'#007bff'});
             else
                 $(this).css({'border':'2px solid #ddd','background':'white','color':'black'});
-        });
-
-        // Toggle chọn màu
-        $(document).on('click', '.color-btn', function() {
-            $(this).toggleClass('selected');
-            if ($(this).hasClass('selected'))
-                $(this).css({'border':'2px solid #007bff','box-shadow':'0 0 0 2px #007bff'});
-            else
-                $(this).css({'border':'2px solid #888','box-shadow':'none'});
         });
 
         function generateProductDetails() {
@@ -381,13 +406,16 @@
 
             // Kiểm tra các trường bắt buộc
             if (!sanPhamId || !thuongHieuId || !chatLieuId || !deGiayId) {
-                Swal.fire('Lỗi', 'Vui lòng chọn đầy đủ thông tin sản phẩm, thương hiệu, chất liệu và đế giày', 'error');
-                return;
+                Swal.fire('Lỗi', 'Vui lòng chọn đầy đủ thông tin sản phẩm chi tiết', 'error');
             }
 
             // Kiểm tra đã chọn màu sắc và kích thước
             if (selectedColors.length === 0 || selectedSizes.length === 0) {
-                Swal.fire('Lỗi', 'Vui lòng chọn ít nhất một màu sắc và một kích thước', 'error');
+                let msg = '';
+                if (selectedColors.length === 0 && selectedSizes.length === 0) msg = 'Vui lòng chọn ít nhất một màu sắc và một kích thước';
+                else if (selectedColors.length === 0) msg = 'Vui lòng chọn ít nhất một màu sắc';
+                else msg = 'Vui lòng chọn ít nhất một kích thước';
+                Swal.fire('Lỗi', msg, 'error');
                 return;
             }
 
@@ -406,12 +434,12 @@
                             <td><input type="checkbox" class="product-checkbox" /></td>
                             <td class="stt">${stt++}</td>
                             <td class="product-name">${tenSanPham}</td>
-                            <td class="product-color">${color.name}</td>
+                            <td class="product-color">${color.ten}</td>
                             <td class="product-size">${size.name}</td>
                             <td><input type="number" class="form-control quantity-input" min="1" value="1" style="width: 80px;" /></td>
                             <td>
                                 <div class="input-group" style="width: 200px;">
-                                    <input type="text" class="form-control price-input" value="1000000" />
+                                    <input type="text" class="form-control price-input" value="1.000.000" />
                                     <span class="input-group-text">VNĐ</span>
                                 </div>
                             </td>
@@ -431,38 +459,64 @@
             });
         }
 
-        $('#btnHoanTat').on('click', function(e) {
+        // Khi bấm Hoàn tất, Sửa giá, Sửa số lượng
+        $('#btnHoanTat, #btnChinhGiavaSoLuong').on('click', function(e) {
             e.preventDefault();
-            let spctList = [];
-            $('#productDetailList tr').each(function() {
-                spctList.push({
-                    SanPhamId: $(this).data('sanpham-id'),
-                    ThuongHieuId: $(this).data('thuonghieu-id'),
-                    ChatLieuId: $(this).data('chatlieu-id'),
-                    DeGiayId: $(this).data('degiay-id'),
-                    MauSacId: $(this).data('mausac-id'),
-                    KichThuocId: $(this).data('kichthuoc-id'),
-                    SoLuong: $(this).find('.quantity-input').val(),
-                    Gia: $(this).find('.price-input').val(),
-                    TrangThai: $(this).data('trangthai') === "true"
+            // Kiểm tra các trường bắt buộc
+            const sanPhamId = $('select[name="SanPhamId"]').val();
+            const thuongHieuId = $('select[name="ThuongHieuId"]').val();
+            const chatLieuId = $('select[name="ChatLieuId"]').val();
+            const deGiayId = $('select[name="DeGiayId"]').val();
+            if (!sanPhamId || !thuongHieuId || !chatLieuId || !deGiayId) {
+                Swal.fire('Lỗi', 'Vui lòng chọn đầy đủ thông tin sản phẩm chi tiết', 'error');
+                return;
+            }
+            if (selectedColors.length === 0 && selectedSizes.length === 0) {
+                Swal.fire('Lỗi', 'Vui lòng chọn ít nhất một màu sắc và một kích thước', 'error');
+                return;
+            }
+            if (selectedColors.length === 0) {
+                Swal.fire('Lỗi', 'Vui lòng chọn ít nhất một màu sắc', 'error');
+                return;
+            }
+            if (selectedSizes.length === 0) {
+                Swal.fire('Lỗi', 'Vui lòng chọn ít nhất một kích thước', 'error');
+                return;
+            }
+            // Nếu là nút hoàn tất thì thực hiện logic gửi dữ liệu
+            if ($(this).attr('id') === 'btnHoanTat') {
+                let spctList = [];
+                $('#productDetailList tr').each(function() {
+                    spctList.push({
+                        SanPhamId: $(this).data('sanpham-id'),
+                        ThuongHieuId: $(this).data('thuonghieu-id'),
+                        ChatLieuId: $(this).data('chatlieu-id'),
+                        DeGiayId: $(this).data('degiay-id'),
+                        MauSacId: $(this).data('mausac-id'),
+                        KichThuocId: $(this).data('kichthuoc-id'),
+                        SoLuong: $(this).find('.quantity-input').val(),
+                        Gia: $(this).find('.price-input').val().replace(/\./g, ''),
+                        TrangThai: $(this).data('trangthai') === "true"
+                    });
                 });
-            });
-
-            $.ajax({
-                url: '/SPCT/CreateMultiple',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(spctList),
-                success: function(res) {
-                    if(res.success) {
-                        Swal.fire('Thành công', res.message, 'success').then(() => {
-                            window.location.href = '/SPCT/Index';
-                        });
-                    } else {
-                        Swal.fire('Lỗi', res.message, 'error');
+                $.ajax({
+                    url: '/SPCT/CreateMultiple',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(spctList),
+                    success: function(res) {
+                        if(res.success) {
+                            Swal.fire('Thành công', res.message, 'success').then(() => {
+                                window.location.href = '/SPCT/Index';
+                            });
+                        } else {
+                            // Nếu đã đủ dữ liệu các trường, chỉ hiện lỗi dữ liệu không hợp lệ
+                            Swal.fire('Lỗi', 'Lỗi dữ liệu không hợp lệ !!', 'error');
+                        }
                     }
-                }
-            });
+                });
+            }
+            // Nếu là nút sửa giá/số lượng thì chỉ cần kiểm tra điều kiện, không gửi dữ liệu
         });
 
         // Xử lý nút thêm kích thước mới
@@ -474,11 +528,18 @@
         });
 
         // Xử lý nút thêm màu sắc mới
-        $('#addNewColor').on('click', function() {
-            $.get('/MauSac/Create', function(html) {
-                $('#modalAddMauSacContent').html(html);
-                $('#modalAddMauSac').modal('show');
+        $(document).on('click', '#addNewColorHex', function() {
+            $('#modalAddMauSac').modal('show');
+            // Reset input
+            $('#addColorPicker').minicolors({
+                control: 'hue',
+                format: 'hex',
+                theme: 'bootstrap',
+                swatches: []
             });
+            $('#addColorPicker').minicolors('value', '#000000');
+            $('#addColorHex').val('#000000').css({'background':'#000000','color':'#fff'});
+            $('#addColorName').val('');
         });
 
         // Xử lý submit form trong modal kích thước
@@ -494,14 +555,15 @@
         });
 
         // Hiển thị selectedSizes và selectedColors ra ngoài với nút xóa
+        
         function renderSelectedSizes() {
             const container = $('#selectedSizes');
             container.empty();
             selectedSizes.forEach(size => {
                 container.append(`
-                    <div class="selected-item size-item d-inline-flex align-items-center me-2 mb-2" style="border:1px solid #ddd; border-radius:5px; padding:2px 8px; background:#fff;">
+                    <div class="selected-item size-item d-inline-flex align-items-center" style="background:#fff;">
                         <span>${size.name}</span>
-                        <button type="button" class="btn btn-link btn-sm text-danger ms-1 remove-size" data-size-id="${size.id}" style="font-size:18px;">&minus;</button>
+                        <span class="remove-x" data-size-id="${size.id}">&times;</span>
                     </div>
                 `);
             });
@@ -510,12 +572,11 @@
             const container = $('#selectedColors');
             container.empty();
             selectedColors.forEach(color => {
-                // Đảm bảo color.name là mã màu hợp lệ, nếu không thì dùng #000
                 let colorHex = color.name && /^#[0-9A-Fa-f]{6}$/.test(color.name) ? color.name : '#000000';
                 container.append(`
-                    <div class="selected-item color-item d-inline-flex align-items-center me-2 mb-2" style="border:1px solid #ddd; border-radius:5px; padding:2px 8px; background:${colorHex}; color:${getContrastYIQ(colorHex)};">
+                    <div class="selected-item color-item d-inline-flex align-items-center" style="background:${colorHex}; color:${getContrastYIQ(colorHex)};">
                         <span>${colorHex}</span>
-                        <button type="button" class="btn btn-link btn-sm text-danger ms-1 remove-color" data-color-id="${color.id}" style="font-size:18px;">&minus;</button>
+                        <span class="remove-x" data-color-id="${color.id}">&times;</span>
                     </div>
                 `);
             });
@@ -531,35 +592,46 @@
             return (yiq >= 128) ? '#000' : '#fff';
         }
         // Xóa kích thước đã chọn
-        $(document).on('click', '.remove-size', function() {
+        $(document).on('click', '.remove-x[data-size-id]', function() {
             const id = $(this).data('size-id');
             selectedSizes = selectedSizes.filter(s => s.id != id);
             renderSelectedSizes();
             generateProductDetails();
         });
         // Xóa màu đã chọn
-        $(document).on('click', '.remove-color', function() {
+        $(document).on('click', '.remove-x[data-color-id]', function() {
             const id = $(this).data('color-id');
             selectedColors = selectedColors.filter(c => c.id != id);
             renderSelectedColors();
             generateProductDetails();
         });
 
-        // Khi bấm '+ Thêm màu sắc', gọi API thêm màu mới vào DB và load lại danh sách màu
-        $(document).on('click', '#addNewColorHex', function() {
-            let hex = $('#newColorHex').val();
+        // Khi chọn màu ở color picker, fill vào input mã màu
+        $(document).on('change', '#addColorPicker', function() {
+            let hex = $(this).val();
+            $('#addColorHex').val(hex).css({'background':hex,'color':getContrastYIQ(hex)});
+        });
+
+        // Khi bấm Lưu trong modal thêm màu mới
+        $(document).on('click', '#saveNewColor', function() {
+            let hex = $('#addColorHex').val();
+            let ten = $('#addColorName').val();
+            if (!ten || ten.trim() === '') {
+                Swal.fire('Lỗi', 'Vui lòng nhập tên màu!', 'error');
+                return;
+            }
             if (!/^#[0-9A-Fa-f]{6}$/.test(hex)) {
                 Swal.fire('Lỗi', 'Vui lòng nhập đúng định dạng mã màu HEX, ví dụ: #FF0000', 'error');
                 return;
             }
-            // Gọi API thêm màu mới
             $.ajax({
-                url: '/MauSac/Create',
+                url: '/MauSac/CreateColor',
                 type: 'POST',
                 contentType: 'application/json',
-                data: JSON.stringify({ TenMauSac: hex }),
+                data: JSON.stringify({ TenMauSac: ten, MaMauSac: hex }),
                 success: function(res) {
                     if(res.success || res === true) {
+                        $('#modalAddMauSac').modal('hide');
                         openColorModal();
                     } else {
                         Swal.fire('Lỗi', res.message || 'Không thể thêm màu mới', 'error');
@@ -588,6 +660,59 @@
             if (e.key === 'Enter') {
                 $(this).blur();
             }
+        });
+
+        // Mở modal sửa giá và số lượng chung
+        $('#btnChinhGiavaSoLuong').on('click', function() {
+            // Nếu chưa có sản phẩm chi tiết thì báo lỗi
+            if ($('#productDetailList tr').length === 0) {
+                Swal.fire('Lỗi', 'Chưa có sản phẩm chi tiết nào để sửa!', 'error');
+                return;
+            }
+            // Lấy giá và số lượng đầu tiên để fill vào modal (nếu có)
+            let firstPrice = $('#productDetailList .price-input').first().val() || '';
+            let firstQuantity = $('#productDetailList .quantity-input').first().val() || '';
+            $('#editAllPrice').val(formatMoney(firstPrice));
+            $('#editAllQuantity').val(firstQuantity);
+            $('#modalEditPriceQuantity').modal('show');
+        });
+        // Định dạng tiền khi nhập
+        $('#editAllPrice').on('input', function() {
+            let val = $(this).val().replace(/\D/g, '');
+            $(this).val(formatMoney(val));
+        });
+        function formatMoney(value) {
+            value = value.toString().replace(/\D/g, '');
+            if (!value) return '';
+            return value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+        // Áp dụng giá và số lượng chung cho tất cả sản phẩm chi tiết
+        $('#btnApplyEditAll').on('click', function() {
+            let price = $('#editAllPrice').val().replace(/\./g, '');
+            let quantity = $('#editAllQuantity').val();
+            if (!price || isNaN(price) || parseInt(price) <= 0) {
+                Swal.fire('Lỗi', 'Vui lòng nhập giá hợp lệ!', 'error');
+                return;
+            }
+            if (!quantity || isNaN(quantity) || parseInt(quantity) <= 0) {
+                Swal.fire('Lỗi', 'Vui lòng nhập số lượng hợp lệ!', 'error');
+                return;
+            }
+            // Cập nhật tất cả các input
+            $('#productDetailList .price-input').each(function() {
+                $(this).val(formatMoney(price));
+            });
+            $('#productDetailList .quantity-input').each(function() {
+                $(this).val(quantity);
+            });
+            $('#modalEditPriceQuantity').modal('hide');
+        });
+        // Khi submit form, chuyển giá về dạng số (bỏ dấu .)
+        $(document).on('submit', '#create-form', function() {
+            $('#productDetailList .price-input').each(function() {
+                let val = $(this).val();
+                $(this).val(val.replace(/\./g, ''));
+            });
         });
     </script>
 }
@@ -666,7 +791,7 @@
             </div>
             <div class="modal-body">
                 <div class="d-flex align-items-center mb-3">
-                    <input type="text" id="newColorHex" class="form-control me-2" style="width: 120px;" placeholder="#000000" />
+                    @* <input type="text" id="newColorHex" class="form-control me-2" style="width: 120px;" placeholder="#000000" /> *@
                     <button class="btn btn-primary" id="addNewColorHex">+ Thêm màu sắc</button>
                 </div>
                 <div class="color-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 12px;">
@@ -733,15 +858,58 @@
     </div>
 </div>
 
-<!-- Modal Thêm Màu Sắc -->
+<!-- Modal Thêm Màu Sắc Mới -->
 <div class="modal fade" id="modalAddMauSac" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Thêm màu sắc</h5>
+                <h5 class="modal-title">Thêm màu sắc mới</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" id="modalAddMauSacContent"></div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Chọn màu sắc</label><br />
+                    <input type="text" id="addColorPicker" class="form-control" style="width: 120px; display:inline-block;" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Mã màu</label>
+                    <input type="text" id="addColorHex" class="form-control" readonly style="width: 120px; background:#fff; color:#000; font-weight:bold; text-align:center;" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Tên màu sắc</label>
+                    <input type="text" id="addColorName" class="form-control" placeholder="Nhập tên màu sắc" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="saveNewColor">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Sửa Giá và Số Lượng Chung -->
+<div class="modal fade" id="modalEditPriceQuantity" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sửa giá và số lượng chung</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Giá bán (VNĐ)</label>
+                    <input type="text" id="editAllPrice" class="form-control" placeholder="Nhập giá, ví dụ: 1.000.000" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Số lượng</label>
+                    <input type="number" id="editAllQuantity" class="form-control" min="1" placeholder="Nhập số lượng" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="btnApplyEditAll">Áp dụng</button>
+            </div>
         </div>
     </div>
 </div>

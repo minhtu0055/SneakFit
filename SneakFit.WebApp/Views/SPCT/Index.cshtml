@@ -106,8 +106,7 @@
                                             <i class="bx bx-dots-vertical-rounded"></i>
                                         </button>
                                         <div class="dropdown-menu">
-                                            <a class="dropdown-item edit-spct" href="javascript:void(0)"
-                                               data-id="@item.Id" data-bs-toggle="modal" data-bs-target="#editSPCTModal">
+                                            <a class="dropdown-item" href="@Url.Action("Edit", "SPCT", new { id = item.Id })">
                                                 <i class="bx bx-edit-alt me-1"></i> Sửa
                                             </a>
                                             <a class="dropdown-item" href="#" onclick="showUpdatePriceModal('@item.Id', '@item.Gia')">

@@ -146,25 +146,23 @@ namespace SneakFit.Admin.Controllers
             if (!ModelState.IsValid)
             {
                 await LoadCombobox();
+                // Hiển thị lỗi từng trường cho người dùng
                 return View(request);
             }
 
-            try
+            var result = await _spctApiClient.Create(request);
+            if (result.IsSuccessed)
             {
-                var result = await _spctApiClient.Create(request);
-                if (result != null)
-                {
-                    TempData["result"] = "Thêm mới sản phẩm chi tiết thành công";
-                    return RedirectToAction("Index");
-                }
+                TempData["result"] = "Thêm mới sản phẩm chi tiết thành công";
+                return RedirectToAction("Index");
             }
-            catch (Exception ex)
+            else
             {
-                ModelState.AddModelError("", ex.Message);
+                // Hiển thị rõ message lỗi từ backend
+                ModelState.AddModelError("", result.Message ?? "Thêm sản phẩm chi tiết thất bại");
+                await LoadCombobox();
+                return View(request);
             }
-
-            ModelState.AddModelError("", "Thêm sản phẩm chi tiết thất bại");
-            return View(request);
         }
 
         [HttpPost]
@@ -173,39 +171,85 @@ namespace SneakFit.Admin.Controllers
             if (items == null || !items.Any())
                 return Json(new { success = false, message = "Dữ liệu không hợp lệ hoặc chưa chọn màu/kích thước" });
 
-            try
+            var errorList = new List<string>();
+            int resultCount = 0;
+            foreach (var item in items)
             {
-                int result = 0;
-                foreach (var item in items)
+                var request = new ThemSPCT
                 {
-                    var request = new ThemSPCT
-                    {
-                        // Gán các trường tương ứng từ item sang request
-                        SanPhamId = item.SanPhamId,
-                        ThuongHieuId = item.ThuongHieuId,
-                        ChatLieuId = item.ChatLieuId,
-                        DeGiayId = item.DeGiayId,
-                        MauSacId = item.MauSacId,
-                        KichThuocId = item.KichThuocId,
-                        SoLuong = item.SoLuong,
-                        Gia = item.Gia
-                        // ... các trường khác nếu cần
-                    };
+                    SanPhamId = item.SanPhamId,
+                    ThuongHieuId = item.ThuongHieuId,
+                    ChatLieuId = item.ChatLieuId,
+                    DeGiayId = item.DeGiayId,
+                    MauSacId = item.MauSacId,
+                    KichThuocId = item.KichThuocId,
+                    SoLuong = item.SoLuong,
+                    Gia = item.Gia
+                };
 
-                    var res = await _spctApiClient.Create(request);
-                    if (res != null) result++;
-                }
-
-                if (result > 0)
-                {
-                    return Json(new { success = true, message = $"Thêm mới {result} sản phẩm chi tiết thành công" });
-                }
+                var result = await _spctApiClient.Create(request);
+                if (result.IsSuccessed)
+                    resultCount++;
+                else
+                    errorList.Add($"[{item.MauSacId}-{item.KichThuocId}]: {result.Message}");
             }
-            catch (Exception ex)
+
+            if (resultCount > 0 && errorList.Count == 0)
             {
-                return Json(new { success = false, message = ex.Message });
+                return Json(new { success = true, message = $"Thêm mới {resultCount} sản phẩm chi tiết thành công" });
             }
-            return Json(new { success = false, message = "Thêm sản phẩm chi tiết thất bại" });
+            else if (resultCount > 0 && errorList.Count > 0)
+            {
+                return Json(new { success = true, message = $"Thêm mới {resultCount} sản phẩm chi tiết thành công. Một số sản phẩm bị lỗi: {string.Join("; ", errorList)}" });
+            }
+            else
+            {
+                return Json(new { success = false, message = $"Không thể thêm sản phẩm chi tiết: {string.Join("; ", errorList)}" });
+            }
+        }
+
+        
+        [HttpGet]
+        public async Task<IActionResult> Edit(Guid id)
+        {
+            var spct = await _spctApiClient.GetById(id);
+            var danhSachSPCT = await _spctApiClient.GetAll(); // hoặc GetAllPaging nếu nhiều
+            var viewModel = new SuaSPCT
+            {
+                Id = spct.Id,
+                Gia = spct.Gia,
+                SoLuong = spct.SoLuong,
+                MauSacId = spct.MauSacId,
+                KichThuocId = spct.KichThuocId,
+                ChatLieuId = spct.ChatLieuId,
+                DeGiayId = spct.DeGiayId,
+                ThuongHieuId = spct.ThuongHieuId,
+                SanPhamId = spct.SanPhamId,
+                DanhMucId = spct.DanhMucId,
+                TrangThai = spct.TrangThai,
+                DanhSachSPCT = danhSachSPCT
+            };
+            await LoadCombobox();
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(SuaSPCT request)
+        {
+            if (!ModelState.IsValid)
+            {
+                await LoadCombobox();
+                return View(request);
+            }
+            var result = await _spctApiClient.Update(request);
+            if (result != null)
+            {
+                TempData["result"] = "Cập nhật sản phẩm chi tiết thành công";
+                return RedirectToAction("Index");
+            }
+            ModelState.AddModelError("", "Cập nhật sản phẩm chi tiết thất bại");
+            await LoadCombobox();
+            return View(request);
         }
 
         [HttpPost]
@@ -264,5 +308,6 @@ namespace SneakFit.Admin.Controllers
                 return Json(new { success = false, message = "Có lỗi xảy ra khi cập nhật số lượng" });
             }
         }
+
     }
 }

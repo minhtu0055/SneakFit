@@ -7,6 +7,7 @@ using SneakFit.ViewModels.Catalog.KhuyenMai;
 using SneakFit.ViewModels.Catalog.SanPham;
 using SneakFit.ViewModels.Catalog.SanPhamChiTiet;
 using SneakFit.ViewModels.Common;
+using Microsoft.Extensions.Logging;
 
 namespace SneakFit.BackEndAPI.Controllers
 {
@@ -15,10 +16,12 @@ namespace SneakFit.BackEndAPI.Controllers
     public class SPCTController : ControllerBase
     {
         private readonly ISanPhamChiTetService _sanPhamChiTetService;
+        private readonly ILogger<SPCTController> _logger;
 
-        public SPCTController(ISanPhamChiTetService sanPhamChiTetService)
+        public SPCTController(ISanPhamChiTetService sanPhamChiTetService, ILogger<SPCTController> logger)
         {
             _sanPhamChiTetService = sanPhamChiTetService;
+            _logger = logger;
         }
         [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll()
@@ -48,8 +51,28 @@ namespace SneakFit.BackEndAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var sanPham = await _sanPhamChiTetService.Create(request);
-            return CreatedAtAction(nameof(GetById), new { id = sanPham.Id }, sanPham);
+            var result = await _sanPhamChiTetService.Create(request);
+            if (!result.IsSuccessed)
+                return BadRequest(new { message = result.Message });
+
+            // Xử lý nhiều hình ảnh tải lên nếu có
+            if (request.Images != null && request.Images.Count > 0)
+            {
+                foreach (var image in request.Images)
+                {
+                    if (image.Length > 0)
+                    {
+                        var imageResult = await _sanPhamChiTetService.AddImage(result.ResultObj.Id, image);
+                        if (imageResult == 0)
+                        {
+                            // Lỗi đăng nhập nhưng tiếp tục với các hình ảnh khác
+                            _logger.LogWarning($"Không thêm được hình ảnh cho sản phẩm {result.ResultObj.Id}");
+                        }
+                    }
+                }
+            }
+
+            return Ok(result);
         }
 
         [HttpPut("Edit/{id}")]

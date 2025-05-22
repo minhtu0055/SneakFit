@@ -8,17 +8,17 @@ namespace SneakFit.ViewModels.Catalog.SanPhamChiTiet
     {
         public Guid SanPhamId { get; set; }
         public Guid ThuongHieuId { get; set; }
-        public Guid DeGiayId { get; set; }
         public Guid ChatLieuId { get; set; }
+        public Guid DeGiayId { get; set; }
         public bool TrangThai { get; set; }
-        public List<SPCTItem> Items { get; set; }
+        public List<ThemSPCTItem> Items { get; set; }
     }
-    public class SPCTItem
+
+    public class ThemSPCTItem
     {
         public Guid MauSacId { get; set; }
         public Guid KichThuocId { get; set; }
         public int SoLuong { get; set; }
         public decimal Gia { get; set; }
-
     }
 } 

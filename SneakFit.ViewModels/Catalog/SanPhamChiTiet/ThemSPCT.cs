@@ -29,6 +29,6 @@ namespace SneakFit.ViewModels.Catalog.SanPhamChiTiet
         public Guid SanPhamId { get; set; }
         public Guid DanhMucId { get; set; }
 
-        public List<IFormFile> Images { get; set; }
+        public List<IFormFile>? Images { get; set; }
     }
 }

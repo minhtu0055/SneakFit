@@ -10,5 +10,6 @@ namespace SneakFit.ViewModels.Catalog.MauSac
     {
         public Guid Id { get; set; }
         public string TenMauSac { get; set; }
+        public string MaMauSac { get; set; }
     }
 }

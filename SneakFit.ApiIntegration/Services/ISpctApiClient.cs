@@ -8,7 +8,7 @@ namespace SneakFit.ApiIntegration.Services
     {
         Task<List<SPCTViewModels>> GetAll();
         Task<SPCTViewModels> GetById(Guid id);
-        Task<SPCTViewModels> Create(ThemSPCT request);
+        Task<ApiResult<SPCTViewModels>> Create(ThemSPCT request);
         Task<SPCTViewModels> Update(SuaSPCT request);
         Task<PagedResult<SPCTViewModels>> GetAllPaging(PhanTrangSPCT request);
         Task<bool> UpdateTrangThai(Guid id, bool trangThai);

@@ -92,11 +92,34 @@ namespace SneakFit.Admin.Controllers
 
             return Json(new { success = false, message = "Cập nhật thất bại" });
         }
+
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
             var mauSacs = await _mauSacApiClient.GetAll();
             return Json(mauSacs);
+        }
+        
+        [HttpPost]
+        public async Task<IActionResult> CreateColor([FromBody] ThemMauSac request)
+        {
+            if (!ModelState.IsValid)
+                return Json(new { success = false, message = "Dữ liệu không hợp lệ" });
+
+            try
+            {
+                var result = await _mauSacApiClient.Create(request);
+                if (result != null)
+                {
+                    return Json(new { success = true });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+
+            return Json(new { success = false, message = "Thêm màu sắc thất bại" });
         }
     }
 }

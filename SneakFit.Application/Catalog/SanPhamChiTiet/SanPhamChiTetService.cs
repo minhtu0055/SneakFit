@@ -154,12 +154,37 @@ namespace SneakFit.Application.Catalog.SanPhamChiTietChiTiet
             spct.TrangThai = trangThai;
             return await _context.SaveChangesAsync() > 0;
         }
-        public async Task<SPCTViewModels> Create(ThemSPCT request)
+        
+        public async Task<ApiResult<SPCTViewModels>> Create(ThemSPCT request)
         {
+            // Validate các trường liên kết
+            if (!_context.SanPham.Any(x => x.Id == request.SanPhamId))
+                return new ApiResult<SPCTViewModels> { IsSuccessed = false, Message = "Sản phẩm không tồn tại" };
+            if (!_context.MauSac.Any(x => x.Id == request.MauSacId))
+                return new ApiResult<SPCTViewModels> { IsSuccessed = false, Message = "Màu sắc không tồn tại" };
+            if (!_context.KichThuoc.Any(x => x.Id == request.KichThuocId))
+                return new ApiResult<SPCTViewModels> { IsSuccessed = false, Message = "Kích thước không tồn tại" };
+            // ... kiểm tra các trường khác tương tự
+
+            // Kiểm tra trùng lặp
+            bool isExist = _context.SanPhamChiTiet.Any(x =>
+                x.SanPhamId == request.SanPhamId &&
+                x.MauSacId == request.MauSacId &&
+                x.KichThuocId == request.KichThuocId
+            );
+            if (isExist)
+                return new ApiResult<SPCTViewModels> { IsSuccessed = false, Message = "Sản phẩm chi tiết này đã tồn tại" };
+
+            // Tạo mới
             var newSanPhamChiTiet = new Data.Entities.SanPhamChiTiet()
             {
                 ID = Guid.NewGuid(),
                 SanPhamId = request.SanPhamId,
+                MauSacId = request.MauSacId,
+                KichThuocId = request.KichThuocId,
+                ThuongHieuId = request.ThuongHieuId,
+                ChatLieuId = request.ChatLieuId,
+                DeGiayId = request.DeGiayId,
                 Gia = (float)request.Gia,
                 SoLuong = request.SoLuong,
                 TrangThai = true,
@@ -168,9 +193,9 @@ namespace SneakFit.Application.Catalog.SanPhamChiTietChiTiet
             };
             _context.SanPhamChiTiet.Add(newSanPhamChiTiet);
 
-
             await _context.SaveChangesAsync();
-            return await GetById(newSanPhamChiTiet.ID);
+            var viewModel = await GetById(newSanPhamChiTiet.ID);
+            return new ApiResult<SPCTViewModels> { IsSuccessed = true, ResultObj = viewModel };
         }
 
         public async Task<SPCTViewModels?> Update(SuaSPCT request)
@@ -190,6 +215,8 @@ namespace SneakFit.Application.Catalog.SanPhamChiTietChiTiet
             entity.Gia = request.Gia;
             entity.SoLuong = request.SoLuong;
             entity.TrangThai = request.TrangThai;
+            entity.SanPhamId = request.SanPhamId;
+            // entity.DanhMucId = request.DanhMucId; // Nếu có
 
             // Xử lý upload ảnh mới nếu có
             if (request.Images != null && request.Images.Count > 0)

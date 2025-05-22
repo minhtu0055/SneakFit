@@ -62,7 +62,7 @@ namespace SneakFit.ApiIntegration.Services
             throw new Exception("Không thể lấy thông tin sản phẩm chi tiết");
         }
 
-        public async Task<SPCTViewModels> Create(ThemSPCT request)
+        public async Task<ApiResult<SPCTViewModels>> Create(ThemSPCT request)
         {
             var client = _httpClientFactory.CreateClient();
             client.BaseAddress = new Uri(_configuration["BaseAddress"]);
@@ -71,44 +71,53 @@ namespace SneakFit.ApiIntegration.Services
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
 
             var form = new MultipartFormDataContent();
-
-            if (request.Images?.Count > 0)
-            {
-                foreach (var image in request.Images)
-                {
-                    byte[] data;
-                    using (var br = new BinaryReader(image.OpenReadStream()))
-                    {
-                        data = br.ReadBytes((int)image.Length);
-                    }
-                    ByteArrayContent bytes = new ByteArrayContent(data);
-                    form.Add(bytes, "Images", image.FileName);
-                }
-            }
-
-            if (request.SanPhamId != Guid.Empty)
-                form.Add(new StringContent(request.SanPhamId.ToString()), "SanPhamId");
-            if (request.MauSacId != Guid.Empty)
-                form.Add(new StringContent(request.MauSacId.ToString()), "MauSacId");
-            if (request.KichThuocId != Guid.Empty)
-                form.Add(new StringContent(request.KichThuocId.ToString()), "KichThuocId");
-            if (request.ChatLieuId != Guid.Empty)
-                form.Add(new StringContent(request.ChatLieuId.ToString()), "ChatLieuId");
-            if (request.DeGiayId != Guid.Empty)
-                form.Add(new StringContent(request.DeGiayId.ToString()), "DeGiayId");
-            if (request.ThuongHieuId != Guid.Empty)
-                form.Add(new StringContent(request.ThuongHieuId.ToString()), "ThuongHieuId");
+            form.Add(new StringContent(request.SanPhamId.ToString()), "SanPhamId");
+            form.Add(new StringContent(request.MauSacId.ToString()), "MauSacId");
+            form.Add(new StringContent(request.KichThuocId.ToString()), "KichThuocId");
+            form.Add(new StringContent(request.ChatLieuId.ToString()), "ChatLieuId");
+            form.Add(new StringContent(request.DeGiayId.ToString()), "DeGiayId");
+            form.Add(new StringContent(request.ThuongHieuId.ToString()), "ThuongHieuId");
             form.Add(new StringContent(request.Gia.ToString()), "Gia");
             form.Add(new StringContent(request.SoLuong.ToString()), "SoLuong");
 
+            // Thêm nhiều ảnh vào form nếu có
+            if (request.Images != null)
+            {
+                foreach (var image in request.Images)
+                {
+                    var streamContent = new StreamContent(image.OpenReadStream());
+                    form.Add(streamContent, "Images", image.FileName);
+                }
+            }
+
             var response = await client.PostAsync($"/api/spct/Create", form);
             var body = await response.Content.ReadAsStringAsync();
+            Console.WriteLine(body);
             if (response.IsSuccessStatusCode)
             {
                 var spct = JsonConvert.DeserializeObject<SPCTViewModels>(body);
-                return spct;
+                return new ApiResult<SPCTViewModels>
+                {
+                    IsSuccessed = true,
+                    Message = "Thành công",
+                    ResultObj = spct
+                };
             }
-            throw new Exception("Không thể tạo sản phẩm chi tiết");
+            // Lấy message lỗi trả về từ API nếu có
+            string errorMsg = "Không thể tạo sản phẩm chi tiết";
+            try
+            {
+                dynamic errorObj = JsonConvert.DeserializeObject(body);
+                if (errorObj != null && errorObj.message != null)
+                    errorMsg = errorObj.message;
+            }
+            catch { }
+            return new ApiResult<SPCTViewModels>
+            {
+                IsSuccessed = false,
+                Message = errorMsg,
+                ResultObj = null
+            };
         }
 
         public async Task<SPCTViewModels> Update(SuaSPCT request)
@@ -129,6 +138,8 @@ namespace SneakFit.ApiIntegration.Services
             form.Add(new StringContent(request.Gia.ToString()), "Gia");
             form.Add(new StringContent(request.SoLuong.ToString()), "SoLuong");
             form.Add(new StringContent(request.TrangThai.ToString()), "TrangThai");
+            form.Add(new StringContent(request.SanPhamId.ToString()), "SanPhamId");
+            form.Add(new StringContent(request.DanhMucId.ToString()), "DanhMucId");
 
             if (request.Images != null)
             {
@@ -293,12 +304,26 @@ namespace SneakFit.ApiIntegration.Services
             var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
             var response = await client.PostAsync($"/api/spct/CreateMultiple", httpContent);
             var body = await response.Content.ReadAsStringAsync();
+
             if (response.IsSuccessStatusCode)
             {
-                var result = JsonConvert.DeserializeObject<int>(body);
-                return result;
+                var apiResult = JsonConvert.DeserializeObject<ApiSuccessResult<int>>(body);
+                return apiResult?.ResultObj ?? 0;
             }
-            throw new Exception("Không thể thêm nhiều sản phẩm chi tiết");
+            // Đọc lỗi chi tiết trả về từ API
+            string errorMsg = "Không thể thêm nhiều sản phẩm chi tiết";
+            try
+            {
+                dynamic errorObj = JsonConvert.DeserializeObject(body);
+                if (errorObj != null && errorObj.title != null)
+                    errorMsg = errorObj.title;
+                else if (errorObj != null && errorObj.message != null)
+                    errorMsg = errorObj.message;
+                else if (errorObj != null && errorObj.detail != null)
+                    errorMsg = errorObj.detail;
+            }
+            catch { }
+            throw new Exception(errorMsg);
         }
     }
 }
