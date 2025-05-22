@@ -1,17 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
-using SneakFit.ViewModels.Catalog.SanPhamChiTiet;
+﻿using SneakFit.ViewModels.Catalog.SanPhamChiTiet;
 using SneakFit.ViewModels.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SneakFit.Application.Catalog.SanPhamChiTiet
+namespace SneakFit.ApiIntegration.Services.SPCT
 {
-    public interface ISanPhamChiTetService
+    public interface ISpctApiClient
     {
-        Task<List<SPCTViewModels>> GetAll();
         Task<SPCTViewModels> GetById(Guid id);
         Task<SPCTViewModels> Create(ThemSPCT request);
         Task<SPCTViewModels> Update(SuaSPCT request);
