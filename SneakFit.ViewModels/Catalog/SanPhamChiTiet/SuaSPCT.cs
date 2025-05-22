@@ -12,11 +12,6 @@ namespace SneakFit.ViewModels.Catalog.SanPhamChiTiet
     {
         public Guid Id { get; set; }
 
-        [Required(ErrorMessage = "Tên sản phẩm không được để trống")]
-        public string TenSanPham { get; set; }
-
-        public string Mota { get; set; }
-
         [Required(ErrorMessage = "Giá sản phẩm không được để trống")]
         [Range(0, double.MaxValue, ErrorMessage = "Giá sản phẩm phải lớn hơn 0")]
         public decimal Gia { get; set; }
