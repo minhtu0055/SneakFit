@@ -69,6 +69,34 @@ namespace SneakFit.Application.Catalog.SanPham
 
             _context.SanPham.Add(newSanPham);
 
+            // ✅ Xử lý upload ảnh nếu có
+            if (request.Images != null && request.Images.Count > 0)
+            {
+                foreach (var image in request.Images)
+                {
+                    if (image.Length > 0)
+                    {
+                        // Ví dụ: lưu vào thư mục wwwroot/uploads/
+                        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+                        if (!Directory.Exists(uploadsFolder))
+                        {
+                            Directory.CreateDirectory(uploadsFolder);
+                        }
+
+                        var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+                        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await image.CopyToAsync(stream);
+                        }
+
+                        // Nếu muốn lưu tên file vào database, thì thêm logic ở đây
+                        // Ví dụ: newSanPham.ImagePath = "/uploads/" + uniqueFileName;
+                    }
+                }
+            }
+
             await _context.SaveChangesAsync();
 
             return new SanPhamViewModels()
@@ -78,6 +106,8 @@ namespace SneakFit.Application.Catalog.SanPham
                 Mota = newSanPham.Mota,
                 DanhMucId = newSanPham.DanhMucId,
                 TenDanhMuc = danhMuc.TenDanhMuc
+                // Nếu lưu ImagePath thì thêm dòng này
+                // ImageUrl = newSanPham.ImagePath
             };
         }
 
@@ -92,8 +122,35 @@ namespace SneakFit.Application.Catalog.SanPham
                 return null;
 
             entity.TenSanPham = request.TenSanPham;
-            entity.Mota = request.Mota ?? entity.Mota;
+            entity.Mota = request.Mota ?? entity.Mota; // Giữ Mota cũ nếu không gửi mới
             entity.DanhMucId = request.DanhMucId;
+
+            // Xử lý upload ảnh mới nếu có
+            if (request.Images != null && request.Images.Count > 0)
+            {
+                foreach (var image in request.Images)
+                {
+                    if (image.Length > 0)
+                    {
+                        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+                        if (!Directory.Exists(uploadsFolder))
+                        {
+                            Directory.CreateDirectory(uploadsFolder);
+                        }
+
+                        var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+                        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await image.CopyToAsync(stream);
+                        }
+
+                        // Nếu muốn lưu tên file vào database, thì thêm logic ở đây
+                        // entity.ImagePath = "/uploads/" + uniqueFileName;
+                    }
+                }
+            }
 
             await _context.SaveChangesAsync();
 

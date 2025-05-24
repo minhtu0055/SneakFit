@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using SneakFit.ApiIntegration.Services;
-using SneakFit.ApiIntegration.Services.SPCT;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,9 +37,7 @@ builder.Services.AddScoped<IMauSacApiClient, MauSacApiClient>();
 builder.Services.AddScoped<IKichThuocApiClient, KichThuocApiClient>();
 builder.Services.AddScoped<IVoucherApiClient, VoucherApiClient>();
 
-// Register API Clients
-builder.Services.AddScoped<IUserApiClient, UserApiClient>();
-builder.Services.AddScoped<ISpctApiClient, SpctApiClient>();
+
 
 builder.Services.AddRazorPages();
 var app = builder.Build();
