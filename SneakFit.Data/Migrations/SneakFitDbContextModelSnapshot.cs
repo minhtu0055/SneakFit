@@ -236,14 +236,14 @@ namespace SneakFit.Data.Migrations
                         {
                             Id = new Guid("69bd714f-9576-45ba-b5b7-f00649be00de"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "eb20ebc6-8bbd-4ef9-a5f1-e446134f2110",
+                            ConcurrencyStamp = "a90f90a8-4313-4ed3-8d62-8a6888016081",
                             Email = "tupmph49568@gmail.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NgaySinh = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NormalizedEmail = "tupmph49568@gmail.com",
                             NormalizedUserName = "Admin",
-                            PasswordHash = "AQAAAAIAAYagAAAAEFg5UlMETjVR0HHV2ctqAtZaOTcX7JwTvDGwkucYcoQIUAtSIDZ/QWl6O8dimLBCMQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEKiB+rhhsCoLA5F0FKSGq2fDxBSqs5JI7uAj2DHh6x2fwUHAu7ZmpspId0hyU73kZA==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
                             TrangThai = true,
@@ -418,6 +418,10 @@ namespace SneakFit.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<string>("DonViVanChuyen")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -433,13 +437,31 @@ namespace SneakFit.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<DateTime>("NgayLapHoaDon")
-                        .HasColumnType("datetime2");
+                    b.Property<int>("LoaiHoaDon")
+                        .HasColumnType("int");
 
-                    b.Property<string>("PhuongThucThanhToan")
-                        .IsRequired()
+                    b.Property<string>("MaGiaoDich")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("MaVanDon")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("NgayTao")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("NgayThanhToan")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("PhiVanChuyen")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("decimal(18,2)")
+                        .HasDefaultValue(0m);
+
+                    b.Property<int>("PhuongThucThanhToan")
+                        .HasMaxLength(50)
+                        .HasColumnType("int");
 
                     b.Property<string>("SoDienThoai")
                         .IsRequired()
@@ -450,6 +472,9 @@ namespace SneakFit.Data.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("TrangThai")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TrangThaiThanhToan")
                         .HasColumnType("int");
 
                     b.Property<Guid>("UserId")
@@ -477,9 +502,6 @@ namespace SneakFit.Data.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<Guid>("HoaDonId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("KhuyenMaiId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("SanPhamChiTietId")
@@ -606,11 +628,13 @@ namespace SneakFit.Data.Migrations
                         new
                         {
                             Id = new Guid("8f4d4a5e-2bfa-2e8c-9d2c-3f6a7e9b87cb"),
+                            MaMauSac = "#FF0000",
                             TenMauSac = "Giày Chạy Bộ"
                         },
                         new
                         {
                             Id = new Guid("8f8d4a5e-2bfa-4e9c-9d2c-3f6a7e9b87cb"),
+                            MaMauSac = "#FF0000",
                             TenMauSac = "Giày Đá Bóng"
                         });
                 });

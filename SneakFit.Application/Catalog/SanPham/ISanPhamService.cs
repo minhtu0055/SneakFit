@@ -17,5 +17,7 @@ namespace SneakFit.Application.Catalog.SanPham
         Task<SanPhamViewModels> GetById(Guid id);
         Task<SanPhamViewModels> Create(ThemSanPham request);
         Task<SanPhamViewModels> Update(SuaSanPham request);
+        Task<bool> UpdateTrangThai(Guid id, bool trangThai);
+
     }
 }

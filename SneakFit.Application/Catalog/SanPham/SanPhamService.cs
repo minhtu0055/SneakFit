@@ -1,7 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SneakFit.Data.EF;
 using SneakFit.ViewModels.Catalog.MauSac;
-using SneakFit.ViewModels.Catalog.SanPham;
 using SneakFit.ViewModels.Catalog.SanPham;
 using SneakFit.ViewModels.Common;
 using System;
@@ -22,7 +21,7 @@ namespace SneakFit.Application.Catalog.SanPham
         }
         public async Task<PagedResult<SanPhamViewModels>> GetAllPaging(SanPhamPagingRequest request)
         {
-            var query = _context.SanPham.AsQueryable();
+            var query = _context.SanPham.Include(x => x.DanhMuc).AsQueryable();
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 query = query.Where(x => x.TenSanPham.Contains(request.Keyword));
@@ -33,7 +32,11 @@ namespace SneakFit.Application.Catalog.SanPham
                 .Select(x => new SanPhamViewModels()
                 {
                     Id = x.Id,
-                    TenSanPham = x.TenSanPham
+                    TenSanPham = x.TenSanPham,
+                    Mota = x.Mota,
+                    DanhMucId = x.DanhMucId,
+                    TenDanhMuc = x.DanhMuc.TenDanhMuc,
+                    TrangThai = x.TrangThai 
                 }).ToListAsync();
             var PageResult = new PagedResult<SanPhamViewModels>()
             {
@@ -54,7 +57,8 @@ namespace SneakFit.Application.Catalog.SanPham
                     TenSanPham = x.TenSanPham,
                     Mota = x.Mota,
                     DanhMucId = x.DanhMucId,
-                    TenDanhMuc = x.DanhMuc.TenDanhMuc
+                    TenDanhMuc = x.DanhMuc.TenDanhMuc,
+                    TrangThai = x.TrangThai
                 })
                 .ToListAsync();
 
@@ -91,7 +95,8 @@ namespace SneakFit.Application.Catalog.SanPham
                 Id = Guid.NewGuid(),
                 TenSanPham = request.TenSanPham,
                 Mota = request.Mota,
-                DanhMucId = request.DanhMucId
+                DanhMucId = request.DanhMucId,
+                TrangThai = true  // Thêm dòng này
             };
 
             _context.SanPham.Add(newSanPham);
@@ -136,6 +141,17 @@ namespace SneakFit.Application.Catalog.SanPham
                 DanhMucId = entity.DanhMucId,
                 TenDanhMuc = entity.DanhMuc?.TenDanhMuc
             };
+        }
+
+        public async Task<bool> UpdateTrangThai(Guid id, bool trangThai)
+        {
+            var sanPham = await _context.SanPham.FindAsync(id);
+            if (sanPham == null)
+                return false;
+
+            sanPham.TrangThai = trangThai;
+            _context.SanPham.Update(sanPham);
+            return await _context.SaveChangesAsync() > 0;
         }
     }
 }

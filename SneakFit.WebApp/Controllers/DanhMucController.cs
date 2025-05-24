@@ -100,5 +100,11 @@ namespace SneakFit.WebApp.Controllers
             var result = await _danhMucApiClient.GetAll();
             return Ok(result);
         }
+        [HttpPost]
+        public async Task<IActionResult> UpdateProductCount(Guid id)
+        {
+            var result = await _danhMucApiClient.UpdateProductCount(id);
+            return Json(result);
+        }
     }
 }

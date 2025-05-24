@@ -10,20 +10,6 @@
     </a>
 </div>
 
-@* <!-- Form thêm mới -->
-<div id="createFormContainer" style="display: none;">
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Thêm mới sản phẩm chi tiết</h5>
-            <button type="button" class="btn-close" id="btnCancelCreate"></button>
-        </div>
-        <div class="card-body" id="createFormContent">
-            <!-- Form sẽ được load từ Create.cshtml -->
-        </div>
-    </div>
-</div> *@
-
-<!-- Danh sách SPCT -->
 <div id="listContainer">
     <div class="card">
         <div class="card-header">
@@ -199,35 +185,7 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
-            // Xử lý nút thêm mới
-            // $('#btnAddNew').click(function () {
-            //     $('#listContainer').hide();
-            //     $('#createFormContainer').show();
 
-            //     // Load form thêm mới
-            //     $.ajax({
-            //         url: '/SPCT/Create',
-            //         type: 'GET',
-            //         success: function (result) {
-            //             $('#createFormContent').html(result);
-            //             if ($.validator && $.validator.unobtrusive) {
-            //                 $.validator.unobtrusive.parse("#createSPCTForm");
-            //             }
-            //         },
-            //         error: function (err) {
-            //             console.error('Lỗi khi tải form:', err);
-            //             toastr.error('Có lỗi xảy ra khi tải form');
-            //         }
-            //     });
-            // });
-
-            // Xử lý nút hủy thêm mới
-            // $('#btnCancelCreate').click(function () {
-            //     $('#createFormContainer').hide();
-            //     $('#listContainer').show();
-            // });
-
-            // Xử lý submit form thêm mới
             $(document).on('submit', '#createSPCTForm', function (e) {
                 e.preventDefault();
                 var formData = new FormData(this);
@@ -340,5 +298,33 @@
                 });
             }
         });
+
+        function capNhatTrangThai(id, trangThai) {
+            $.ajax({
+                url: '/SPCT/CapNhatTrangThai',
+                type: 'POST',
+                data: { id: id, trangThai: trangThai },
+                headers: {
+                    "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(result) {
+                    if(result.success) {
+                        toastr.success('Cập nhật trạng thái thành công');
+                        // Cập nhật label
+                        var label = $(`label[for="switch-${id}"]`);
+                        label.text(trangThai ? 'Hoạt động' : 'Ngưng hoạt động');
+                    } else {
+                        toastr.error(result.message || 'Có lỗi xảy ra');
+                        // Revert switch state if failed
+                        $(`#switch-${id}`).prop('checked', !trangThai);
+                    }
+                },
+                error: function() {
+                    toastr.error('Có lỗi xảy ra khi cập nhật trạng thái');
+                    // Revert switch state if error
+                    $(`#switch-${id}`).prop('checked', !trangThai);
+                }
+            });
+        }
     </script>
 }

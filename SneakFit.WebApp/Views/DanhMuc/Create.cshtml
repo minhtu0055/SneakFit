@@ -10,6 +10,17 @@
         <span asp-validation-for="TenDanhMuc" class="text-danger"></span>
         <span id="danhmuc-validation-error" class="text-danger" style="display: none;">Vui lòng chỉ nhập chữ cái</span>
     </div>
+    <div class="mb-3">
+        <label class="form-label d-block">Trạng Thái</label>
+        @* <div class="form-check form-check-inline">
+            <input type="radio" class="form-check-input" asp-for="TrangThai" id="trangThaiTrue" value="true" checked />
+            <label class="form-check-label" for="trangThaiTrue">Hoạt động</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input type="radio" class="form-check-input" asp-for="TrangThai" id="trangThaiFalse" value="false" />
+            <label class="form-check-label" for="trangThaiFalse">Ngừng hoạt động</label>
+        </div> *@
+    </div>
     <div class="text-end">
         <button type="submit" class="btn btn-primary">Thêm</button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

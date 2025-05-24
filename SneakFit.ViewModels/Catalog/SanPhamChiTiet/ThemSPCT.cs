@@ -28,6 +28,7 @@ namespace SneakFit.ViewModels.Catalog.SanPhamChiTiet
         public Guid ThuongHieuId { get; set; }
         public Guid SanPhamId { get; set; }
         public Guid DanhMucId { get; set; }
+        public bool TrangThai { get; set; }
 
         public List<IFormFile>? Images { get; set; }
     }

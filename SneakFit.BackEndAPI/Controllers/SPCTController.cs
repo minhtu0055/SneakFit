@@ -41,7 +41,7 @@ namespace SneakFit.BackEndAPI.Controllers
         {
             var item = await _sanPhamChiTetService.GetById(id);
             if (item == null)
-                return NotFound($"Không tìm thấy sản phẩm với id = {id}");
+                return NotFound($"Không tìm thấy sản phẩm chi tiết với id = {id}");
             return Ok(item);
         }
 
@@ -84,16 +84,16 @@ namespace SneakFit.BackEndAPI.Controllers
             request.Id = id;
             var sanPham = await _sanPhamChiTetService.Update(request);
             if (sanPham == null)
-                return NotFound($"Không tìm thấy sản phẩm với id = {id}");
+                return NotFound($"Không tìm thấy sản phẩm chi tiết với id = {id}");
 
             return Ok(sanPham);
         }
-        [HttpPatch("{id}/trangThai")]
+        [HttpPut("{id}/trangThai")]
         public async Task<IActionResult> UpdateTrangThai(Guid id, [FromBody] bool trangThai)
         {
             var result = await _sanPhamChiTetService.UpdateTrangThai(id, trangThai);
             if (!result)
-                return BadRequest(new ApiErrorResult<bool>("Cập nhật trạng thái không thành công"));
+                return BadRequest(new ApiErrorResult<bool>($"Không tìm thấy sản phẩm chi tiết có ID: {id}"));
 
             return Ok(new ApiSuccessResult<bool>(true));
         }

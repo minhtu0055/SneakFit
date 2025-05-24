@@ -97,5 +97,20 @@ namespace SneakFit.ApiIntegration.Services
             }
             throw new Exception("Không thể lấy danh sách danh mục");
         }
+
+        public async Task<ApiResult<bool>> UpdateProductCount(Guid id)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var response = await client.PostAsync($"/api/danhmuc/UpdateProductCount/{id}", null);
+            var result = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+                return JsonConvert.DeserializeObject<ApiResult<bool>>(result);
+
+            return new ApiResult<bool>() { IsSuccessed = false, Message = "Không thể cập nhật số lượng sản phẩm" };
+        }
     }
 }

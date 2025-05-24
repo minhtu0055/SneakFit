@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SneakFit.Application.Catalog.SanPham;
+using SneakFit.Application.Catalog.SanPhamChiTiet;
 using SneakFit.ViewModels.Catalog.ChatLieu;
 using SneakFit.ViewModels.Catalog.SanPham;
 using SneakFit.ViewModels.Catalog.ThuongHieu;
+using SneakFit.ViewModels.Common;
 
 namespace SneakFit.BackEndAPI.Controllers
 {
@@ -61,6 +63,16 @@ namespace SneakFit.BackEndAPI.Controllers
                 return NotFound($"Không tìm thấy sản phẩm với id = {id}");
 
             return Ok(sanPham);
+        }
+
+        [HttpPut("{id}/trangThai")]
+        public async Task<IActionResult> UpdateTrangThai(Guid id, [FromBody] bool trangThai)
+        {
+            var result = await _sanPhamService.UpdateTrangThai(id, trangThai);
+            if (!result)
+                return BadRequest(new ApiErrorResult<bool>($"Không tìm thấy sản phẩm có ID: {id}"));
+
+            return Ok(new ApiSuccessResult<bool>(true));
         }
     }
 }

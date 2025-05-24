@@ -133,5 +133,23 @@ namespace SneakFit.Admin.Controllers
             var result = await _sanPhamApiClient.GetAll();
             return Ok(result);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> CapNhatTrangThai(Guid id, bool trangThai)
+        {
+            try
+            {
+                var result = await _sanPhamApiClient.UpdateTrangThai(id, trangThai);
+                if (result != null)
+                {
+                    return Json(new { success = true, message = "Cập nhật trạng thái thành công" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+            return Json(new { success = false, message = "Cập nhật trạng thái thất bại" });
+        }
     }
 }

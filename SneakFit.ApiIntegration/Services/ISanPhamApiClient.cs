@@ -11,5 +11,7 @@ namespace SneakFit.ApiIntegration.Services
         Task<SanPhamViewModels> Create(ThemSanPham request);
         Task<SanPhamViewModels> Update(SuaSanPham request);
         Task<List<SanPhamViewModels>> GetAll();
+        Task<bool> UpdateTrangThai(Guid id, bool trangThai);
+
     }
 }

@@ -53,7 +53,7 @@
                                 {
                                     foreach (var dm in ViewBag.DanhMucs)
                                     {
-                                        @* <option value="@dm.Value" @(ViewBag.DanhMucId == dm.Value ? "selected" : "")>@dm.Text</option> *@
+                                        <option value="@(dm.Value)" selected="@(ViewBag.DanhMucId == dm.Value)">@dm.Text</option>
                                     }
                                 }
                             </select>
@@ -61,8 +61,8 @@
                         <div class="col-md-2">
                             <select name="TrangThai" class="form-control">
                                 <option value="">-- Trạng thái --</option>
-                                @* <option value="true" @(ViewBag.TrangThai == "true" ? "selected" : "")>Hoạt động</option>
-                                <option value="false" @(ViewBag.TrangThai == "false" ? "selected" : "")>Ngừng hoạt động</option> *@
+                                <option value="true" selected="@(ViewBag.TrangThai == "true")">Hoạt động</option>
+                                <option value="false" selected="@(ViewBag.TrangThai == "false")">Ngừng hoạt động</option>
                             </select>
                         </div>
                         <div class="col-md-2 mb-2 d-flex align-items-end">
@@ -87,7 +87,7 @@
                     <th>Tên Sản Phẩm</th>
                     <th>Danh Mục</th>
                     <th>Mô Tả</th>
-                    <th>Trạng Thái</th>
+                    <th style="width: 310px">Trạng Thái</th>
                     <th></th>
                 </tr>
             </thead>
@@ -99,9 +99,13 @@
                         <td>@item.TenDanhMuc</td>
                         <td>@item.Mota</td>
                         <td>
-                            @* <span class="badge @(item.TrangThai ? "bg-success" : "bg-danger")">
-                                @(item.TrangThai ? "Hoạt động" : "Ngừng hoạt động")
-                            </span> *@
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="switch-@item.Id"
+                                @(item.TrangThai ? "checked" : "") onchange="capNhatTrangThai('@item.Id', this.checked)">
+                                <label class="form-check-label" for="switch-@item.Id">
+                                    @(item.TrangThai ? "Hoạt động" : "Ngưng hoạt động")
+                                </label>
+                            </div>
                         </td>
                         <td>
                             <div class="dropdown">
@@ -210,5 +214,30 @@
                 toastr.error(errorMessage);
             }
         });
+
+        function capNhatTrangThai(id, trangThai) {
+            $.ajax({
+                url: '/SanPham/CapNhatTrangThai',
+                type: 'POST',
+                data: { id: id, trangThai: trangThai },
+                success: function (result) {
+                    if (result.success) {
+                        toastr.success('Cập nhật trạng thái thành công');
+                        // Cập nhật label
+                        var label = $(`label[for="switch-${id}"]`);
+                        label.text(trangThai ? 'Hoạt động' : 'Ngưng hoạt động');
+                    } else {
+                        toastr.error(result.message || 'Cập nhật trạng thái thất bại');
+                        // Revert switch state if failed
+                        $(`#switch-${id}`).prop('checked', !trangThai);
+                    }
+                },
+                error: function () {
+                    toastr.error('Có lỗi xảy ra khi cập nhật trạng thái');
+                    // Revert switch state if error
+                    $(`#switch-${id}`).prop('checked', !trangThai);
+                }
+            });
+        }
     </script>
-} 
+}

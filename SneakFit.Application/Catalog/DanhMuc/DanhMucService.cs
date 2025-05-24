@@ -100,5 +100,22 @@ namespace SneakFit.Application.Catalog.DanhMuc
                 SoSanPham = await _context.SanPham.CountAsync(s => s.DanhMucId == getid.Id && s.TrangThai == true)
             };
         }
+        public async Task<DanhMucViewModels> UpdateProductCount(Guid id)
+        {
+            var danhmuc = await _context.DanhMuc.FindAsync(id);
+            if (danhmuc == null)
+            {
+                throw new Exception($"Không tìm thấy id : {id} của danh mục");
+            }
+
+            var soSanPham = await _context.SanPham.CountAsync(s => s.DanhMucId == id && s.TrangThai == true);
+
+            return new DanhMucViewModels()
+            {
+                Id = danhmuc.Id,
+                TenDanhMuc = danhmuc.TenDanhMuc,
+                SoSanPham = soSanPham
+            };
+        }
     }
 }

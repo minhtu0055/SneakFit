@@ -138,7 +138,7 @@
                             </li>
                         </ul>
                     </li>
-                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "SanPham" || ViewContext.RouteData.Values["controller"]?.ToString() == "ChatLieu" || ViewContext.RouteData.Values["controller"]?.ToString() == "KichThuoc" || ViewContext.RouteData.Values["controller"]?.ToString() == "ThuongHieu"|| ViewContext.RouteData.Values["controller"]?.ToString() == "SanPham" || ViewContext.RouteData.Values["controller"]?.ToString() == "MauSac" || ViewContext.RouteData.Values["controller"]?.ToString() == "DeGiay" ? "active open" : "" )">
+                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "SanPhamChiTiet" || ViewContext.RouteData.Values["controller"]?.ToString() == "ChatLieu" || ViewContext.RouteData.Values["controller"]?.ToString() == "KichThuoc" || ViewContext.RouteData.Values["controller"]?.ToString() == "ThuongHieu"|| ViewContext.RouteData.Values["controller"]?.ToString() == "SanPham" || ViewContext.RouteData.Values["controller"]?.ToString() == "MauSac" || ViewContext.RouteData.Values["controller"]?.ToString() == "DeGiay" ? "active open" : "" )">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-cube-alt"></i>
                             <div class="text-truncate" data-i18n="Misc">Quản lý sản phẩm</div>
@@ -150,7 +150,7 @@
                                 </a>
                             </li>
                             <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "SanPham" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "") ">
-                                <a asp-action="Index" asp-controller="Product" class="menu-link">
+                                <a asp-action="Index" asp-controller="SanPham" class="menu-link">
                                     <div class="text-truncate" data-i18n="sanpham">Sản Phẩm</div>
                                 </a>
                             </li>

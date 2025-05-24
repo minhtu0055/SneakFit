@@ -260,15 +260,14 @@ namespace SneakFit.Admin.Controllers
                 var result = await _spctApiClient.UpdateTrangThai(id, trangThai);
                 if (result)
                 {
-                    return Json(new { success = true });
+                    return Json(new { success = true, message = "Cập nhật trạng thái thành công" });
                 }
-                return Json(new { success = false, message = "Cập nhật trạng thái thất bại" });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Lỗi khi cập nhật trạng thái");
-                return Json(new { success = false, message = "Có lỗi xảy ra khi cập nhật trạng thái" });
+                return Json(new { success = false, message = ex.Message });
             }
+            return Json(new { success = false, message = "Cập nhật trạng thái thất bại" });
         }
 
         [HttpPost]
