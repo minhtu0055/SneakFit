@@ -589,6 +589,10 @@ namespace SneakFit.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("MaMauSac")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("TenMauSac")
                         .IsRequired()
                         .HasMaxLength(50)

@@ -1,4 +1,5 @@
 ﻿using SneakFit.ViewModels.Catalog.DeGiay;
+using SneakFit.ViewModels.Catalog.MauSac;
 using SneakFit.ViewModels.Common;
 using System;
 using System.Collections.Generic;
@@ -14,5 +15,6 @@ namespace SneakFit.Application.Catalog.DeGiay
         Task<DeGiayViewModels> GetById(Guid id);
         Task<DeGiayViewModels> Create(ThemDeGiay request);
         Task<DeGiayViewModels> Update(SuaDeGiay request);
+        Task<List<DeGiayViewModels>> GetAll();
     }
 }

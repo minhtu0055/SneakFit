@@ -10,10 +10,6 @@ namespace SneakFit.ViewModels.Catalog.SanPhamChiTiet
 {
     public class ThemSPCT
     {
-        [Required(ErrorMessage = "Tên sản phẩm không được để trống")]
-        public string TenSanPham { get; set; }
-
-        public string Mota { get; set; }
 
         [Required(ErrorMessage = "Giá sản phẩm không được để trống")]
         [Range(0, double.MaxValue, ErrorMessage = "Giá sản phẩm phải lớn hơn 0")]
@@ -33,6 +29,6 @@ namespace SneakFit.ViewModels.Catalog.SanPhamChiTiet
         public Guid SanPhamId { get; set; }
         public Guid DanhMucId { get; set; }
 
-        public List<IFormFile> Images { get; set; }
+        public List<IFormFile>? Images { get; set; }
     }
 }

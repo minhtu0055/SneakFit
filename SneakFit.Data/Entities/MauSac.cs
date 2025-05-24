@@ -10,6 +10,7 @@ namespace SneakFit.Data.Entities
     {
         public Guid Id { get; set; }
         public string TenMauSac { get; set; }
+        public string MaMauSac { get; set; }
         public List<SanPhamChiTiet> SanPhamChiTiet { get; set; }
     }
 }

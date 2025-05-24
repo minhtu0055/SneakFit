@@ -29,9 +29,9 @@ namespace SneakFit.Admin.Controllers
             return View(data);
         }
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-             return PartialView("Create");
+             return  PartialView("Create");
         }
 
         [HttpPost]
@@ -91,6 +91,12 @@ namespace SneakFit.Admin.Controllers
             }
 
             return Json(new { success = false, message = "Cập nhật thất bại" });
+        }
+        [HttpGet("getall")]
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _deGiayApiClient.GetAll();
+            return Ok(result);
         }
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SneakFit.Application.Catalog.DanhMuc;
 using SneakFit.ViewModels.Catalog.DanhMuc;
+using SneakFit.ViewModels.Catalog.MauSac;
 
 namespace SneakFit.BackEndAPI.Controllers
 {
@@ -14,6 +15,12 @@ namespace SneakFit.BackEndAPI.Controllers
         public DanhMucController(IDanhMucService danhMucService)
         {
             _danhMucService = danhMucService;
+        }
+        [HttpGet("paging")]
+        public async Task<IActionResult> GetAllPaging([FromQuery] DanhMucPagingRequest request)
+        {
+            var result = await _danhMucService.GetAllPaging(request);
+            return Ok(result);
         }
         [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll()

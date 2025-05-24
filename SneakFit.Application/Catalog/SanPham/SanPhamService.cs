@@ -1,6 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SneakFit.Data.EF;
+using SneakFit.ViewModels.Catalog.MauSac;
 using SneakFit.ViewModels.Catalog.SanPham;
+using SneakFit.ViewModels.Catalog.SanPham;
+using SneakFit.ViewModels.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +19,30 @@ namespace SneakFit.Application.Catalog.SanPham
         public SanPhamService(SneakFitDbContext context)
         {
             _context = context;
+        }
+        public async Task<PagedResult<SanPhamViewModels>> GetAllPaging(SanPhamPagingRequest request)
+        {
+            var query = _context.SanPham.AsQueryable();
+            if (!string.IsNullOrEmpty(request.Keyword))
+            {
+                query = query.Where(x => x.TenSanPham.Contains(request.Keyword));
+            }
+            int totalRow = await query.CountAsync();
+            var data = await query.Skip((request.PageIndex - 1) * request.PageSize)
+                .Take(request.PageSize)
+                .Select(x => new SanPhamViewModels()
+                {
+                    Id = x.Id,
+                    TenSanPham = x.TenSanPham
+                }).ToListAsync();
+            var PageResult = new PagedResult<SanPhamViewModels>()
+            {
+                TotalRecords = totalRow,
+                PageSize = request.PageSize,
+                PageIndex = request.PageIndex,
+                Items = data,
+            };
+            return PageResult;
         }
         public async Task<List<SanPhamViewModels>> GetAll()
         {
@@ -69,34 +96,6 @@ namespace SneakFit.Application.Catalog.SanPham
 
             _context.SanPham.Add(newSanPham);
 
-            // ✅ Xử lý upload ảnh nếu có
-            if (request.Images != null && request.Images.Count > 0)
-            {
-                foreach (var image in request.Images)
-                {
-                    if (image.Length > 0)
-                    {
-                        // Ví dụ: lưu vào thư mục wwwroot/uploads/
-                        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
-                        if (!Directory.Exists(uploadsFolder))
-                        {
-                            Directory.CreateDirectory(uploadsFolder);
-                        }
-
-                        var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
-                        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await image.CopyToAsync(stream);
-                        }
-
-                        // Nếu muốn lưu tên file vào database, thì thêm logic ở đây
-                        // Ví dụ: newSanPham.ImagePath = "/uploads/" + uniqueFileName;
-                    }
-                }
-            }
-
             await _context.SaveChangesAsync();
 
             return new SanPhamViewModels()
@@ -106,8 +105,6 @@ namespace SneakFit.Application.Catalog.SanPham
                 Mota = newSanPham.Mota,
                 DanhMucId = newSanPham.DanhMucId,
                 TenDanhMuc = danhMuc.TenDanhMuc
-                // Nếu lưu ImagePath thì thêm dòng này
-                // ImageUrl = newSanPham.ImagePath
             };
         }
 
@@ -122,35 +119,8 @@ namespace SneakFit.Application.Catalog.SanPham
                 return null;
 
             entity.TenSanPham = request.TenSanPham;
-            entity.Mota = request.Mota ?? entity.Mota; // Giữ Mota cũ nếu không gửi mới
+            entity.Mota = request.Mota ?? entity.Mota;
             entity.DanhMucId = request.DanhMucId;
-
-            // Xử lý upload ảnh mới nếu có
-            if (request.Images != null && request.Images.Count > 0)
-            {
-                foreach (var image in request.Images)
-                {
-                    if (image.Length > 0)
-                    {
-                        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
-                        if (!Directory.Exists(uploadsFolder))
-                        {
-                            Directory.CreateDirectory(uploadsFolder);
-                        }
-
-                        var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
-                        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                        using (var stream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await image.CopyToAsync(stream);
-                        }
-
-                        // Nếu muốn lưu tên file vào database, thì thêm logic ở đây
-                        // entity.ImagePath = "/uploads/" + uniqueFileName;
-                    }
-                }
-            }
 
             await _context.SaveChangesAsync();
 

@@ -1,0 +1,17 @@
+@model SneakFit.ViewModels.Catalog.DanhMuc.ThemDanhMuc
+<form asp-controller="DanhMuc" asp-action="Create" id="createDanhMucForm" method="post" data-confirm="Bạn có chắc chắn muốn làm điều đó không?">
+    <div class="mb-3">
+        <label asp-for="TenDanhMuc" class="form-label">Tên Danh Mục</label>
+        <input asp-for="TenDanhMuc" class="form-control" placeholder="Nhập tên danh mục"
+               pattern="^[a-zA-ZÀ-ỹ\s]+$"
+               oninput="validateInput(this)"
+               maxlength="50"
+               title="Vui lòng chỉ nhập chữ cái"></input>
+        <span asp-validation-for="TenDanhMuc" class="text-danger"></span>
+        <span id="danhmuc-validation-error" class="text-danger" style="display: none;">Vui lòng chỉ nhập chữ cái</span>
+    </div>
+    <div class="text-end">
+        <button type="submit" class="btn btn-primary">Thêm</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    </div>
+</form>

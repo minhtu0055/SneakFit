@@ -9,6 +9,6 @@ namespace SneakFit.ViewModels.Catalog.MauSac
     public class ThemMauSac
     {
         public string TenMauSac { get; set; }
-
+        public string MaMauSac { get; set; }
     }
 }

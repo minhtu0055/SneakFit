@@ -9,5 +9,6 @@ namespace SneakFit.ApiIntegration.Services
         Task<MauSacViewModels> GetById(Guid id);
         Task<MauSacViewModels> Create(ThemMauSac request);
         Task<MauSacViewModels> Update(SuaMauSac request);
+        Task<List<MauSacViewModels>> GetAll();
     }
 }

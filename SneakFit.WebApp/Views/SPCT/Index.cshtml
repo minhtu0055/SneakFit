@@ -1,0 +1,344 @@
+﻿@using SneakFit.ViewModels.Common
+@model PagedResult<SneakFit.ViewModels.Catalog.SanPhamChiTiet.SPCTViewModels>
+@{
+    ViewData["Title"] = "Danh sách sản phẩm chi tiết";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="text-end mb-4">
+    <a type="button" class="btn btn-primary" id="btnAddNew" asp-action="Create" asp-controller="SPCT">
+        <i class="bx bx-plus me-1"></i> Thêm mới sản phẩm chi tiết
+    </a>
+</div>
+
+@* <!-- Form thêm mới -->
+<div id="createFormContainer" style="display: none;">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Thêm mới sản phẩm chi tiết</h5>
+            <button type="button" class="btn-close" id="btnCancelCreate"></button>
+        </div>
+        <div class="card-body" id="createFormContent">
+            <!-- Form sẽ được load từ Create.cshtml -->
+        </div>
+    </div>
+</div> *@
+
+<!-- Danh sách SPCT -->
+<div id="listContainer">
+    <div class="card">
+        <div class="card-header">
+            <div class="row">
+                <div class="col-md-6 col-xs-12">
+                    <form asp-action="Index" method="get">
+                        <div class="row">
+                            <div class="col-md-9">
+                                <input type="text" value="@ViewBag.Keyword" name="Keyword" class="form-control" placeholder="Tìm kiếm sản phẩm..." />
+                            </div>
+                            <div class="col-md-2 mb-2 d-flex align-items-end">
+                                <div class="btn-group w-100">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bx bx-search"></i> Tìm
+                                    </button>
+                                    <button type="button" onclick="window.location.href='/SPCT/Index'" class="btn btn-dark">
+                                        <i class="bx bx-reset"></i> Reset
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="table-responsive text-nowrap">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Sản phẩm</th>
+                        <th>Màu sắc</th>
+                        <th>Kích thước</th>
+                        <th>Chất liệu</th>
+                        <th>Đế giày</th>
+                        <th>Thương hiệu</th>
+                        <th>Giá</th>
+                        <th>Số lượng</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody class="table-border-bottom-0">
+                    @if (Model.Items != null && Model.Items.Any())
+                    {
+                        foreach (var item in Model.Items)
+                        {
+                            <tr>
+                                <td class="sanpham" data-id="@item.SanPhamId">
+                                    @(ViewBag.SanPhams.ContainsKey(item.SanPhamId) ? ViewBag.SanPhams[item.SanPhamId] : "N/A")
+                                </td>
+                                <td class="mausac" data-id="@item.MauSacId">
+                                    @(ViewBag.MauSacs.ContainsKey(item.MauSacId) ? ViewBag.MauSacs[item.MauSacId] : "N/A")
+                                </td>
+                                <td class="kichthuoc" data-id="@item.KichThuocId">
+                                    @(ViewBag.KichThuocs.ContainsKey(item.KichThuocId) ? ViewBag.KichThuocs[item.KichThuocId] : "N/A")
+                                </td>
+                                <td class="chatlieu" data-id="@item.ChatLieuId">
+                                    @(ViewBag.ChatLieus.ContainsKey(item.ChatLieuId) ? ViewBag.ChatLieus[item.ChatLieuId] : "N/A")
+                                </td>
+                                <td class="degiay" data-id="@item.DeGiayId">
+                                    @(ViewBag.DeGiays.ContainsKey(item.DeGiayId) ? ViewBag.DeGiays[item.DeGiayId] : "N/A")
+                                </td>
+                                <td class="thuonghieu" data-id="@item.ThuongHieuId">
+                                    @(ViewBag.ThuongHieus.ContainsKey(item.ThuongHieuId) ? ViewBag.ThuongHieus[item.ThuongHieuId] : "N/A")
+                                </td>
+                                <td>@item.Gia.ToString("N0") VNĐ</td>
+                                <td>@item.SoLuong</td>
+                                <td>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="switch-@item.Id"
+                                        @(item.TrangThai ? "checked" : "") onchange="capNhatTrangThai('@item.Id', this.checked)">
+                                        <label class="form-check-label" for="switch-@item.Id">
+                                            @(item.TrangThai ? "Hoạt động" : "Ngưng hoạt động")
+                                        </label>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                            <i class="bx bx-dots-vertical-rounded"></i>
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="@Url.Action("Edit", "SPCT", new { id = item.Id })">
+                                                <i class="bx bx-edit-alt me-1"></i> Sửa
+                                            </a>
+                                            <a class="dropdown-item" href="#" onclick="showUpdatePriceModal('@item.Id', '@item.Gia')">
+                                                <i class="bx bx-dollar me-1"></i> Cập nhật giá
+                                            </a>
+                                            <a class="dropdown-item" href="#" onclick="showUpdateQuantityModal('@item.Id', '@item.SoLuong')">
+                                                <i class="bx bx-package me-1"></i> Cập nhật số lượng
+                                            </a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="10" class="text-center">Không có dữ liệu</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @await Component.InvokeAsync("Pager", Model)
+    </div>
+</div>
+
+<!-- Modal Edit -->
+<div class="modal fade" id="editSPCTModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chỉnh sửa sản phẩm chi tiết</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="editModalContent">
+                <!-- Nội dung form sẽ được load bằng Ajax -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Cập nhật giá -->
+<div class="modal fade" id="updatePriceModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cập nhật giá</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="priceProductId" />
+                <div class="mb-3">
+                    <label class="form-label">Giá mới</label>
+                    <input type="number" id="newPrice" class="form-control" min="0" step="1000" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="updatePrice()">Cập nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Cập nhật số lượng -->
+<div class="modal fade" id="updateQuantityModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cập nhật số lượng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="quantityProductId" />
+                <div class="mb-3">
+                    <label class="form-label">Số lượng thêm/bớt</label>
+                    <input type="number" id="quantityChange" class="form-control" />
+                    <small class="text-muted">Nhập số âm để giảm số lượng</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="updateQuantity()">Cập nhật</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Xử lý nút thêm mới
+            // $('#btnAddNew').click(function () {
+            //     $('#listContainer').hide();
+            //     $('#createFormContainer').show();
+
+            //     // Load form thêm mới
+            //     $.ajax({
+            //         url: '/SPCT/Create',
+            //         type: 'GET',
+            //         success: function (result) {
+            //             $('#createFormContent').html(result);
+            //             if ($.validator && $.validator.unobtrusive) {
+            //                 $.validator.unobtrusive.parse("#createSPCTForm");
+            //             }
+            //         },
+            //         error: function (err) {
+            //             console.error('Lỗi khi tải form:', err);
+            //             toastr.error('Có lỗi xảy ra khi tải form');
+            //         }
+            //     });
+            // });
+
+            // Xử lý nút hủy thêm mới
+            // $('#btnCancelCreate').click(function () {
+            //     $('#createFormContainer').hide();
+            //     $('#listContainer').show();
+            // });
+
+            // Xử lý submit form thêm mới
+            $(document).on('submit', '#createSPCTForm', function (e) {
+                e.preventDefault();
+                var formData = new FormData(this);
+
+                $.ajax({
+                    url: '/SPCT/Create',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (result) {
+                        if (result.success) {
+                            toastr.success('Thêm mới thành công');
+                            // Quay lại danh sách
+                            $('#createFormContainer').hide();
+                            $('#listContainer').show();
+                            // Reload trang để cập nhật danh sách
+                            setTimeout(function() {
+                                window.location.reload();
+                            }, 1000);
+                        } else {
+                            toastr.error(result.message || 'Có lỗi xảy ra');
+                        }
+                    },
+                    error: function (err) {
+                        console.error('Lỗi khi thêm mới:', err);
+                        toastr.error('Có lỗi xảy ra khi thêm mới');
+                    }
+                });
+            });
+
+            // Hàm cập nhật trạng thái
+            function capNhatTrangThai(id, trangThai) {
+                $.ajax({
+                    url: '/SPCT/CapNhatTrangThai',
+                    type: 'POST',
+                    data: { id: id, trangThai: trangThai },
+                    success: function(result) {
+                        if(result.success) {
+                            toastr.success('Cập nhật trạng thái thành công');
+                        } else {
+                            toastr.error(result.message || 'Có lỗi xảy ra');
+                        }
+                    },
+                    error: function() {
+                        toastr.error('Có lỗi xảy ra khi cập nhật trạng thái');
+                    }
+                });
+            }
+
+            // Hàm hiển thị modal cập nhật giá
+            function showUpdatePriceModal(id, gia) {
+                $('#priceProductId').val(id);
+                $('#newPrice').val(gia);
+                $('#updatePriceModal').modal('show');
+            }
+
+            // Hàm cập nhật giá
+            function updatePrice() {
+                var id = $('#priceProductId').val();
+                var newPrice = $('#newPrice').val();
+
+                $.ajax({
+                    url: '/SPCT/CapNhatGia',
+                    type: 'POST',
+                    data: { id: id, gia: newPrice },
+                    success: function(result) {
+                        if(result.success) {
+                            $('#updatePriceModal').modal('hide');
+                            toastr.success('Cập nhật giá thành công');
+                            setTimeout(function() { window.location.reload(); }, 1000);
+                        } else {
+                            toastr.error(result.message || 'Có lỗi xảy ra');
+                        }
+                    },
+                    error: function() {
+                        toastr.error('Có lỗi xảy ra khi cập nhật giá');
+                    }
+                });
+            }
+
+            // Hàm hiển thị modal cập nhật số lượng
+            function showUpdateQuantityModal(id, soLuong) {
+                $('#quantityProductId').val(id);
+                $('#quantityChange').val('');
+                $('#updateQuantityModal').modal('show');
+            }
+
+            // Hàm cập nhật số lượng
+            function updateQuantity() {
+                var id = $('#quantityProductId').val();
+                var change = $('#quantityChange').val();
+
+                $.ajax({
+                    url: '/SPCT/CapNhatSoLuong',
+                    type: 'POST',
+                    data: { id: id, soLuongThayDoi: change },
+                    success: function(result) {
+                        if(result.success) {
+                            $('#updateQuantityModal').modal('hide');
+                            toastr.success('Cập nhật số lượng thành công');
+                            setTimeout(function() { window.location.reload(); }, 1000);
+                        } else {
+                            toastr.error(result.message || 'Có lỗi xảy ra');
+                        }
+                    },
+                    error: function() {
+                        toastr.error('Có lỗi xảy ra khi cập nhật số lượng');
+                    }
+                });
+            }
+        });
+    </script>
+}

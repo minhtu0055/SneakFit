@@ -3,6 +3,7 @@ using System.Threading.Tasks.Sources;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SneakFit.Application.Catalog.ThuongHieu;
+using SneakFit.ViewModels.Catalog.ChatLieu;
 using SneakFit.ViewModels.Catalog.ThuongHieu;
 
 namespace SneakFit.BackEndAPI.Controllers
@@ -16,6 +17,12 @@ namespace SneakFit.BackEndAPI.Controllers
         public ThuongHieuController(IThuongHieuService thuongHieuService)
         {
             _thuongHieuService = thuongHieuService;
+        }
+        [HttpGet("paging")]
+        public async Task<IActionResult> GetAllPaging([FromQuery] ThuongHieuPagingRequest request)
+        {
+            var result = await _thuongHieuService.GetAllPaging(request);
+            return Ok(result);
         }
         [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll()

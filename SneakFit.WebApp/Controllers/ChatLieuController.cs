@@ -92,5 +92,11 @@ namespace SneakFit.Admin.Controllers
 
             return Json(new { success = false, message = "Cập nhật thất bại" });
         }
+        [HttpGet("getall")]
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _chatLieuApiClient.GetAll();
+            return Ok(result);
+        }
     }
 }
