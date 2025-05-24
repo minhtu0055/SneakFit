@@ -106,10 +106,10 @@ namespace SneakFit.Application.Catalog.SanPhamChiTietChiTiet
                 query = query.Where(x => x.sp.DanhMucId == request.DanhMucId);
 
             if (request.GiaThapNhat.HasValue)
-                query = query.Where(x => x.spct.Gia >= (float)request.GiaThapNhat.Value);
+                query = query.Where(x => x.spct.Gia >= request.GiaThapNhat.Value);
 
             if (request.GiaCaoNhat.HasValue)
-                query = query.Where(x => x.spct.Gia <= (float)request.GiaCaoNhat.Value);
+                query = query.Where(x => x.spct.Gia <= request.GiaCaoNhat.Value);
 
             if (request.LocTrangthai == true)
                 query = query.Where(x => x.spct.TrangThai == request.TrangThai);
@@ -185,7 +185,6 @@ namespace SneakFit.Application.Catalog.SanPhamChiTietChiTiet
                 ThuongHieuId = request.ThuongHieuId,
                 ChatLieuId = request.ChatLieuId,
                 DeGiayId = request.DeGiayId,
-                ThuongHieuId = request.ThuongHieuId,
                 Gia = request.Gia,
                 SoLuong = request.SoLuong,
                 TrangThai = true,
@@ -374,7 +373,7 @@ namespace SneakFit.Application.Catalog.SanPhamChiTietChiTiet
                     MauSacId = item.MauSacId,
                     KichThuocId = item.KichThuocId,
                     SoLuong = item.SoLuong,
-                    Gia = (float)item.Gia,
+                    Gia = item.Gia,
                     NgayTao = DateTime.Now,
                     HinhAnhSanPham = new List<HinhAnhSanPham>()
                 };

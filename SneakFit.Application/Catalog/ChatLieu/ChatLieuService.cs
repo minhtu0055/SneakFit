@@ -110,13 +110,5 @@ namespace SneakFit.Application.Catalog.ChatLieu
                 TenChatLieu = chatLieu.TenChatLieu
             };
         }
-        public async Task<List<ChatLieuViewModels>> GetAll()
-        {
-            return await _context.ChatLieu.Select(x => new ChatLieuViewModels
-            {
-                Id = x.Id,
-                TenChatLieu = x.TenChatLieu
-            }).ToListAsync();
-        }
     }
 }
