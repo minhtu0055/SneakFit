@@ -14,24 +14,13 @@ namespace SneakFit.Application.Catalog.KhuyenMai
 {
     public class KhuyenMaiService : IKhuyenMaiService
     {
-        //demokhuyemai
         private readonly SneakFitDbContext _context;
-
         public KhuyenMaiService(SneakFitDbContext context)
         {
             _context = context;
         }
-
-        // Phương thức tạo mới khuyến mãi
         public async Task<KhuyenMaiViewModels> Create(ThemKhuyenMai request)
         {
-            // Kiểm tra nếu danh sách sản phẩm trống
-            if (request.SanPhamIds == null || !request.SanPhamIds.Any())
-            {
-                throw new Exception("Danh sách sản phẩm không thể trống.");
-            }
-
-            // Tạo đối tượng Khuyến Mại mới
             var khuyenMai = new Data.Entities.KhuyenMai()
             {
                 Id = Guid.NewGuid(),
@@ -39,14 +28,10 @@ namespace SneakFit.Application.Catalog.KhuyenMai
                 MoTa = request.MoTa,
                 NgayTao = DateTime.Now,
                 ThoiGianBatDau = request.ThoiGianBatDau,
-                ThoiGianKetThuc = request.ThoiGianKetThuc,
-               
+                ThoiGianKetThuc = request.ThoiGianKetThuc,           
                 LoaiGiamGia = request.LoaiGiamGia,
-                GiaTriGiamGia = request.GiaTriGiamGia,
-                TrangThai = DateTime.Now >= request.ThoiGianBatDau
-                ? (DateTime.Now <= request.ThoiGianKetThuc ? TrangThaiGiamGia.HoatDong : TrangThaiGiamGia.HetHan)
-                : TrangThaiGiamGia.KhongHoatDong,
-                KhuyenMaiChiTiet = new List<KhuyenMaiChiTiet>()
+                GiaTriGiamGia = request.GiaTriGiamGia,            
+                TrangThai = DateTime.Now >= request.ThoiGianBatDau ? TrangThaiGiamGia.HoatDong : TrangThaiGiamGia.KhongHoatDong,
             };
 
             // Kiểm tra tính hợp lệ của các sản phẩm trong danh sách
@@ -64,24 +49,19 @@ namespace SneakFit.Application.Catalog.KhuyenMai
                     KhuyenMaiId = khuyenMai.Id
                 };
                 _context.KhuyenMaiChiTiet.Add(khuyenMaiChiTiet);
-            }
-
-            // Lưu khuyến mãi vào cơ sở dữ liệu
+            }           
             _context.KhuyenMai.Add(khuyenMai);
             await _context.SaveChangesAsync();
-
-            // Trả về thông tin khuyến mãi mới tạo
             return await GetById(khuyenMai.Id);
         }
-
         // Phương thức lấy tất cả các khuyến mãi
         public async Task<PagedResult<KhuyenMaiViewModels>> GetAllPaging(PhanTrangKhuyenMai request)
         {
             var query = _context.KhuyenMai
                 .Include(x => x.KhuyenMaiChiTiet)
-                .ThenInclude(x => x.SanPham)           
+                .ThenInclude(x => x.SanPham)
+                .ThenInclude(x => x.SanPhamChiTiet)
                 .AsQueryable();
-
             // Cập nhật trạng thái cho tất cả các khuyến mại
             var khuyenMais = await query.ToListAsync();
             foreach (var khuyenMai in khuyenMais)
@@ -99,12 +79,7 @@ namespace SneakFit.Application.Catalog.KhuyenMai
             {
                 query = query.Where(x => x.TrangThai == request.TrangThai.Value);
             }
-
-            int tongSoHang = await query.CountAsync();
-
-            // Nếu không truyền MucTrang hoặc KichThuocTrang thì set mặc định
-            if (request.PageIndex <= 0) request.PageIndex = 1;
-            if (request.PageSize <= 0) request.PageSize = 10;
+            int totalRow = await query.CountAsync();
 
             var data = await query.Skip((request.PageIndex - 1) * request.PageSize)
                 .Take(request.PageSize)
@@ -119,21 +94,23 @@ namespace SneakFit.Application.Catalog.KhuyenMai
                     LoaiGiamGia = khuyenMai.LoaiGiamGia,
                     GiaTriGiamGia = khuyenMai.GiaTriGiamGia,
                     TrangThai = khuyenMai.TrangThai,
-                SanPhams = khuyenMai.KhuyenMaiChiTiet.Select(p => new KhuyenMaiSanPhamViewModels()
-                {
-                    SanPhamId = p.SanPhamId,
-                    TenSanPham = p.SanPham.TenSanPham,                                 
+                    SanPhams = khuyenMai.KhuyenMaiChiTiet.Select(p => new KhuyenMaiSanPhamViewModels()
+                    {
+                        SanPhamId = p.SanPhamId,
+                        TenSanPham = p.SanPham.TenSanPham,
+                        GiaGoc = p.SanPham.SanPhamChiTiet.Select(i => i.Gia).FirstOrDefault(),
+                        GiaKhuyenMai = khuyenMai.LoaiGiamGia == LoaiGiamGia.PhamTram
+                            ? p.SanPham.SanPhamChiTiet.Select(i => i.Gia).FirstOrDefault() * (100 - khuyenMai.GiaTriGiamGia) / 100
+                            : p.SanPham.SanPhamChiTiet.Select(i => i.Gia).FirstOrDefault() - khuyenMai.GiaTriGiamGia
                     }).ToList()
                 }).ToListAsync();
-
             var pagedResult = new PagedResult<KhuyenMaiViewModels>()
             {
-                TotalRecords = tongSoHang,
+                TotalRecords = totalRow,
                 PageSize = request.PageSize,
                 PageIndex = request.PageIndex,
                 Items = data
-            };
-            
+            };          
             return pagedResult;
         }
 
@@ -143,12 +120,12 @@ namespace SneakFit.Application.Catalog.KhuyenMai
             var khuyenMai = await _context.KhuyenMai
                 .Include(x => x.KhuyenMaiChiTiet)
                 .ThenInclude(x => x.SanPham)
-               
+                .ThenInclude(x => x.SanPhamChiTiet)
                 .FirstOrDefaultAsync(x => x.Id == id);
 
             if (khuyenMai == null)
-                throw new Exception($"Không tìm thấy khuyến mãi có id: {id}");
-
+                throw new Exception($"Không tìm thấy khuyến mãi có id: {id}");  
+            
             return new KhuyenMaiViewModels
             {
                 Id = khuyenMai.Id,
@@ -156,16 +133,18 @@ namespace SneakFit.Application.Catalog.KhuyenMai
                 MoTa = khuyenMai.MoTa,
                 NgayTao = khuyenMai.NgayTao,
                 ThoiGianBatDau = khuyenMai.ThoiGianBatDau,
-                ThoiGianKetThuc = khuyenMai.ThoiGianKetThuc,
-              
+                ThoiGianKetThuc = khuyenMai.ThoiGianKetThuc,              
                 LoaiGiamGia = khuyenMai.LoaiGiamGia,
                 GiaTriGiamGia = khuyenMai.GiaTriGiamGia,
                 TrangThai = khuyenMai.TrangThai,
                 SanPhams = khuyenMai.KhuyenMaiChiTiet.Select(p => new KhuyenMaiSanPhamViewModels()
                 {
                     SanPhamId = p.SanPhamId,
-                    TenSanPham = p.SanPham.TenSanPham,
-                   
+                    TenSanPham = p.SanPham.TenSanPham,                   
+                    GiaGoc = p.SanPham.SanPhamChiTiet.Select(i => i.Gia).FirstOrDefault(),
+                    GiaKhuyenMai = khuyenMai.LoaiGiamGia == LoaiGiamGia.PhamTram
+                            ? p.SanPham.SanPhamChiTiet.Select(i => i.Gia).FirstOrDefault() * (100 - khuyenMai.GiaTriGiamGia) / 100
+                            : p.SanPham.SanPhamChiTiet.Select(i => i.Gia).FirstOrDefault() - khuyenMai.GiaTriGiamGia
                 }).ToList()
             };
         }
@@ -179,11 +158,9 @@ namespace SneakFit.Application.Catalog.KhuyenMai
             khuyenMai.TenKhuyenMai = request.TenKhuyenMai;
             khuyenMai.MoTa = request.MoTa;
             khuyenMai.ThoiGianBatDau = request.ThoiGianBatDau;
-            khuyenMai.ThoiGianKetThuc = request.ThoiGianKetThuc;
-         
+            khuyenMai.ThoiGianKetThuc = request.ThoiGianKetThuc;        
             khuyenMai.LoaiGiamGia = request.LoaiGiamGia;
             khuyenMai.GiaTriGiamGia = request.GiaTriGiamGia;
-            khuyenMai.TrangThai = request.TrangThai;
 
             // Cập nhật trạng thái dựa trên thời gian
             await CapNhatTrangThaiKhuyenMai(khuyenMai);
@@ -198,8 +175,10 @@ namespace SneakFit.Application.Catalog.KhuyenMai
             foreach (var sanPhamId in request.SanPhamIds)
             {
                 var sanPham = await _context.SanPham.FindAsync(sanPhamId);
-                if (sanPham == null)
-                    throw new Exception($"Không tìm thấy sản phẩm có id: {sanPhamId}");
+                if (request.SanPhamIds == null || !request.SanPhamIds.Any())
+                {
+                    throw new Exception("Danh sách sản phẩm không thể trống.");
+                }
 
                 var khuyenMaiChiTiet = new KhuyenMaiChiTiet()
                 {

@@ -6,11 +6,22 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+// Thêm Memory Cache
+builder.Services.AddMemoryCache();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
 .AddCookie(options =>
     {
         options.LoginPath = "/Login/Index";
         options.AccessDeniedPath = "/User/Forbidden/";
+        // Thêm các cấu hình sau
+        options.Cookie.Name = "SneakFit.Admin";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+        
+        // Cấu hình thời gian sống của cookie
+        options.ExpireTimeSpan = TimeSpan.FromHours(24);
+        options.SlidingExpiration = true;
     });
 builder.Services.AddSession(options =>
 {
@@ -19,6 +30,8 @@ builder.Services.AddSession(options =>
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddScoped<IUserApiClient, UserApiClient>();
+builder.Services.AddScoped<IRoleApiClient, RoleApiClient>();
+builder.Services.AddScoped<IKhuyenMaiApiClient, KhuyenMaiApiClient>();
 builder.Services.AddScoped<IChatLieuApiClient, ChatLieuApiClient>();
 builder.Services.AddScoped<IDeGiayApiClient, DeGiayApiClient>();
 builder.Services.AddScoped<IMauSacApiClient, MauSacApiClient>();
@@ -27,6 +40,7 @@ builder.Services.AddScoped<ISanPhamApiClient, SanPhamApiClient>();
 builder.Services.AddScoped<ISpctApiClient, SpctApiClient>();
 builder.Services.AddScoped<IThuongHieuApiClient, ThuongHieuApiClient>();
 builder.Services.AddScoped<IDanhMucApiClient, DanhMucApiClient>();
+builder.Services.AddScoped<IVoucherApiClient, VoucherApiClient>();
 
 
 

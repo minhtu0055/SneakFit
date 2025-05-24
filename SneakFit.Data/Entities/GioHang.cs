@@ -9,7 +9,8 @@ namespace SneakFit.Data.Entities
     public class GioHang
     {
         public Guid Id { get; set; }
-        public string UserId { get; set; }
+        public Guid UserId { get; set; }
+        public DateTime NgayTao { get; set; }
         public AppUser User { get; set; }
         public List<GioHangChiTiet> GioHangChiTiet { get; set; }
     }

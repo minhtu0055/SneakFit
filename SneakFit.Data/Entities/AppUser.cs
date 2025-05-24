@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace SneakFit.Data.Entities
 {
-    public class AppUser : IdentityUser
+    public class AppUser : IdentityUser<Guid>
     {
         public string? UrlHinhAnh { get; set; }  
         public DateTime NgaySinh { get; set; }

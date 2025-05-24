@@ -85,7 +85,6 @@ namespace SneakFit.ApiIntegration.Services
 
             throw new Exception("Không thể cập nhật chất liệu");
         }
-
         public async Task<List<ChatLieuViewModels>> GetAll()
         {
             var client = _httpClientFactory.CreateClient();

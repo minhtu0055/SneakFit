@@ -21,7 +21,7 @@ namespace SneakFit.Data.Entities
 		public ThuongHieu ThuongHieu { get; set; }
         public Guid SanPhamId { get; set; }
 		public SanPham SanPham { get; set; }
-		public float Gia { get; set; }
+		public decimal Gia { get; set; }
 		public int SoLuong { get; set; }
 		public bool TrangThai { get; set; }
         public DateTime NgayTao { get; set; }

@@ -120,14 +120,10 @@
 									   name="UserName"
 									   placeholder="Nhập tài khoản"
 									   autofocus />
-							</div>
-							<span asp-validation-for="UserName" class="text-danger"></span>
+							</div>					
 							<div class="mb-6 form-password-toggle">
 								<div class="d-flex justify-content-between">
-									<label class="form-label" for="password">Mật khẩu</label>
-									<a asp-action="ForgotPassword" asp-controller="Login">
-										<small>Quên mật khẩu?</small>
-									</a>
+									<label class="form-label" for="password">Mật khẩu</label>						
 								</div>
 								<div class="input-group input-group-merge">
 									<input type="password"
@@ -137,8 +133,10 @@
 										   placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
 										   aria-describedby="password" />
 									<span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
-								</div>
-								<span asp-validation-for="Password" class="text-danger"></span>
+								</div>	
+								<a asp-action="ForgotPassword" asp-controller="Login">
+									<small>Quên mật khẩu?</small>
+								</a>
 							</div>
 							<div class="form-check mb-3">
 								<input asp-for="RememberMe" class="form-check-input" type="checkbox" />

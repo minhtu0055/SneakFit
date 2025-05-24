@@ -57,7 +57,7 @@ namespace SneakFit.Application.Catalog.SanPhamChiTietChiTiet
             return list;
         }
 
-        public async Task<SPCTViewModels?> GetById(Guid id)
+        public async Task<SPCTViewModels> GetById(Guid id)
         {
             var entity = await _context.SanPhamChiTiet
                 .Include(x => x.SanPham)
@@ -185,7 +185,8 @@ namespace SneakFit.Application.Catalog.SanPhamChiTietChiTiet
                 ThuongHieuId = request.ThuongHieuId,
                 ChatLieuId = request.ChatLieuId,
                 DeGiayId = request.DeGiayId,
-                Gia = (float)request.Gia,
+                ThuongHieuId = request.ThuongHieuId,
+                Gia = request.Gia,
                 SoLuong = request.SoLuong,
                 TrangThai = true,
                 NgayTao = DateTime.Now,
@@ -264,7 +265,7 @@ namespace SneakFit.Application.Catalog.SanPhamChiTietChiTiet
         {
             var entity = await _context.SanPhamChiTiet.FindAsync(id);
             if (entity == null) return false;
-            entity.Gia = (float)gia;
+            entity.Gia = gia;
             await _context.SaveChangesAsync();
             return true;
         }

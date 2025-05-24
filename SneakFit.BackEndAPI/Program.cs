@@ -14,10 +14,13 @@ using SneakFit.Application.Catalog.SanPhamChiTietChiTiet;
 using SneakFit.Application.Catalog.KhuyenMai;
 using SneakFit.Application.Catalog.ThuongHieu;
 using SneakFit.Application.Catalog.Voucher;
-using SneakFit.Application.System;
 using SneakFit.Data.EF;
 using SneakFit.Data.Entities;
 using System.Text.Json.Serialization;
+using SneakFit.Application.System.User;
+using Microsoft.AspNetCore.DataProtection;
+using SneakFit.Application.System.Role;
+using SneakFit.Application.Catalog.GioHang;
 
 
 
@@ -33,7 +36,7 @@ builder.Services.AddDbContext<SneakFitDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
-builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
+builder.Services.AddIdentity<AppUser, IdentityRole<Guid>>(options =>
 {
     options.Password.RequireDigit = true; //yêu có ít nhất 1 chữ số 
     options.Password.RequireLowercase = true; // yêu cầu có ít nhất chứ thường
@@ -43,16 +46,32 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
     options.User.RequireUniqueEmail = true; // yêu cầu mỗi email phải là duy nhất, không thể hai toàn khoản có trùng email
     options.Lockout.MaxFailedAccessAttempts = 5; // sau 5 lần nhập sai mật khẩu 
     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5); // khóa tài khoản trong 5 phút
+    // Thêm cấu hình này để hỗ trợ nhiều phiên đăng nhập
+    options.SignIn.RequireConfirmedAccount = false;
+    options.SignIn.RequireConfirmedEmail = false;
+    options.SignIn.RequireConfirmedPhoneNumber = false;
 }).AddEntityFrameworkStores<SneakFitDbContext>() // sử dụng addentity để lưu trữ dữ liệu người dùng vào database
             .AddDefaultTokenProviders(); // cung cấp các token cho tính năng: xác thực  
+// Thêm cấu hình này ngay sau phần AddIdentity
+builder.Services.Configure<SecurityStampValidatorOptions>(options =>
+{
+    // Kéo dài thời gian xác thực security stamp lên 1 ngày
+    options.ValidationInterval = TimeSpan.FromDays(1);
+});            
+// Thêm sau phần khai báo các dịch vụ
+builder.Services.AddDataProtection()
+    .SetApplicationName("SneakFit")
+    .SetDefaultKeyLifetime(TimeSpan.FromDays(14)); // Đặt thời gian sống cho key
 //Declare DI
 builder.Services.AddScoped<IThuongHieuService, ThuongHieuService>(); // khai báo dịch vụ
 builder.Services.AddScoped<IDeGiayService, DeGiayService>(); // khai báo dịch vụ
 builder.Services.AddScoped<IChatLieuService, ChatLieuService>(); // khai báo dịch vụ
 builder.Services.AddScoped<IUserService, UserService>(); // khai báo dịch vụ
+builder.Services.AddScoped<IRoleService, RoleService>(); // khai báo dịch vụ
 builder.Services.AddScoped<UserManager<AppUser>, UserManager<AppUser>>();
 builder.Services.AddScoped<SignInManager<AppUser>, SignInManager<AppUser>>();
-builder.Services.AddScoped<RoleManager<IdentityRole>, RoleManager<IdentityRole>>();
+builder.Services.AddScoped<RoleManager<IdentityRole<Guid>>, RoleManager<IdentityRole<Guid>>>();
+builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IKichThuocService, KichThuocService>(); // khai báo dịch vụ
 builder.Services.AddScoped<IMauSacService, MauSacService>(); // khai báo dịch vụ
 builder.Services.AddScoped<IDanhMucService, DanhMucService>(); // khai báo dịch vụ
@@ -60,6 +79,7 @@ builder.Services.AddScoped<ISanPhamService, SanPhamService>(); // khai báo dị
 builder.Services.AddScoped<ISanPhamChiTetService, SanPhamChiTietChiTetService>(); // khai báo dịch vụ
 builder.Services.AddScoped<IKhuyenMaiService, KhuyenMaiService>();
 builder.Services.AddScoped<IVoucherService, VoucherService>(); // khai báo dịch vụ
+builder.Services.AddScoped<IGioHangService, GioHangService>(); // khai báo dịch vụ
 
 
 builder.Services.AddEndpointsApiExplorer();
@@ -93,6 +113,7 @@ builder.Services.AddSwaggerGen(x =>
         }
     });
 });
+
 string issuer = builder.Configuration.GetValue<string>("Tokens:Issuer");
 string signingKey = builder.Configuration.GetValue<string>("Tokens:Key");
 byte[] signingKeyBytes = System.Text.Encoding.UTF8.GetBytes(signingKey);
