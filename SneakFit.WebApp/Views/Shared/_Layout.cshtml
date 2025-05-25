@@ -1,4 +1,5 @@
-﻿<!doctype html>
+﻿﻿
+<!doctype html>
 <html lang="en"
       class="light-style layout-menu-fixed layout-compact"
       dir="ltr"
@@ -41,6 +42,12 @@
     <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="~/assets/js/config.js"></script>
+    @* <style>
+        a {
+            text-decoration: none;
+        }
+    </style> *@
+
 </head>
 
 <body>
@@ -211,8 +218,8 @@
             <!-- / Menu -->
             <!-- Layout container -->
             <div class="layout-page">
-                <!-- Navbar -->             
-				@await Html.PartialAsync("_Navbar")
+                <!-- Navbar -->
+                @await Html.PartialAsync("_Navbar")
                 <!-- / Navbar -->
                 <!-- Content wrapper -->
                 <div class="content-wrapper">
@@ -234,7 +241,7 @@
                                     , made with ❤️ by
                                     <a href="https://www.facebook.com/phi.minh.tu.2024" target="_blank" class="footer-link">SneakFit</a>
                                 </div>
-                                <div class="d-none d-lg-inline-block">                                 
+                                <div class="d-none d-lg-inline-block">
                                     <a href="https://www.facebook.com/phi.minh.tu.2024"
                                        target="_blank"
                                        class="footer-link">Hỗ trợ</a>
@@ -264,22 +271,22 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
     <script>
         // Cấu hình toastr
-        toastr.options = { 
-            "closeButton": true, 
-            "debug": false, 
-            "newestOnTop": true, 
-            "progressBar": true, 
-            "positionClass": "toast-top-right", 
-            "preventDuplicates": false, 
-            "onclick": null, 
-            "showDuration": "300", 
-            "hideDuration": "1000", 
-            "timeOut": "5000", 
-            "extendedTimeOut": "1000", 
-            "showEasing": "swing", 
-            "hideEasing": "linear", 
-            "showMethod": "fadeIn", 
-            "hideMethod": "fadeOut" 
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "5000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
         }
     </script>
     <!-- Vendors JS -->
