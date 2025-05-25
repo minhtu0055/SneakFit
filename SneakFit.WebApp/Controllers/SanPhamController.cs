@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SneakFit.ApiIntegration.Services;
 using SneakFit.ViewModels.Catalog.SanPham;
+using SneakFit.ViewModels.Catalog.SanPhamChiTiet;
 
 namespace SneakFit.Admin.Controllers
 {
@@ -9,11 +10,30 @@ namespace SneakFit.Admin.Controllers
     {
         private readonly ISanPhamApiClient _sanPhamApiClient;
         private readonly IDanhMucApiClient _danhMucApiClient;
+        private readonly ISpctApiClient _spctApiClient;
+        private readonly IKichThuocApiClient _kichThuocApiClient;
+        private readonly IMauSacApiClient _mauSacApiClient;
+        private readonly IChatLieuApiClient _chatLieuApiClient;
+        private readonly IThuongHieuApiClient _thuongHieuApiClient;
+        private readonly IDeGiayApiClient _deGiayApiClient;
 
-        public SanPhamController(ISanPhamApiClient sanPhamApiClient, IDanhMucApiClient danhMucApiClient)
+        public SanPhamController(ISanPhamApiClient sanPhamApiClient, 
+                                IDanhMucApiClient danhMucApiClient,
+                                ISpctApiClient spctApiClient,
+                                IKichThuocApiClient kichThuocApiClient,
+                                IMauSacApiClient mauSacApiClient,
+                                IChatLieuApiClient chatLieuApiClient,
+                                IThuongHieuApiClient thuongHieuApiClient,
+                                IDeGiayApiClient deGiayApiClient)
         {
             _sanPhamApiClient = sanPhamApiClient;
             _danhMucApiClient = danhMucApiClient;
+            _spctApiClient = spctApiClient;
+            _kichThuocApiClient = kichThuocApiClient;
+            _mauSacApiClient = mauSacApiClient;
+            _chatLieuApiClient = chatLieuApiClient;
+            _thuongHieuApiClient = thuongHieuApiClient;
+            _deGiayApiClient = deGiayApiClient;
         }
 
         public async Task<IActionResult> Index(string keyWord, Guid? danhMucId, int pageIndex = 1, int pageSize = 8)
@@ -150,6 +170,50 @@ namespace SneakFit.Admin.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
             return Json(new { success = false, message = "Cập nhật trạng thái thất bại" });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditSPCT(Guid id)
+        {
+            var sanPham = await _sanPhamApiClient.GetById(id);
+            if (sanPham == null) return NotFound();
+
+            // Lấy danh sách các thuộc tính cho ViewBag
+            var chatLieus = await _chatLieuApiClient.GetAll();
+            var thuongHieus = await _thuongHieuApiClient.GetAll();
+            var deGiays = await _deGiayApiClient.GetAll();
+            var kichThuocs = await _kichThuocApiClient.GetAll();
+            var mauSacs = await _mauSacApiClient.GetAll();
+
+            ViewBag.ChatLieus = chatLieus.ToDictionary(x => x.Id, x => x.TenChatLieu);
+            ViewBag.ThuongHieus = thuongHieus.ToDictionary(x => x.Id, x => x.TenThuongHieu);
+            ViewBag.DeGiays = deGiays.ToDictionary(x => x.Id, x => x.TenDeGiay);
+            ViewBag.KichThuocs = kichThuocs.ToDictionary(x => x.Id, x => x.MaKichThuoc.ToString());
+            ViewBag.MauSacs = mauSacs.ToDictionary(x => x.Id, x => x.TenMauSac);
+
+            var danhSachSPCT = await _sanPhamApiClient.GetSPCTByProductName(sanPham.TenSanPham);
+
+            var model = new SuaSPCT
+            {
+                SanPhamId = sanPham.Id,
+                TenSanPham = sanPham.TenSanPham,
+                DanhSachSPCT = danhSachSPCT
+            };
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateSPCT(Guid id, [FromBody] List<SanPhamChiTietCapNhat> updates)
+        {
+            try
+            {
+                var result = await _sanPhamApiClient.UpdateSPCT(id, updates);
+                return Json(new { success = true, message = "Cập nhật thành công" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
     }
 }

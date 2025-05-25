@@ -35,6 +35,7 @@ namespace SneakFit.ViewModels.Catalog.SanPhamChiTiet
         [Required(ErrorMessage = "Danh mục không được để trống")]
         public Guid DanhMucId { get; set; }
         public bool TrangThai { get; set; }
+        public string TenSanPham { get; set; }
 
         public List<IFormFile>? Images { get; set; }
 

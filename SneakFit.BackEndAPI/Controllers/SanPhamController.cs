@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SneakFit.Application.Catalog.SanPham;
 using SneakFit.Application.Catalog.SanPhamChiTiet;
@@ -6,6 +6,7 @@ using SneakFit.ViewModels.Catalog.ChatLieu;
 using SneakFit.ViewModels.Catalog.SanPham;
 using SneakFit.ViewModels.Catalog.ThuongHieu;
 using SneakFit.ViewModels.Common;
+using SneakFit.ViewModels.Catalog.SanPhamChiTiet;
 
 namespace SneakFit.BackEndAPI.Controllers
 {
@@ -73,6 +74,48 @@ namespace SneakFit.BackEndAPI.Controllers
                 return BadRequest(new ApiErrorResult<bool>($"Không tìm thấy sản phẩm có ID: {id}"));
 
             return Ok(new ApiSuccessResult<bool>(true));
+        }
+        [HttpPut("{id}/spct")]
+        public async Task<IActionResult> UpdateSPCT(Guid id, [FromBody] List<SanPhamChiTietCapNhat> updates)
+        {
+            var result = await _sanPhamService.UpdateSPCT(id, updates);
+            if (!result)
+                return BadRequest(new ApiErrorResult<bool>($"Không tìm thấy sản phẩm có ID: {id}"));
+
+            return Ok(new ApiSuccessResult<bool>(true));
+        }
+
+        [HttpPost("GetSPCTByFilter")]
+        public async Task<IActionResult> GetSPCTByFilter([FromBody] SPCTFilterRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { message = "Invalid request model", errors = ModelState });
+            }
+
+            try
+            {
+                var result = await _sanPhamService.GetSPCTByFilter(request);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("GetSPCTByProductName/{productName}")]
+        public async Task<IActionResult> GetSPCTByProductName(string productName)
+        {
+            try
+            {
+                var result = await _sanPhamService.GetSPCTByProductName(productName);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

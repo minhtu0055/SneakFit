@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using SneakFit.ViewModels.Catalog.SanPhamChiTiet;
 using SneakFit.ApiIntegration.Services;
 using Microsoft.AspNetCore.Mvc.Rendering;
