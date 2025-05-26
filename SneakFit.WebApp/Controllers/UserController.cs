@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using SneakFit.ApiIntegration.Services;
 using SneakFit.ViewModels.System.User;
 using SneakFit.ViewModels.Common;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SneakFit.Admin.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class UserController : BaseController
     {
         private readonly IUserApiClient _userApiClient;
@@ -25,7 +27,8 @@ namespace SneakFit.Admin.Controllers
             {
                 TuKhoa = tuKhoa,
                 PageIndex = pageIndex,
-                PageSize = pageSize
+                PageSize = pageSize,
+                Role = "NHÂN VIÊN,ADMIN"
             };
             var data = await _userApiClient.GetUsersPaging(request);
             ViewBag.TuKhoa = tuKhoa;
@@ -43,19 +46,58 @@ namespace SneakFit.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(RegisterRequest request)
         {
-            if (!ModelState.IsValid)
-            {
-                return View();
-            }
+            request.Roles = new List<string> { "NHÂN VIÊN" };
+
             var result = await _userApiClient.Register(request);
             if (result.IsSuccessed)
             {
                 TempData["success"] = "Thêm mới người dùng thành công";
                 return RedirectToAction("Index");
             }
-            ModelState.AddModelError("", result.Message);
-            return View(result);
+            if (!string.IsNullOrEmpty(result.Message))
+            {
+                TempData["ErrorMessage"] = result.Message;
+            }
+            return View(request);
         }
+        [HttpGet]
+        public async Task<IActionResult> Edit(Guid id)
+        {
+            var result = await _userApiClient.GetById(id);
+            if (result.IsSuccessed)
+            {
+                var user = result.ResultObj;
+                var updateRequest = new UserUpdateRequest()
+                {
+                    Id = id,
+                    Email = user.Email,
+                    GioiTinh = user.GioiTinh,
+                    NgaySinh = user.NgaySinh,
+                    SoDienThoai = user.SoDienThoai,
+                    HoVaTen = user.HoVaTen,
+                    TrangThai = user.TrangThai
+                };
+                return View(updateRequest);
+            }
+            return RedirectToAction("Index");
+        }
+        [HttpPost]
+        public async Task<IActionResult> Edit(UserUpdateRequest request)
+        {
+            if (!ModelState.IsValid)
+                return View();
+
+            var result = await _userApiClient.Update(request);
+            if (result.IsSuccessed)
+            {
+                TempData["success"] = "Cập nhật thông tin thành công";
+                return RedirectToAction("Index");
+            }
+
+            ModelState.AddModelError("", result.Message);
+            return View(request);
+        }
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> Logout()
         {

@@ -1,39 +1,157 @@
 ﻿@model SneakFit.ViewModels.System.User.RegisterRequest
 
-<form asp-controller="User" asp-action="Create" method="post" data-confirm="Are you sure you want to do that?">
-    <div class="mb-3">
-        <label asp-for="UserName" class="form-label"></label>
-        <input asp-for="UserName" class="form-control" placeholder="Nhập tên người dùng"></input>
-        <span asp-validation-for="UserName" class="text-danger"></span>
-    </div>
-    <div class="mb-3">
-        <label asp-for="Email" class="form-label"></label>
-        <input asp-for="Email" class="form-control" placeholder="Nhập email"></input>
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
-    <div class="mb-3">
-        <label asp-for="NgaySinh" class="form-label"></label>
-        <input asp-for="NgaySinh" type="date" class="form-control" placeholder="Ngày sinh" required="required" data-validation-required-message="Vui lòng nhập ngày sinh" />
-        <span asp-validation-for="NgaySinh" class="text-danger"></span>
-    </div>
-    <div class="mb-3">
-        <label asp-for="Password" class="form-label"></label>
-        <input asp-for="Password" type="password" class="form-control" placeholder="Nhập mật khẩu" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-    <div class="mb-3">
-        <label asp-for="TrangThai" class="form-label"></label>
-        <div class="form-check">
-            <input asp-for="TrangThai" class="form-check-input" type="radio" value="true" checked />
-            <label class="form-check-label">Hoạt Động</label>
-        </div>
-        <div class="form-check">
-            <input asp-for="TrangThai" class="form-check-input" type="radio" value="false" />
-            <label class="form-check-label">Ngưng Hoạt Động</label>
-        </div>
-    </div>
-    <div class="text-end">
-        <button type="submit" class="btn btn-primary">Create</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-    </div>
-</form>
+<div class="container-fluid">
+	<h3 class="mt-4">Tạo mới khách hàng</h3>
+	<ol class="breadcrumb mb-4">
+		<li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+		<li class="breadcrumb-item"><a asp-action="Index">Danh sách khách hàng</a></li>
+		<li class="breadcrumb-item active">Tạo mới</li>
+	</ol>
+	<div class="card mb-4">
+		<div class="card-body">
+			<div class="col-md-12 mx-auto">
+				<form asp-action="Create" method="post" id="create-form" novalidate>
+					<div class="row">
+						<div class="col-md-2">
+							<div class="mb-3 row">
+								<div class="">
+									<label for="AnhDaiDien">
+										<img id="previewImage" src="~/assets/img/avatars/hinhanhnew.png" alt="Ảnh" class="img-thumbnail" style="width: 200px; height: 200px; object-fit: cover; border-radius: 20px; cursor: pointer;" onclick="document.getElementById('fileInput').click();" />
+									</label>
+									<input id="fileInput" asp-for="UrlHinhAnh" type="file" accept="image/*" class="form-control d-none" onchange="previewFile(this)" />
+								</div>
+							</div>
+						</div>
+						<div class="col-md-10">
+							<div class="mb-3 row">
+								<label asp-for="HoVaTen" class="col-sm-2 col-form-label">Họ và tên <span class="text-danger">*</span></label>
+								<div class="col-sm-10">
+									<input asp-for="HoVaTen" class="form-control" placeholder="Vui lòng nhập Họ Tên..." required />
+									<span class="invalid-feedback">Vui lòng nhập họ và tên</span>
+								</div>
+							</div>
+							<div class="mb-3 row">
+								<label asp-for="UserName" class="col-sm-2 col-form-label">Tài khoản <span class="text-danger">*</span></label>
+								<div class="col-sm-10">
+									<input asp-for="UserName" class="form-control" placeholder="Nhập tài khoản..." required />
+									<span class="invalid-feedback">Vui lòng nhập tài khoản</span>
+								</div>
+							</div>
+							<div class="mb-3 row">
+								<label asp-for="Email" class="col-sm-2 col-form-label">Email <span class="text-danger">*</span></label>
+								<div class="col-sm-10">
+									<input asp-for="Email" class="form-control" placeholder="Nhập Gmail..." required />
+									<span class="invalid-feedback">Vui lòng nhập email hợp lệ</span>
+								</div>
+							</div>
+							<div class="mb-3 row">
+								<label asp-for="SoDienThoai" class="col-sm-2 col-form-label">Số điện thoại <span class="text-danger">*</span></label>
+								<div class="col-sm-10">
+									<input asp-for="SoDienThoai" class="form-control" placeholder="Nhập số điện thoại..." required pattern="[0-9]{10}" />
+									<span class="invalid-feedback">Vui lòng nhập số điện thoại hợp lệ (10 số)</span>
+								</div>
+							</div>
+							<div class="mb-3 row">
+								<label asp-for="NgaySinh" class="col-sm-2 col-form-label">Ngày sinh <span class="text-danger">*</span></label>
+								<div class="col-sm-10">
+									<div class="input-group has-validation">
+										<input asp-for="NgaySinh" type="datetime-local" class="form-control" required />
+										<span class="invalid-feedback">Vui lòng chọn ngày sinh</span>
+									</div>
+								</div>
+							</div>
+							<div class="mb-3 row">
+								<label asp-for="GioiTinh" class="col-sm-2 col-form-label">Giới tính <span class="text-danger">*</span></label>
+								<div class="col-sm-10">
+									<div class="form-check form-check-inline">
+										<input class="form-check-input" type="radio" asp-for="GioiTinh" id="nam" value="true" checked>
+										<label class="form-check-label" for="nam">Nam</label>
+									</div>
+									<div class="form-check form-check-inline">
+										<input class="form-check-input" type="radio" asp-for="GioiTinh" id="nu" value="false">
+										<label class="form-check-label" for="nu">Nữ</label>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="mb-3 row">
+						<div class="col-sm-9 offset-sm-9">
+							<button type="submit" class="btn btn-primary me-4">
+								<i class="bx bx-save me-1"></i> Tạo mới
+							</button>
+							<a asp-action="Index" class="btn btn-secondary">
+								<i class="bx bx-arrow-back me-1"></i> Quay lại
+							</a>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+@section Scripts {
+	@{
+		await Html.RenderPartialAsync("_ValidationScriptsPartial");
+	}
+	<script>
+			function previewFile(input) {
+			const file = input.files[0];
+			if (file) {
+				const reader = new FileReader();
+				reader.onload = function(e) {
+					document.getElementById('previewImage').src = e.target.result;
+				}
+				reader.readAsDataURL(file);
+			}
+		}
+			const form = document.getElementById('create-form');
+
+			// Thêm sự kiện khi input thay đổi
+			form.querySelectorAll('input').forEach(input => {
+				input.addEventListener('input', function() {
+					if (this.value.trim() !== '') {
+						// Chỉ xóa class is-invalid, không thêm bất kỳ class nào khác
+						this.classList.remove('is-invalid');
+					}
+				});
+			});
+			// Validate khi submit form
+			form.addEventListener('submit', function(event) {
+				let isValid = true;
+
+				// Kiểm tra từng input
+				form.querySelectorAll('input[required]').forEach(input => {
+					if (!input.value.trim()) {
+						input.classList.add('is-invalid');
+						isValid = false;
+					}
+				});
+				if (!isValid) {
+					event.preventDefault();
+					event.stopPropagation();
+				}
+			});
+			 // Lấy TempData
+			var successMessage = '@TempData["SuccessMessage"]';
+			var errorMessage = '@TempData["ErrorMessage"]';
+
+			if (successMessage) {
+				toastr.success(successMessage);
+			}
+
+			if (errorMessage) {
+				toastr.error(errorMessage);
+			}
+					function previewFile(input) {
+				const file = input.files[0];
+				if (file) {
+					const reader = new FileReader();
+					reader.onload = function(e) {
+						document.getElementById('previewImage').src = e.target.result;
+					}
+					reader.readAsDataURL(file);
+				}
+			}
+	</script>
+}

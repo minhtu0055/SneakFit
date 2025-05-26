@@ -1,0 +1,128 @@
+﻿@using SneakFit.ViewModels.Common
+@model PagedResult<SneakFit.ViewModels.System.User.UserViewModels>
+@{
+    ViewData["Title"] = "Danh sách khách hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="text-end mb-4">
+    <a asp-action="Create" asp-controller="KhachHang" class="btn btn-primary">
+        <i class="bx bx-plus me-1"></i> Thêm mới khách hàng
+    </a>
+</div>
+<div class="card">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-md-6 col-xs-12">
+                <form asp-action="Index" method="get">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <input type="text" value="@ViewBag.TuKhoa" name="tuKhoa" class="form-control" placeholder="Tìm kiếm..." />
+                        </div>
+                        <div class="col-md-2 mb-2 d-flex align-items-end">
+                            <div class="btn-group w-100">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bx bx-search"></i> Tìm
+                                </button>
+                                <button type="button" onclick="window.location.href='/KhachHang/Index'" class="btn btn-dark">
+                                    <i class="bx bx-reset"></i> Reset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="table-responsive text-nowrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Tên Khách Hàng</th>              
+                    <th>Số điện thoại</th>              
+                    <th>Email</th>
+                    <th>Ngày Sinh</th>
+                    <th>Giới Tính</th>
+                    <th>Trạng Thái</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody class="table-border-bottom-0">
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.HoVaTen)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.SoDienThoai)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Email)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.NgaySinh)
+                        </td>
+                        <td>
+                            @(item.GioiTinh ? "Nam" : "Nữ")
+                        </td>
+                        <td>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" id="switch-@item.Id" @(item.TrangThai ? "checked" : "") onchange="capNhatTrangThai('@item.Id', this.checked)">
+                                <label class="form-check-label" for="switch-@item.Id">@(item.TrangThai ? "Hoạt động" : "Ngưng hoạt động")</label>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="dropdown">
+                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="@Url.Action("Edit","KhachHang", new {id = item.Id})">
+                                        <i class="bx bx-edit-alt me-1"></i> Chỉnh sửa
+                                    </a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    @await Component.InvokeAsync("Pager", Model)
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            var successMessage = '@TempData["success"]';
+            if (successMessage) {
+                toastr.success(successMessage);
+            }
+        });
+
+        function capNhatTrangThai(id, trangThai) {
+            var label = $("label[for='switch-" + id + "']");
+            label.text(trangThai ? "Hoạt động" : "Ngưng hoạt động");
+
+            $.ajax({
+                url: '/KhachHang/CapNhatTrangThai',
+                type: 'POST',
+                data: { id: id, trangThai: trangThai },
+                success: function (result) {
+                    if (result.success) {
+                        toastr.success("Cập nhật trạng thái thành công");
+                    } else {
+                        toastr.error("Cập nhật trạng thái thất bại");
+                        $("#switch-" + id).prop('checked', !trangThai);
+                        label.text(!trangThai ? "Hoạt động" : "Ngưng hoạt động");
+                    }
+                },
+                error: function () {
+                    toastr.error("Có lỗi xảy ra");
+                    $("#switch-" + id).prop('checked', !trangThai);
+                    label.text(!trangThai ? "Hoạt động" : "Ngưng hoạt động");
+                }
+            });
+        }
+    </script>
+}

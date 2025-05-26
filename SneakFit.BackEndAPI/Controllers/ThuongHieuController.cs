@@ -1,5 +1,6 @@
 ﻿using System.Net.WebSockets;
 using System.Threading.Tasks.Sources;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SneakFit.Application.Catalog.ThuongHieu;
@@ -10,6 +11,7 @@ namespace SneakFit.BackEndAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ThuongHieuController : ControllerBase
     {
         private readonly IThuongHieuService _thuongHieuService;

@@ -12,7 +12,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 .AddCookie(options =>
     {
         options.LoginPath = "/Login/Index";
-        options.AccessDeniedPath = "/User/Forbidden/";
+        options.AccessDeniedPath = "/Forbidden/Index";
         // Thêm các cấu hình sau
         options.Cookie.Name = "SneakFit.Admin";
         options.Cookie.HttpOnly = true;

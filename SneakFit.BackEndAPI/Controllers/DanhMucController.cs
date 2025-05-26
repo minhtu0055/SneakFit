@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SneakFit.Application.Catalog.DanhMuc;
 using SneakFit.ViewModels.Catalog.DanhMuc;
@@ -9,6 +10,7 @@ namespace SneakFit.BackEndAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class DanhMucController : ControllerBase
     {
         private readonly IDanhMucService _danhMucService;

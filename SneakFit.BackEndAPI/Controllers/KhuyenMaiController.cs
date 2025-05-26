@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SneakFit.Application.Catalog.KhuyenMai;
 using SneakFit.Data.Enums;
@@ -9,6 +10,7 @@ namespace SneakFit.BackEndAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class KhuyenMaiController : ControllerBase
     {
         private readonly IKhuyenMaiService _khuyenMaiService;
