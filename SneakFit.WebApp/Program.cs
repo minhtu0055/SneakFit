@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using SneakFit.ApiIntegration.Services;
-using SneakFit.ApiIntegration.Services.SPCT;
+using SneakFit.ApiIntegration.Services.ThuongHieu;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +12,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 .AddCookie(options =>
     {
         options.LoginPath = "/Login/Index";
-        options.AccessDeniedPath = "/User/Forbidden/";
+        options.AccessDeniedPath = "/Forbidden/Index";
         // Thêm các cấu hình sau
         options.Cookie.Name = "SneakFit.Admin";
         options.Cookie.HttpOnly = true;
@@ -36,11 +36,13 @@ builder.Services.AddScoped<IChatLieuApiClient, ChatLieuApiClient>();
 builder.Services.AddScoped<IDeGiayApiClient, DeGiayApiClient>();
 builder.Services.AddScoped<IMauSacApiClient, MauSacApiClient>();
 builder.Services.AddScoped<IKichThuocApiClient, KichThuocApiClient>();
+builder.Services.AddScoped<ISanPhamApiClient, SanPhamApiClient>();
+builder.Services.AddScoped<ISpctApiClient, SpctApiClient>();
+builder.Services.AddScoped<IThuongHieuApiClient, ThuongHieuApiClient>();
+builder.Services.AddScoped<IDanhMucApiClient, DanhMucApiClient>();
 builder.Services.AddScoped<IVoucherApiClient, VoucherApiClient>();
 
-// Register API Clients
-builder.Services.AddScoped<IUserApiClient, UserApiClient>();
-builder.Services.AddScoped<ISpctApiClient, SpctApiClient>();
+
 
 builder.Services.AddRazorPages();
 var app = builder.Build();

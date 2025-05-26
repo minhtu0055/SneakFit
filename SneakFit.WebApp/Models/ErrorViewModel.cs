@@ -1,4 +1,4 @@
-namespace SneakFit.WebApp.Models
+namespace SneakFit.Admin.Models
 {
     public class ErrorViewModel
     {

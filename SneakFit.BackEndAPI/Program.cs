@@ -21,6 +21,8 @@ using SneakFit.Application.System.User;
 using Microsoft.AspNetCore.DataProtection;
 using SneakFit.Application.System.Role;
 using SneakFit.Application.Catalog.GioHang;
+using SneakFit.Application.Email;
+using SneakFit.Application.System.DiaChi;
 
 
 
@@ -80,6 +82,8 @@ builder.Services.AddScoped<ISanPhamChiTetService, SanPhamChiTietChiTetService>()
 builder.Services.AddScoped<IKhuyenMaiService, KhuyenMaiService>();
 builder.Services.AddScoped<IVoucherService, VoucherService>(); // khai báo dịch vụ
 builder.Services.AddScoped<IGioHangService, GioHangService>(); // khai báo dịch vụ
+builder.Services.AddScoped<IEmailSender, EmailSender>(); // khai báo dịch vụ
+builder.Services.AddScoped<IDiaChiService, DiaChiService>(); // khai báo dịch vụ
 
 
 builder.Services.AddEndpointsApiExplorer();

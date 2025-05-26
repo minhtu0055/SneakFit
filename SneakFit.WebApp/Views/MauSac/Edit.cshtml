@@ -1,16 +1,16 @@
-﻿@model SneakFit.ViewModels.Catalog.MauSac.SuaMauSac
+@model SneakFit.ViewModels.Catalog.MauSac.SuaMauSac
 
-<form asp-controller="MauSac" asp-action="Edit" method="post" id="editChatLieuForm">
+<form asp-controller="MauSac" asp-action="Edit" id="editColorForm" method="post">
     <input type="hidden" asp-for="Id" />
     <div class="mb-3">
         <label asp-for="TenMauSac" class="form-label">Tên màu sắc</label>
         <input asp-for="TenMauSac" class="form-control" placeholder="Nhập tên màu sắc"
                pattern="^[a-zA-ZÀ-ỹ\s]+$" 
-               oninput="validateInput(this)"
+               oninput="validateColorInput(this)"
                maxlength="50"
                title="Vui lòng chỉ nhập chữ cái" />
         <span asp-validation-for="TenMauSac" class="text-danger"></span>
-        <span id="customError" class="text-danger" style="display: none;">Vui lòng chỉ nhập chữ cái</span>
+        <span id="editColorValidationError" class="text-danger" style="display: none;">Vui lòng chỉ nhập chữ cái</span>
     </div>
     <div class="text-end">
         <button type="submit" class="btn btn-primary">
@@ -23,9 +23,9 @@
 </form>
 
 <script>
-function validateInput(input) {
+function validateColorInput(input) {
     const pattern = /^[a-zA-ZÀ-ỹ\s]+$/;
-    const errorSpan = document.getElementById('customError');
+    const errorSpan = document.getElementById('editColorValidationError');
     
     if (!pattern.test(input.value) && input.value !== '') {
         errorSpan.style.display = 'block';

@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SneakFit.Data.EF;
 using SneakFit.ViewModels.Catalog.DanhMuc;
+using SneakFit.ViewModels.Catalog.MauSac;
+using SneakFit.ViewModels.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +18,31 @@ namespace SneakFit.Application.Catalog.DanhMuc
         public DanhMucService(SneakFitDbContext context)
         {
             _context = context;
+        }
+        public async Task<PagedResult<DanhMucViewModels>> GetAllPaging(DanhMucPagingRequest request)
+        {
+            var query = _context.DanhMuc.AsQueryable();
+            if (!string.IsNullOrEmpty(request.Keyword))
+            {
+                query = query.Where(x => x.TenDanhMuc.Contains(request.Keyword));
+            }
+            int totalRow = await query.CountAsync();
+            var data = await query.Skip((request.PageIndex - 1) * request.PageSize)
+                .Take(request.PageSize)
+                .Select(x => new DanhMucViewModels()
+                {
+                    Id = x.Id,
+                    TenDanhMuc = x.TenDanhMuc,
+                    SoSanPham = _context.SanPham.Count(s => s.DanhMucId == x.Id && s.TrangThai == true)
+                }).ToListAsync();
+            var PageResult = new PagedResult<DanhMucViewModels>()
+            {
+                TotalRecords = totalRow,
+                PageSize = request.PageSize,
+                PageIndex = request.PageIndex,
+                Items = data,
+            };
+            return PageResult;
         }
         public async Task<List<DanhMucViewModels>> GetAll()
         {
@@ -71,6 +98,23 @@ namespace SneakFit.Application.Catalog.DanhMuc
                 Id = getid.Id,
                 TenDanhMuc = getid.TenDanhMuc,
                 SoSanPham = await _context.SanPham.CountAsync(s => s.DanhMucId == getid.Id && s.TrangThai == true)
+            };
+        }
+        public async Task<DanhMucViewModels> UpdateProductCount(Guid id)
+        {
+            var danhmuc = await _context.DanhMuc.FindAsync(id);
+            if (danhmuc == null)
+            {
+                throw new Exception($"Không tìm thấy id : {id} của danh mục");
+            }
+
+            var soSanPham = await _context.SanPham.CountAsync(s => s.DanhMucId == id && s.TrangThai == true);
+
+            return new DanhMucViewModels()
+            {
+                Id = danhmuc.Id,
+                TenDanhMuc = danhmuc.TenDanhMuc,
+                SoSanPham = soSanPham
             };
         }
     }

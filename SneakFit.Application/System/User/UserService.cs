@@ -9,24 +9,29 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using SneakFit.Application.Email;
+using SneakFit.Data.EF;
 using SneakFit.Data.Entities;
 using SneakFit.ViewModels.Common;
 using SneakFit.ViewModels.System.User;
-using static Azure.Core.HttpHeader;
 
 namespace SneakFit.Application.System.User
 {
     public class UserService : IUserService
     {
         private readonly UserManager<AppUser> _userManager;
+        private readonly IEmailSender _emailSender;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly IConfiguration _config;
+        private readonly SneakFitDbContext _context;
 
-        public UserService(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IConfiguration configuration)
+        public UserService(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IConfiguration configuration, IEmailSender emailSender,SneakFitDbContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _config = configuration;
+            _emailSender = emailSender;
+            _context = context;
         }
         public async Task<ApiResult<string>> Authenticate(LoginRequest request)
         {
@@ -77,6 +82,10 @@ namespace SneakFit.Application.System.User
                 UserName = user.UserName,
                 NgaySinh = user.NgaySinh,
                 TrangThai = user.TrangThai,
+                HoVaTen = user.HoVaTen,
+                UrlHinhAnh = user.UrlHinhAnh,
+                SoDienThoai = user.PhoneNumber,
+                GioiTinh = user.GioiTinh,
                 Roles = roles
             };
             return new ApiSuccessResult<UserViewModels>(userVm);
@@ -89,7 +98,27 @@ namespace SneakFit.Application.System.User
                 query = query.Where(x => x.UserName.Contains(request.TuKhoa)
                  || x.PhoneNumber.Contains(request.TuKhoa));
             }
-
+            // Lọc theo role nếu được chỉ định
+            // if (!string.IsNullOrEmpty(request.Role))
+            // {
+            //     var usersInRole = await _userManager.GetUsersInRoleAsync(request.Role);
+            //     var userIds = usersInRole.Select(u => u.Id);
+            //     query = query.Where(u => userIds.Contains(u.Id));
+            // }
+            if (!string.IsNullOrEmpty(request.Role))
+            {
+                var roles = request.Role.Split(',');
+                var userIds = new HashSet<string>();
+                foreach (var role in roles)
+                {
+                    var usersInRole = await _userManager.GetUsersInRoleAsync(role.Trim());
+                    foreach (var user in usersInRole)
+                    {
+                        userIds.Add(user.Id.ToString());
+                    }
+                }
+                query = query.Where(u => userIds.Contains(u.Id.ToString()));
+            }
             // Paging
             int totalRow = await query.CountAsync();
 
@@ -97,8 +126,12 @@ namespace SneakFit.Application.System.User
                 .Take(request.PageSize)
                 .Select(x => new UserViewModels()
                 {
+                    HoVaTen = x.HoVaTen,
+                    GioiTinh = x.GioiTinh,
+                    NgaySinh = x.NgaySinh,
                     Email = x.Email,
                     UserName = x.UserName,
+                    SoDienThoai = x.PhoneNumber,
                     Id = x.Id,
                     TrangThai = x.TrangThai,
                 }).ToListAsync();
@@ -120,16 +153,67 @@ namespace SneakFit.Application.System.User
             {
                 return new ApiErrorResult<bool>("Tài khoản đã tồn tại");
             }
+            // Kiểm tra email đã tồn tại
+            var userByEmail = await _userManager.FindByEmailAsync(request.Email);
+            if (userByEmail != null)
+            {
+                return new ApiErrorResult<bool>("Email đã được sử dụng");
+            }
+            var userByPhone = await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.SoDienThoai);
+            if (userByPhone != null)
+            {
+                return new ApiErrorResult<bool>("Số điện thoại đã được sử dụng");
+            }
+            var randomPassword = GenerateRandomPassword();
             user = new AppUser()
             {
+                HoVaTen = request.HoVaTen,
+                GioiTinh = request.GioiTinh,
                 UserName = request.UserName,
                 NgaySinh = request.NgaySinh,
+                PhoneNumber = request.SoDienThoai,
                 Email = request.Email,
                 TrangThai = request.TrangThai,
             };
-            var result = await _userManager.CreateAsync(user, request.Password);
+            var result = await _userManager.CreateAsync(user, randomPassword);
             if (result.Succeeded)
             {
+                if (request.Roles != null && request.Roles.Count > 0)
+                {
+                    var roleResult = await _userManager.AddToRolesAsync(user, request.Roles);
+                    if (!roleResult.Succeeded)
+                    {
+                        return new ApiErrorResult<bool>("Thêm role không thành công");
+                    }
+                }
+                // Thêm địa chỉ cho người dùng
+                if (request.DiaChi != null)
+                {
+                    // Địa chỉ đầu tiên sẽ là mặc định
+                    var diaChi = new Data.Entities.DiaChi
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = user.Id,
+                        TenDiaChi = request.DiaChi.TenDiaChi,
+                        TenThanhPho = request.DiaChi.TenThanhPho,
+                        TenHuyen = request.DiaChi.TenHuyen,
+                        TenXa = request.DiaChi.TenXa,
+                        Mac_Dinh = true // Địa chỉ đầu tiên luôn là mặc định
+                    };
+                    _context.DiaChi.Add(diaChi);
+                    await _context.SaveChangesAsync();
+                }
+                // Gửi email thông báo mật khẩu
+                await _emailSender.SendEmailAsync(
+                    request.Email,
+                    "Thông tin tài khoản SneakFit",
+                    $"Xin chào {request.HoVaTen},<br/><br/>" +
+                    $"Tài khoản của bạn đã được tạo thành công trên hệ thống SneakFit.<br/>" +
+                    $"Thông tin đăng nhập của bạn:<br/>" +
+                    $"Tên đăng nhập: {request.UserName}<br/>" +
+                    $"Mật khẩu: {randomPassword}<br/><br/>" +
+                    $"Vui lòng đăng nhập và đổi mật khẩu để bảo mật tài khoản của bạn.");
+
                 return new ApiSuccessResult<bool>();
             }
             return new ApiErrorResult<bool>("Đăng ký không thành công");
@@ -171,6 +255,49 @@ namespace SneakFit.Application.System.User
             }
 
             return new ApiSuccessResult<bool>();
+        }
+        public async Task<ApiResult<bool>> Update(UserUpdateRequest request)
+        {
+            var user = await _userManager.FindByIdAsync(request.Id.ToString());
+            if (user == null)
+                return new ApiErrorResult<bool>("Tài khoản không tồn tại");
+            user.Email = request.Email;
+            user.NgaySinh = request.NgaySinh;
+            user.HoVaTen = request.HoVaTen;
+            user.GioiTinh = request.GioiTinh;
+            user.PhoneNumber = request.SoDienThoai;
+            user.TrangThai = request.TrangThai;
+            var result = await _userManager.UpdateAsync(user);
+            if (result.Succeeded)
+                return new ApiSuccessResult<bool>();
+
+            return new ApiErrorResult<bool>("Cập nhật không thành công");
+        }
+        private string GenerateRandomPassword()
+        {
+            var lowercase = "abcdefghijkmnopqrstuvwxyz";
+            var uppercase = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+            var numbers = "23456789";
+            var special = "@!#$%^&*";
+
+            var random = new Random();
+            var password = new StringBuilder();
+
+            // Đảm bảo có ít nhất 1 ký tự từ mỗi loại
+            password.Append(lowercase[random.Next(lowercase.Length)]);
+            password.Append(uppercase[random.Next(uppercase.Length)]);
+            password.Append(numbers[random.Next(numbers.Length)]);
+            password.Append(special[random.Next(special.Length)]);
+
+            // Thêm 4 ký tự ngẫu nhiên từ tất cả các loại
+            var allChars = lowercase + uppercase + numbers + special;
+            for (int i = 0; i < 4; i++)
+            {
+                password.Append(allChars[random.Next(allChars.Length)]);
+            }
+
+            // Trộn ngẫu nhiên các ký tự
+            return new string(password.ToString().ToCharArray().OrderBy(x => random.Next()).ToArray());
         }
     }
 }

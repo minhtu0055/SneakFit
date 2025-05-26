@@ -20,17 +20,25 @@ namespace SneakFit.ViewModels.Catalog.SanPhamChiTiet
         [Range(0, int.MaxValue, ErrorMessage = "Số lượng sản phẩm phải lớn hơn 0")]
         public int SoLuong { get; set; }
 
-        [Required(ErrorMessage = "Danh mục không được để trống")]
-
+        [Required(ErrorMessage = "Màu sắc không được để trống")]
         public Guid MauSacId { get; set; }
+        [Required(ErrorMessage = "Kích thước không được để trống")]
         public Guid KichThuocId { get; set; }
+        [Required(ErrorMessage = "Chất liệu không được để trống")]
         public Guid ChatLieuId { get; set; }
+        [Required(ErrorMessage = "Đế giày không được để trống")]
         public Guid DeGiayId { get; set; }
+        [Required(ErrorMessage = "Thương hiệu không được để trống")]
         public Guid ThuongHieuId { get; set; }
+        [Required(ErrorMessage = "Sản phẩm không được để trống")]
         public Guid SanPhamId { get; set; }
+        [Required(ErrorMessage = "Danh mục không được để trống")]
         public Guid DanhMucId { get; set; }
-        public bool TrangThai { get; set; } = true;
+        public bool TrangThai { get; set; }
+        public string TenSanPham { get; set; }
 
-        public List<IFormFile> Images { get; set; }
+        public List<IFormFile>? Images { get; set; }
+
+        public List<SPCTViewModels>? DanhSachSPCT { get; set; }
     }
 }

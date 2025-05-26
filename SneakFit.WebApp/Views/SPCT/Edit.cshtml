@@ -1,0 +1,230 @@
+@model SneakFit.ViewModels.Catalog.SanPhamChiTiet.SuaSPCT
+
+<div class="container-fluid">
+    <!-- PHẦN 1: BỘ LỌC TÌM KIẾM -->
+    <div class="card mb-3">
+        <div class="card-header fw-bold">
+            <i class="fa fa-filter"></i> Bộ lọc
+        </div>
+        <div class="card-body">
+            <form id="filterForm" class="row g-2 align-items-end" method="get" asp-action="Edit" asp-controller="SPCT">
+                <div class="col-md-3">
+                    <input type="text" class="form-control" name="TuKhoa" placeholder="Nhập tên sản phẩm" value="@Context.Request.Query["TuKhoa"]" />
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" name="ChatLieuId">
+                        <option value="">Chất liệu</option>
+                        @foreach (var cl in ViewBag.ChatLieus)
+                        {
+                            var isSelected = Context.Request.Query["ChatLieuId"] == cl.Value;
+                            if (isSelected)
+                            {
+                                <option value="@cl.Value" selected>@cl.Text</option>
+                            }
+                            else
+                            {
+                                <option value="@cl.Value">@cl.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" name="ThuongHieuId">
+                        <option value="">Thương hiệu</option>
+                        @foreach (var th in ViewBag.ThuongHieus)
+                        {
+                            var isSelected = Context.Request.Query["ThuongHieuId"] == th.Value;
+                            if (isSelected)
+                            {
+                                <option value="@th.Value" selected>@th.Text</option>
+                            }
+                            else
+                            {
+                                <option value="@th.Value">@th.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" name="DeGiayId">
+                        <option value="">Đế giày</option>
+                        @foreach (var dg in ViewBag.DeGiays)
+                        {
+                            var isSelected = Context.Request.Query["DeGiayId"] == dg.Value;
+                            if (isSelected)
+                            {
+                                <option value="@dg.Value" selected>@dg.Text</option>
+                            }
+                            else
+                            {
+                                <option value="@dg.Value">@dg.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" name="KichThuocId">
+                        <option value="">Kích cỡ</option>
+                        @foreach (var kt in ViewBag.KichThuocs)
+                        {
+                            var isSelected = Context.Request.Query["KichThuocId"] == kt.Value;
+                            if (isSelected)
+                            {
+                                <option value="@kt.Value" selected>@kt.Text</option>
+                            }
+                            else
+                            {
+                                <option value="@kt.Value">@kt.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" name="MauSacId">
+                        <option value="">Màu sắc</option>
+                        @foreach (var ms in ViewBag.MauSacs)
+                        {
+                            var isSelected = Context.Request.Query["MauSacId"] == ms.Value;
+                            if (isSelected)
+                            {
+                                <option value="@ms.Value" selected>@ms.Text</option>
+                            }
+                            else
+                            {
+                                <option value="@ms.Value">@ms.Text</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" name="TrangThai">
+                        <option value="">Trạng thái</option>
+                        @{
+                            var isSelectedTrue = Context.Request.Query["TrangThai"] == "true";
+                            var isSelectedFalse = Context.Request.Query["TrangThai"] == "false";
+                        }
+                        @if (isSelectedTrue)
+                        {
+                            <option value="true" selected>Đang kinh doanh</option>
+                        }
+                        else
+                        {
+                            <option value="true">Đang kinh doanh</option>
+                        }
+                        @if (isSelectedFalse)
+                        {
+                            <option value="false" selected>Ngừng kinh doanh</option>
+                        }
+                        else
+                        {
+                            <option value="false">Ngừng kinh doanh</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label>Khoảng giá:</label>
+                    <input type="number" class="form-control" name="GiaTu" placeholder="Từ" value="@Context.Request.Query["GiaTu"]" />
+                    <input type="number" class="form-control mt-1" name="GiaDen" placeholder="Đến" value="@Context.Request.Query["GiaDen"]" />
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                    <button type="reset" class="btn btn-danger">Làm mới</button>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-info">QR Code sản phẩm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- PHẦN 2: DANH SÁCH SẢN PHẨM CHI TIẾT -->
+    <div class="card">
+        <div class="card-header fw-bold">
+            <i class="fa fa-list"></i> Danh sách sản phẩm chi tiết
+        </div>
+        <div class="card-body">
+            <div class="mb-2 text-end">
+                <button class="btn btn-primary" id="updateAll">Chỉnh số lượng và giá chung</button>
+                <button class="btn btn-success" id="updateSelected">Update sản phẩm</button>
+            </div>
+            <table class="table table-hover align-middle" id="spctTable">
+                <thead class="table-warning">
+                    <tr>
+                        <th><input type="checkbox" id="checkAll" /></th>
+                        <th>STT</th>
+                        <th>Ảnh</th>
+                        <th>Tên Sản Phẩm</th>
+                        <th>Số Lượng</th>
+                        <th>Giá Bán</th>
+                        <th>Kích Thước</th>
+                        <th>Màu Sắc</th>
+                        <th>Trạng Thái</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        int stt = 1;
+                        var sanPhams = ViewBag.SanPhams as Dictionary<Guid, string>;
+                    }
+                    @foreach (var item in Model.DanhSachSPCT)
+                    {
+                        <tr data-id="@item.Id">
+                            <td><input type="checkbox" class="row-check" /></td>
+                            <td>@stt</td>
+                            <td>
+                                <img src="@(item.Images != null && item.Images.Count > 0 ? item.Images[0] : "/images/no-image.png")" width="60" />
+                            </td>
+                            <td>@(sanPhams != null && sanPhams.ContainsKey(item.SanPhamId) ? sanPhams[item.SanPhamId] : "")</td>
+                            <td><input type="number" class="form-control so-luong" value="@item.SoLuong" min="0" /></td>
+                            <td><input type="number" class="form-control gia-ban" value="@item.Gia" min="0" step="1000" /></td>
+                            <td>@(ViewBag.KichThuocs[item.KichThuocId])</td>
+                            <td>
+                                <span style="background:@(ViewBag.MauSacs[item.MauSacId].ToLower());display:inline-block;width:30px;height:20px;"></span>
+                            </td>
+                            <td>
+                                <span class="badge bg-success">@(item.TrangThai ? "Đang kinh doanh" : "Ngừng kinh doanh")</span>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-warning btn-view" data-id="@item.Id">👁️</button>
+                            </td>
+                        </tr>
+                        stt++;
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function() {
+            // Chọn dòng
+            $('#spctTable tbody tr').on('click', function(e) {
+                if (!$(e.target).is('input, button')) {
+                    $(this).find('.row-check').prop('checked', true);
+                }
+                $('#spctTable tbody tr').removeClass('table-info');
+                $(this).addClass('table-info');
+            });
+
+            // CheckAll
+            $('#checkAll').on('change', function() {
+                $('.row-check').prop('checked', this.checked);
+            });
+
+            // Xem chi tiết
+            $('.btn-view').on('click', function() {
+                var id = $(this).data('id');
+                $.get('/SPCT/Details/' + id, function(html) {
+                    $('#modalChiTiet .modal-body').html(html);
+                    $('#modalChiTiet').modal('show');
+                });
+            });
+
+            // Chỉnh sửa giá/số lượng trực tiếp: có thể gửi ajax khi blur hoặc khi bấm nút cập nhật
+        });
+    </script>
+}

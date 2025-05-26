@@ -9,5 +9,6 @@ namespace SneakFit.ApiIntegration.Services
         Task<DeGiayViewModels> GetById(Guid id);
         Task<DeGiayViewModels> Create(ThemDeGiay request);
         Task<DeGiayViewModels> Update(SuaDeGiay request);
+        Task<List<DeGiayViewModels>> GetAll();
     }
 }

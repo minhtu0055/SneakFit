@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SneakFit.Application.Catalog.MauSac;
 using SneakFit.ViewModels.Catalog.MauSac;
@@ -7,6 +8,7 @@ namespace SneakFit.BackEndAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class MauSacController : ControllerBase
     {
         private readonly IMauSacService _mauSacService;
@@ -46,6 +48,12 @@ namespace SneakFit.BackEndAPI.Controllers
             request.Id = id;
             var mausac = await _mauSacService.Update(request);
             return Ok(mausac);
+        }
+        [HttpGet("getall")]
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _mauSacService.GetAll();
+            return Ok(result);
         }
     }
 }

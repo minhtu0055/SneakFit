@@ -13,7 +13,7 @@ namespace SneakFit.Application.Catalog.SanPhamChiTiet
     {
         Task<List<SPCTViewModels>> GetAll();
         Task<SPCTViewModels> GetById(Guid id);
-        Task<SPCTViewModels> Create(ThemSPCT request);
+        Task<ApiResult<SPCTViewModels>> Create(ThemSPCT request);
         Task<SPCTViewModels> Update(SuaSPCT request);
         Task<PagedResult<SPCTViewModels>> GetAllPaging(PhanTrangSPCT request);
         Task<bool> UpdateTrangThai(Guid id, bool trangThai);
@@ -22,5 +22,6 @@ namespace SneakFit.Application.Catalog.SanPhamChiTiet
         Task<int> AddImage(Guid idSanPham, IFormFile image);
         Task<int> RemoveImage(Guid imageId);
         Task<List<string>> GetListImages(Guid idSanPham);
+        Task<int> CreateMultiple(ThemNhieuSPCTRequest request);
     }
 }

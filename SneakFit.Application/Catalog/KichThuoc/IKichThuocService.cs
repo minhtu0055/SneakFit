@@ -1,4 +1,5 @@
 ﻿using SneakFit.ViewModels.Catalog.KichThuoc;
+using SneakFit.ViewModels.Catalog.MauSac;
 using SneakFit.ViewModels.Common;
 using System;
 using System.Collections.Generic;
@@ -14,5 +15,6 @@ namespace SneakFit.Application.Catalog.KichThuoc
         Task<KichThuocViewModels> GetById(Guid id);
         Task<KichThuocViewModels> Create(ThemKichThuoc request);
         Task<KichThuocViewModels> Update(SuaKichThuoc request);
+        Task<List<KichThuocViewModels>> GetAll();
     }
 }

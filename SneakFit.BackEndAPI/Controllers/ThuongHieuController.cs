@@ -1,14 +1,17 @@
 ﻿using System.Net.WebSockets;
 using System.Threading.Tasks.Sources;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SneakFit.Application.Catalog.ThuongHieu;
+using SneakFit.ViewModels.Catalog.ChatLieu;
 using SneakFit.ViewModels.Catalog.ThuongHieu;
 
 namespace SneakFit.BackEndAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ThuongHieuController : ControllerBase
     {
         private readonly IThuongHieuService _thuongHieuService;
@@ -16,6 +19,12 @@ namespace SneakFit.BackEndAPI.Controllers
         public ThuongHieuController(IThuongHieuService thuongHieuService)
         {
             _thuongHieuService = thuongHieuService;
+        }
+        [HttpGet("paging")]
+        public async Task<IActionResult> GetAllPaging([FromQuery] ThuongHieuPagingRequest request)
+        {
+            var result = await _thuongHieuService.GetAllPaging(request);
+            return Ok(result);
         }
         [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll()

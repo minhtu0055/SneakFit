@@ -2,7 +2,6 @@
 using SneakFit.Data.EF;
 using SneakFit.Data.Entities;
 using SneakFit.Data.Enums;
-
 using SneakFit.ViewModels.Catalog.KhuyenMai;
 using SneakFit.ViewModels.Common;
 using System;

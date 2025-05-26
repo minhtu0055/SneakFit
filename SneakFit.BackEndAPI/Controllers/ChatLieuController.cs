@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SneakFit.Application.Catalog.ChatLieu;
 using SneakFit.ViewModels.Catalog.ChatLieu;
@@ -8,6 +9,7 @@ namespace SneakFit.BackEndAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ChatLieuController : ControllerBase
     {
         private readonly IChatLieuService _chatLieuService;
@@ -57,11 +59,11 @@ namespace SneakFit.BackEndAPI.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-        [HttpGet("GetAll")]
+        [HttpGet("getall")]
         public async Task<IActionResult> GetAll()
         {
-            var categories = await _chatLieuService.GetAll();
-            return Ok(categories);
+            var result = await _chatLieuService.GetAll();
+            return Ok(result);
         }
     }
 }

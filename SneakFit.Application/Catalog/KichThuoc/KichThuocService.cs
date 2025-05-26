@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SneakFit.Data.EF;
 using SneakFit.ViewModels.Catalog.KichThuoc;
+using SneakFit.ViewModels.Catalog.MauSac;
 using SneakFit.ViewModels.Common;
 using System;
 using System.Collections.Generic;
@@ -95,6 +96,14 @@ namespace SneakFit.Application.Catalog.KichThuoc
                 Id = getid.Id,
                 MaKichThuoc = getid.MaKichThuoc
             };
+        }
+        public async Task<List<KichThuocViewModels>> GetAll()
+        {
+            return await _context.KichThuoc.Select(x => new KichThuocViewModels
+            {
+                Id = x.Id,
+                MaKichThuoc = x.MaKichThuoc
+            }).ToListAsync();
         }
     }
 }

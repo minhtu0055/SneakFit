@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SneakFit.Data.EF;
 using SneakFit.ViewModels.Catalog.DeGiay;
+using SneakFit.ViewModels.Catalog.MauSac;
 using SneakFit.ViewModels.Common;
 using System;
 using System.Collections.Generic;
@@ -101,6 +102,13 @@ namespace SneakFit.Application.Catalog.DeGiay
             };
         }
 
-
+        public async Task<List<DeGiayViewModels>> GetAll()
+        {
+            return await _context.DeGiay.Select(x => new DeGiayViewModels
+            {
+                Id = x.Id,
+                TenDeGiay = x.TenDeGiay
+            }).ToListAsync();
+        }
     }
 }

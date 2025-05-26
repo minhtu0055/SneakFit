@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SneakFit.Application.Catalog.DeGiay;
 using SneakFit.ViewModels.Catalog.DeGiay;
 
@@ -6,6 +7,7 @@ namespace SneakFit.BackEndAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class DeGiayController : ControllerBase
     {
         private readonly IDeGiayService _deGiayService;
@@ -46,6 +48,12 @@ namespace SneakFit.BackEndAPI.Controllers
             request.Id = id;
             var degiay = await _deGiayService.Update(request);
             return Ok(degiay);       
+        }
+        [HttpGet("getall")]
+        public async Task<IActionResult> GetAll()
+        {
+            var result = await _deGiayService.GetAll();
+            return Ok(result);
         }
     }
 }
