@@ -210,14 +210,21 @@ namespace SneakFit.ApiIntegration.Services
 
             var json = JsonConvert.SerializeObject(trangThai);
             var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await client.PatchAsync($"/api/spct/{id}/trangThai", httpContent);
-            var body = await response.Content.ReadAsStringAsync();
+
+            var response = await client.PutAsync($"/api/spct/{id}/trangThai", httpContent);
+            var result = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)
             {
-                var result = JsonConvert.DeserializeObject<bool>(body);
-                return result;
+                var settings = new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore,
+                    MissingMemberHandling = MissingMemberHandling.Ignore
+                };
+                var apiResult = JsonConvert.DeserializeObject<ApiSuccessResult<bool>>(result, settings);
+                return apiResult.ResultObj;
             }
-            throw new Exception("Không thể cập nhật trạng thái");
+
+            throw new Exception($"Không thể cập nhật trạng thái. Error: {result}");
         }
 
         public async Task<int> AddImage(Guid id, IFormFile file)

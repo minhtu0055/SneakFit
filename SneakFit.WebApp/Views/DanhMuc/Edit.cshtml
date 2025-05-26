@@ -1,16 +1,27 @@
 @model SneakFit.ViewModels.Catalog.DanhMuc.SuaDanhMuc
 
-<form asp-controller="DanhMuc" asp-action="Edit" method="post" id="editDanhMucForm">
+<form asp-controller="DanhMuc" asp-action="Edit" id="editDanhMucForm" method="post">
     <input type="hidden" asp-for="Id" />
     <div class="mb-3">
         <label asp-for="TenDanhMuc" class="form-label">Tên danh mục</label>
         <input asp-for="TenDanhMuc" class="form-control" placeholder="Nhập tên danh mục"
-               pattern="^[a-zA-ZÀ-ỹ\s]+$"
-               oninput="validateInput(this)"
+               pattern="^[a-zA-ZÀ-ỹ\s]+$" 
+               oninput="validateDanhMucInput(this)"
                maxlength="50"
                title="Vui lòng chỉ nhập chữ cái" />
         <span asp-validation-for="TenDanhMuc" class="text-danger"></span>
-        <span id="danhmuc-edit-validation-error" class="text-danger" style="display: none;">Vui lòng chỉ nhập chữ cái</span>
+        <span id="editDanhMucValidationError" class="text-danger" style="display: none;">Vui lòng chỉ nhập chữ cái</span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label d-block">Trạng Thái</label>
+        @* <div class="form-check form-check-inline">
+            <input type="radio" class="form-check-input" asp-for="TrangThai" id="trangThaiTrue" value="true" />
+            <label class="form-check-label" for="trangThaiTrue">Hoạt động</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input type="radio" class="form-check-input" asp-for="TrangThai" id="trangThaiFalse" value="false" />
+            <label class="form-check-label" for="trangThaiFalse">Ngừng hoạt động</label>
+        </div> *@
     </div>
     <div class="text-end">
         <button type="submit" class="btn btn-primary">
@@ -21,3 +32,18 @@
         </button>
     </div>
 </form>
+
+<script>
+function validateDanhMucInput(input) {
+    const pattern = /^[a-zA-ZÀ-ỹ\s]+$/;
+    const errorSpan = document.getElementById('editDanhMucValidationError');
+    
+    if (!pattern.test(input.value) && input.value !== '') {
+        errorSpan.style.display = 'block';
+        input.setCustomValidity('Vui lòng chỉ nhập chữ cái');
+    } else {
+        errorSpan.style.display = 'none';
+        input.setCustomValidity('');
+    }
+}
+</script>

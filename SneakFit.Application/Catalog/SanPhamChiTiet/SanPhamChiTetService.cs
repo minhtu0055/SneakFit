@@ -150,21 +150,28 @@ namespace SneakFit.Application.Catalog.SanPhamChiTietChiTiet
         {
             var spct = await _context.SanPhamChiTiet.FindAsync(id);
             if (spct == null)
-                throw new Exception($"Không tìm thấy khuyến mãi có id: {id}");
+                return false;
+
             spct.TrangThai = trangThai;
+            _context.SanPhamChiTiet.Update(spct);
             return await _context.SaveChangesAsync() > 0;
         }
         
         public async Task<ApiResult<SPCTViewModels>> Create(ThemSPCT request)
         {
-            // Validate các trường liên kết
+            // Kiểm tra dữ liệu đầu vào
             if (!_context.SanPham.Any(x => x.Id == request.SanPhamId))
                 return new ApiResult<SPCTViewModels> { IsSuccessed = false, Message = "Sản phẩm không tồn tại" };
             if (!_context.MauSac.Any(x => x.Id == request.MauSacId))
                 return new ApiResult<SPCTViewModels> { IsSuccessed = false, Message = "Màu sắc không tồn tại" };
             if (!_context.KichThuoc.Any(x => x.Id == request.KichThuocId))
                 return new ApiResult<SPCTViewModels> { IsSuccessed = false, Message = "Kích thước không tồn tại" };
-            // ... kiểm tra các trường khác tương tự
+            if (!_context.DeGiay.Any(x => x.Id == request.DeGiayId))
+                return new ApiResult<SPCTViewModels> { IsSuccessed = false, Message = "Đế giày không tồn tại" };
+            if (!_context.ThuongHieu.Any(x => x.Id == request.ThuongHieuId))
+                return new ApiResult<SPCTViewModels> { IsSuccessed = false, Message = "Thương hiệu không tồn tại" };
+            if (!_context.ChatLieu.Any(x => x.Id == request.ChatLieuId))
+                return new ApiResult<SPCTViewModels> { IsSuccessed = false, Message = "Chất liệu không tồn tại" };
 
             // Kiểm tra trùng lặp
             bool isExist = _context.SanPhamChiTiet.Any(x =>

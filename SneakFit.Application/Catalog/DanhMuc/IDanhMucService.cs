@@ -16,5 +16,6 @@ namespace SneakFit.Application.Catalog.DanhMuc
         Task<DanhMucViewModels> GetById(Guid id);
         Task<DanhMucViewModels> Create(ThemDanhMuc request);
         Task<DanhMucViewModels> Update(SuaDanhMuc request);
+        Task<DanhMucViewModels> UpdateProductCount(Guid id);
     }
 }

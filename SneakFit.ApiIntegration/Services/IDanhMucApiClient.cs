@@ -10,5 +10,6 @@ namespace SneakFit.ApiIntegration.Services
         Task<DanhMucViewModels> Create(ThemDanhMuc request);
         Task<DanhMucViewModels> Update(SuaDanhMuc request);
         Task<List<DanhMucViewModels>> GetAll();
+        Task<ApiResult<bool>> UpdateProductCount(Guid id);
     }
 }

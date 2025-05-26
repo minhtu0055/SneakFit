@@ -99,85 +99,112 @@
     </div>
     @await Component.InvokeAsync("Pager", Model)
 </div>
-<script>
-    $(document).ready(function () {
-        // Xử lý khi click vào nút thêm mới
-        $('[data-bs-target="#taoDanhMucModal"]').click(function () {
-            $.ajax({
-                url: '/danhmuc/Create',
-                type: 'GET',
-                success: function (result) {
-                    $('#danhmuc-create-modal-content').html(result);
-                },
-                error: function (err) {
-                    toastr.error('Có lỗi xảy ra khi tải form');
-                }
-            });
-        });
-
-        // Xử lý submit form create bằng Ajax
-        $(document).on('submit', '#createDanhMucForm', function (e) {
-            e.preventDefault();
-            var formData = $(this).serialize();
-            $.ajax({
-                url: '/danhmuc/Create',
-                type: 'POST',
-                data: formData,
-                success: function (result) {
-                    if (result.success) {
-                        $('#taoDanhMucModal').modal('hide');
-                        toastr.success('Thêm mới thành công');
-                        setTimeout(function() {
-                            window.location.reload();
-                        }, 1000);
-                    } else {
-                        toastr.error(result.message);
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Xử lý khi click vào nút thêm mới
+            $('[data-bs-target="#taoDanhMucModal"]').click(function () {
+                $.ajax({
+                    url: '/DanhMuc/Create',
+                    type: 'GET',
+                    success: function (result) {
+                        $('#danhmuc-create-modal-content').html(result);
+                    },
+                    error: function (err) {
+                        toastr.error('Có lỗi xảy ra khi tải form');
                     }
-                },
-                error: function (err) {
-                    toastr.error('Có lỗi xảy ra khi thêm mới');
-                }
+                });
             });
-        });
 
-        // Xử lý khi click vào nút edit
-        $('.edit-danhmuc').click(function () {
-            var id = $(this).data('id');
-            $.ajax({
-                url: '/danhmuc/Edit/' + id,
-                type: 'GET',
-                success: function (result) {
-                    $('#danhmuc-edit-modal-content').html(result);
-                },
-                error: function (err) {
-                    toastr.error('Có lỗi xảy ra khi tải form');
-                }
-            });
-        });
-
-        // Xử lý submit form edit bằng Ajax
-        $(document).on('submit', '#editDanhMucForm', function (e) {
-            e.preventDefault();
-            var formData = $(this).serialize();
-            $.ajax({
-                url: '/danhmuc/Edit',
-                type: 'POST',
-                data: formData,
-                success: function (result) {
-                    if (result.success) {
-                        $('#editDanhMucModal').modal('hide');
-                        toastr.success('Cập nhật thành công');
-                        setTimeout(function() {
-                            window.location.reload();
-                        }, 1000);
-                    } else {
-                        toastr.error(result.message);
+            // Xử lý submit form create bằng Ajax
+            $(document).on('submit', '#createDanhMucForm', function (e) {
+                e.preventDefault();
+                var formData = $(this).serialize();
+                $.ajax({
+                    url: '/DanhMuc/Create',
+                    type: 'POST',
+                    data: formData,
+                    success: function (result) {
+                        if (result.success) {
+                            $('#taoDanhMucModal').modal('hide');
+                            toastr.success('Thêm mới thành công');
+                            setTimeout(function() {
+                                window.location.reload();
+                            }, 1000);
+                        } else {
+                            toastr.error(result.message);
+                        }
+                    },
+                    error: function (err) {
+                        toastr.error('Có lỗi xảy ra khi thêm mới');
                     }
-                },
-                error: function (err) {
-                    toastr.error('Có lỗi xảy ra khi cập nhật');
-                }
+                });
             });
+
+            // Xử lý khi click vào nút edit
+            $('.edit-danhmuc').click(function () {
+                var id = $(this).data('id');
+                var soSanPham = $(this).closest('tr').find('td:eq(1)').text().trim();
+                
+                $.ajax({
+                    url: '/DanhMuc/Edit/' + id,
+                    type: 'GET',
+                    success: function (result) {
+                        $('#danhmuc-edit-modal-content').html(result);
+                        
+                        // Thêm thông tin số sản phẩm vào modal
+                        var warningHtml = '';
+                        if (parseInt(soSanPham) > 0) {
+                            warningHtml = `
+                                <div class="alert alert-warning mt-3">
+                                    <i class="bx bx-info-circle me-1"></i>
+                                    Danh mục này hiện đang được sử dụng bởi ${soSanPham} sản phẩm.
+                                </div>
+                            `;
+                        }
+                        $('#danhmuc-edit-modal-content').append(warningHtml);
+                    },
+                    error: function (err) {
+                        toastr.error('Có lỗi xảy ra khi tải form');
+                    }
+                });
+            });
+
+            // Xử lý submit form edit bằng Ajax
+            $(document).on('submit', '#editDanhMucForm', function (e) {
+                e.preventDefault();
+                var formData = $(this).serialize();
+                $.ajax({
+                    url: '/DanhMuc/Edit',
+                    type: 'POST',
+                    data: formData,
+                    success: function (result) {
+                        if (result.success) {
+                            $('#editDanhMucModal').modal('hide');
+                            toastr.success('Cập nhật thành công');
+                            setTimeout(function() {
+                                window.location.reload();
+                            }, 1000);
+                        } else {
+                            toastr.error(result.message);
+                        }
+                    },
+                    error: function (err) {
+                        toastr.error('Có lỗi xảy ra khi cập nhật');
+                    }
+                });
+            });
+            
+            // Kiểm tra và hiển thị thông báo thành công
+            var successMessage = '@TempData["SuccessMessage"]';
+            if (successMessage) {
+                toastr.success(successMessage);
+            }
+            // Kiểm tra và hiển thị thông báo lỗi
+            var errorMessage = '@TempData["ErrorMessage"]';
+            if (errorMessage) {
+                toastr.error(errorMessage);
+            }
         });
-    });
-</script>
+    </script>
+}

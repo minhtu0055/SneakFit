@@ -1,5 +1,6 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using SneakFit.ViewModels.Catalog.SanPham;
+using SneakFit.ViewModels.Catalog.SanPhamChiTiet;
 using SneakFit.ViewModels.Common;
 using System.Net.Http.Headers;
 using System.Text;
@@ -102,6 +103,90 @@ namespace SneakFit.ApiIntegration.Services
             }
             throw new Exception("Không thể lấy danh sách sản phẩm");
 
+        }
+
+        public async Task<bool> UpdateTrangThai(Guid id, bool trangThai)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var json = JsonConvert.SerializeObject(trangThai);
+            var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await client.PutAsync($"/api/SanPham/{id}/trangThai", httpContent);
+            var result = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                var settings = new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore,
+                    MissingMemberHandling = MissingMemberHandling.Ignore
+                };
+                var apiResult = JsonConvert.DeserializeObject<ApiSuccessResult<bool>>(result, settings);
+                return apiResult.ResultObj;
+            }
+
+            throw new Exception($"Không thể cập nhật trạng thái. Error: {result}");
+        }
+
+        public async Task<bool> UpdateSPCT(Guid id, List<SanPhamChiTietCapNhat> updates)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var json = JsonConvert.SerializeObject(updates);
+            var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await client.PutAsync($"/api/SanPham/{id}/spct", httpContent);
+            var result = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                var settings = new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore,
+                    MissingMemberHandling = MissingMemberHandling.Ignore
+                };
+                var apiResult = JsonConvert.DeserializeObject<ApiSuccessResult<bool>>(result, settings);
+                return apiResult.ResultObj;
+            }
+
+            throw new Exception($"Không thể cập nhật SPCT. Error: {result}");
+        }
+
+        public async Task<List<SPCTViewModels>> GetSPCTByFilter(SPCTFilterRequest request)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var json = JsonConvert.SerializeObject(request);
+            var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync($"/api/SanPham/GetSPCTByFilter", httpContent);
+            var body = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonConvert.DeserializeObject<List<SPCTViewModels>>(body);
+                return result ?? new List<SPCTViewModels>();
+            }
+            throw new Exception("Không thể lấy danh sách SPCT theo filter");
+        }
+
+        public async Task<List<SPCTViewModels>> GetSPCTByProductName(string productName)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var response = await client.GetAsync($"/api/SanPham/GetSPCTByProductName/{Uri.EscapeDataString(productName)}");
+            var body = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonConvert.DeserializeObject<List<SPCTViewModels>>(body);
+                return result ?? new List<SPCTViewModels>();
+            }
+            throw new Exception("Không thể lấy danh sách SPCT theo tên sản phẩm");
         }
     }
 }

@@ -12,8 +12,10 @@ namespace SneakFit.ViewModels.Catalog.SanPham
     {
         [Required(ErrorMessage = "Tên sản phẩm không được để trống")]
         public string TenSanPham { get; set; }
-
         public string Mota { get; set; }
         public Guid DanhMucId { get; set; }
+        public Guid ThuongHieuId { get; set; }
+        public bool TrangThai { get; set; }
+
     }
 }
