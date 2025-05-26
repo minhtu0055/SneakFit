@@ -10,9 +10,7 @@ namespace SneakFit.Data.Enums
     {
         ChoXacNhan,
         DaXacNhan, 
-        ChoVanChuyen,
         DangVanChuyen,    
-        DaThanhToan,
         HoanThanh,   
         DaHuy     
     }
