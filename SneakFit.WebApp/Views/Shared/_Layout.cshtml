@@ -120,7 +120,7 @@
                             <div class="text-truncate" data-i18n="Banhang">Bán Hàng</div>
                         </a>
                     </li>
-                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" ? "active open" : "")">
+                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" || ViewContext.RouteData.Values["controller"]?.ToString() == "KhachHang" ? "active open" : "" )">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-group"></i>
                             <div class="text-truncate" data-i18n="Account Settings">Quản lý tài khoản</div>
@@ -128,7 +128,12 @@
                         <ul class="menu-sub ">
                             <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
                                 <a asp-action="Index" asp-controller="User" class="menu-link">
-                                    <div class="text-truncate" data-i18n="Account">Account</div>
+                                    <div class="text-truncate" data-i18n="Account">Nhân Viên</div>
+                                </a>
+                            </li>
+                            <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "KhachHang" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
+                                <a asp-action="Index" asp-controller="KhachHang" class="menu-link">
+                                    <div class="text-truncate" data-i18n="Account">Khách Hàng</div>
                                 </a>
                             </li>
                             <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" && ViewContext.RouteData.Values["action"]?.ToString() == "ChangePassword" ? "active" : "") ">
@@ -145,7 +150,7 @@
                         </a>
                         <ul class="menu-sub ">
                             <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "SanPham" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "") ">
-                                <a asp-action="Index" asp-controller="Product" class="menu-link">
+                                <a asp-action="Index" asp-controller="SanPham" class="menu-link">
                                     <div class="text-truncate" data-i18n="sanpham">Sản Phẩm</div>
                                 </a>
                             </li>
@@ -172,12 +177,6 @@
                             <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "DanhMuc" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "") ">
                                 <a asp-action="Index" asp-controller="Category" class="menu-link">
                                     <div class="text-truncate" data-i18n="Category">Danh Mục</div>
-                                </a>
-                            </li>
-                            <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Voucher" ? "active open" : "")">
-                                <a asp-action="Index" asp-controller="Voucher" class="menu-link">
-                                    <i class="menu-icon tf-icons bx bxs-offer"></i>
-                                    <div class="text-truncate" data-i18n="Combo">Voucher</div>
                                 </a>
                             </li>
                         </ul>

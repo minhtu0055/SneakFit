@@ -10,5 +10,6 @@ namespace SneakFit.ViewModels.System.User
     public class GetUserPagingRequest : PagingRequestBase
     {
         public string? TuKhoa { get; set; }
+        public string Role { get; set; }
     }
 }

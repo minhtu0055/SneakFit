@@ -91,8 +91,8 @@ namespace SneakFit.ApiIntegration.Services
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
             var response = await client.GetAsync($"/api/chatlieu/getall");
             var body = await response.Content.ReadAsStringAsync();
-            var categories = JsonConvert.DeserializeObject<List<ChatLieuViewModels>>(body);
-            return categories;
+            var chatlieu = JsonConvert.DeserializeObject<List<ChatLieuViewModels>>(body);
+            return chatlieu;
         }
     }
 }

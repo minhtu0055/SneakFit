@@ -106,6 +106,7 @@ namespace SneakFit.Data.Extensions
             {
                 Id = adminId,
                 UserName = "Admin",
+                HoVaTen = "Phí Minh Tú",
                 NormalizedUserName = "Admin",
                 Email = "tupmph49568@gmail.com",
                 NormalizedEmail = "tupmph49568@gmail.com",

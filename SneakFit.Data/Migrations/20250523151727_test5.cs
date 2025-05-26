@@ -3,62 +3,22 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace SneakFit.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class updb : Migration
+    public partial class test5 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "AspNetRoles",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AspNetRoles", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AspNetUsers",
-                columns: table => new
-                {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    UrlHinhAnh = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    NgaySinh = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    TrangThai = table.Column<bool>(type: "bit", nullable: false),
-                    UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
-                    TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
-                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "ChatLieu",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TenChatLieu = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    TenChatLieu = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -70,7 +30,7 @@ namespace SneakFit.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TenDanhMuc = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    TenDanhMuc = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -82,7 +42,7 @@ namespace SneakFit.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TenDeGiay = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    TenDeGiay = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -94,8 +54,8 @@ namespace SneakFit.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TenKhuyenMai = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    MoTa = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TenKhuyenMai = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    MoTa = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     NgayTao = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ThoiGianBatDau = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ThoiGianKetThuc = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -125,7 +85,7 @@ namespace SneakFit.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TenMauSac = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    TenMauSac = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -133,11 +93,40 @@ namespace SneakFit.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "RoleClaims",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RoleClaims", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Roles",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NormalizedName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Roles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ThuongHieu",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TenThuongHieu = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    TenThuongHieu = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -145,11 +134,96 @@ namespace SneakFit.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserClaims",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserClaims", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserLogins",
+                columns: table => new
+                {
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LoginProvider = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ProviderKey = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ProviderDisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserLogins", x => x.UserId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserRoles",
+                columns: table => new
+                {
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserRoles", x => new { x.UserId, x.RoleId });
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UrlHinhAnh = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NgaySinh = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    GioiTinh = table.Column<bool>(type: "bit", nullable: false),
+                    TrangThai = table.Column<bool>(type: "bit", nullable: false),
+                    HoVaTen = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NormalizedUserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NormalizedEmail = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
+                    TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    LockoutEnabled = table.Column<bool>(type: "bit", nullable: false),
+                    AccessFailedCount = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserTokens",
+                columns: table => new
+                {
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LoginProvider = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserTokens", x => x.UserId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Voucher",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    MaVoucher = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MaVoucher = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     LoaiGiamGia = table.Column<int>(type: "int", nullable: false),
                     GiaTriGiamGia = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     DieuKienApDung = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
@@ -165,136 +239,12 @@ namespace SneakFit.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AspNetRoleClaims",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AspNetRoleClaims", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
-                        column: x => x.RoleId,
-                        principalTable: "AspNetRoles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AspNetUserClaims",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AspNetUserClaims", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AspNetUserClaims_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AspNetUserLogins",
-                columns: table => new
-                {
-                    LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ProviderKey = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ProviderDisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AspNetUserLogins", x => new { x.LoginProvider, x.ProviderKey });
-                    table.ForeignKey(
-                        name: "FK_AspNetUserLogins_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AspNetUserRoles",
-                columns: table => new
-                {
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AspNetUserRoles", x => new { x.UserId, x.RoleId });
-                    table.ForeignKey(
-                        name: "FK_AspNetUserRoles_AspNetRoles_RoleId",
-                        column: x => x.RoleId,
-                        principalTable: "AspNetRoles",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_AspNetUserRoles_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AspNetUserTokens",
-                columns: table => new
-                {
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AspNetUserTokens", x => new { x.UserId, x.LoginProvider, x.Name });
-                    table.ForeignKey(
-                        name: "FK_AspNetUserTokens_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "GioHang",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_GioHang", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_GioHang_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "SanPham",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TenSanPham = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Mota = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TenSanPham = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Mota = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     TrangThai = table.Column<bool>(type: "bit", nullable: false),
                     DanhMucId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
@@ -310,31 +260,80 @@ namespace SneakFit.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "DiaChi",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TenDiaChi = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    TenThanhPho = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    TenHuyen = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    TenXa = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Mac_Dinh = table.Column<bool>(type: "bit", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DiaChi", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DiaChi_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "GioHang",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    NgayTao = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GioHang", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_GioHang_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "HoaDon",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    NgayLapHoaDon = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    NgayTao = table.Column<DateTime>(type: "datetime2", nullable: false),
                     TongTien = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     TrangThai = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId1 = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    DiaChi = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SoDienThoai = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    HoTen = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    GhiChu = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PhuongThucThanhToan = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DiaChi = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    SoDienThoai = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    HoTen = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    GhiChu = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    PhuongThucThanhToan = table.Column<int>(type: "int", maxLength: 50, nullable: false),
+                    LoaiHoaDon = table.Column<int>(type: "int", nullable: false),
+                    NgayThanhToan = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    MaGiaoDich = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    PhiVanChuyen = table.Column<decimal>(type: "decimal(18,2)", nullable: false, defaultValue: 0m),
+                    DonViVanChuyen = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    MaVanDon = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    TrangThaiThanhToan = table.Column<int>(type: "int", nullable: false),
                     VoucherID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_HoaDon", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_HoaDon_AspNetUsers_UserId1",
-                        column: x => x.UserId1,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
+                        name: "FK_HoaDon_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_HoaDon_Voucher_VoucherID",
                         column: x => x.VoucherID,
@@ -349,7 +348,7 @@ namespace SneakFit.Data.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     KhuyenMaiId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    SanPhamId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    SanPhamId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -363,7 +362,8 @@ namespace SneakFit.Data.Migrations
                         name: "FK_KhuyenMaiChiTiet_SanPham_SanPhamId",
                         column: x => x.SanPhamId,
                         principalTable: "SanPham",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -377,8 +377,10 @@ namespace SneakFit.Data.Migrations
                     DeGiayId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ThuongHieuId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     SanPhamId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Gia = table.Column<float>(type: "real", nullable: false),
-                    SoLuong = table.Column<int>(type: "int", nullable: false)
+                    Gia = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    SoLuong = table.Column<int>(type: "int", nullable: false),
+                    TrangThai = table.Column<bool>(type: "bit", nullable: false),
+                    NgayTao = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -430,7 +432,7 @@ namespace SneakFit.Data.Migrations
                     SoLuong = table.Column<int>(type: "int", nullable: false),
                     NgayTao = table.Column<DateTime>(type: "datetime2", nullable: false),
                     GioHangId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SanPhamChiTietId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    SanPhamChiTietId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -445,7 +447,8 @@ namespace SneakFit.Data.Migrations
                         name: "FK_GioHangChiTiet_SanPhamChiTiet_SanPhamChiTietId",
                         column: x => x.SanPhamChiTietId,
                         principalTable: "SanPhamChiTiet",
-                        principalColumn: "ID");
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -454,7 +457,7 @@ namespace SneakFit.Data.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     SanPhamChiTietId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UrlHinhAnh = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    UrlHinhAnh = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -474,7 +477,6 @@ namespace SneakFit.Data.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     SoLuong = table.Column<int>(type: "int", nullable: false),
                     GiaBan = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    KhuyenMaiId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     HoaDonId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     SanPhamChiTietId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
@@ -495,44 +497,75 @@ namespace SneakFit.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateIndex(
-                name: "IX_AspNetRoleClaims_RoleId",
-                table: "AspNetRoleClaims",
-                column: "RoleId");
+            migrationBuilder.InsertData(
+                table: "ChatLieu",
+                columns: new[] { "Id", "TenChatLieu" },
+                values: new object[,]
+                {
+                    { new Guid("8f4d4a5e-2bfa-4e8c-9d2c-4f6a7e9b87cb"), "Giày Chạy Bộ" },
+                    { new Guid("8f8d4a5e-3bfa-4e8c-9d2c-3f6a7e9b87cb"), "Giày Đá Bóng" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "DanhMuc",
+                columns: new[] { "Id", "TenDanhMuc" },
+                values: new object[,]
+                {
+                    { new Guid("8f4d4a5e-2bfa-4e8c-9d2c-3f6a7e9b87cb"), "Giày Chạy Bộ" },
+                    { new Guid("8f8d4a6e-2bfa-4e8c-9d2c-3f6a7e9b87cb"), "Giày Đá Bóng" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "DeGiay",
+                columns: new[] { "Id", "TenDeGiay" },
+                values: new object[,]
+                {
+                    { new Guid("8f8d4a1e-2bfa-4e8c-9d2c-3f6a7e9b81cb"), "Nhựa" },
+                    { new Guid("9f4d4a6e-2bfa-4e8c-9d2c-3f6a7e9b87cb"), "Cao Su" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "KichThuoc",
+                columns: new[] { "Id", "MaKichThuoc" },
+                values: new object[,]
+                {
+                    { new Guid("8f4d4a6e-2bfa-4e8c-9d2c-3f6a7e9b87cb"), 40 },
+                    { new Guid("8f8d4a1e-2bfa-4e8c-9d2c-3f6a7e9b87cb"), 41 }
+                });
+
+            migrationBuilder.InsertData(
+                table: "MauSac",
+                columns: new[] { "Id", "TenMauSac" },
+                values: new object[,]
+                {
+                    { new Guid("8f4d4a5e-2bfa-2e8c-9d2c-3f6a7e9b87cb"), "Giày Chạy Bộ" },
+                    { new Guid("8f8d4a5e-2bfa-4e9c-9d2c-3f6a7e9b87cb"), "Giày Đá Bóng" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Roles",
+                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
+                values: new object[,]
+                {
+                    { new Guid("8d04dce2-969a-435d-bba4-df3f325983dc"), null, "Admin", "ADMIN" },
+                    { new Guid("8d04dce2-969a-435d-bba4-df3f325984dc"), null, "Nhân Viên", "NHÂN VIÊN" },
+                    { new Guid("8d04dce2-979a-435d-bba4-df3f325983dc"), null, "Khách Hàng", "KHÁCH HÀNG" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "UserRoles",
+                columns: new[] { "RoleId", "UserId" },
+                values: new object[] { new Guid("8d04dce2-969a-435d-bba4-df3f325983dc"), new Guid("69bd714f-9576-45ba-b5b7-f00649be00de") });
+
+            migrationBuilder.InsertData(
+                table: "Users",
+                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "GioiTinh", "HoVaTen", "LockoutEnabled", "LockoutEnd", "NgaySinh", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TrangThai", "TwoFactorEnabled", "UrlHinhAnh", "UserName" },
+                values: new object[] { new Guid("69bd714f-9576-45ba-b5b7-f00649be00de"), 0, "df53d45a-ee5d-4d03-9fe3-8298dc9c3914", "tupmph49568@gmail.com", true, false, "Phí Minh Tú", false, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "tupmph49568@gmail.com", "Admin", "AQAAAAIAAYagAAAAEPSIpCSr4n0opVgLVZz7PU+JS5up7kFnRzUxqNa7vU2JC9MF05avy1trM3n2mw4/dg==", null, false, "", true, false, null, "Admin" });
 
             migrationBuilder.CreateIndex(
-                name: "RoleNameIndex",
-                table: "AspNetRoles",
-                column: "NormalizedName",
-                unique: true,
-                filter: "[NormalizedName] IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AspNetUserClaims_UserId",
-                table: "AspNetUserClaims",
+                name: "IX_DiaChi_UserId",
+                table: "DiaChi",
                 column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AspNetUserLogins_UserId",
-                table: "AspNetUserLogins",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AspNetUserRoles_RoleId",
-                table: "AspNetUserRoles",
-                column: "RoleId");
-
-            migrationBuilder.CreateIndex(
-                name: "EmailIndex",
-                table: "AspNetUsers",
-                column: "NormalizedEmail");
-
-            migrationBuilder.CreateIndex(
-                name: "UserNameIndex",
-                table: "AspNetUsers",
-                column: "NormalizedUserName",
-                unique: true,
-                filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_GioHang_UserId",
@@ -556,9 +589,9 @@ namespace SneakFit.Data.Migrations
                 column: "SanPhamChiTietId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_HoaDon_UserId1",
+                name: "IX_HoaDon_UserId",
                 table: "HoaDon",
-                column: "UserId1");
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_HoaDon_VoucherID",
@@ -625,19 +658,7 @@ namespace SneakFit.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AspNetRoleClaims");
-
-            migrationBuilder.DropTable(
-                name: "AspNetUserClaims");
-
-            migrationBuilder.DropTable(
-                name: "AspNetUserLogins");
-
-            migrationBuilder.DropTable(
-                name: "AspNetUserRoles");
-
-            migrationBuilder.DropTable(
-                name: "AspNetUserTokens");
+                name: "DiaChi");
 
             migrationBuilder.DropTable(
                 name: "GioHangChiTiet");
@@ -652,7 +673,22 @@ namespace SneakFit.Data.Migrations
                 name: "KhuyenMaiChiTiet");
 
             migrationBuilder.DropTable(
-                name: "AspNetRoles");
+                name: "RoleClaims");
+
+            migrationBuilder.DropTable(
+                name: "Roles");
+
+            migrationBuilder.DropTable(
+                name: "UserClaims");
+
+            migrationBuilder.DropTable(
+                name: "UserLogins");
+
+            migrationBuilder.DropTable(
+                name: "UserRoles");
+
+            migrationBuilder.DropTable(
+                name: "UserTokens");
 
             migrationBuilder.DropTable(
                 name: "GioHang");
@@ -667,7 +703,7 @@ namespace SneakFit.Data.Migrations
                 name: "KhuyenMai");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "Voucher");

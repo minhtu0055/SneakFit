@@ -1,0 +1,159 @@
+﻿@model SneakFit.ViewModels.System.User.UserUpdateRequest
+@inject IConfiguration Configuration
+<div class="container-fluid">
+	<h3 class="mt-4">Cập nhật khách hàng</h3>
+	<ol class="breadcrumb mb-4">
+		<li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
+		<li class="breadcrumb-item"><a asp-action="Index">Danh sách khách hàng</a></li>
+		<li class="breadcrumb-item active">Cập nhật</li>
+	</ol>
+	<div class="card mb-4">
+		<div class="card-body">
+			<div class="col-md-12 mx-auto">
+				<form asp-action="Edit" method="post" id="edit-form" enctype="multipart/form-data" novalidate>
+					<div class="row">
+						<div class="col-md-2">
+							<div class="mb-3 row">
+								<div class="">
+									<label for="AnhDaiDien">
+										<img id="previewImage" src="~/assets/img/avatars/hinhanhnew.png" alt="Ảnh" class="img-thumbnail" style="width: 200px; height: 200px; object-fit: cover; border-radius: 20px; cursor: pointer;" onclick="document.getElementById('fileInput').click();" />
+									</label>
+									<input id="fileInput" name="imageFile" type="file" accept="image/*" class="form-control d-none" onchange="previewFile(this)" />
+								</div>
+							</div>
+						</div>
+						<div class="col-md-10">
+							<div class="mb-3 row">
+								<label asp-for="HoVaTen" class="col-sm-2 col-form-label">Họ và tên <span class="text-danger">*</span></label>
+								<div class="col-sm-10">
+									<input asp-for="HoVaTen" class="form-control" placeholder="Vui lòng nhập Họ Tên..." required />
+									<span class="invalid-feedback">Vui lòng nhập họ và tên</span>
+								</div>
+							</div>
+							<div class="mb-3 row">
+								<label asp-for="Email" class="col-sm-2 col-form-label">Email <span class="text-danger">*</span></label>
+								<div class="col-sm-10">
+									<input asp-for="Email" class="form-control" placeholder="Nhập Gmail..." required />
+									<span class="invalid-feedback">Vui lòng nhập email hợp lệ</span>
+								</div>
+							</div>
+							<div class="mb-3 row">
+								<label asp-for="NgaySinh" class="col-sm-2 col-form-label">Ngày sinh <span class="text-danger">*</span></label>
+								<div class="col-sm-10">
+									<div class="input-group has-validation">
+										<input asp-for="NgaySinh" type="datetime-local" class="form-control" required />
+										<span class="invalid-feedback">Vui lòng chọn ngày sinh</span>
+									</div>
+								</div>
+							</div>
+							<div class="mb-3 row">
+								<label asp-for="SoDienThoai" class="col-sm-2 col-form-label">Số điện thoại <span class="text-danger">*</span></label>
+								<div class="col-sm-10">
+									<input asp-for="SoDienThoai" class="form-control" placeholder="Nhập số điện thoại..." required pattern="[0-9]{10}" />
+									<span class="invalid-feedback">Vui lòng nhập số điện thoại hợp lệ (10 số)</span>
+								</div>
+							</div>
+							<div class="mb-3 row">
+								<label asp-for="GioiTinh" class="col-sm-2 col-form-label">Giới tính <span class="text-danger">*</span></label>
+								<div class="col-sm-10">
+									<div class="form-check form-check-inline">
+										<input class="form-check-input" type="radio" asp-for="GioiTinh" id="nam" value="true">
+										<label class="form-check-label" for="nam">Nam</label>
+									</div>
+									<div class="form-check form-check-inline">
+										<input class="form-check-input" type="radio" asp-for="GioiTinh" id="nu" value="false">
+										<label class="form-check-label" for="nu">Nữ</label>
+									</div>
+								</div>
+							</div>
+							<div class="mb-3 row">
+								<label asp-for="TrangThai" class="col-sm-2 col-form-label">Trạng thái <span class="text-danger">*</span></label>
+								<div class="col-sm-10">
+									<select asp-for="TrangThai" class="form-select" required>
+										<option value="true">Hoạt động</option>
+										<option value="false">Ngưng hoạt động</option>
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="mb-3 row">
+						<div class="col-sm-9 offset-sm-9">
+							<button type="submit" class="btn btn-primary me-4">
+								<i class="bx bx-save me-1"></i> Cập nhật
+							</button>
+							<a asp-action="Index" class="btn btn-secondary">
+								<i class="bx bx-arrow-back me-1"></i> Quay lại
+							</a>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+@section Scripts {
+	@{
+		await Html.RenderPartialAsync("_ValidationScriptsPartial");
+	}
+	<script>
+			function previewFile(input) {
+			const file = input.files[0];
+			if (file) {
+				const reader = new FileReader();
+				reader.onload = function(e) {
+					document.getElementById('previewImage').src = e.target.result;
+				}
+				reader.readAsDataURL(file);
+			}
+		}
+		const form = document.getElementById('edit-form');
+
+			// Thêm sự kiện khi input thay đổi
+			form.querySelectorAll('input').forEach(input => {
+				input.addEventListener('input', function() {
+					if (this.value.trim() !== '') {
+						// Chỉ xóa class is-invalid, không thêm bất kỳ class nào khác
+						this.classList.remove('is-invalid');
+					}
+				});
+			});
+			// Validate khi submit form
+			form.addEventListener('submit', function(event) {
+				let isValid = true;
+
+				// Kiểm tra từng input
+				form.querySelectorAll('input[required]').forEach(input => {
+					if (!input.value.trim()) {
+						input.classList.add('is-invalid');
+						isValid = false;
+					}
+				});
+				if (!isValid) {
+					event.preventDefault();
+					event.stopPropagation();
+				}
+			});
+			 // Lấy TempData
+			var successMessage = '@TempData["SuccessMessage"]';
+			var errorMessage = '@TempData["ErrorMessage"]';
+
+			if (successMessage) {
+				toastr.success(successMessage);
+			}
+
+			if (errorMessage) {
+				toastr.error(errorMessage);
+			}
+					function previewFile(input) {
+				const file = input.files[0];
+				if (file) {
+					const reader = new FileReader();
+					reader.onload = function(e) {
+						document.getElementById('previewImage').src = e.target.result;
+					}
+					reader.readAsDataURL(file);
+				}
+			}
+	</script>
+}

@@ -11,5 +11,6 @@ namespace SneakFit.ApiIntegration.Services
         Task<ApiResult<UserViewModels>> GetById(Guid id);
         Task<bool> TrangThai(Guid id, bool trangThai);
         Task<ApiResult<bool>> RoleAssign(Guid id, RoleAssignRequest request);
+        Task<ApiResult<bool>> Update(UserUpdateRequest request);
     }
 }
