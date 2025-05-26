@@ -251,5 +251,32 @@ namespace SneakFit.Application.Catalog.SanPham
 
             return danhSachSPCT;
         }
+
+        public async Task<SPCTDetailViewModel> GetSPCTDetail(Guid spctId)
+        {
+            var spct = await _context.SanPhamChiTiet
+                .Include(x => x.SanPham)
+                .Include(x => x.HinhAnhSanPham) // Nếu có navigation property Images
+                .FirstOrDefaultAsync(x => x.ID == spctId);
+
+            if (spct == null) return null;
+
+            return new SPCTDetailViewModel
+            {
+                Id = spct.ID,
+                TenSanPham = spct.SanPham.TenSanPham,
+                MoTa = spct.SanPham.Mota,
+                ThuongHieuId = spct.ThuongHieuId,
+                TrangThai = spct.TrangThai,
+                ChatLieuId = spct.ChatLieuId,
+                DeGiayId = spct.DeGiayId,
+                MauSacId = spct.MauSacId,
+                KichThuocId = spct.KichThuocId,
+                SoLuong = spct.SoLuong,
+                GiaBan = spct.Gia,
+                //QRCodeUrl = spct.QRCodeUrl, // Nếu có
+                //Images = spct.HinhAnhSanPham?.Select(i => new ImageViewModel { Id = i.Id, Url = i.Url }).ToList() ?? new List<ImageViewModel>()
+            };
+        }
     }
 }

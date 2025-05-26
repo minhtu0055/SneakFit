@@ -7,133 +7,146 @@
             <i class="fa fa-filter"></i> Bộ lọc
         </div>
         <div class="card-body">
-            <form id="filterForm" class="row g-2 align-items-end" method="get">
-                <div class="col-md-3">
-                    <input type="text" class="form-control" name="TuKhoa" placeholder="Nhập tên sản phẩm" value="@Context.Request.Query["TuKhoa"]" />
+            <form id="filterForm" method="get">
+                <!-- Hàng 1: Tên sản phẩm -->
+                <div class="row mb-2">
+                    <div class="col-md-12">
+                        <input type="text" class="form-control" name="TuKhoa" placeholder="Nhập tên sản phẩm" value="@Context.Request.Query["TuKhoa"]" />
+                    </div>
                 </div>
-                <div class="col-md-2">
-                    <select class="form-select" name="ChatLieuId">
-                        <option value="">Chất liệu</option>
-                        @foreach (var cl in (IDictionary<Guid, string>)ViewBag.ChatLieus)
-                        {
-                            var isSelected = Context.Request.Query["ChatLieuId"] == cl.Key.ToString();
-                            if (isSelected)
+                <!-- Hàng 2: Chất liệu, Thương hiệu, Đế giày, Khoảng giá Từ -->
+                <div class="row mb-2">
+                    <div class="col-md-3">
+                        <select class="form-select" name="ChatLieuId">
+                            <option value="">Chất liệu</option>
+                            @foreach (var cl in (IDictionary<Guid, string>)ViewBag.ChatLieus)
                             {
-                                <option value="@cl.Key" selected>@cl.Value</option>
+                                var isSelected = Context.Request.Query["ChatLieuId"] == cl.Key.ToString();
+                                if (isSelected)
+                                {
+                                    <option value="@cl.Key" selected>@cl.Value</option>
+                                }
+                                else
+                                {
+                                    <option value="@cl.Key">@cl.Value</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" name="ThuongHieuId">
+                            <option value="">Thương hiệu</option>
+                            @foreach (var th in (IDictionary<Guid, string>)ViewBag.ThuongHieus)
+                            {
+                                var isSelected = Context.Request.Query["ThuongHieuId"] == th.Key.ToString();
+                                if (isSelected)
+                                {
+                                    <option value="@th.Key" selected>@th.Value</option>
+                                }
+                                else
+                                {
+                                    <option value="@th.Key">@th.Value</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" name="DeGiayId">
+                            <option value="">Đế giày</option>
+                            @foreach (var dg in (IDictionary<Guid, string>)ViewBag.DeGiays)
+                            {
+                                var isSelected = Context.Request.Query["DeGiayId"] == dg.Key.ToString();
+                                if (isSelected)
+                                {
+                                    <option value="@dg.Key" selected>@dg.Value</option>
+                                }
+                                else
+                                {
+                                    <option value="@dg.Key">@dg.Value</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="number" class="form-control" name="GiaTu" placeholder="Giá từ" value="@Context.Request.Query["GiaTu"]" />
+                    </div>
+                </div>
+                <!-- Hàng 3: Kích cỡ, Màu sắc, Trạng thái, Khoảng giá Đến -->
+                <div class="row mb-2">
+                    <div class="col-md-3">
+                        <select class="form-select" name="KichThuocId">
+                            <option value="">Kích cỡ</option>
+                            @foreach (var kt in (IDictionary<Guid, string>)ViewBag.KichThuocs)
+                            {
+                                var isSelected = Context.Request.Query["KichThuocId"] == kt.Key.ToString();
+                                if (isSelected)
+                                {
+                                    <option value="@kt.Key" selected>@kt.Value</option>
+                                }
+                                else
+                                {
+                                    <option value="@kt.Key">@kt.Value</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" name="MauSacId">
+                            <option value="">Màu sắc</option>
+                            @foreach (var ms in (IDictionary<Guid, string>)ViewBag.MauSacs)
+                            {
+                                var isSelected = Context.Request.Query["MauSacId"] == ms.Key.ToString();
+                                if (isSelected)
+                                {
+                                    <option value="@ms.Key" selected>@ms.Value</option>
+                                }
+                                else
+                                {
+                                    <option value="@ms.Key">@ms.Value</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" name="TrangThai">
+                            <option value="">Trạng thái</option>
+                            @{
+                                var isSelectedTrue = Context.Request.Query["TrangThai"] == "true";
+                                var isSelectedFalse = Context.Request.Query["TrangThai"] == "false";
+                            }
+                            @if (isSelectedTrue)
+                            {
+                                <option value="true" selected>Đang kinh doanh</option>
                             }
                             else
                             {
-                                <option value="@cl.Key">@cl.Value</option>
+                                <option value="true">Đang kinh doanh</option>
                             }
-                        }
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select class="form-select" name="ThuongHieuId">
-                        <option value="">Thương hiệu</option>
-                        @foreach (var th in (IDictionary<Guid, string>)ViewBag.ThuongHieus)
-                        {
-                            var isSelected = Context.Request.Query["ThuongHieuId"] == th.Key.ToString();
-                            if (isSelected)
+                            @if (isSelectedFalse)
                             {
-                                <option value="@th.Key" selected>@th.Value</option>
+                                <option value="false" selected>Ngừng kinh doanh</option>
                             }
                             else
                             {
-                                <option value="@th.Key">@th.Value</option>
+                                <option value="false">Ngừng kinh doanh</option>
                             }
-                        }
-                    </select>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="number" class="form-control" name="GiaDen" placeholder="Giá đến" value="@Context.Request.Query["GiaDen"]" />
+                    </div>
                 </div>
-                <div class="col-md-2">
-                    <select class="form-select" name="DeGiayId">
-                        <option value="">Đế giày</option>
-                        @foreach (var dg in (IDictionary<Guid, string>)ViewBag.DeGiays)
-                        {
-                            var isSelected = Context.Request.Query["DeGiayId"] == dg.Key.ToString();
-                            if (isSelected)
-                            {
-                                <option value="@dg.Key" selected>@dg.Value</option>
-                            }
-                            else
-                            {
-                                <option value="@dg.Key">@dg.Value</option>
-                            }
-                        }
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select class="form-select" name="KichThuocId">
-                        <option value="">Kích cỡ</option>
-                        @foreach (var kt in (IDictionary<Guid, string>)ViewBag.KichThuocs)
-                        {
-                            var isSelected = Context.Request.Query["KichThuocId"] == kt.Key.ToString();
-                            if (isSelected)
-                            {
-                                <option value="@kt.Key" selected>@kt.Value</option>
-                            }
-                            else
-                            {
-                                <option value="@kt.Key">@kt.Value</option>
-                            }
-                        }
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select class="form-select" name="MauSacId">
-                        <option value="">Màu sắc</option>
-                        @foreach (var ms in (IDictionary<Guid, string>)ViewBag.MauSacs)
-                        {
-                            var isSelected = Context.Request.Query["MauSacId"] == ms.Key.ToString();
-                            if (isSelected)
-                            {
-                                <option value="@ms.Key" selected>@ms.Value</option>
-                            }
-                            else
-                            {
-                                <option value="@ms.Key">@ms.Value</option>
-                            }
-                        }
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select class="form-select" name="TrangThai">
-                        <option value="">Trạng thái</option>
-                        @{
-                            var isSelectedTrue = Context.Request.Query["TrangThai"] == "true";
-                            var isSelectedFalse = Context.Request.Query["TrangThai"] == "false";
-                        }
-                        @if (isSelectedTrue)
-                        {
-                            <option value="true" selected>Đang kinh doanh</option>
-                        }
-                        else
-                        {
-                            <option value="true">Đang kinh doanh</option>
-                        }
-                        @if (isSelectedFalse)
-                        {
-                            <option value="false" selected>Ngừng kinh doanh</option>
-                        }
-                        else
-                        {
-                            <option value="false">Ngừng kinh doanh</option>
-                        }
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label>Khoảng giá:</label>
-                    <input type="number" class="form-control" name="GiaTu" placeholder="Từ" value="@Context.Request.Query["GiaTu"]" />
-                    <input type="number" class="form-control mt-1" name="GiaDen" placeholder="Đến" value="@Context.Request.Query["GiaDen"]" />
-                </div>
-                <div class="col-md-2">
-                    @* <button type="submit" class="btn btn-primary">Tìm kiếm</button>
-                    <button type="reset" class="btn btn-danger">Làm mới</button> *@
-                    <button type="submit" class="btn btn-primary">Tìm kiếm</button>
-                    <button type="reset" class="btn btn-danger" onclick="window.location.href=window.location.pathname">Làm mới</button>
-                </div>
-                <div class="col-md-2">
-                    <button type="button" class="btn btn-info">QR Code sản phẩm</button>
+                <!-- Hàng 4: Tìm kiếm, Làm mới, QR Code -->
+                <div class="row mb-2">
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">Tìm kiếm</button>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="reset" class="btn btn-danger w-100" onclick="window.location.href=window.location.pathname">Làm mới</button>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="button" class="btn btn-info w-100">QR Code sản phẩm</button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -152,16 +165,14 @@
             <table class="table table-hover align-middle" id="spctTable">
                 <thead class="table-warning">
                     <tr>
-                        <th><input type="checkbox" id="checkAll" /></th>
-                        <th>STT</th>
-                        <th>Ảnh</th>
-                        <th>Tên Sản Phẩm</th>
-                        <th>Số Lượng</th>
-                        <th>Giá Bán</th>
-                        <th>Kích Thước</th>
-                        <th>Màu Sắc</th>
-                        <th>Trạng Thái</th>
-                        <th>Hành động</th>
+                        <th style="width: 30px;"><input type="checkbox" id="checkAll" /></th>
+                        <th style="width: 30px;">STT</th>
+                        <th style="width: 100px;">Ảnh</th>
+                        <th style="min-width: 250px;">Tên Sản Phẩm</th>
+                        <th style="width: 112px;">Số Lượng</th>
+                        <th style="width: 120px;">Giá Bán</th>
+                        <th style="width: 120px;">Trạng Thái</th>
+                        <th style="width: 1px">@* Hành động *@</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -177,18 +188,25 @@
                             <td>
                                 <img src="@(item.Images != null && item.Images.Count > 0 ? item.Images[0] : "/images/no-image.png")" width="60" />
                             </td>
-                            <td>@(sanPhams != null && sanPhams.ContainsKey(item.SanPhamId) ? sanPhams[item.SanPhamId] : "")</td>
-                            <td><input type="number" class="form-control so-luong" value="@item.SoLuong" min="0" /></td>
-                            <td><input type="number" class="form-control gia-ban" value="@item.Gia" min="0" step="1000" /></td>
-                            <td>@(ViewBag.KichThuocs[item.KichThuocId])</td>
                             <td>
-                                <span style="background:@(ViewBag.MauSacs[item.MauSacId].ToLower());display:inline-block;width:30px;height:20px;"></span>
+                                @{
+                                    var tenSanPham = (sanPhams != null && sanPhams.ContainsKey(item.SanPhamId)) ? sanPhams[item.SanPhamId] : "";
+                                    var kichThuoc = ViewBag.KichThuocs[item.KichThuocId];
+                                    var mauSac = ViewBag.MauSacs[item.MauSacId];
+                                }
+                                @($"{tenSanPham} ( {kichThuoc} - {mauSac} )")
+                            </td>
+                            <td style="width: 100px;">
+                                <input type="number" class="form-control so-luong" value="@item.SoLuong" min="0" style="width: 70px; padding: 2px 6px; font-size: 0.95em;" />
+                            </td>
+                            <td style="width: 120px;">
+                                <input type="text" class="form-control gia-ban" value="@item.Gia.ToString("N0", new System.Globalization.CultureInfo("vi-VN"))" style="width: 110px; padding: 2px 6px; font-size: 0.95em;" />
                             </td>
                             <td>
                                 <span class="badge bg-success">@(item.TrangThai ? "Đang kinh doanh" : "Ngừng kinh doanh")</span>
                             </td>
                             <td>
-                                <button type="button" class="btn btn-warning btn-view" data-id="@item.Id">👁️</button>
+                                <button type="button" class="btn btn-warning btn-view" style="width: 40px" data-id="@item.Id">👁️</button>
                             </td>
                         </tr>
                         stt++;
@@ -197,6 +215,212 @@
             </table>
         </div>
     </div>
+</div>
+
+<!-- Modal chi tiết sản phẩm -->
+<div class="modal fade" id="productDetailModal" tabindex="-1" aria-labelledby="productDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" style="min-width:900px;max-width:1200px;width:90vw;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productDetailModalLabel">Thông Tin Sản Phẩm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="max-height:70vh; overflow-y:auto;">
+                <form id="productDetailForm">
+                    <div class="mb-2">
+                        <label class="form-label fw-bold">Tên sản phẩm :</label>
+                        <input type="text" class="form-control" name="TenSanPham" required />
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-bold">Mô tả :</label>
+                        <textarea class="form-control" name="MoTa" rows="2" required></textarea>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Thương hiệu :</label>
+                            <div class="input-group align-items-center">
+                                <select class="form-select" name="ThuongHieuId" required></select>
+                                <button type="button" class="btn btn-add-sub btn-circle ms-2" data-type="thuonghieu"><span>+</span></button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Chất Liệu :</label>
+                            <div class="input-group align-items-center">
+                                <select class="form-select" name="ChatLieuId" required></select>
+                                <button type="button" class="btn btn-add-sub btn-circle ms-2" data-type="chatlieu"><span>+</span></button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Đế Giày :</label>
+                            <div class="input-group align-items-center">
+                                <select class="form-select" name="DeGiayId" required></select>
+                                <button type="button" class="btn btn-add-sub btn-circle ms-2" data-type="degiay"><span>+</span></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Kích Cỡ :</label>
+                            <div class="input-group align-items-center">
+                                <select class="form-select" name="KichThuocId" required></select>
+                                <button type="button" class="btn btn-add-sub btn-circle ms-2" data-type="kichthuoc"><span>+</span></button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Màu Sắc :</label>
+                            <div class="input-group align-items-center">
+                                <select class="form-select" name="MauSacId" required></select>
+                                <button type="button" class="btn btn-add-sub btn-circle ms-2" data-type="mausac"><span>+</span></button>
+                                <span class="input-group-text" id="colorPreview" style="width:40px;"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Trạng thái :</label>
+                            <select class="form-select" name="TrangThai" required>
+                                <option value="true">Kinh Doanh</option>
+                                <option value="false">Ngừng Kinh Doanh</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Số Lượng đang bán :</label>
+                            <input type="number" class="form-control" name="SoLuong" min="0" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Giá Bán :</label>
+                            <input type="text" class="form-control" name="GiaBan" required />
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Số Lượng Hàng Trả :</label>
+                            <input type="number" class="form-control" name="SoLuongHangTra" min="0" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">QR Code :</label>
+                            <div id="qrCodePreview"></div>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-bold d-block text-center" style="font-size: 1.2em;">Ảnh Sản Phẩm</label>
+                        <div id="productImages" class="d-flex flex-wrap gap-2 justify-content-center mb-2">
+                            <!-- Ảnh sẽ được render ở đây bằng JS -->
+                        </div>
+                        <div class="text-center">
+                            <input type="file" id="uploadImageInput" accept="image/*" style="display:none;" multiple />
+                            <button type="button" class="btn btn-outline-primary" id="btnUploadImage">+ Upload</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="btnSaveProductDetail">Chỉnh sửa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal thêm mới Thương hiệu -->
+<div class="modal fade" id="modalAddThuongHieu" tabindex="-1" aria-labelledby="modalAddThuongHieuLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalAddThuongHieuLabel">Thêm mới Thương hiệu</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formAddThuongHieu">
+          <div class="mb-3">
+            <label class="form-label">Tên thương hiệu</label>
+            <input type="text" class="form-control" name="TenThuongHieu" required />
+          </div>
+          <button type="submit" class="btn btn-primary">Thêm</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal thêm mới Chất liệu -->
+<div class="modal fade" id="modalAddChatLieu" tabindex="-1" aria-labelledby="modalAddChatLieuLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalAddChatLieuLabel">Thêm mới Chất liệu</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formAddChatLieu">
+          <div class="mb-3">
+            <label class="form-label">Tên chất liệu</label>
+            <input type="text" class="form-control" name="TenChatLieu" required />
+          </div>
+          <button type="submit" class="btn btn-primary">Thêm</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal thêm mới Đế giày -->
+<div class="modal fade" id="modalAddDeGiay" tabindex="-1" aria-labelledby="modalAddDeGiayLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalAddDeGiayLabel">Thêm mới Đế giày</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formAddDeGiay">
+          <div class="mb-3">
+            <label class="form-label">Tên đế giày</label>
+            <input type="text" class="form-control" name="TenDeGiay" required />
+          </div>
+          <button type="submit" class="btn btn-primary">Thêm</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal thêm mới Kích cỡ -->
+<div class="modal fade" id="modalAddKichThuoc" tabindex="-1" aria-labelledby="modalAddKichThuocLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalAddKichThuocLabel">Thêm mới Kích cỡ</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formAddKichThuoc">
+          <div class="mb-3">
+            <label class="form-label">Mã kích cỡ</label>
+            <input type="text" class="form-control" name="MaKichThuoc" required />
+          </div>
+          <button type="submit" class="btn btn-primary">Thêm</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal thêm mới Màu sắc -->
+<div class="modal fade" id="modalAddMauSac" tabindex="-1" aria-labelledby="modalAddMauSacLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalAddMauSacLabel">Thêm mới Màu sắc</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formAddMauSac">
+          <div class="mb-3">
+            <label class="form-label">Tên màu sắc</label>
+            <input type="text" class="form-control" name="TenMauSac" required />
+          </div>
+          <button type="submit" class="btn btn-primary">Thêm</button>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
 
 @section Scripts {
@@ -236,7 +460,7 @@
                     updates.push({
                         id: row.data('id'),
                         soLuong: row.find('.so-luong').val(),
-                        giaBan: row.find('.gia-ban').val(),
+                        giaBan: row.find('.gia-ban').val().replace(/\./g, ''),
                         trangThai: row.find('.badge').text().trim() === "Đang kinh doanh"
                     });
                 });
@@ -262,6 +486,174 @@
                     alert('Vui lòng chọn ít nhất một sản phẩm!');
                 }
             });
+
+            // Format giá bán khi nhập
+            $(document).on('input', '.gia-ban', function() {
+                let value = $(this).val().replace(/\D/g, '');
+                if (value) {
+                    value = parseInt(value, 10).toLocaleString('vi-VN');
+                }
+                $(this).val(value);
+            });
+
+            // Fill combobox dữ liệu từ ViewBag khi mở modal
+            function fillCombobox(selector, data, value, text) {
+                var $select = $(selector);
+                $select.empty();
+                $select.append('<option value="">Chọn</option>');
+                for (var i = 0; i < data.length; i++) {
+                    $select.append('<option value="' + data[i][value] + '">' + data[i][text] + '</option>');
+                }
+            }
+
+            // Khi click 👁️
+            $(document).on('click', '.btn-view', function() {
+                var id = $(this).closest('tr').data('id');
+                // Lấy dữ liệu combobox từ ViewBag (render ra JS object ở view)
+                var thuongHieus = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.ThuongHieus));
+                var chatLieus = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.ChatLieus));
+                var deGiays = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.DeGiays));
+                var kichThuocs = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.KichThuocs));
+                var mauSacs = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.MauSacs));
+                // Convert object to array for easier loop
+                function objToArr(obj) {
+                    return Object.keys(obj).map(function(key) {
+                        return { id: key, name: obj[key] };
+                    });
+                }
+                fillCombobox("#productDetailModal select[name='ThuongHieuId']", objToArr(thuongHieus), 'id', 'name');
+                fillCombobox("#productDetailModal select[name='ChatLieuId']", objToArr(chatLieus), 'id', 'name');
+                fillCombobox("#productDetailModal select[name='DeGiayId']", objToArr(deGiays), 'id', 'name');
+                fillCombobox("#productDetailModal select[name='KichThuocId']", objToArr(kichThuocs), 'id', 'name');
+                fillCombobox("#productDetailModal select[name='MauSacId']", objToArr(mauSacs), 'id', 'name');
+                // Gọi backend lấy chi tiết sản phẩm
+                $.get('/SanPham/GetSPCTDetail', { id: id }, function(data) {
+                    // Fill dữ liệu vào các trường như cũ
+                    $("#productDetailModal input[name='TenSanPham']").val(data.tenSanPham);
+                    $("#productDetailModal textarea[name='MoTa']").val(data.moTa);
+                    $("#productDetailModal select[name='ThuongHieuId']").val(data.thuongHieuId);
+                    $("#productDetailModal select[name='TrangThai']").val(data.trangThai ? 'true' : 'false');
+                    $("#productDetailModal select[name='ChatLieuId']").val(data.chatLieuId);
+                    $("#productDetailModal select[name='DeGiayId']").val(data.deGiayId);
+                    $("#productDetailModal select[name='KichThuocId']").val(data.kichThuocId);
+                    $("#productDetailModal select[name='MauSacId']").val(data.mauSacId).trigger('change');
+                    $("#productDetailModal input[name='SoLuong']").val(data.soLuong);
+                    $("#productDetailModal input[name='SoLuongHangTra']").val(data.soLuongHangTra);
+                    $("#productDetailModal input[name='GiaBan']").val(Number(data.giaBan).toLocaleString('vi-VN'));
+                    // QR code
+                    $("#qrCodePreview").html('<img src="' + data.qrCodeUrl + '" style="width:100px;" />');
+                    // Ảnh sản phẩm
+                    renderProductImages(data.images);
+                    $('#productDetailModal').modal('show');
+                });
+            });
+
+            // Render ảnh sản phẩm
+            function renderProductImages(images) {
+                var html = '';
+                (images || []).forEach(function(img, idx) {
+                    html += `
+                        <div class="position-relative" style="display:inline-block;">
+                            <img src="${img.url}" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid #ccc;">
+                            <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 btn-delete-image" data-idx="${idx}" style="padding:2px 6px;">&times;</button>
+                        </div>
+                    `;
+                });
+                $('#productImages').html(html);
+            }
+
+            // Thêm ảnh
+            $('#btnUploadImage').on('click', function() {
+                $('#uploadImageInput').click();
+            });
+
+            $('#uploadImageInput').on('change', function() {
+                var files = this.files;
+                if (!files.length) return;
+                var formData = new FormData();
+                for (let i = 0; i < files.length; i++) {
+                    formData.append('files', files[i]);
+                }
+                // Gửi lên backend (ví dụ: /SanPham/UploadImage?spctId=...)
+                // Lấy id SPCT hiện tại (nên lưu lại khi mở modal)
+                var spctId = $('#spctTable tr.table-info').data('id');
+                $.ajax({
+                    url: '/SanPham/UploadImage?spctId=' + spctId,
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(res) {
+                        if(res.success) {
+                            // Sau khi upload thành công, reload lại danh sách ảnh
+                            renderProductImages(res.images);
+                        } else {
+                            alert('Upload ảnh thất bại!');
+                        }
+                    },
+                    error: function() {
+                        alert('Có lỗi khi upload ảnh!');
+                    }
+                });
+            });
+
+            // Xóa ảnh
+            $(document).on('click', '.btn-delete-image', function() {
+                var idx = $(this).data('idx');
+                // Lấy id ảnh hoặc url ảnh
+                var imgId = $(this).data('imgid');
+                // Gửi AJAX xóa ảnh
+                $.post('/SanPham/DeleteImage', { id: imgId }, function(res) {
+                    if(res.success) {
+                        // Reload lại danh sách ảnh
+                        renderProductImages(res.images);
+                    } else {
+                        alert('Xóa ảnh thất bại!');
+                    }
+                });
+            });
+
+            // Khi chọn màu sắc thì đổi màu preview
+            $("#productDetailModal select[name='MauSacId']").on('change', function() {
+                var color = $(this).find('option:selected').text();
+                $('#colorPreview').css('background', color);
+            });
+
+            // Sửa lại sự kiện click cho từng nút +
+            $(document).on('click', '.btn-add-sub', function() {
+                var type = $(this).data('type');
+                if(type === 'thuonghieu') $('#modalAddThuongHieu').modal('show');
+                if(type === 'chatlieu') $('#modalAddChatLieu').modal('show');
+                if(type === 'degiay') $('#modalAddDeGiay').modal('show');
+                if(type === 'kichthuoc') $('#modalAddKichThuoc').modal('show');
+                if(type === 'mausac') $('#modalAddMauSac').modal('show');
+            });
         });
     </script>
 }
+
+<style>
+.btn-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #6c63ff;
+    color: #fff;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(108,99,255,0.15);
+    border: none;
+    transition: background 0.2s;
+}
+.btn-circle:hover {
+    background: #554ee2;
+    color: #fff;
+}
+.btn-circle span {
+    font-weight: bold;
+    font-size: 1.5rem;
+    line-height: 1;
+}
+</style>

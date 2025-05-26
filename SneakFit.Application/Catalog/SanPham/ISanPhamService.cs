@@ -22,5 +22,6 @@ namespace SneakFit.Application.Catalog.SanPham
         Task<bool> UpdateSPCT(Guid id, List<SanPhamChiTietCapNhat> updates);
         Task<List<SPCTViewModels>> GetSPCTByFilter(SPCTFilterRequest request);
         Task<List<SPCTViewModels>> GetSPCTByProductName(string productName);
+        Task<SPCTDetailViewModel> GetSPCTDetail(Guid spctId);
     }
 }

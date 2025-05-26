@@ -117,5 +117,13 @@ namespace SneakFit.BackEndAPI.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [HttpGet("GetSPCTDetail/{spctId}")]
+        public async Task<IActionResult> GetSPCTDetail(Guid spctId)
+        {
+            var detail = await _sanPhamService.GetSPCTDetail(spctId);
+            if (detail == null) return NotFound();
+            return Ok(detail);
+        }
     }
 }

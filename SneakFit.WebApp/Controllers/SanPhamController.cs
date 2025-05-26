@@ -184,7 +184,9 @@ namespace SneakFit.Admin.Controllers
             var deGiays = await _deGiayApiClient.GetAll();
             var kichThuocs = await _kichThuocApiClient.GetAll();
             var mauSacs = await _mauSacApiClient.GetAll();
+            var sanphams = await _sanPhamApiClient.GetAll();
 
+            ViewBag.SanPhams = sanphams.ToDictionary(x => x.Id, x => x.TenSanPham);
             ViewBag.ChatLieus = chatLieus.ToDictionary(x => x.Id, x => x.TenChatLieu);
             ViewBag.ThuongHieus = thuongHieus.ToDictionary(x => x.Id, x => x.TenThuongHieu);
             ViewBag.DeGiays = deGiays.ToDictionary(x => x.Id, x => x.TenDeGiay);
@@ -214,6 +216,13 @@ namespace SneakFit.Admin.Controllers
             {
                 return Json(new { success = false, message = ex.Message });
             }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetSPCTDetail(Guid id)
+        {
+            var detail = await _sanPhamApiClient.GetSPCTDetail(id);
+            return Json(detail);
         }
     }
 }

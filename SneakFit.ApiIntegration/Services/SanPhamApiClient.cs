@@ -188,5 +188,19 @@ namespace SneakFit.ApiIntegration.Services
             }
             throw new Exception("Không thể lấy danh sách SPCT theo tên sản phẩm");
         }
+
+        public async Task<SPCTDetailViewModel> GetSPCTDetail(Guid spctId)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var response = await client.GetAsync($"/api/SanPham/GetSPCTDetail/{spctId}");
+            var body = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonConvert.DeserializeObject<SPCTDetailViewModel>(body);
+                return result;
+            }
+            throw new Exception("Không thể lấy chi tiết SPCT");
+        }
     }
 }
