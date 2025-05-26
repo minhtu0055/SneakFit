@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using SneakFit.Data.EF;
 using SneakFit.Data.Entities;
+using SneakFit.ViewModels.Catalog.MauSac;
 using SneakFit.ViewModels.Catalog.ThuongHieu;
+using SneakFit.ViewModels.Common;
 
 namespace SneakFit.Application.Catalog.ThuongHieu
 {
@@ -17,6 +19,30 @@ namespace SneakFit.Application.Catalog.ThuongHieu
         public ThuongHieuService(SneakFitDbContext context)
         {
             _context = context;
+        }
+        public async Task<PagedResult<ThuongHieuViewModels>> GetAllPaging(ThuongHieuPagingRequest request)
+        {
+            var query = _context.ThuongHieu.AsQueryable();
+            if (!string.IsNullOrEmpty(request.Keyword))
+            {
+                query = query.Where(x => x.TenThuongHieu.Contains(request.Keyword));
+            }
+            int totalRow = await query.CountAsync();
+            var data = await query.Skip((request.PageIndex - 1) * request.PageSize)
+                .Take(request.PageSize)
+                .Select(x => new ThuongHieuViewModels()
+                {
+                    Id = x.Id,
+                    TenThuongHieu = x.TenThuongHieu
+                }).ToListAsync();
+            var PageResult = new PagedResult<ThuongHieuViewModels>()
+            {
+                TotalRecords = totalRow,
+                PageSize = request.PageSize,
+                PageIndex = request.PageIndex,
+                Items = data,
+            };
+            return PageResult;
         }
         public async Task<List<ThuongHieuViewModels>> GetAll()
         {

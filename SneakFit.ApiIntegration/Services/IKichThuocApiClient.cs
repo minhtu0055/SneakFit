@@ -10,5 +10,6 @@ namespace SneakFit.ApiIntegration.Services
         Task<KichThuocViewModels> GetById(Guid id);
         Task<KichThuocViewModels> Create(ThemKichThuoc request);
         Task<KichThuocViewModels> Update(SuaKichThuoc request);
+        Task<List<KichThuocViewModels>> GetAll();
     }
 }

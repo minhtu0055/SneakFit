@@ -69,5 +69,6 @@ namespace SneakFit.Data.EF
         public DbSet<SanPhamChiTiet> SanPhamChiTiet { get; set; }
         public DbSet<ThuongHieu> ThuongHieu { get; set; }
         public DbSet<Voucher> Voucher { get; set; }
+        
     }
 }

@@ -1,0 +1,24 @@
+@model SneakFit.ViewModels.Catalog.SanPham.ThemSanPham
+<form asp-controller="SanPham" asp-action="Create" id="createSanPhamForm" method="post">
+    <div class="mb-3">
+        <label asp-for="TenSanPham" class="form-label">Tên sản phẩm</label>
+        <input asp-for="TenSanPham" class="form-control" placeholder="Nhập tên sản phẩm" maxlength="100" required />
+        <span asp-validation-for="TenSanPham" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="DanhMucId" class="form-label">Danh mục</label>
+        <select asp-for="DanhMucId" class="form-control" asp-items="ViewBag.DanhMucs">
+            <option value="">-- Chọn danh mục --</option>
+        </select>
+        <span asp-validation-for="DanhMucId" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Mota" class="form-label">Mô tả</label>
+        <textarea asp-for="Mota" class="form-control" placeholder="Nhập mô tả" rows="3" maxlength="500"></textarea>
+        <span asp-validation-for="Mota" class="text-danger"></span>
+    </div>
+    <div class="text-end">
+        <button type="submit" class="btn btn-primary">Thêm</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+    </div>
+</form> 

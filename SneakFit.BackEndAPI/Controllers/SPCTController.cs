@@ -8,6 +8,7 @@ using SneakFit.ViewModels.Catalog.KhuyenMai;
 using SneakFit.ViewModels.Catalog.SanPham;
 using SneakFit.ViewModels.Catalog.SanPhamChiTiet;
 using SneakFit.ViewModels.Common;
+using Microsoft.Extensions.Logging;
 
 namespace SneakFit.BackEndAPI.Controllers
 {
@@ -17,10 +18,12 @@ namespace SneakFit.BackEndAPI.Controllers
     public class SPCTController : ControllerBase
     {
         private readonly ISanPhamChiTetService _sanPhamChiTetService;
+        private readonly ILogger<SPCTController> _logger;
 
-        public SPCTController(ISanPhamChiTetService sanPhamChiTetService)
+        public SPCTController(ISanPhamChiTetService sanPhamChiTetService, ILogger<SPCTController> logger)
         {
             _sanPhamChiTetService = sanPhamChiTetService;
+            _logger = logger;
         }
         [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll()
@@ -40,7 +43,7 @@ namespace SneakFit.BackEndAPI.Controllers
         {
             var item = await _sanPhamChiTetService.GetById(id);
             if (item == null)
-                return NotFound($"Không tìm thấy sản phẩm với id = {id}");
+                return NotFound($"Không tìm thấy sản phẩm chi tiết với id = {id}");
             return Ok(item);
         }
 
@@ -50,8 +53,28 @@ namespace SneakFit.BackEndAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var sanPham = await _sanPhamChiTetService.Create(request);
-            return CreatedAtAction(nameof(GetById), new { id = sanPham.Id }, sanPham);
+            var result = await _sanPhamChiTetService.Create(request);
+            if (!result.IsSuccessed)
+                return BadRequest(new { message = result.Message });
+
+            // Xử lý nhiều hình ảnh tải lên nếu có
+            if (request.Images != null && request.Images.Count > 0)
+            {
+                foreach (var image in request.Images)
+                {
+                    if (image.Length > 0)
+                    {
+                        var imageResult = await _sanPhamChiTetService.AddImage(result.ResultObj.Id, image);
+                        if (imageResult == 0)
+                        {
+                            // Lỗi đăng nhập nhưng tiếp tục với các hình ảnh khác
+                            _logger.LogWarning($"Không thêm được hình ảnh cho sản phẩm {result.ResultObj.Id}");
+                        }
+                    }
+                }
+            }
+
+            return Ok(result);
         }
 
         [HttpPut("Edit/{id}")]
@@ -63,16 +86,16 @@ namespace SneakFit.BackEndAPI.Controllers
             request.Id = id;
             var sanPham = await _sanPhamChiTetService.Update(request);
             if (sanPham == null)
-                return NotFound($"Không tìm thấy sản phẩm với id = {id}");
+                return NotFound($"Không tìm thấy sản phẩm chi tiết với id = {id}");
 
             return Ok(sanPham);
         }
-        [HttpPatch("{id}/trangThai")]
+        [HttpPut("{id}/trangThai")]
         public async Task<IActionResult> UpdateTrangThai(Guid id, [FromBody] bool trangThai)
         {
             var result = await _sanPhamChiTetService.UpdateTrangThai(id, trangThai);
             if (!result)
-                return BadRequest(new ApiErrorResult<bool>("Cập nhật trạng thái không thành công"));
+                return BadRequest(new ApiErrorResult<bool>($"Không tìm thấy sản phẩm chi tiết có ID: {id}"));
 
             return Ok(new ApiSuccessResult<bool>(true));
         }
@@ -152,6 +175,15 @@ namespace SneakFit.BackEndAPI.Controllers
         {
             var images = await _sanPhamChiTetService.GetListImages(id);
             return Ok(new ApiSuccessResult<List<string>>(images));
+        }
+
+        [HttpPost("CreateMultiple")]
+        public async Task<IActionResult> CreateMultiple([FromBody] ThemNhieuSPCTRequest request)
+        {
+            if (request.Items == null || !request.Items.Any())
+                return BadRequest(new ApiErrorResult<int>("Chưa chọn màu sắc/kích thước"));
+            var count = await _sanPhamChiTetService.CreateMultiple(request);
+            return Ok(new ApiSuccessResult<int>(count));
         }
     }
 }

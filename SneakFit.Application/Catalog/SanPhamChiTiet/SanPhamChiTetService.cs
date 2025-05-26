@@ -150,21 +150,48 @@ namespace SneakFit.Application.Catalog.SanPhamChiTietChiTiet
         {
             var spct = await _context.SanPhamChiTiet.FindAsync(id);
             if (spct == null)
-                throw new Exception($"Không tìm thấy khuyến mãi có id: {id}");
+                return false;
+
             spct.TrangThai = trangThai;
+            _context.SanPhamChiTiet.Update(spct);
             return await _context.SaveChangesAsync() > 0;
         }
-        public async Task<SPCTViewModels> Create(ThemSPCT request)
+        
+        public async Task<ApiResult<SPCTViewModels>> Create(ThemSPCT request)
         {
+            // Kiểm tra dữ liệu đầu vào
+            if (!_context.SanPham.Any(x => x.Id == request.SanPhamId))
+                return new ApiResult<SPCTViewModels> { IsSuccessed = false, Message = "Sản phẩm không tồn tại" };
+            if (!_context.MauSac.Any(x => x.Id == request.MauSacId))
+                return new ApiResult<SPCTViewModels> { IsSuccessed = false, Message = "Màu sắc không tồn tại" };
+            if (!_context.KichThuoc.Any(x => x.Id == request.KichThuocId))
+                return new ApiResult<SPCTViewModels> { IsSuccessed = false, Message = "Kích thước không tồn tại" };
+            if (!_context.DeGiay.Any(x => x.Id == request.DeGiayId))
+                return new ApiResult<SPCTViewModels> { IsSuccessed = false, Message = "Đế giày không tồn tại" };
+            if (!_context.ThuongHieu.Any(x => x.Id == request.ThuongHieuId))
+                return new ApiResult<SPCTViewModels> { IsSuccessed = false, Message = "Thương hiệu không tồn tại" };
+            if (!_context.ChatLieu.Any(x => x.Id == request.ChatLieuId))
+                return new ApiResult<SPCTViewModels> { IsSuccessed = false, Message = "Chất liệu không tồn tại" };
+
+            // Kiểm tra trùng lặp
+            bool isExist = _context.SanPhamChiTiet.Any(x =>
+                x.SanPhamId == request.SanPhamId &&
+                x.MauSacId == request.MauSacId &&
+                x.KichThuocId == request.KichThuocId
+            );
+            if (isExist)
+                return new ApiResult<SPCTViewModels> { IsSuccessed = false, Message = "Sản phẩm chi tiết này đã tồn tại" };
+
+            // Tạo mới
             var newSanPhamChiTiet = new Data.Entities.SanPhamChiTiet()
             {
                 ID = Guid.NewGuid(),
                 SanPhamId = request.SanPhamId,
                 MauSacId = request.MauSacId,
                 KichThuocId = request.KichThuocId,
+                ThuongHieuId = request.ThuongHieuId,
                 ChatLieuId = request.ChatLieuId,
                 DeGiayId = request.DeGiayId,
-                ThuongHieuId = request.ThuongHieuId,
                 Gia = request.Gia,
                 SoLuong = request.SoLuong,
                 TrangThai = true,
@@ -173,9 +200,9 @@ namespace SneakFit.Application.Catalog.SanPhamChiTietChiTiet
             };
             _context.SanPhamChiTiet.Add(newSanPhamChiTiet);
 
-
             await _context.SaveChangesAsync();
-            return await GetById(newSanPhamChiTiet.ID);
+            var viewModel = await GetById(newSanPhamChiTiet.ID);
+            return new ApiResult<SPCTViewModels> { IsSuccessed = true, ResultObj = viewModel };
         }
 
         public async Task<SPCTViewModels?> Update(SuaSPCT request)
@@ -195,6 +222,8 @@ namespace SneakFit.Application.Catalog.SanPhamChiTietChiTiet
             entity.Gia = request.Gia;
             entity.SoLuong = request.SoLuong;
             entity.TrangThai = request.TrangThai;
+            entity.SanPhamId = request.SanPhamId;
+            // entity.DanhMucId = request.DanhMucId; // Nếu có
 
             // Xử lý upload ảnh mới nếu có
             if (request.Images != null && request.Images.Count > 0)
@@ -333,6 +362,33 @@ namespace SneakFit.Application.Catalog.SanPhamChiTietChiTiet
                 .Where(x => x.SanPhamChiTietId == id)
                 .Select(i => i.UrlHinhAnh)
                 .ToListAsync();
+        }
+
+        public async Task<int> CreateMultiple(ThemNhieuSPCTRequest request)
+        {
+            int count = 0;
+            foreach (var item in request.Items)
+            {
+                var newSanPhamChiTiet = new Data.Entities.SanPhamChiTiet()
+                {
+                    ID = Guid.NewGuid(),
+                    SanPhamId = request.SanPhamId,
+                    ThuongHieuId = request.ThuongHieuId,
+                    DeGiayId = request.DeGiayId,
+                    ChatLieuId = request.ChatLieuId,
+                    TrangThai = request.TrangThai,
+                    MauSacId = item.MauSacId,
+                    KichThuocId = item.KichThuocId,
+                    SoLuong = item.SoLuong,
+                    Gia = item.Gia,
+                    NgayTao = DateTime.Now,
+                    HinhAnhSanPham = new List<HinhAnhSanPham>()
+                };
+                _context.SanPhamChiTiet.Add(newSanPhamChiTiet);
+                count++;
+            }
+            await _context.SaveChangesAsync();
+            return count;
         }
     }
 }

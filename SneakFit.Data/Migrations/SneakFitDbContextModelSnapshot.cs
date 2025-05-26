@@ -243,7 +243,7 @@ namespace SneakFit.Data.Migrations
                         {
                             Id = new Guid("69bd714f-9576-45ba-b5b7-f00649be00de"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "ffd40b54-5523-4dda-8ff5-baa91570e802",
+                            ConcurrencyStamp = "a90f90a8-4313-4ed3-8d62-8a6888016081",
                             Email = "tupmph49568@gmail.com",
                             EmailConfirmed = true,
                             GioiTinh = false,
@@ -252,7 +252,7 @@ namespace SneakFit.Data.Migrations
                             NgaySinh = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NormalizedEmail = "tupmph49568@gmail.com",
                             NormalizedUserName = "Admin",
-                            PasswordHash = "AQAAAAIAAYagAAAAEFvsQrK8suWIEBLSZyc3ZeoVjkhKtAn65sn+7PJOdiJxGxBMOpLMWRmHEGRcGEHbkg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEKiB+rhhsCoLA5F0FKSGq2fDxBSqs5JI7uAj2DHh6x2fwUHAu7ZmpspId0hyU73kZA==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
                             TrangThai = true,
@@ -667,6 +667,10 @@ namespace SneakFit.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("MaMauSac")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("TenMauSac")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -680,11 +684,13 @@ namespace SneakFit.Data.Migrations
                         new
                         {
                             Id = new Guid("8f4d4a5e-2bfa-2e8c-9d2c-3f6a7e9b87cb"),
+                            MaMauSac = "#FF0000",
                             TenMauSac = "Giày Chạy Bộ"
                         },
                         new
                         {
                             Id = new Guid("8f8d4a5e-2bfa-4e9c-9d2c-3f6a7e9b87cb"),
+                            MaMauSac = "#FF0000",
                             TenMauSac = "Giày Đá Bóng"
                         });
                 });

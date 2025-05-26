@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SneakFit.Application.Catalog.DanhMuc;
 using SneakFit.ViewModels.Catalog.DanhMuc;
+using SneakFit.ViewModels.Catalog.MauSac;
+using SneakFit.ViewModels.Common;
 
 namespace SneakFit.BackEndAPI.Controllers
 {
@@ -16,6 +18,12 @@ namespace SneakFit.BackEndAPI.Controllers
         public DanhMucController(IDanhMucService danhMucService)
         {
             _danhMucService = danhMucService;
+        }
+        [HttpGet("paging")]
+        public async Task<IActionResult> GetAllPaging([FromQuery] DanhMucPagingRequest request)
+        {
+            var result = await _danhMucService.GetAllPaging(request);
+            return Ok(result);
         }
         [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll()
@@ -49,6 +57,12 @@ namespace SneakFit.BackEndAPI.Controllers
             request.Id = id;
             var danhmuc = await _danhMucService.Update(request);
             return Ok(danhmuc);
+        }
+        [HttpPost("UpdateProductCount/{id}")]
+        public async Task<IActionResult> UpdateProductCount(Guid id)
+        {
+            var result = await _danhMucService.UpdateProductCount(id);
+            return Ok(new ApiSuccessResult<bool>());
         }
     }
 }

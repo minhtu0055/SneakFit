@@ -31,7 +31,8 @@ namespace SneakFit.Application.Catalog.MauSac
                 .Select(x => new MauSacViewModels()
                 {
                     Id = x.Id,
-                    TenMauSac = x.TenMauSac
+                    TenMauSac = x.TenMauSac,
+                    MaMauSac = x.MaMauSac
                 }).ToListAsync();
             var PageResult = new PagedResult<MauSacViewModels>()
             {
@@ -52,7 +53,8 @@ namespace SneakFit.Application.Catalog.MauSac
             return new MauSacViewModels()
             {
                 Id = getid.Id,
-                TenMauSac = getid.TenMauSac
+                TenMauSac = getid.TenMauSac,
+                MaMauSac = getid.MaMauSac
             };
         }
         public async Task<MauSacViewModels> Create(ThemMauSac request)
@@ -67,14 +69,16 @@ namespace SneakFit.Application.Catalog.MauSac
             var newMauSac = new Data.Entities.MauSac()
             {
                 Id = Guid.NewGuid(),
-                TenMauSac = request.TenMauSac
+                TenMauSac = request.TenMauSac,
+                MaMauSac = request.MaMauSac
             };
             _context.MauSac.Add(newMauSac);
             await _context.SaveChangesAsync();
             return new MauSacViewModels()
             {
                 Id = newMauSac.Id,
-                TenMauSac = newMauSac.TenMauSac
+                TenMauSac = newMauSac.TenMauSac,
+                MaMauSac = newMauSac.MaMauSac
             };
         }
         public async Task<MauSacViewModels> Update(SuaMauSac request)
@@ -97,8 +101,18 @@ namespace SneakFit.Application.Catalog.MauSac
             return new MauSacViewModels()
             {
                 Id = getid.Id,
-                TenMauSac = getid.TenMauSac
+                TenMauSac = getid.TenMauSac,
+                MaMauSac = getid.MaMauSac
             };
+        }
+        public async Task<List<MauSacViewModels>> GetAll()
+        {
+            return await _context.MauSac.Select(x => new MauSacViewModels
+            {
+                Id = x.Id,
+                TenMauSac = x.TenMauSac,
+                MaMauSac = x.MaMauSac
+            }).ToListAsync();
         }
     }
 }

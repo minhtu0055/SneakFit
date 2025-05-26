@@ -93,5 +93,12 @@ namespace SneakFit.Admin.Controllers
 
             return Json(new { success = false, message = "Cập nhật thất bại" });
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var kichThuocs = await _kichThuocApiClient.GetAll(); // Gọi sang API backend
+            return Json(kichThuocs);
+        }
     }
 }
