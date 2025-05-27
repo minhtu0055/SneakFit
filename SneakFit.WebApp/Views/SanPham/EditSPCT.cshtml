@@ -239,22 +239,28 @@
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Thương hiệu :</label>
                             <div class="input-group align-items-center">
-                                <select class="form-select" name="ThuongHieuId" required></select>
-                                <button type="button" class="btn btn-add-sub btn-circle ms-2" data-type="thuonghieu"><span>+</span></button>
+                                <select class="form-select" name="ThuongHieuId" style="border-radius: 8px;" required></select>
+                                <button type="button" class="btn btn-primary ms-2" style="border-radius: 8px; width: 40px; height: 40px; padding: 0;" data-type="thuonghieu">
+                                    <i class="bx bx-plus"></i>
+                                </button>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Chất Liệu :</label>
                             <div class="input-group align-items-center">
-                                <select class="form-select" name="ChatLieuId" required></select>
-                                <button type="button" class="btn btn-add-sub btn-circle ms-2" data-type="chatlieu"><span>+</span></button>
+                                <select class="form-select" name="ChatLieuId" style="border-radius: 8px;" required></select>
+                                <button type="button" class="btn btn-primary ms-2" style="border-radius: 8px; width: 40px; height: 40px; padding: 0;" data-type="chatlieu">
+                                    <i class="bx bx-plus"></i>
+                                </button>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Đế Giày :</label>
                             <div class="input-group align-items-center">
-                                <select class="form-select" name="DeGiayId" required></select>
-                                <button type="button" class="btn btn-add-sub btn-circle ms-2" data-type="degiay"><span>+</span></button>
+                                <select class="form-select" name="DeGiayId" style="border-radius: 8px;" required></select>
+                                <button type="button" class="btn btn-primary ms-2" style="border-radius: 8px; width: 40px; height: 40px; padding: 0;" data-type="degiay">
+                                    <i class="bx bx-plus"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -262,16 +268,21 @@
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Kích Cỡ :</label>
                             <div class="input-group align-items-center">
-                                <select class="form-select" name="KichThuocId" required></select>
-                                <button type="button" class="btn btn-add-sub btn-circle ms-2" data-type="kichthuoc"><span>+</span></button>
+                                <select class="form-select" name="KichThuocId" style="border-radius: 8px;" required></select>
+                                <button type="button" class="btn btn-primary ms-2" style="border-radius: 8px; width: 40px; height: 40px; padding: 0;" data-type="kichthuoc">
+                                    <i class="bx bx-plus"></i>
+                                </button>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Màu Sắc :</label>
                             <div class="input-group align-items-center">
-                                <select class="form-select" name="MauSacId" required></select>
-                                <button type="button" class="btn btn-add-sub btn-circle ms-2" data-type="mausac"><span>+</span></button>
-                                <span class="input-group-text" id="colorPreview" style="width:40px;"></span>
+                                <select class="form-select" name="MauSacId" style="border-radius: 8px;" required>
+                                    <span class="input-group-text" id="colorPreview" style="width:40px;"></span>
+                                </select>
+                                <button type="button" class="btn btn-primary ms-2" style="border-radius: 8px; width: 40px; height: 40px; padding: 0;" data-type="mausac">
+                                    <i class="bx bx-plus"></i>
+                                </button>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -293,10 +304,10 @@
                         </div>
                     </div>
                     <div class="row mb-2">
-                        <div class="col-md-6">
+                        @* <div class="col-md-6">
                             <label class="form-label fw-bold">Số Lượng Hàng Trả :</label>
                             <input type="number" class="form-control" name="SoLuongHangTra" min="0" />
-                        </div>
+                        </div> *@
                         <div class="col-md-6">
                             <label class="form-label fw-bold">QR Code :</label>
                             <div id="qrCodePreview"></div>
@@ -323,108 +334,99 @@
 </div>
 
 <!-- Modal thêm mới Thương hiệu -->
-<div class="modal fade" id="modalAddThuongHieu" tabindex="-1" aria-labelledby="modalAddThuongHieuLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalAddThuongHieuLabel">Thêm mới Thương hiệu</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
-      </div>
-      <div class="modal-body">
-        <form id="formAddThuongHieu">
-          <div class="mb-3">
-            <label class="form-label">Tên thương hiệu</label>
-            <input type="text" class="form-control" name="TenThuongHieu" required />
-          </div>
-          <button type="submit" class="btn btn-primary">Thêm</button>
-        </form>
-      </div>
+<div class="modal fade" id="modalAddThuongHieu" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm thương hiệu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalAddThuongHieuContent"></div>
+        </div>
     </div>
-  </div>
 </div>
+
 <!-- Modal thêm mới Chất liệu -->
-<div class="modal fade" id="modalAddChatLieu" tabindex="-1" aria-labelledby="modalAddChatLieuLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalAddChatLieuLabel">Thêm mới Chất liệu</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
-      </div>
-      <div class="modal-body">
-        <form id="formAddChatLieu">
-          <div class="mb-3">
-            <label class="form-label">Tên chất liệu</label>
-            <input type="text" class="form-control" name="TenChatLieu" required />
-          </div>
-          <button type="submit" class="btn btn-primary">Thêm</button>
-        </form>
-      </div>
+<div class="modal fade" id="modalAddChatLieu" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm chất liệu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalAddChatLieuContent"></div>
+        </div>
     </div>
-  </div>
 </div>
+
 <!-- Modal thêm mới Đế giày -->
-<div class="modal fade" id="modalAddDeGiay" tabindex="-1" aria-labelledby="modalAddDeGiayLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalAddDeGiayLabel">Thêm mới Đế giày</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
-      </div>
-      <div class="modal-body">
-        <form id="formAddDeGiay">
-          <div class="mb-3">
-            <label class="form-label">Tên đế giày</label>
-            <input type="text" class="form-control" name="TenDeGiay" required />
-          </div>
-          <button type="submit" class="btn btn-primary">Thêm</button>
-        </form>
-      </div>
+<div class="modal fade" id="modalAddDeGiay" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm đế giày</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalAddDeGiayContent"></div>
+        </div>
     </div>
-  </div>
 </div>
+
 <!-- Modal thêm mới Kích cỡ -->
-<div class="modal fade" id="modalAddKichThuoc" tabindex="-1" aria-labelledby="modalAddKichThuocLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalAddKichThuocLabel">Thêm mới Kích cỡ</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
-      </div>
-      <div class="modal-body">
-        <form id="formAddKichThuoc">
-          <div class="mb-3">
-            <label class="form-label">Mã kích cỡ</label>
-            <input type="text" class="form-control" name="MaKichThuoc" required />
-          </div>
-          <button type="submit" class="btn btn-primary">Thêm</button>
-        </form>
-      </div>
+<div class="modal fade" id="modalAddKichThuoc" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm kích thước</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalAddKichThuocContent"></div>
+        </div>
     </div>
-  </div>
 </div>
+
 <!-- Modal thêm mới Màu sắc -->
-<div class="modal fade" id="modalAddMauSac" tabindex="-1" aria-labelledby="modalAddMauSacLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalAddMauSacLabel">Thêm mới Màu sắc</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
-      </div>
-      <div class="modal-body">
-        <form id="formAddMauSac">
-          <div class="mb-3">
-            <label class="form-label">Tên màu sắc</label>
-            <input type="text" class="form-control" name="TenMauSac" required />
-          </div>
-          <button type="submit" class="btn btn-primary">Thêm</button>
-        </form>
-      </div>
+<div class="modal fade" id="modalAddMauSac" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm màu sắc mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Chọn màu sắc</label><br />
+                    <input type="color" id="addColorPicker" class="form-control" style="width: 120px; display:inline-block;" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Mã màu</label>
+                    <input type="text" id="addColorHex" class="form-control" readonly style="width: 120px; background:#fff; color:#000; font-weight:bold; text-align:center;" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Tên màu sắc</label>
+                    <input type="text" id="addColorName" class="form-control" placeholder="Nhập tên màu sắc" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="saveNewColor">Lưu</button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <!-- jQuery (nên đã có) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap JS (nếu dùng) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+    <!-- Bootstrap Colorpicker CSS & JS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/3.4.0/css/bootstrap-colorpicker.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/3.4.0/js/bootstrap-colorpicker.min.js"></script>
+
     <script>
         $(document).ready(function() {
             // Chọn dòng
@@ -538,7 +540,7 @@
                     $("#productDetailModal select[name='KichThuocId']").val(data.kichThuocId);
                     $("#productDetailModal select[name='MauSacId']").val(data.mauSacId).trigger('change');
                     $("#productDetailModal input[name='SoLuong']").val(data.soLuong);
-                    $("#productDetailModal input[name='SoLuongHangTra']").val(data.soLuongHangTra);
+                    // $("#productDetailModal input[name='SoLuongHangTra']").val(data.soLuongHangTra);
                     $("#productDetailModal input[name='GiaBan']").val(Number(data.giaBan).toLocaleString('vi-VN'));
                     // QR code
                     $("#qrCodePreview").html('<img src="' + data.qrCodeUrl + '" style="width:100px;" />');
@@ -619,14 +621,176 @@
                 $('#colorPreview').css('background', color);
             });
 
-            // Sửa lại sự kiện click cho từng nút +
-            $(document).on('click', '.btn-add-sub', function() {
+            // Hàm mở modal thêm thương hiệu
+            function openAddThuongHieuModal() {
+                $.get('/ThuongHieu/Create', function(html) {
+                    $('#modalAddThuongHieuContent').html(html);
+                    $('#modalAddThuongHieu').modal('show');
+                });
+            }
+
+            // Hàm mở modal thêm đế giày
+            function openAddDeGiayModal() {
+                $.get('/DeGiay/Create', function(html) {
+                    $('#modalAddDeGiayContent').html(html);
+                    $('#modalAddDeGiay').modal('show');
+                });
+            }
+
+            // Hàm mở modal thêm chất liệu
+            function openAddChatLieuModal() {
+                $.get('/ChatLieu/Create', function(html) {
+                    $('#modalAddChatLieuContent').html(html);
+                    $('#modalAddChatLieu').modal('show');
+                });
+            }
+
+            // Hàm mở modal thêm kích thước
+            function openAddKichThuocModal() {
+                $.get('/KichThuoc/Create', function(html) {
+                    $('#modalAddKichThuocContent').html(html);
+                    $('#modalAddKichThuoc').modal('show');
+                });
+            }
+
+            // Xử lý sự kiện click cho các button +
+            $(document).on('click', 'button[data-type]', function() {
                 var type = $(this).data('type');
-                if(type === 'thuonghieu') $('#modalAddThuongHieu').modal('show');
-                if(type === 'chatlieu') $('#modalAddChatLieu').modal('show');
-                if(type === 'degiay') $('#modalAddDeGiay').modal('show');
-                if(type === 'kichthuoc') $('#modalAddKichThuoc').modal('show');
-                if(type === 'mausac') $('#modalAddMauSac').modal('show');
+                switch(type) {
+                    case 'thuonghieu':
+                        openAddThuongHieuModal();
+                        break;
+                    case 'chatlieu':
+                        openAddChatLieuModal();
+                        break;
+                    case 'degiay':
+                        openAddDeGiayModal();
+                        break;
+                    case 'kichthuoc':
+                        openAddKichThuocModal();
+                        break;
+                    case 'mausac':
+                        $('#modalAddMauSac').modal('show');
+                        break;
+                }
+            });
+
+            // Handle color picker
+            if ($('#addColorPicker').length) {
+                $('#addColorPicker').on('input', function() {
+                    $('#addColorHex').val($(this).val());
+                });
+            }
+
+            // Handle save new color
+            $('#saveNewColor').on('click', function() {
+                const colorName = $('#addColorName').val();
+                const colorHex = $('#addColorHex').val();
+                
+                if (!colorName || !colorHex) {
+                    alert('Vui lòng nhập đầy đủ thông tin màu sắc!');
+                    return;
+                }
+
+                $.post('/SanPham/AddMauSac', {
+                    tenMauSac: colorName,
+                    maMau: colorHex
+                }, function(response) {
+                    if (response.success) {
+                        $('#modalAddMauSac').modal('hide');
+                        // Refresh the color dropdown
+                        location.reload();
+                    } else {
+                        alert('Có lỗi xảy ra: ' + response.message);
+                    }
+                });
+            });
+
+            // Handle form submissions for other modals
+            $(document).on('submit', '#formAddThuongHieu', function(e) {
+                e.preventDefault();
+                const formData = $(this).serialize();
+                $.post('/SanPham/AddThuongHieu', formData, function(response) {
+                    if (response.success) {
+                        $('#modalAddThuongHieu').modal('hide');
+                        location.reload();
+                    } else {
+                        alert('Có lỗi xảy ra: ' + response.message);
+                    }
+                });
+            });
+
+            $(document).on('submit', '#formAddChatLieu', function(e) {
+                e.preventDefault();
+                const formData = $(this).serialize();
+                $.post('/SanPham/AddChatLieu', formData, function(response) {
+                    if (response.success) {
+                        $('#modalAddChatLieu').modal('hide');
+                        location.reload();
+                    } else {
+                        alert('Có lỗi xảy ra: ' + response.message);
+                    }
+                });
+            });
+
+            $(document).on('submit', '#formAddDeGiay', function(e) {
+                e.preventDefault();
+                const formData = $(this).serialize();
+                $.post('/SanPham/AddDeGiay', formData, function(response) {
+                    if (response.success) {
+                        $('#modalAddDeGiay').modal('hide');
+                        location.reload();
+                    } else {
+                        alert('Có lỗi xảy ra: ' + response.message);
+                    }
+                });
+            });
+
+            $(document).on('submit', '#formAddKichThuoc', function(e) {
+                e.preventDefault();
+                const formData = $(this).serialize();
+                $.post('/SanPham/AddKichThuoc', formData, function(response) {
+                    if (response.success) {
+                        $('#modalAddKichThuoc').modal('hide');
+                        location.reload();
+                    } else {
+                        alert('Có lỗi xảy ra: ' + response.message);
+                    }
+                });
+            });
+
+            $('#btnSaveProductDetail').on('click', function() {
+                var spctId = $('#spctTable tr.table-info').data('id');
+                var formData = {
+                    Id: spctId,
+                    TenSanPham: $("#productDetailModal input[name='TenSanPham']").val(),
+                    MoTa: $("#productDetailModal textarea[name='MoTa']").val(),
+                    ThuongHieuId: $("#productDetailModal select[name='ThuongHieuId']").val(),
+                    ChatLieuId: $("#productDetailModal select[name='ChatLieuId']").val(),
+                    DeGiayId: $("#productDetailModal select[name='DeGiayId']").val(),
+                    KichThuocId: $("#productDetailModal select[name='KichThuocId']").val(),
+                    MauSacId: $("#productDetailModal select[name='MauSacId']").val(),
+                    TrangThai: $("#productDetailModal select[name='TrangThai']").val() === "true",
+                    SoLuong: $("#productDetailModal input[name='SoLuong']").val(),
+                    GiaBan: parseInt($("#productDetailModal input[name='GiaBan']").val().replace(/[^0-9]/g, ''), 10) || 0
+                };
+                $.ajax({
+                    url: '/SanPham/UpdateSPCTDetail',
+                    type: 'POST',
+                    data: JSON.stringify(formData),
+                    contentType: 'application/json',
+                    success: function(response) {
+                        if (response.success) {
+                            alert('Cập nhật thành công!');
+                            location.reload();
+                        } else {
+                            alert('Có lỗi xảy ra: ' + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('Có lỗi xảy ra khi gửi yêu cầu!');
+                    }
+                });
             });
         });
     </script>

@@ -278,5 +278,31 @@ namespace SneakFit.Application.Catalog.SanPham
                 //Images = spct.HinhAnhSanPham?.Select(i => new ImageViewModel { Id = i.Id, Url = i.Url }).ToList() ?? new List<ImageViewModel>()
             };
         }
+
+        public async Task<bool> UpdateSPCTDetail(SuaSPCTDetailViewModel model)
+        {
+            var spct = await _context.SanPhamChiTiet.FirstOrDefaultAsync(x => x.ID == model.Id);
+            if (spct == null) return false;
+
+            // Nếu muốn update cả bảng SanPham thì lấy entity SanPham ra và update
+            var sanPham = await _context.SanPham.FirstOrDefaultAsync(x => x.Id == spct.SanPhamId);
+            if (sanPham != null)
+            {
+                sanPham.TenSanPham = model.TenSanPham;
+                sanPham.Mota = model.MoTa;
+            }
+
+            spct.ThuongHieuId = model.ThuongHieuId;
+            spct.ChatLieuId = model.ChatLieuId;
+            spct.DeGiayId = model.DeGiayId;
+            spct.KichThuocId = model.KichThuocId;
+            spct.MauSacId = model.MauSacId;
+            spct.TrangThai = model.TrangThai;
+            spct.SoLuong = model.SoLuong;
+            spct.Gia = model.GiaBan;
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

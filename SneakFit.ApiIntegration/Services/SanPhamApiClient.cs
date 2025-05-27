@@ -1,3 +1,4 @@
+using Azure.Core;
 using Newtonsoft.Json;
 using SneakFit.ViewModels.Catalog.SanPham;
 using SneakFit.ViewModels.Catalog.SanPhamChiTiet;
@@ -179,6 +180,8 @@ namespace SneakFit.ApiIntegration.Services
         {
             var client = _httpClientFactory.CreateClient();
             client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
             var response = await client.GetAsync($"/api/SanPham/GetSPCTByProductName/{Uri.EscapeDataString(productName)}");
             var body = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)
@@ -193,6 +196,8 @@ namespace SneakFit.ApiIntegration.Services
         {
             var client = _httpClientFactory.CreateClient();
             client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
             var response = await client.GetAsync($"/api/SanPham/GetSPCTDetail/{spctId}");
             var body = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)
@@ -201,6 +206,23 @@ namespace SneakFit.ApiIntegration.Services
                 return result;
             }
             throw new Exception("Không thể lấy chi tiết SPCT");
+        }
+
+        public async Task<bool> UpdateSPCTDetail(SuaSPCTDetailViewModel model)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var json = JsonConvert.SerializeObject(model);
+            var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await client.PutAsync($"/api/SanPham/UpdateSPCTDetail", httpContent);
+            var body = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+                return true;
+            return false;
         }
     }
 }

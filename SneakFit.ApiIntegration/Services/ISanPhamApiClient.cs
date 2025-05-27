@@ -17,5 +17,6 @@ namespace SneakFit.ApiIntegration.Services
         Task<List<SPCTViewModels>> GetSPCTByFilter(SPCTFilterRequest request);
         Task<List<SPCTViewModels>> GetSPCTByProductName(string productName);
         Task<SPCTDetailViewModel> GetSPCTDetail(Guid spctId);
+        Task<bool> UpdateSPCTDetail(SuaSPCTDetailViewModel model);
     }
 }

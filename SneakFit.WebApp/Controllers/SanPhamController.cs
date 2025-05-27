@@ -224,5 +224,50 @@ namespace SneakFit.Admin.Controllers
             var detail = await _sanPhamApiClient.GetSPCTDetail(id);
             return Json(detail);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateSPCTDetail([FromBody] SuaSPCTDetailViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                return Json(new { success = false, message = "Dữ liệu không hợp lệ", errors });
+            }
+
+            var result = await _sanPhamApiClient.UpdateSPCTDetail(model);
+            if (result)
+                return Json(new { success = true });
+            return Json(new { success = false, message = "Cập nhật thất bại" });
+        }
+
+        [HttpGet("GetChatlieuForm")]
+        public IActionResult GetChatlieuForm()
+        {
+            return PartialView("_AddChatLieuPartial");
+        }
+
+        [HttpGet("GetThuonghieuForm")]
+        public IActionResult GetThuonghieuForm()
+        {
+            return PartialView("_AddThuongHieuPartial");
+        }
+
+        [HttpGet("GetDeGiayForm")]
+        public IActionResult GetDeGiayForm()
+        {
+            return PartialView("_AddDeGiayPartial");
+        }
+
+        [HttpGet("GetKichthuocForm")]
+        public IActionResult GetKichthuocForm()
+        {
+            return PartialView("_AddKichThuocPartial");
+        }
+
+        [HttpGet("GetMausacForm")]
+        public IActionResult GetMausacForm()
+        {
+            return PartialView("_AddMauSacPartial");
+        }
     }
 }

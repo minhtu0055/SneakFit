@@ -125,5 +125,17 @@ namespace SneakFit.BackEndAPI.Controllers
             if (detail == null) return NotFound();
             return Ok(detail);
         }
+
+        [HttpPut("UpdateSPCTDetail")]
+        public async Task<IActionResult> UpdateSPCTDetail([FromBody] SuaSPCTDetailViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(new { success = false, message = "Dữ liệu không hợp lệ" });
+
+            var result = await _sanPhamService.UpdateSPCTDetail(model);
+            if (result)
+                return Ok(new { success = true });
+            return BadRequest(new { success = false, message = "Cập nhật thất bại" });
+        }
     }
 }
