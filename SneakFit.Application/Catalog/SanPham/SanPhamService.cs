@@ -9,16 +9,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
+using Microsoft.AspNetCore.Http;
 
 namespace SneakFit.Application.Catalog.SanPham
 {
     public class SanPhamService : ISanPhamService
     {
         private readonly SneakFitDbContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public SanPhamService(SneakFitDbContext context)
+        public SanPhamService(SneakFitDbContext context,
+                              IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
         public async Task<PagedResult<SanPhamViewModels>> GetAllPaging(SanPhamPagingRequest request)
         {
@@ -155,30 +160,19 @@ namespace SneakFit.Application.Catalog.SanPham
             return await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task<bool> UpdateSPCT(Guid id, List<SanPhamChiTietCapNhat> updates)
+        public async Task<bool> UpdateSPCT(List<SanPhamChiTietCapNhat> updates)
         {
-            var sanPham = await _context.SanPham
-                .Include(x => x.SanPhamChiTiet)
-                .FirstOrDefaultAsync(x => x.Id == id);
-
-            if (sanPham == null)
-                return false;
-
             foreach (var update in updates)
             {
-                var spct = sanPham.SanPhamChiTiet.FirstOrDefault(x => x.ID == update.Id);
+                var spct = await _context.SanPhamChiTiet.FirstOrDefaultAsync(x => x.ID == update.Id);
                 if (spct != null)
                 {
-                    spct.SoLuong = update.SoLuong;
-                    spct.Gia = update.Gia;
-                    spct.TrangThai = update.TrangThai;
+                    if (update.SoLuong > 0) spct.SoLuong = update.SoLuong;
+                    if (update.Gia > 0) spct.Gia = update.Gia;
                 }
             }
-
-            await _context.SaveChangesAsync();
-            return true;
+            return await _context.SaveChangesAsync() > 0;
         }
-
 
         public async Task<List<SPCTViewModels>> GetSPCTByFilter(SPCTFilterRequest request)
         {
@@ -256,10 +250,20 @@ namespace SneakFit.Application.Catalog.SanPham
         {
             var spct = await _context.SanPhamChiTiet
                 .Include(x => x.SanPham)
-                .Include(x => x.HinhAnhSanPham) // Nếu có navigation property Images
+                .Include(x => x.HinhAnhSanPham)
                 .FirstOrDefaultAsync(x => x.ID == spctId);
 
             if (spct == null) return null;
+
+            var request = _httpContextAccessor.HttpContext.Request;
+            var baseUrl = $"{request.Scheme}://{request.Host}";
+            var images = spct.HinhAnhSanPham?
+                .Select((img, idx) => new ImageViewModel
+                {
+                    Id = img.Id,
+                    UrlHinhAnh = baseUrl + img.UrlHinhAnh,
+                    IsDefault = idx == 0
+                }).ToList() ?? new List<ImageViewModel>();
 
             return new SPCTDetailViewModel
             {
@@ -274,8 +278,7 @@ namespace SneakFit.Application.Catalog.SanPham
                 KichThuocId = spct.KichThuocId,
                 SoLuong = spct.SoLuong,
                 GiaBan = spct.Gia,
-                //QRCodeUrl = spct.QRCodeUrl, // Nếu có
-                //Images = spct.HinhAnhSanPham?.Select(i => new ImageViewModel { Id = i.Id, Url = i.Url }).ToList() ?? new List<ImageViewModel>()
+                Images = images
             };
         }
 
@@ -302,6 +305,61 @@ namespace SneakFit.Application.Catalog.SanPham
             spct.Gia = model.GiaBan;
 
             await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> UploadImages(UploadImageRequest request)
+        {
+            var spct = await _context.SanPhamChiTiet
+                .Include(x => x.HinhAnhSanPham)
+                .FirstOrDefaultAsync(x => x.ID == request.SanPhamChiTietId);
+
+            if (spct == null) return false;
+
+            foreach (var file in request.Files)
+            {
+                if (file.Length > 0)
+                {
+                    var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+                    var filePath = Path.Combine("wwwroot", "images", "products", fileName);
+                    Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+                    var image = new Data.Entities.HinhAnhSanPham
+                    {
+                        Id = Guid.NewGuid(),
+                        SanPhamChiTietId = request.SanPhamChiTietId,
+                        UrlHinhAnh = $"/images/products/{fileName}"
+                    };
+                    _context.HinhAnhSanPham.Add(image);
+                }
+            }
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> DeleteImage(DeleteImageRequest request)
+        {
+            var image = await _context.HinhAnhSanPham
+                .FirstOrDefaultAsync(x => x.Id == request.ImageId && x.SanPhamChiTietId == request.SanPhamChiTietId);
+
+            if (image == null) return false;
+
+            var filePath = Path.Combine("wwwroot", image.UrlHinhAnh.TrimStart('/'));
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+            }
+            _context.HinhAnhSanPham.Remove(image);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> SetDefaultImage(SetDefaultImageRequest request)
+        {
+            await Task.CompletedTask; // Để tránh warning async
             return true;
         }
     }

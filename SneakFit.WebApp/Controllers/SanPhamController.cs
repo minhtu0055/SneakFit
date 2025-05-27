@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using SneakFit.ApiIntegration.Services;
 using SneakFit.ViewModels.Catalog.SanPham;
 using SneakFit.ViewModels.Catalog.SanPhamChiTiet;
+using Microsoft.AspNetCore.Http;
 
 namespace SneakFit.Admin.Controllers
 {
@@ -17,6 +18,8 @@ namespace SneakFit.Admin.Controllers
         private readonly IThuongHieuApiClient _thuongHieuApiClient;
         private readonly IDeGiayApiClient _deGiayApiClient;
 
+        private readonly IConfiguration _configuration;
+
         public SanPhamController(ISanPhamApiClient sanPhamApiClient, 
                                 IDanhMucApiClient danhMucApiClient,
                                 ISpctApiClient spctApiClient,
@@ -24,7 +27,8 @@ namespace SneakFit.Admin.Controllers
                                 IMauSacApiClient mauSacApiClient,
                                 IChatLieuApiClient chatLieuApiClient,
                                 IThuongHieuApiClient thuongHieuApiClient,
-                                IDeGiayApiClient deGiayApiClient)
+                                IDeGiayApiClient deGiayApiClient,
+                                IConfiguration configuration)
         {
             _sanPhamApiClient = sanPhamApiClient;
             _danhMucApiClient = danhMucApiClient;
@@ -34,6 +38,7 @@ namespace SneakFit.Admin.Controllers
             _chatLieuApiClient = chatLieuApiClient;
             _thuongHieuApiClient = thuongHieuApiClient;
             _deGiayApiClient = deGiayApiClient;
+            _configuration = configuration;
         }
 
         public async Task<IActionResult> Index(string keyWord, Guid? danhMucId, int pageIndex = 1, int pageSize = 8)
@@ -205,12 +210,14 @@ namespace SneakFit.Admin.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateSPCT(Guid id, [FromBody] List<SanPhamChiTietCapNhat> updates)
+        public async Task<IActionResult> UpdateSPCT([FromBody] List<SanPhamChiTietCapNhat> updates) // ở ngoài table list danh sách spct
         {
             try
             {
-                var result = await _sanPhamApiClient.UpdateSPCT(id, updates);
-                return Json(new { success = true, message = "Cập nhật thành công" });
+                var result = await _sanPhamApiClient.UpdateSPCT(updates);
+                if (result)
+                    return Json(new { success = true, message = "Cập nhật thành công" });
+                return Json(new { success = false, message = "Cập nhật thất bại" });
             }
             catch (Exception ex)
             {
@@ -222,15 +229,23 @@ namespace SneakFit.Admin.Controllers
         public async Task<IActionResult> GetSPCTDetail(Guid id)
         {
             var detail = await _sanPhamApiClient.GetSPCTDetail(id);
+            var apiBaseUrl = _configuration["BackEndApiBaseUrl"];
+            foreach (var img in detail.Images)
+            {
+                if (!string.IsNullOrEmpty(img.UrlHinhAnh) && !img.UrlHinhAnh.StartsWith("http"))
+                {
+                    img.UrlHinhAnh = apiBaseUrl.TrimEnd('/') + img.UrlHinhAnh;
+                }
+            }
             return Json(detail);
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateSPCTDetail([FromBody] SuaSPCTDetailViewModel model)
+        public async Task<IActionResult> UpdateSPCTDetail([FromBody] SuaSPCTDetailViewModel model) // ở trong modal detail spct
         {
             if (!ModelState.IsValid)
             {
-                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList(); // mess báo lỗi
                 return Json(new { success = false, message = "Dữ liệu không hợp lệ", errors });
             }
 
@@ -268,6 +283,50 @@ namespace SneakFit.Admin.Controllers
         public IActionResult GetMausacForm()
         {
             return PartialView("_AddMauSacPartial");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UploadImages(Guid sanPhamChiTietId, List<IFormFile> files)
+        {
+            var result = await _sanPhamApiClient.UploadImages(sanPhamChiTietId, files);
+            if (result)
+            {
+                var spctDetail = await _sanPhamApiClient.GetSPCTDetail(sanPhamChiTietId);
+                return Json(new { success = true, images = spctDetail.Images });
+            }
+            return Json(new { success = false, message = "Upload ảnh thất bại" });
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteImage(Guid imageId, Guid sanPhamChiTietId)
+        {
+            var result = await _sanPhamApiClient.DeleteImage(imageId, sanPhamChiTietId);
+            if (result)
+            {
+                var spctDetail = await _sanPhamApiClient.GetSPCTDetail(sanPhamChiTietId);
+                return Json(new { success = true, images = spctDetail.Images });
+            }
+            return Json(new { success = false, message = "Xóa ảnh thất bại" });
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> SetDefaultImage(Guid imageId, Guid sanPhamChiTietId)
+        {
+            try
+            {
+                var result = await _sanPhamApiClient.SetDefaultImage(imageId, sanPhamChiTietId);
+                if (result)
+                {
+                    // Lấy lại thông tin chi tiết SPCT để cập nhật danh sách ảnh
+                    var spctDetail = await _sanPhamApiClient.GetSPCTDetail(sanPhamChiTietId);
+                    return Json(new { success = true, images = spctDetail.Images });
+                }
+                return Json(new { success = false, message = "Set ảnh mặc định thất bại" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
     }
 }

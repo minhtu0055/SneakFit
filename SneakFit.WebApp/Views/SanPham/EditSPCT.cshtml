@@ -68,7 +68,7 @@
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <input type="number" class="form-control" name="GiaTu" placeholder="Giá từ" value="@Context.Request.Query["GiaTu"]" />
+                        <input type="number" class="form-control gia-ban" name="GiaTu" placeholder="Giá từ" value="@Context.Request.Query["GiaTu"]" />
                     </div>
                 </div>
                 <!-- Hàng 3: Kích cỡ, Màu sắc, Trạng thái, Khoảng giá Đến -->
@@ -133,19 +133,17 @@
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <input type="number" class="form-control" name="GiaDen" placeholder="Giá đến" value="@Context.Request.Query["GiaDen"]" />
+                        <input type="number" class="form-control gia-ban" name="GiaDen" placeholder="Giá đến" value="@Context.Request.Query["GiaDen"]" />
                     </div>
                 </div>
                 <!-- Hàng 4: Tìm kiếm, Làm mới, QR Code -->
                 <div class="row mb-2">
-                    <div class="col-md-4 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary w-100">Tìm kiếm</button>
-                    </div>
-                    <div class="col-md-4 d-flex align-items-end">
-                        <button type="reset" class="btn btn-danger w-100" onclick="window.location.href=window.location.pathname">Làm mới</button>
-                    </div>
-                    <div class="col-md-4 d-flex align-items-end">
-                        <button type="button" class="btn btn-info w-100">QR Code sản phẩm</button>
+                    <div class="col-md-12 d-flex justify-content-end gap-2">
+                        <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                        <button type="reset" class="btn btn-dark" onclick="window.location.href=window.location.pathname">
+                            <i class="bx bx-reset"></i> Reset
+                        </button>
+                        <button type="button" class="btn btn-primary">QR Code sản phẩm</button>
                     </div>
                 </div>
             </form>
@@ -160,11 +158,11 @@
         <div class="card-body">
             <div class="mb-2 text-end">
                 <button class="btn btn-primary" id="updateAll">Chỉnh số lượng và giá chung</button>
-                <button class="btn btn-success" id="updateSelected">Update sản phẩm</button>
+                <button class="btn btn-primary" style="margin-left: 5px" id="updateSelected">Update sản phẩm</button>
             </div>
             <table class="table table-hover align-middle" id="spctTable">
-                <thead class="table-warning">
-                    <tr>
+                <thead class="table">
+                    <tr style="background-color: mediumpurple; color: white;">
                         <th style="width: 30px;"><input type="checkbox" id="checkAll" /></th>
                         <th style="width: 30px;">STT</th>
                         <th style="width: 100px;">Ảnh</th>
@@ -182,11 +180,11 @@
                     }
                     @foreach (var item in Model.DanhSachSPCT)
                     {
-                        <tr data-id="@item.Id">
+                        <tr data-id="@item.Id" data-so-luong="@item.SoLuong" data-gia-ban="@item.Gia">
                             <td><input type="checkbox" class="row-check" /></td>
                             <td>@stt</td>
                             <td>
-                                <img src="@(item.Images != null && item.Images.Count > 0 ? item.Images[0] : "/images/no-image.png")" width="60" />
+                                <img src="@(item.Images != null && item.Images.Count > 0 ? item.Images[0] : "/images/LOGO.jpg")" width="60" />
                             </td>
                             <td>
                                 @{
@@ -203,10 +201,12 @@
                                 <input type="text" class="form-control gia-ban" value="@item.Gia.ToString("N0", new System.Globalization.CultureInfo("vi-VN"))" style="width: 110px; padding: 2px 6px; font-size: 0.95em;" />
                             </td>
                             <td>
-                                <span class="badge bg-success">@(item.TrangThai ? "Đang kinh doanh" : "Ngừng kinh doanh")</span>
+                                <span class="badge @(item.TrangThai ? "bg-success" : "bg-danger")">
+                                    @(item.TrangThai ? "Đang kinh doanh" : "Ngừng kinh doanh")
+                                </span>
                             </td>
                             <td>
-                                <button type="button" class="btn btn-warning btn-view" style="width: 40px" data-id="@item.Id">👁️</button>
+                                <button type="button" class="btn btn-primary btn-view" style="width: 40px" data-id="@item.Id">👁️</button>
                             </td>
                         </tr>
                         stt++;
@@ -415,6 +415,32 @@
     </div>
 </div>
 
+<!-- Modal Sửa Giá và Số Lượng Chung -->
+<div class="modal fade" id="modalEditPriceQuantity" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sửa giá và số lượng chung</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Giá bán (VNĐ)</label>
+                    <input type="text" id="editAllPrice" class="form-control gia-ban" placeholder="Nhập giá, ví dụ: 1.000.000" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Số lượng</label>
+                    <input type="number" id="editAllQuantity" class="form-control so-luong" min="10" placeholder="Nhập số lượng" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="btnApplyEditAll">Áp dụng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <!-- jQuery (nên đã có) -->
@@ -443,29 +469,71 @@
                 $('.row-check').prop('checked', this.checked);
             });
 
-            // Chỉnh số lượng và giá chung
-            $('#updateAll').on('click', function() {
-                var soLuong = prompt("Nhập số lượng mới:");
-                var giaBan = prompt("Nhập giá bán mới:");
-                if (soLuong && giaBan) {
-                    $('.so-luong').val(soLuong);
-                    $('.gia-ban').val(giaBan);
+            // Format giá bán khi nhập
+            $(document).on('input', '.gia-ban', function() {
+                let value = $(this).val().replace(/\D/g, '');
+                if (value) {
+                    value = parseInt(value, 10).toLocaleString('vi-VN');
                 }
+                $(this).val(value);
+            });
+
+            // Thay thế sự kiện #updateAll:
+            $('#updateAll').off('click').on('click', function() {
+                // Lấy giá và số lượng đầu tiên để fill vào modal (nếu có)
+                let firstPrice = $('.gia-ban').first().val() || '';
+                let firstQuantity = $('.so-luong').first().val() || '';
+                $('#editAllPrice').val(firstPrice);
+                $('#editAllQuantity').val(firstQuantity);
+                $('#modalEditPriceQuantity').modal('show');
+            });
+
+            // Xử lý khi bấm Áp dụng trong modal
+            $('#btnApplyEditAll').off('click').on('click', function() {
+                let price = $('#editAllPrice').val().replace(/\./g, '');
+                let quantity = $('#editAllQuantity').val();
+                
+                if (!price || !quantity) {
+                    alert('Vui lòng nhập đầy đủ giá và số lượng!');
+                    return;
+                }
+
+                // Format giá trước khi hiển thị
+                let formattedPrice = parseInt(price).toLocaleString('vi-VN');
+                $('.gia-ban').val(formattedPrice);
+                $('.so-luong').val(quantity);
+                $('#modalEditPriceQuantity').modal('hide');
             });
 
             // Update selected
             $('#updateSelected').on('click', function() {
                 var selectedRows = $('.row-check:checked').closest('tr');
+                if (selectedRows.length === 0) {
+                    alert('Vui lòng chọn ít nhất một sản phẩm!');
+                    return;
+                }
+
                 var updates = [];
                 selectedRows.each(function() {
                     var row = $(this);
-                    updates.push({
-                        id: row.data('id'),
-                        soLuong: row.find('.so-luong').val(),
-                        giaBan: row.find('.gia-ban').val().replace(/\./g, ''),
-                        trangThai: row.find('.badge').text().trim() === "Đang kinh doanh"
-                    });
+                    var soLuongInput = row.find('.so-luong').val();
+                    var giaBanInput = row.find('.gia-ban').val();
+
+                    // Xử lý giá trị số lượng
+                    var soLuong = parseInt(soLuongInput) || 0;
+
+                    // Xử lý giá trị giá bán - loại bỏ dấu phẩy và chấm
+                    var giaBan = parseInt(giaBanInput.replace(/[.,]/g, '')) || 0;
+
+                    if (soLuong >= 0 && giaBan > 0) {
+                        updates.push({
+                            id: row.data('id'),
+                            soLuong: soLuong,
+                            gia: giaBan
+                        });
+                    }
                 });
+
                 if (updates.length > 0) {
                     $.ajax({
                         url: '/SanPham/UpdateSPCT',
@@ -477,20 +545,27 @@
                                 alert('Cập nhật thành công!');
                                 location.reload();
                             } else {
-                                alert('Có lỗi xảy ra: ' + response.message);
+                                alert('Có lỗi xảy ra: ' + (response.message || 'Không xác định'));
                             }
                         },
-                        error: function() {
-                            alert('Có lỗi xảy ra khi gửi yêu cầu!');
+                        error: function(xhr) {
+                            alert('Có lỗi xảy ra khi gửi yêu cầu! Chi tiết: ' + xhr.responseText);
                         }
                     });
-                } else {
-                    alert('Vui lòng chọn ít nhất một sản phẩm!');
                 }
             });
 
-            // Format giá bán khi nhập
-            $(document).on('input', '.gia-ban', function() {
+            // Thêm xử lý format giá tiền khi nhập
+            $('.gia-ban').on('input', function() {
+                let value = $(this).val().replace(/[^0-9]/g, '');
+                if (value) {
+                    value = parseInt(value).toLocaleString('vi-VN');
+                    $(this).val(value);
+                }
+            });
+
+            // Format giá bán khi nhập trong modal
+            $('#editAllPrice').on('input', function() {
                 let value = $(this).val().replace(/\D/g, '');
                 if (value) {
                     value = parseInt(value, 10).toLocaleString('vi-VN');
@@ -517,7 +592,7 @@
                 var deGiays = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.DeGiays));
                 var kichThuocs = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.KichThuocs));
                 var mauSacs = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.MauSacs));
-                // Convert object to array for easier loop
+                // Chuyển đổi đối tượng thành mảng để vòng lặp dễ dàng hơn
                 function objToArr(obj) {
                     return Object.keys(obj).map(function(key) {
                         return { id: key, name: obj[key] };
@@ -555,9 +630,10 @@
                 var html = '';
                 (images || []).forEach(function(img, idx) {
                     html += `
-                        <div class="position-relative" style="display:inline-block;">
-                            <img src="${img.url}" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid #ccc;">
-                            <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 btn-delete-image" data-idx="${idx}" style="padding:2px 6px;">&times;</button>
+                        <div>
+                            <img src="${img.urlHinhAnh}" style="width:180px;height:180px;object-fit:contain;" />
+                            ${img.isDefault ? '<span class="badge bg-success">Mặc định</span>' : ''}
+                            <button ... data-id="${img.id}">Xóa</button>
                         </div>
                     `;
                 });
@@ -572,45 +648,95 @@
             $('#uploadImageInput').on('change', function() {
                 var files = this.files;
                 if (!files.length) return;
+
+                // Kiểm tra định dạng file
+                var allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                for (let i = 0; i < files.length; i++) {
+                    let ext = files[i].name.split('.').pop().toLowerCase();
+                    if (!allowedExtensions.includes(ext)) {
+                        alert('Chỉ cho phép upload các file ảnh: jpg, jpeg, png, gif, webp!');
+                        return;
+                    }
+                }
+
                 var formData = new FormData();
                 for (let i = 0; i < files.length; i++) {
                     formData.append('files', files[i]);
                 }
-                // Gửi lên backend (ví dụ: /SanPham/UploadImage?spctId=...)
-                // Lấy id SPCT hiện tại (nên lưu lại khi mở modal)
+
                 var spctId = $('#spctTable tr.table-info').data('id');
+                formData.append('sanPhamChiTietId', spctId);
+
                 $.ajax({
-                    url: '/SanPham/UploadImage?spctId=' + spctId,
+                    url: '/SanPham/UploadImages',
                     type: 'POST',
                     data: formData,
                     processData: false,
                     contentType: false,
-                    success: function(res) {
-                        if(res.success) {
-                            // Sau khi upload thành công, reload lại danh sách ảnh
-                            renderProductImages(res.images);
+                    success: function(response) {
+                        if(response.success) {
+                            // Sau khi upload thành công, lấy lại danh sách ảnh mới
+                            $.get('/SanPham/GetSPCTDetail', { id: spctId }, function(data) {
+                                renderProductImages(data.images);
+                            });
                         } else {
-                            alert('Upload ảnh thất bại!');
+                            alert('Upload ảnh thất bại: ' + (response.message || 'Không xác định'));
                         }
                     },
-                    error: function() {
-                        alert('Có lỗi khi upload ảnh!');
+                    error: function(xhr) {
+                        alert('Có lỗi khi upload ảnh: ' + xhr.responseText);
                     }
                 });
             });
 
             // Xóa ảnh
             $(document).on('click', '.btn-delete-image', function() {
-                var idx = $(this).data('idx');
-                // Lấy id ảnh hoặc url ảnh
-                var imgId = $(this).data('imgid');
-                // Gửi AJAX xóa ảnh
-                $.post('/SanPham/DeleteImage', { id: imgId }, function(res) {
-                    if(res.success) {
-                        // Reload lại danh sách ảnh
-                        renderProductImages(res.images);
-                    } else {
-                        alert('Xóa ảnh thất bại!');
+                if (!confirm('Bạn có chắc muốn xóa ảnh này?')) return;
+
+                var imageId = $(this).data('id');
+                var spctId = $('#spctTable tr.table-info').data('id');
+
+                $.ajax({
+                    url: '/SanPham/DeleteImage',
+                    type: 'DELETE',
+                    data: { imageId: imageId, sanPhamChiTietId: spctId },
+                    success: function(response) {
+                        if(response.success) {
+                            // Sau khi xóa thành công, lấy lại danh sách ảnh mới
+                            $.get('/SanPham/GetSPCTDetail', { id: spctId }, function(data) {
+                                renderProductImages(data.images);
+                            });
+                        } else {
+                            alert('Xóa ảnh thất bại: ' + (response.message || 'Không xác định'));
+                        }
+                    },
+                    error: function(xhr) {
+                        alert('Có lỗi khi xóa ảnh: ' + xhr.responseText);
+                    }
+                });
+            });
+
+            // Set ảnh mặc định
+            $(document).on('click', '.btn-set-default', function() {
+                var imageId = $(this).data('id');
+                var spctId = $('#spctTable tr.table-info').data('id');
+
+                $.ajax({
+                    url: '/SanPham/SetDefaultImage',
+                    type: 'PUT',
+                    data: { imageId: imageId, spctId: spctId },
+                    success: function(response) {
+                        if(response.success) {
+                            // Sau khi set thành công, lấy lại danh sách ảnh mới
+                            $.get('/SanPham/GetSPCTDetail', { id: spctId }, function(data) {
+                                renderProductImages(data.images);
+                            });
+                        } else {
+                            alert('Set ảnh mặc định thất bại: ' + (response.message || 'Không xác định'));
+                        }
+                    },
+                    error: function(xhr) {
+                        alert('Có lỗi khi set ảnh mặc định: ' + xhr.responseText);
                     }
                 });
             });
@@ -682,7 +808,7 @@
                 });
             }
 
-            // Handle save new color
+            // Xử lý lưu màu mới
             $('#saveNewColor').on('click', function() {
                 const colorName = $('#addColorName').val();
                 const colorHex = $('#addColorHex').val();
@@ -698,7 +824,7 @@
                 }, function(response) {
                     if (response.success) {
                         $('#modalAddMauSac').modal('hide');
-                        // Refresh the color dropdown
+                        // Làm mới danh sách thả xuống màu sắc
                         location.reload();
                     } else {
                         alert('Có lỗi xảy ra: ' + response.message);
@@ -706,7 +832,7 @@
                 });
             });
 
-            // Handle form submissions for other modals
+            // Xử lý việc gửi biểu mẫu cho các phương thức khác
             $(document).on('submit', '#formAddThuongHieu', function(e) {
                 e.preventDefault();
                 const formData = $(this).serialize();
@@ -792,6 +918,23 @@
                     }
                 });
             });
+        });
+
+        // Chỉ cho nhập số và tự động format giá bán
+        $(document).on('input', '.gia-ban, .price-input', function() {
+            let value = $(this).val().replace(/[^0-9]/g, ''); // Loại bỏ ký tự không phải số
+            if (value) {
+                value = value.replace(/^0+/, ''); // Loại bỏ số 0 ở đầu
+                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Thêm dấu chấm hàng nghìn
+            }
+            $(this).val(value);
+        });
+
+        // Chỉ cho nhập số lượng là số nguyên dương
+        $(document).on('input', '.so-luong, .quantity-input', function() {
+            let value = $(this).val().replace(/[^0-9]/g, '');
+            value = value.replace(/^0+/, ''); // Loại bỏ số 0 ở đầu
+            $(this).val(value);
         });
     </script>
 }

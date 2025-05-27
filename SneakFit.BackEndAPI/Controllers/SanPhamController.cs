@@ -75,14 +75,13 @@ namespace SneakFit.BackEndAPI.Controllers
 
             return Ok(new ApiSuccessResult<bool>(true));
         }
-        [HttpPut("{id}/spct")]
-        public async Task<IActionResult> UpdateSPCT(Guid id, [FromBody] List<SanPhamChiTietCapNhat> updates)
+        [HttpPut("UpdateSPCT")]
+        public async Task<IActionResult> UpdateSPCT([FromBody] List<SanPhamChiTietCapNhat> updates)
         {
-            var result = await _sanPhamService.UpdateSPCT(id, updates);
+            var result = await _sanPhamService.UpdateSPCT(updates);
             if (!result)
-                return BadRequest(new ApiErrorResult<bool>($"Không tìm thấy sản phẩm có ID: {id}"));
-
-            return Ok(new ApiSuccessResult<bool>(true));
+                return BadRequest(new { success = false, message = "Cập nhật thất bại" });
+            return Ok(new { success = true });
         }
 
         [HttpPost("GetSPCTByFilter")]
@@ -136,6 +135,38 @@ namespace SneakFit.BackEndAPI.Controllers
             if (result)
                 return Ok(new { success = true });
             return BadRequest(new { success = false, message = "Cập nhật thất bại" });
+        }
+
+        [HttpPost("UploadImages")]
+        public async Task<IActionResult> UploadImages([FromForm] UploadImageRequest request)
+        {
+            if (request.Files == null || !request.Files.Any())
+                return BadRequest(new { success = false, message = "Không có file nào được gửi lên" });
+
+            var result = await _sanPhamService.UploadImages(request);
+            if (result)
+                return Ok(new { success = true });
+            return BadRequest(new { success = false, message = "Upload ảnh thất bại" });
+        }
+
+        [HttpDelete("DeleteImage/{imageId}")]
+        public async Task<IActionResult> DeleteImage(Guid imageId, [FromQuery] Guid sanPhamChiTietId)
+        {
+            var request = new DeleteImageRequest { ImageId = imageId, SanPhamChiTietId = sanPhamChiTietId };
+            var result = await _sanPhamService.DeleteImage(request);
+            if (result)
+                return Ok(new { success = true });
+            return BadRequest(new { success = false, message = "Xóa ảnh thất bại" });
+        }
+
+        [HttpPut("SetDefaultImage/{imageId}")]
+        public async Task<IActionResult> SetDefaultImage(Guid imageId, [FromQuery] Guid sanPhamChiTietId)
+        {
+            var request = new SetDefaultImageRequest { ImageId = imageId, SanPhamChiTietId = sanPhamChiTietId };
+            var result = await _sanPhamService.SetDefaultImage(request);
+            if (result)
+                return Ok(new { success = true });
+            return BadRequest(new { success = false, message = "Set ảnh mặc định thất bại" });
         }
     }
 }

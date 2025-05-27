@@ -471,7 +471,7 @@
                 Swal.fire('Lỗi', 'Vui lòng chọn đầy đủ thông tin sản phẩm chi tiết', 'error');
                 return;
             }
-            if (selectedColors.length === 0 && selectedSizes.length === 0) {
+            if (selectedColors.length === 0 || selectedSizes.length === 0) {
                 Swal.fire('Lỗi', 'Vui lòng chọn ít nhất một màu sắc và một kích thước', 'error');
                 return;
             }
@@ -714,6 +714,23 @@
                 $(this).val(val.replace(/\./g, ''));
             });
         });
+        // Chỉ cho nhập số và tự động format giá bán
+        $(document).on('input', '.gia-ban, .price-input', function() {
+            let value = $(this).val().replace(/[^0-9]/g, ''); // Loại bỏ ký tự không phải số
+            if (value) {
+                value = value.replace(/^0+/, ''); // Loại bỏ số 0 ở đầu
+                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Thêm dấu chấm hàng nghìn
+            }
+            $(this).val(value);
+        });
+
+        // Chỉ cho nhập số lượng là số nguyên dương
+        $(document).on('input', '.so-luong, .quantity-input', function() {
+            let value = $(this).val().replace(/[^0-9]/g, '');
+            value = value.replace(/^0+/, ''); // Loại bỏ số 0 ở đầu
+            value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            $(this).val(value);
+        });
     </script>
 }
 
@@ -899,11 +916,11 @@
             <div class="modal-body">
                 <div class="mb-3">
                     <label class="form-label">Giá bán (VNĐ)</label>
-                    <input type="text" id="editAllPrice" class="form-control" placeholder="Nhập giá, ví dụ: 1.000.000" />
+                    <input type="text" id="editAllPrice" class="form-control gia-ban" placeholder="Nhập giá, ví dụ: 1.000.000" />
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Số lượng</label>
-                    <input type="number" id="editAllQuantity" class="form-control" min="1" placeholder="Nhập số lượng" />
+                    <input type="number" id="editAllQuantity" class="form-control so-luong" min="10" placeholder="Nhập số lượng" />
                 </div>
             </div>
             <div class="modal-footer">

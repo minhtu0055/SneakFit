@@ -11,6 +11,5 @@ namespace SneakFit.ViewModels.Catalog.SanPham
         public Guid Id { get; set; }
         public int SoLuong { get; set; }
         public decimal Gia { get; set; }
-        public bool TrangThai { get; set; }
     }
 }

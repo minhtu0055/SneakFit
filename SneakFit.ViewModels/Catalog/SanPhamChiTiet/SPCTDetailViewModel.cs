@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Http;
+
 public class SPCTDetailViewModel
 {
     public Guid Id { get; set; }
@@ -15,11 +17,30 @@ public class SPCTDetailViewModel
     public int? SoLuongHangTra { get; set; }
     public decimal GiaBan { get; set; }
     public string QRCodeUrl { get; set; }
-    public List<ImageViewModel> Images { get; set; }
+    public List<ImageViewModel>? Images { get; set; }
 }
 
 public class ImageViewModel
 {
     public Guid Id { get; set; }
-    public string Url { get; set; }
+    public string UrlHinhAnh { get; set; }
+    public bool IsDefault { get; set; }
+}
+
+public class UploadImageRequest
+{
+    public Guid SanPhamChiTietId { get; set; }
+    public List<IFormFile> Files { get; set; }
+}
+
+public class DeleteImageRequest
+{
+    public Guid ImageId { get; set; }
+    public Guid SanPhamChiTietId { get; set; }
+}
+
+public class SetDefaultImageRequest
+{
+    public Guid ImageId { get; set; }
+    public Guid SanPhamChiTietId { get; set; }
 }
