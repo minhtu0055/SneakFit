@@ -4,8 +4,6 @@ using System.Net.Http.Headers;
 using System.Net.Http;
 using System.Text;
 using SneakFit.ViewModels.Catalog.DeGiay;
-using SneakFit.ViewModels.Catalog.MauSac;
-using SneakFit.ViewModels.Catalog.SanPham;
 
 namespace SneakFit.ApiIntegration.Services
 {
@@ -76,12 +74,10 @@ namespace SneakFit.ApiIntegration.Services
 
             var json = JsonConvert.SerializeObject(request);
             var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
-
             var response = await client.PutAsync($"/api/degiay/edit/{request.Id}", httpContent);
             var result = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)
                 return JsonConvert.DeserializeObject<DeGiayViewModels>(result);
-
             throw new Exception("Không thể cập nhật đế giày");
         }
         public async Task<List<DeGiayViewModels>> GetAll()
@@ -89,11 +85,11 @@ namespace SneakFit.ApiIntegration.Services
             var client = _httpClientFactory.CreateClient();
             client.BaseAddress = new Uri(_configuration["BaseAddress"]);
             var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
             var response = await client.GetAsync($"/api/degiay/GetAll");
             var body = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)
             {
-                // Nếu API trả về array
                 var result = JsonConvert.DeserializeObject<List<DeGiayViewModels>>(body);
                 return result ?? new List<DeGiayViewModels>();
             }

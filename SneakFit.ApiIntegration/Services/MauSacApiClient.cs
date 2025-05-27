@@ -1,12 +1,9 @@
 ﻿using Newtonsoft.Json;
-using SneakFit.ViewModels.Catalog.ChatLieu;
 using SneakFit.ViewModels.Common;
 using System.Net.Http.Headers;
 using System.Net.Http;
 using System.Text;
-using SneakFit.ViewModels.System.User;
 using SneakFit.ViewModels.Catalog.MauSac;
-using SneakFit.ViewModels.Catalog.DeGiay;
 
 namespace SneakFit.ApiIntegration.Services
 {
@@ -85,13 +82,14 @@ namespace SneakFit.ApiIntegration.Services
 
             throw new Exception("Không thể cập nhật màu sắc");
         }
-
         public async Task<List<MauSacViewModels>> GetAll()
         {
             var client = _httpClientFactory.CreateClient();
             client.BaseAddress = new Uri(_configuration["BaseAddress"]);
             var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
-            var response = await client.GetAsync($"/api/mausac/GetAll");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var response = await client.GetAsync($"/api/mausac/getall");
             var body = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)
             {

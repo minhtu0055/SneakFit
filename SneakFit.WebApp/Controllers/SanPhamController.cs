@@ -17,7 +17,7 @@ namespace SneakFit.Admin.Controllers
         private readonly IThuongHieuApiClient _thuongHieuApiClient;
         private readonly IDeGiayApiClient _deGiayApiClient;
 
-        public SanPhamController(ISanPhamApiClient sanPhamApiClient, 
+        public SanPhamController(ISanPhamApiClient sanPhamApiClient,
                                 IDanhMucApiClient danhMucApiClient,
                                 ISpctApiClient spctApiClient,
                                 IKichThuocApiClient kichThuocApiClient,

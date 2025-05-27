@@ -1,6 +1,4 @@
 ﻿using Newtonsoft.Json;
-using SneakFit.ViewModels.Catalog.KichThuoc;
-using SneakFit.ViewModels.Catalog.SanPhamChiTiet;
 using SneakFit.ViewModels.Catalog.ThuongHieu;
 using SneakFit.ViewModels.Common;
 using System.Net.Http.Headers;
@@ -86,6 +84,7 @@ namespace SneakFit.ApiIntegration.Services.ThuongHieu
             var client = _httpClientFactory.CreateClient();
             client.BaseAddress = new Uri(_configuration["BaseAddress"]);
             var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
             var response = await client.GetAsync($"/api/thuonghieu/GetAll");
             var body = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)
