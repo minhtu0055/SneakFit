@@ -151,22 +151,6 @@ namespace SneakFit.ApiIntegration.Services
             return false;
         }
 
-        public async Task<List<SPCTViewModels>> GetSPCTByFilter(SPCTFilterRequest request)
-        {
-            var client = _httpClientFactory.CreateClient();
-            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
-            var json = JsonConvert.SerializeObject(request);
-            var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await client.PostAsync($"/api/SanPham/GetSPCTByFilter", httpContent);
-            var body = await response.Content.ReadAsStringAsync();
-            if (response.IsSuccessStatusCode)
-            {
-                var result = JsonConvert.DeserializeObject<List<SPCTViewModels>>(body);
-                return result ?? new List<SPCTViewModels>();
-            }
-            throw new Exception("Không thể lấy danh sách SPCT theo filter");
-        }
-
         public async Task<List<SPCTViewModels>> GetSPCTByProductName(string productName)
         {
             var client = _httpClientFactory.CreateClient();
@@ -241,16 +225,5 @@ namespace SneakFit.ApiIntegration.Services
             return response.IsSuccessStatusCode;
         }
 
-        public async Task<bool> SetDefaultImage(Guid imageId, Guid spctId)
-        {
-            var client = _httpClientFactory.CreateClient();
-            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
-            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
-            if (!string.IsNullOrEmpty(sessions))
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
-
-            var response = await client.PutAsync($"/api/SanPham/SetDefaultImage/{imageId}?spctId={spctId}", null);
-            return response.IsSuccessStatusCode;
-        }
     }
 }

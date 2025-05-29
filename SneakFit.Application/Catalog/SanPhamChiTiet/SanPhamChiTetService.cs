@@ -12,16 +12,21 @@ using System.IO;
 using SneakFit.Data.Entities;
 using SneakFit.ViewModels.Common;
 using SneakFit.Data.Enums;
+using Microsoft.Extensions.Configuration;
 
-namespace SneakFit.Application.Catalog.SanPhamChiTietChiTiet
+namespace SneakFit.Application.Catalog.SanPhamChiTiet
 {
-    public class SanPhamChiTietChiTetService : ISanPhamChiTetService
+    public class SanPhamChiTietService : ISanPhamChiTetService
     {
         private readonly SneakFitDbContext _context;
+        private readonly IConfiguration _configuration;
+        private readonly string _baseAddress;
 
-        public SanPhamChiTietChiTetService(SneakFitDbContext context)
+        public SanPhamChiTietService(SneakFitDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
+            _baseAddress = _configuration["BaseAddress"]?.TrimEnd('/') ?? "";
         }
 
         public async Task<List<SPCTViewModels>> GetAll()
@@ -194,7 +199,7 @@ namespace SneakFit.Application.Catalog.SanPhamChiTietChiTiet
                 DeGiayId = request.DeGiayId,
                 Gia = request.Gia,
                 SoLuong = request.SoLuong,
-                TrangThai = true,
+                TrangThai = request.TrangThai,
                 NgayTao = DateTime.Now,
                 HinhAnhSanPham = new List<HinhAnhSanPham>()
             };
@@ -202,6 +207,11 @@ namespace SneakFit.Application.Catalog.SanPhamChiTietChiTiet
 
             await _context.SaveChangesAsync();
             var viewModel = await GetById(newSanPhamChiTiet.ID);
+            // Đảm bảo trả về URL ảnh đầy đủ
+            if (viewModel.Images != null && viewModel.Images.Count > 0)
+            {
+                viewModel.Images = viewModel.Images.Select(img => img.StartsWith("http") ? img : $"{_baseAddress}/images/products/{img}").ToList();
+            }
             return new ApiResult<SPCTViewModels> { IsSuccessed = true, ResultObj = viewModel };
         }
 
@@ -251,12 +261,12 @@ namespace SneakFit.Application.Catalog.SanPhamChiTietChiTiet
                 {
                     if (image.Length > 0)
                     {
-                        var fileName = await SaveFile(image);
+                        var url = await SaveFile(image);
                         var hinhAnhSanPham = new Data.Entities.HinhAnhSanPham()
                         {
                             Id = Guid.NewGuid(),
                             SanPhamChiTietId = entity.ID,
-                            UrlHinhAnh = fileName
+                            UrlHinhAnh = url
                         };
                         _context.HinhAnhSanPham.Add(hinhAnhSanPham);
                     }
@@ -264,7 +274,12 @@ namespace SneakFit.Application.Catalog.SanPhamChiTietChiTiet
             }
 
             await _context.SaveChangesAsync();
-            return await GetById(entity.ID);
+            var updated = await GetById(entity.ID);
+            if (updated.Images != null && updated.Images.Count > 0)
+            {
+                updated.Images = updated.Images.Select(img => img.StartsWith("http") ? img : $"{_baseAddress}/images/products/{img}").ToList();
+            }
+            return updated;
         }   
 
         public async Task<bool> UpdateGia(Guid id, decimal gia)
@@ -289,7 +304,7 @@ namespace SneakFit.Application.Catalog.SanPhamChiTietChiTiet
         {
             var originalFileName = file.FileName;
             var fileName = $"{Guid.NewGuid()}{Path.GetExtension(originalFileName)}";
-            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/products");
             
             if (!Directory.Exists(uploadsFolder))
             {
@@ -302,12 +317,13 @@ namespace SneakFit.Application.Catalog.SanPhamChiTietChiTiet
                 await file.CopyToAsync(stream);
             }
 
-            return fileName;
+            // Trả về URL đầy đủ
+            return $"{_baseAddress}/images/products/{fileName}";
         }
 
         private void DeleteFile(string fileName)
         {
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads", fileName);
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/products", fileName);
             if (File.Exists(filePath))
             {
                 File.Delete(filePath);
@@ -318,12 +334,12 @@ namespace SneakFit.Application.Catalog.SanPhamChiTietChiTiet
 
         public async Task<int> AddImage(Guid id, IFormFile image)
         {
-            var fileName = await SaveFile(image);
+            var url = await SaveFile(image);
             var hinhAnhSanPham = new Data.Entities.HinhAnhSanPham()
             {
                 Id = Guid.NewGuid(),
                 SanPhamChiTietId = id,
-                UrlHinhAnh = fileName
+                UrlHinhAnh = url
             };
 
             _context.HinhAnhSanPham.Add(hinhAnhSanPham);
@@ -358,10 +374,11 @@ namespace SneakFit.Application.Catalog.SanPhamChiTietChiTiet
 
         public async Task<List<string>> GetListImages(Guid id)
         {
-            return await _context.HinhAnhSanPham
+            var images = await _context.HinhAnhSanPham
                 .Where(x => x.SanPhamChiTietId == id)
                 .Select(i => i.UrlHinhAnh)
                 .ToListAsync();
+            return images.Select(img => img.StartsWith("http") ? img : $"{_baseAddress}/images/products/{img}").ToList();
         }
 
         public async Task<int> CreateMultiple(ThemNhieuSPCTRequest request)

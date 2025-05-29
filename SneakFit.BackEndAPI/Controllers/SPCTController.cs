@@ -65,13 +65,20 @@ namespace SneakFit.BackEndAPI.Controllers
                         var imageResult = await _sanPhamChiTetService.AddImage(result.ResultObj.Id, image);
                         if (imageResult == 0)
                         {
-                            // Lỗi đăng nhập nhưng tiếp tục với các hình ảnh khác
                             _logger.LogWarning($"Không thêm được hình ảnh cho sản phẩm {result.ResultObj.Id}");
                         }
                     }
                 }
             }
 
+            // Đảm bảo trả về URL ảnh đầy đủ
+            if (result.ResultObj.Images != null && result.ResultObj.Images.Count > 0)
+            {
+                var baseAddress = _sanPhamChiTetService is SneakFit.Application.Catalog.SanPhamChiTiet.SanPhamChiTietService s
+                    ? s.GetType().GetProperty("_baseAddress", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.GetValue(s)?.ToString()
+                    : null;
+                result.ResultObj.Images = result.ResultObj.Images.Select(img => img.StartsWith("http") ? img : $"{baseAddress}/images/products/{img}").ToList();
+            }
             return Ok(result);
         }
 

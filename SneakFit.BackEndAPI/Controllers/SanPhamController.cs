@@ -84,25 +84,6 @@ namespace SneakFit.BackEndAPI.Controllers
             return Ok(new { success = true });
         }
 
-        [HttpPost("GetSPCTByFilter")]
-        public async Task<IActionResult> GetSPCTByFilter([FromBody] SPCTFilterRequest request)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(new { message = "Invalid request model", errors = ModelState });
-            }
-
-            try
-            {
-                var result = await _sanPhamService.GetSPCTByFilter(request);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
-
         [HttpGet("GetSPCTByProductName/{productName}")]
         public async Task<IActionResult> GetSPCTByProductName(string productName)
         {
@@ -157,16 +138,6 @@ namespace SneakFit.BackEndAPI.Controllers
             if (result)
                 return Ok(new { success = true });
             return BadRequest(new { success = false, message = "Xóa ảnh thất bại" });
-        }
-
-        [HttpPut("SetDefaultImage/{imageId}")]
-        public async Task<IActionResult> SetDefaultImage(Guid imageId, [FromQuery] Guid sanPhamChiTietId)
-        {
-            var request = new SetDefaultImageRequest { ImageId = imageId, SanPhamChiTietId = sanPhamChiTietId };
-            var result = await _sanPhamService.SetDefaultImage(request);
-            if (result)
-                return Ok(new { success = true });
-            return BadRequest(new { success = false, message = "Set ảnh mặc định thất bại" });
         }
     }
 }

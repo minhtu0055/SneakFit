@@ -178,7 +178,7 @@ namespace SneakFit.Admin.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> EditSPCT(Guid id)
+        public async Task<IActionResult> EditSPCT(Guid id) 
         {
             var sanPham = await _sanPhamApiClient.GetById(id);
             if (sanPham == null) return NotFound();
@@ -255,36 +255,6 @@ namespace SneakFit.Admin.Controllers
             return Json(new { success = false, message = "Cập nhật thất bại" });
         }
 
-        [HttpGet("GetChatlieuForm")]
-        public IActionResult GetChatlieuForm()
-        {
-            return PartialView("_AddChatLieuPartial");
-        }
-
-        [HttpGet("GetThuonghieuForm")]
-        public IActionResult GetThuonghieuForm()
-        {
-            return PartialView("_AddThuongHieuPartial");
-        }
-
-        [HttpGet("GetDeGiayForm")]
-        public IActionResult GetDeGiayForm()
-        {
-            return PartialView("_AddDeGiayPartial");
-        }
-
-        [HttpGet("GetKichthuocForm")]
-        public IActionResult GetKichthuocForm()
-        {
-            return PartialView("_AddKichThuocPartial");
-        }
-
-        [HttpGet("GetMausacForm")]
-        public IActionResult GetMausacForm()
-        {
-            return PartialView("_AddMauSacPartial");
-        }
-
         [HttpPost]
         public async Task<IActionResult> UploadImages(Guid sanPhamChiTietId, List<IFormFile> files)
         {
@@ -309,24 +279,5 @@ namespace SneakFit.Admin.Controllers
             return Json(new { success = false, message = "Xóa ảnh thất bại" });
         }
 
-        [HttpPut]
-        public async Task<IActionResult> SetDefaultImage(Guid imageId, Guid sanPhamChiTietId)
-        {
-            try
-            {
-                var result = await _sanPhamApiClient.SetDefaultImage(imageId, sanPhamChiTietId);
-                if (result)
-                {
-                    // Lấy lại thông tin chi tiết SPCT để cập nhật danh sách ảnh
-                    var spctDetail = await _sanPhamApiClient.GetSPCTDetail(sanPhamChiTietId);
-                    return Json(new { success = true, images = spctDetail.Images });
-                }
-                return Json(new { success = false, message = "Set ảnh mặc định thất bại" });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
-        }
     }
 }

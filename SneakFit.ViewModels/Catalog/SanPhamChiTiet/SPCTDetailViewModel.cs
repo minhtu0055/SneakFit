@@ -10,7 +10,6 @@ public class SPCTDetailViewModel
     public Guid ChatLieuId { get; set; }
     public Guid DeGiayId { get; set; }
     public string GioiTinh { get; set; }
-    public Guid TheLoaiId { get; set; }
     public Guid MauSacId { get; set; }
     public Guid KichThuocId { get; set; }
     public int SoLuong { get; set; }
@@ -34,12 +33,6 @@ public class UploadImageRequest
 }
 
 public class DeleteImageRequest
-{
-    public Guid ImageId { get; set; }
-    public Guid SanPhamChiTietId { get; set; }
-}
-
-public class SetDefaultImageRequest
 {
     public Guid ImageId { get; set; }
     public Guid SanPhamChiTietId { get; set; }

@@ -15,7 +15,6 @@ namespace SneakFit.ApiIntegration.Services
         Task<List<SanPhamViewModels>> GetAll();
         Task<bool> UpdateTrangThai(Guid id, bool trangThai);
         Task<bool> UpdateSPCT(List<SanPhamChiTietCapNhat> updates);
-        Task<List<SPCTViewModels>> GetSPCTByFilter(SPCTFilterRequest request);
         Task<List<SPCTViewModels>> GetSPCTByProductName(string productName);
         Task<SPCTDetailViewModel> GetSPCTDetail(Guid spctId);
         Task<bool> UpdateSPCTDetail(SuaSPCTDetailViewModel model);
@@ -23,6 +22,5 @@ namespace SneakFit.ApiIntegration.Services
         // Thêm các phương thức xử lý ảnh
         Task<bool> UploadImages(Guid sanPhamChiTietId, List<IFormFile> files);
         Task<bool> DeleteImage(Guid imageId, Guid sanPhamChiTietId);
-        Task<bool> SetDefaultImage(Guid imageId, Guid sanPhamChiTietId);
     }
 }

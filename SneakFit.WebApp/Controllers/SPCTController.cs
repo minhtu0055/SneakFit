@@ -11,6 +11,7 @@ using SneakFit.ViewModels.Catalog.SanPham;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
 
 namespace SneakFit.Admin.Controllers
 {
@@ -146,10 +147,9 @@ namespace SneakFit.Admin.Controllers
             if (!ModelState.IsValid)
             {
                 await LoadCombobox();
-                // Hiển thị lỗi từng trường cho người dùng
                 return View(request);
             }
-
+            // Gọi qua ApiClient, không xử lý ảnh ở đây
             var result = await _spctApiClient.Create(request);
             if (result.IsSuccessed)
             {
@@ -158,7 +158,6 @@ namespace SneakFit.Admin.Controllers
             }
             else
             {
-                // Hiển thị rõ message lỗi từ backend
                 ModelState.AddModelError("", result.Message ?? "Thêm sản phẩm chi tiết thất bại");
                 await LoadCombobox();
                 return View(request);
@@ -306,6 +305,21 @@ namespace SneakFit.Admin.Controllers
                 _logger.LogError(ex, "Lỗi khi cập nhật số lượng");
                 return Json(new { success = false, message = "Có lỗi xảy ra khi cập nhật số lượng" });
             }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UploadImages(Guid sanPhamChiTietId, List<IFormFile> files)
+        {
+            if (files == null || files.Count == 0)
+                return Json(new { success = false, message = "Không có file nào được upload" });
+
+            int successCount = 0;
+            foreach (var file in files)
+            {
+                var result = await _spctApiClient.AddImage(sanPhamChiTietId, file);
+                if (result > 0) successCount++;
+            }
+            return Json(new { success = successCount == files.Count, uploaded = successCount });
         }
 
     }

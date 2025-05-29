@@ -79,6 +79,8 @@ namespace SneakFit.ApiIntegration.Services
             form.Add(new StringContent(request.ThuongHieuId.ToString()), "ThuongHieuId");
             form.Add(new StringContent(request.Gia.ToString()), "Gia");
             form.Add(new StringContent(request.SoLuong.ToString()), "SoLuong");
+            form.Add(new StringContent(request.DanhMucId.ToString()), "DanhMucId");
+            form.Add(new StringContent(request.TrangThai.ToString()), "TrangThai");
 
             // Thêm nhiều ảnh vào form nếu có
             if (request.Images != null)
@@ -95,13 +97,14 @@ namespace SneakFit.ApiIntegration.Services
             Console.WriteLine(body);
             if (response.IsSuccessStatusCode)
             {
-                var spct = JsonConvert.DeserializeObject<SPCTViewModels>(body);
-                return new ApiResult<SPCTViewModels>
+                var apiResult = JsonConvert.DeserializeObject<ApiResult<SPCTViewModels>>(body);
+                // Đảm bảo trả về URL ảnh đầy đủ
+                if (apiResult != null && apiResult.ResultObj != null && apiResult.ResultObj.Images != null && apiResult.ResultObj.Images.Count > 0)
                 {
-                    IsSuccessed = true,
-                    Message = "Thành công",
-                    ResultObj = spct
-                };
+                    var baseAddress = _configuration["BaseAddress"]?.TrimEnd('/') ?? "";
+                    apiResult.ResultObj.Images = apiResult.ResultObj.Images.Select(img => img.StartsWith("http") ? img : $"{baseAddress}/images/products/{img}").ToList();
+                }
+                return apiResult;
             }
             // Lấy message lỗi trả về từ API nếu có
             string errorMsg = "Không thể tạo sản phẩm chi tiết";
@@ -140,6 +143,7 @@ namespace SneakFit.ApiIntegration.Services
             form.Add(new StringContent(request.TrangThai.ToString()), "TrangThai");
             form.Add(new StringContent(request.SanPhamId.ToString()), "SanPhamId");
             form.Add(new StringContent(request.DanhMucId.ToString()), "DanhMucId");
+            form.Add(new StringContent(request.TrangThai.ToString()), "TrangThai");
 
             if (request.Images != null)
             {
