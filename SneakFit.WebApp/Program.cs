@@ -41,6 +41,7 @@ builder.Services.AddScoped<ISpctApiClient, SpctApiClient>();
 builder.Services.AddScoped<IThuongHieuApiClient, ThuongHieuApiClient>();
 builder.Services.AddScoped<IDanhMucApiClient, DanhMucApiClient>();
 builder.Services.AddScoped<IVoucherApiClient, VoucherApiClient>();
+builder.Services.AddScoped<IHoaDonApiClient, HoaDonApiClient>();
 
 
 
