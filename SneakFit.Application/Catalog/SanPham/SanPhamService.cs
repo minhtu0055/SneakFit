@@ -27,7 +27,10 @@ namespace SneakFit.Application.Catalog.SanPham
         }
         public async Task<PagedResult<SanPhamViewModels>> GetAllPaging(SanPhamPagingRequest request)
         {
-            var query = _context.SanPham.Include(x => x.DanhMuc).AsQueryable();
+            var query = _context.SanPham
+                .Include(x => x.DanhMuc)
+                .Include(x => x.SanPhamChiTiet)
+                .AsQueryable();
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 query = query.Where(x => x.TenSanPham.Contains(request.Keyword));
@@ -42,7 +45,8 @@ namespace SneakFit.Application.Catalog.SanPham
                     Mota = x.Mota,
                     DanhMucId = x.DanhMucId,
                     TenDanhMuc = x.DanhMuc.TenDanhMuc,
-                    TrangThai = x.TrangThai 
+                    TrangThai = x.TrangThai,
+                    TongSoSanPham = x.SanPhamChiTiet.Where(spct => spct.TrangThai).Sum(spct => spct.SoLuong)
                 }).ToListAsync();
             var PageResult = new PagedResult<SanPhamViewModels>()
             {

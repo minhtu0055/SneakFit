@@ -740,9 +740,19 @@
         $('#spctImageInput').on('change', function() {
             let files = Array.from(this.files);
             let rowIndex = $('#modalUploadImage').data('rowIndex');
+
+            // Kiểm tra số lượng ảnh hiện tại và mới
+            let currentFiles = spctImages[rowIndex] || [];
+            if (currentFiles.length + files.length > 3) {
+                Swal.fire('Lỗi', 'Chỉ được upload tối đa 3 ảnh cho mỗi sản phẩm chi tiết', 'error');
+                this.value = ''; // Reset input
+                return;
+            }
+
             if (!spctImages[rowIndex]) spctImages[rowIndex] = [];
             spctImages[rowIndex] = spctImages[rowIndex].concat(files);
             renderSpctImagePreview(rowIndex);
+            $('#spctImageCount').text(`${spctImages[rowIndex].length} file(s)`);
         });
 
         // Hiển thị preview ảnh
@@ -776,6 +786,13 @@
             let rowIndex = $('#modalUploadImage').data('rowIndex');
             let $row = $('#productDetailList tr').eq(rowIndex);
             let files = spctImages[rowIndex] || [];
+
+            // Kiểm tra số lượng ảnh trước khi lưu
+            if (files.length > 3) {
+                Swal.fire('Lỗi', 'Chỉ được upload tối đa 3 ảnh cho mỗi sản phẩm chi tiết', 'error');
+                return;
+            }
+
             let imgHtml = '';
             files.forEach((file, idx) => {
                 let url = URL.createObjectURL(file);

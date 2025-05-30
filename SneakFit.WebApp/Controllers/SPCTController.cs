@@ -323,6 +323,10 @@ namespace SneakFit.Admin.Controllers
             if (files == null || !files.Any())
                 return Json(new { success = false, message = "Không có file để upload" });
 
+            // Kiểm tra số lượng file
+            if (files.Count > 3)
+                return Json(new { success = false, message = "Chỉ được upload tối đa 3 ảnh" });
+
             int successCount = 0;
             var errors = new List<string>();
 

@@ -86,6 +86,7 @@
                 <tr>
                     <th>Tên Sản Phẩm</th>
                     <th>Danh Mục</th>
+                    <th>Tổng số SP</th>
                     <th>Mô Tả</th>
                     <th style="width: 310px">Trạng Thái</th>
                     <th></th>
@@ -97,6 +98,11 @@
                     <tr>
                         <td>@item.TenSanPham</td>
                         <td>@item.TenDanhMuc</td>
+                        <td>
+                            <span class="badge bg-label-primary" data-bs-toggle="tooltip" data-bs-placement="top" >
+                                @item.TongSoSanPham
+                            </span>
+                        </td>
                         <td>@item.Mota</td>
                         <td>
                             <div class="form-check form-switch">
@@ -132,6 +138,12 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
+            // Css cho tổng số sản phẩm chi tiết đang kinh doanh
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+
             // Thêm mới
             $('[data-bs-target="#taoSanPhamModal"]').click(function () {
                 $.ajax({
