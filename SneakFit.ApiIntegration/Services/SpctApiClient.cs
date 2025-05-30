@@ -231,6 +231,27 @@ namespace SneakFit.ApiIntegration.Services
             throw new Exception($"Không thể cập nhật trạng thái. Error: {result}");
         }
 
+        //public async Task<int> AddImage(Guid id, IFormFile file)
+        //{
+        //    var client = _httpClientFactory.CreateClient();
+        //    client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+        //    var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+        //    if (!string.IsNullOrEmpty(sessions))
+        //        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+        //    var form = new MultipartFormDataContent();
+        //    var streamContent = new StreamContent(file.OpenReadStream());
+        //    form.Add(streamContent, "file", file.FileName);
+
+        //    var response = await client.PostAsync($"/api/SPCT/{id}/images", form);
+        //    var body = await response.Content.ReadAsStringAsync();
+        //    if (response.IsSuccessStatusCode)
+        //    {
+        //        var result = JsonConvert.DeserializeObject<int>(body);
+        //        return result;
+        //    }
+        //    throw new Exception("Không thể thêm ảnh");
+        //}
         public async Task<int> AddImage(Guid id, IFormFile file)
         {
             var client = _httpClientFactory.CreateClient();
@@ -240,17 +261,26 @@ namespace SneakFit.ApiIntegration.Services
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
 
             var form = new MultipartFormDataContent();
+            form.Add(new StringContent(id.ToString()), "id");
             var streamContent = new StreamContent(file.OpenReadStream());
             form.Add(streamContent, "file", file.FileName);
 
-            var response = await client.PostAsync($"/api/SPCT/{id}/images", form);
+            var response = await client.PostAsync($"/api/spct/{id}/images", form);
             var body = await response.Content.ReadAsStringAsync();
+            Console.WriteLine("Phản hồi từ /api/spct/{id}/images: " + body);
+
             if (response.IsSuccessStatusCode)
             {
-                var result = JsonConvert.DeserializeObject<int>(body);
-                return result;
+                var apiResponse = JsonConvert.DeserializeObject<ApiSuccessResult<int>>(body);
+                if (apiResponse.IsSuccessed)
+                    return apiResponse.ResultObj;
+                throw new Exception("Không thể upload ảnh: Phản hồi không thành công");
             }
-            throw new Exception("Không thể thêm ảnh");
+            else
+            {
+                var errorResponse = JsonConvert.DeserializeObject<ApiErrorResult<int>>(body);
+                throw new Exception(errorResponse.Message ?? "Yêu cầu upload ảnh thất bại");
+            }
         }
 
         public async Task<int> RemoveImage(Guid imageId)

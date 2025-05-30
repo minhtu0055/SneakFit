@@ -171,7 +171,9 @@ namespace SneakFit.Admin.Controllers
                 return Json(new { success = false, message = "Dữ liệu không hợp lệ hoặc chưa chọn màu/kích thước" });
 
             var errorList = new List<string>();
+            var createdItems = new List<SPCTViewModels>(); // Lưu danh sách sản phẩm đã tạo
             int resultCount = 0;
+
             foreach (var item in items)
             {
                 var request = new ThemSPCT
@@ -183,23 +185,31 @@ namespace SneakFit.Admin.Controllers
                     MauSacId = item.MauSacId,
                     KichThuocId = item.KichThuocId,
                     SoLuong = item.SoLuong,
-                    Gia = item.Gia
+                    Gia = item.Gia,
+                    TrangThai = item.TrangThai
                 };
 
                 var result = await _spctApiClient.Create(request);
                 if (result.IsSuccessed)
+                {
                     resultCount++;
+                    createdItems.Add(result.ResultObj);
+                }
                 else
+                {
                     errorList.Add($"[{item.MauSacId}-{item.KichThuocId}]: {result.Message}");
+                }
             }
 
-            if (resultCount > 0 && errorList.Count == 0)
+            // Luôn trả về success: true nếu có ít nhất một sản phẩm được tạo thành công
+            if (resultCount > 0)
             {
-                return Json(new { success = true, message = $"Thêm mới {resultCount} sản phẩm chi tiết thành công" });
-            }
-            else if (resultCount > 0 && errorList.Count > 0)
-            {
-                return Json(new { success = true, message = $"Thêm mới {resultCount} sản phẩm chi tiết thành công. Một số sản phẩm bị lỗi: {string.Join("; ", errorList)}" });
+                string message = $"Thêm mới {resultCount} sản phẩm chi tiết thành công.";
+                if (errorList.Count > 0)
+                {
+                    message += $"\nMột số sản phẩm bị lỗi: {string.Join("; ", errorList)}";
+                }
+                return Json(new { success = true, message = message, data = createdItems });
             }
             else
             {
@@ -207,7 +217,7 @@ namespace SneakFit.Admin.Controllers
             }
         }
 
-        
+
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
         {
@@ -310,16 +320,36 @@ namespace SneakFit.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> UploadImages(Guid sanPhamChiTietId, List<IFormFile> files)
         {
-            if (files == null || files.Count == 0)
-                return Json(new { success = false, message = "Không có file nào được upload" });
+            if (files == null || !files.Any())
+                return Json(new { success = false, message = "Không có file để upload" });
 
             int successCount = 0;
+            var errors = new List<string>();
+
             foreach (var file in files)
             {
-                var result = await _spctApiClient.AddImage(sanPhamChiTietId, file);
-                if (result > 0) successCount++;
+                try
+                {
+                    int result = await _spctApiClient.AddImage(sanPhamChiTietId, file);
+                    if (result > 0)
+                        successCount++;
+                    else
+                        errors.Add($"Không thể upload file {file.FileName}");
+                }
+                catch (Exception ex)
+                {
+                    errors.Add($"Lỗi upload file {file.FileName}: {ex.Message}");
+                }
             }
-            return Json(new { success = successCount == files.Count, uploaded = successCount });
+
+            if (successCount > 0)
+            {
+                string message = $"Upload thành công {successCount}/{files.Count} file.";
+                if (errors.Any())
+                    message += $"\nLỗi: {string.Join("; ", errors)}";
+                return Json(new { success = true, message = message });
+            }
+            return Json(new { success = false, message = $"Upload thất bại: {string.Join("; ", errors)}" });
         }
 
     }
