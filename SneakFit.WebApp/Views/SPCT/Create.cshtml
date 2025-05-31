@@ -523,10 +523,10 @@
                             'text-align': 'center'
                         });
                         uploadCell.append(`
+                            <div class="image-preview-container d-flex flex-wrap gap-1 justify-content-center mt-2"></div>
                             <button type="button" class="btn btn-light btn-sm upload-image" data-color-group-key="${groupKey}">
                                 <i class="bx bx-upload"></i> Upload
                             </button>
-                            <div class="image-preview-container d-flex flex-wrap gap-1 justify-content-center mt-2"></div>
                         `);
                         row.append(uploadCell);
                     }
@@ -564,10 +564,10 @@
                         'text-align': 'center'
                     });
                     newUploadCell.append(`
+                        <div class="image-preview-container d-flex flex-wrap gap-1 justify-content-center mt-2"></div>
                         <button type="button" class="btn btn-light btn-sm upload-image" data-color-group-key="${groupKey}">
                             <i class="bx bx-upload"></i> Upload
                         </button>
-                        <div class="image-preview-container d-flex flex-wrap gap-1 justify-content-center mt-2"></div>
                     `);
                     firstRow.append(newUploadCell);
 
@@ -579,10 +579,10 @@
                             imgHtml += `
                                 <div class="spct-thumb-wrapper d-inline-block position-relative me-1 mb-1" style="width:48px;height:48px;">
                                     <img src="${url}" class="spct-thumb-img" data-idx="${idx}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;cursor:pointer;" />
-                                    <button type="button" class="btn btn-danger btn-sm spct-thumb-delete position-absolute top-0 end-0 d-none" data-idx="${idx}" style="z-index:2;padding:2px 5px;">
+                                    <button type="button" class="btn btn-danger btn-sm spct-thumb-delete position-absolute top-0 end-0 d-none" data-idx="${idx}" style="z-index:2;padding:0.05px 0.05px;">
                                         <i class="bx bx-trash"></i>
                                     </button>
-                                    <button type="button" class="btn btn-light btn-sm spct-thumb-view position-absolute bottom-0 end-0 d-none" data-idx="${idx}" style="z-index:2;padding:2px 5px;">
+                                    <button type="button" class="btn btn-light btn-sm spct-thumb-view position-absolute bottom-0 end-0 d-none" data-idx="${idx}" style="z-index:2;padding:0.05px 0.05px;">
                                         <i class="bx bx-show"></i>
                                     </button>
                                 </div>
@@ -667,10 +667,10 @@
                 imgHtml += `
                     <div class="spct-thumb-wrapper d-inline-block position-relative me-1 mb-1" style="width:48px;height:48px;">
                         <img src="${url}" class="spct-thumb-img" data-idx="${idx}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;cursor:pointer;" />
-                        <button type="button" class="btn btn-danger btn-sm spct-thumb-delete position-absolute top-0 end-0 d-none" data-idx="${idx}" style="z-index:2;padding:2px 5px;">
+                        <button type="button" class="btn btn-danger btn-sm spct-thumb-delete position-absolute top-0 end-0 d-none" data-idx="${idx}" style="z-index:2;padding:0.05px 0.05px;">
                             <i class="bx bx-trash"></i>
                         </button>
-                        <button type="button" class="btn btn-light btn-sm spct-thumb-view position-absolute bottom-0 end-0 d-none" data-idx="${idx}" style="z-index:2;padding:2px 5px;">
+                        <button type="button" class="btn btn-light btn-sm spct-thumb-view position-absolute bottom-0 end-0 d-none" data-idx="${idx}" style="z-index:2;padding:0.05px 0.05px;">
                             <i class="bx bx-show"></i>
                         </button>
                     </div>
