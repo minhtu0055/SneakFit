@@ -25,6 +25,8 @@ namespace SneakFit.Application.Catalog.SanPham
             _context = context;
             _httpContextAccessor = httpContextAccessor;
         }
+        
+        // Lấy danh sách sản phẩm có phân trang
         public async Task<PagedResult<SanPhamViewModels>> GetAllPaging(SanPhamPagingRequest request)
         {
             var query = _context.SanPham
@@ -57,6 +59,8 @@ namespace SneakFit.Application.Catalog.SanPham
             };
             return PageResult;
         }
+
+        // Lấy danh sách tất cả sản phẩm
         public async Task<List<SanPhamViewModels>> GetAll()
         {
             var list = await _context.SanPham
@@ -75,6 +79,7 @@ namespace SneakFit.Application.Catalog.SanPham
             return list;
         }
 
+        // Lấy chi tiết một sản phẩm
         public async Task<SanPhamViewModels?> GetById(Guid id)
         {
             var entity = await _context.SanPham
@@ -94,6 +99,7 @@ namespace SneakFit.Application.Catalog.SanPham
             };
         }
 
+        // Thêm mới sản phẩm
         public async Task<SanPhamViewModels> Create(ThemSanPham request)
         {
             var danhMuc = await _context.DanhMuc.FindAsync(request.DanhMucId);
@@ -123,7 +129,7 @@ namespace SneakFit.Application.Catalog.SanPham
             };
         }
 
-
+        // Cập nhật sản phẩm
         public async Task<SanPhamViewModels?> Update(SuaSanPham request)
         {
             var entity = await _context.SanPham
@@ -153,6 +159,7 @@ namespace SneakFit.Application.Catalog.SanPham
             };
         }
 
+        // Cập nhật trạng thái sản phẩm
         public async Task<bool> UpdateTrangThai(Guid id, bool trangThai)
         {
             var sanPham = await _context.SanPham.FindAsync(id);
@@ -164,6 +171,7 @@ namespace SneakFit.Application.Catalog.SanPham
             return await _context.SaveChangesAsync() > 0;
         }
 
+        // Cập nhật chi tiết sản phẩm
         public async Task<bool> UpdateSPCT(List<SanPhamChiTietCapNhat> updates)
         {
             foreach (var update in updates)
@@ -178,6 +186,7 @@ namespace SneakFit.Application.Catalog.SanPham
             return await _context.SaveChangesAsync() > 0;
         }
 
+        // Lấy danh sách sản phẩm chi tiết theo tên sản phẩm
         public async Task<List<SPCTViewModels>> GetSPCTByProductName(string productName)
         {
             var query = _context.SanPhamChiTiet
@@ -203,6 +212,7 @@ namespace SneakFit.Application.Catalog.SanPham
             return danhSachSPCT;
         }
 
+        // Lấy chi tiết một sản phẩm chi tiết
         public async Task<SPCTDetailViewModel> GetSPCTDetail(Guid spctId)
         {
             var spct = await _context.SanPhamChiTiet
@@ -239,6 +249,7 @@ namespace SneakFit.Application.Catalog.SanPham
             };
         }
 
+        // Cập nhật chi tiết sản phẩm chi tiết
         public async Task<bool> UpdateSPCTDetail(SuaSPCTDetailViewModel model)
         {
             var spct = await _context.SanPhamChiTiet.FirstOrDefaultAsync(x => x.ID == model.Id);
@@ -265,6 +276,7 @@ namespace SneakFit.Application.Catalog.SanPham
             return true;
         }
 
+        // Upload ảnh cho sản phẩm chi tiết
         public async Task<bool> UploadImages(UploadImageRequest request)
         {
             var spct = await _context.SanPhamChiTiet
@@ -301,6 +313,7 @@ namespace SneakFit.Application.Catalog.SanPham
             return true;
         }
 
+        // Xóa ảnh của sản phẩm chi tiết
         public async Task<bool> DeleteImage(DeleteImageRequest request)
         {
             var image = await _context.HinhAnhSanPham

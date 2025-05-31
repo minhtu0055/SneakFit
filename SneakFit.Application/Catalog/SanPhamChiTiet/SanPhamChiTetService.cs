@@ -29,6 +29,7 @@ namespace SneakFit.Application.Catalog.SanPhamChiTiet
             _baseAddress = _configuration["BaseAddress"]?.TrimEnd('/') ?? "";
         }
 
+        // Lấy tất cả sản phẩm chi tiết
         public async Task<List<SPCTViewModels>> GetAll()
         {
             var list = await _context.SanPhamChiTiet
@@ -62,6 +63,7 @@ namespace SneakFit.Application.Catalog.SanPhamChiTiet
             return list;
         }
 
+        // Lấy thông tin chi tiết một sản phẩm chi tiết
         public async Task<SPCTViewModels> GetById(Guid id)
         {
             var entity = await _context.SanPhamChiTiet
@@ -97,6 +99,7 @@ namespace SneakFit.Application.Catalog.SanPhamChiTiet
             };
         }
 
+        // Lấy danh sách sản phẩm chi tiết với phân trang và tìm kiếm
         public async Task<PagedResult<SPCTViewModels>> GetAllPaging(PhanTrangSPCT request)
         {
             var query = from spct in _context.SanPhamChiTiet
@@ -151,6 +154,7 @@ namespace SneakFit.Application.Catalog.SanPhamChiTiet
             return pagedResult;
         }
 
+        // Cập nhật trạng thái sản phẩm chi tiết
         public async Task<bool> UpdateTrangThai(Guid id, bool trangThai)
         {
             var spct = await _context.SanPhamChiTiet.FindAsync(id);
@@ -161,7 +165,8 @@ namespace SneakFit.Application.Catalog.SanPhamChiTiet
             _context.SanPhamChiTiet.Update(spct);
             return await _context.SaveChangesAsync() > 0;
         }
-        
+
+        // Thêm mới sản phẩm chi tiết
         public async Task<ApiResult<SPCTViewModels>> Create(ThemSPCT request)
         {
             // Kiểm tra dữ liệu đầu vào
@@ -215,6 +220,7 @@ namespace SneakFit.Application.Catalog.SanPhamChiTiet
             return new ApiResult<SPCTViewModels> { IsSuccessed = true, ResultObj = viewModel };
         }
 
+        // Cập nhật sản phẩm chi tiết
         public async Task<SPCTViewModels?> Update(SuaSPCT request)
         {
             var entity = await _context.SanPhamChiTiet
@@ -281,7 +287,8 @@ namespace SneakFit.Application.Catalog.SanPhamChiTiet
             }
             return updated;
         }   
-
+        
+        // Cập nhật giá sản phẩm chi tiết
         public async Task<bool> UpdateGia(Guid id, decimal gia)
         {
             var entity = await _context.SanPhamChiTiet.FindAsync(id);
@@ -291,6 +298,7 @@ namespace SneakFit.Application.Catalog.SanPhamChiTiet
             return true;
         }
 
+        // Cập nhật số lượng sản phẩm chi tiết
         public async Task<bool> UpdateSoLuong(Guid id, int soLuong)
         {
             var entity = await _context.SanPhamChiTiet.FindAsync(id);
@@ -300,6 +308,7 @@ namespace SneakFit.Application.Catalog.SanPhamChiTiet
             return true;
         }
 
+        // Lưu file
         private async Task<string> SaveFile(IFormFile file)
         {
             var originalFileName = file.FileName;
@@ -321,6 +330,7 @@ namespace SneakFit.Application.Catalog.SanPhamChiTiet
             return $"{_baseAddress}/images/products/{fileName}";
         }
 
+        // Xóa file
         private void DeleteFile(string fileName)
         {
             var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/products", fileName);
@@ -330,8 +340,7 @@ namespace SneakFit.Application.Catalog.SanPhamChiTiet
             }
         }
 
-        
-
+        // Thêm ảnh cho sản phẩm chi tiết
         public async Task<int> AddImage(Guid id, IFormFile image)
         {
             var url = await SaveFile(image);
@@ -346,6 +355,7 @@ namespace SneakFit.Application.Catalog.SanPhamChiTiet
             return await _context.SaveChangesAsync();
         }
 
+        // Xóa ảnh của sản phẩm chi tiết
         public async Task<int> RemoveImage(Guid imageId)
         {
             try
@@ -372,6 +382,7 @@ namespace SneakFit.Application.Catalog.SanPhamChiTiet
             }
         }
 
+        // Lấy danh sách ảnh của sản phẩm chi tiết
         public async Task<List<string>> GetListImages(Guid id)
         {
             var images = await _context.HinhAnhSanPham
@@ -381,6 +392,7 @@ namespace SneakFit.Application.Catalog.SanPhamChiTiet
             return images.Select(img => img.StartsWith("http") ? img : $"{_baseAddress}/images/products/{img}").ToList();
         }
 
+        // Tạo nhiều sản phẩm chi tiết cùng lúc
         public async Task<int> CreateMultiple(ThemNhieuSPCTRequest request)
         {
             int count = 0;

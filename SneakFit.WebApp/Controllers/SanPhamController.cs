@@ -41,6 +41,7 @@ namespace SneakFit.Admin.Controllers
             _configuration = configuration;
         }
 
+        // Hiển thị danh sách sản phẩm với phân trang và tìm kiếm
         public async Task<IActionResult> Index(string keyWord, Guid? danhMucId, int pageIndex = 1, int pageSize = 8)
         {
             var request = new SanPhamPagingRequest()
@@ -69,6 +70,7 @@ namespace SneakFit.Admin.Controllers
             return View(data);
         }
 
+        // Hiển thị form thêm mới sản phẩm
         [HttpGet]
         public async Task<IActionResult> Create()
         {
@@ -81,6 +83,7 @@ namespace SneakFit.Admin.Controllers
             return PartialView("Create");
         }
 
+        // Xử lý thêm mới sản phẩm
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ThemSanPham request)
@@ -104,6 +107,7 @@ namespace SneakFit.Admin.Controllers
             return Json(new { success = false, message = "Thêm sản phẩm thất bại" });
         }
 
+        // Hiển thị form chỉnh sửa sản phẩm
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
         {
@@ -129,6 +133,7 @@ namespace SneakFit.Admin.Controllers
             return PartialView("Edit", editModel);
         }
 
+        // Xử lý cập nhật sản phẩm
         [HttpPut]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(SuaSanPham request)
@@ -159,6 +164,7 @@ namespace SneakFit.Admin.Controllers
             return Ok(result);
         }
 
+        // Cập nhật trạng thái sản phẩm (active/inactive)
         [HttpPost]
         public async Task<IActionResult> CapNhatTrangThai(Guid id, bool trangThai)
         {
@@ -177,6 +183,7 @@ namespace SneakFit.Admin.Controllers
             return Json(new { success = false, message = "Cập nhật trạng thái thất bại" });
         }
 
+        // Hiển thị form chỉnh sửa chi tiết sản phẩm (SPCT)
         [HttpGet]
         public async Task<IActionResult> EditSPCT(Guid id) 
         {
@@ -209,6 +216,7 @@ namespace SneakFit.Admin.Controllers
             return View(model);
         }
 
+        // Cập nhật thông tin chi tiết sản phẩm
         [HttpPost]
         public async Task<IActionResult> UpdateSPCT([FromBody] List<SanPhamChiTietCapNhat> updates) // ở ngoài table list danh sách spct
         {
@@ -225,6 +233,7 @@ namespace SneakFit.Admin.Controllers
             }
         }
 
+        // Lấy chi tiết một sản phẩm chi tiết
         [HttpGet]
         public async Task<IActionResult> GetSPCTDetail(Guid id)
         {
@@ -240,6 +249,7 @@ namespace SneakFit.Admin.Controllers
             return Json(detail);
         }
 
+        // Cập nhật chi tiết một sản phẩm chi tiết
         [HttpPost]
         public async Task<IActionResult> UpdateSPCTDetail([FromBody] SuaSPCTDetailViewModel model) // ở trong modal detail spct
         {
@@ -255,6 +265,7 @@ namespace SneakFit.Admin.Controllers
             return Json(new { success = false, message = "Cập nhật thất bại" });
         }
 
+        // Upload ảnh cho sản phẩm chi tiết
         [HttpPost]
         public async Task<IActionResult> UploadImages(Guid sanPhamChiTietId, List<IFormFile> files)
         {
@@ -267,6 +278,7 @@ namespace SneakFit.Admin.Controllers
             return Json(new { success = false, message = "Upload ảnh thất bại" });
         }
 
+        // Xóa ảnh của sản phẩm chi tiết
         [HttpDelete]
         public async Task<IActionResult> DeleteImage(Guid imageId, Guid sanPhamChiTietId)
         {

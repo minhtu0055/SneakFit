@@ -137,17 +137,15 @@
                             <table class="table table-hover">
                                 <thead>
                                     <tr style="background-color: mediumpurple; color: white;">
-                                        <th>
+                                        <th style="width: 30px">
                                             <input type="checkbox" id="checkAll" />
                                         </th>
-                                        <th>STT</th>
+                                        <th style="width: 30px">STT</th>
                                         <th>Tên Sản Phẩm</th>
-                                        <th>Màu Sắc</th>
-                                        <th>Kích Thước</th>
-                                        <th>Số Lượng</th>
-                                        <th>Giá Bán</th>
-                                        <th>Hành Động</th>
-                                        <th>Upload Ảnh</th>
+                                        <th style="width: 112px">Số Lượng</th>
+                                        <th style="width: 205px">Giá Bán</th>
+                                        <th style="width: 123px">Hành Động</th>
+                                        <th style="width: 185px">Upload Ảnh</th>
                                     </tr>
                                 </thead>
                                 <tbody id="productDetailList">
@@ -413,6 +411,20 @@
                 $(this).css({'border':'2px solid #ddd','background':'white','color':'black'});
         });
 
+        // Chọn dòng
+        $('#spctTable tbody tr').on('click', function(e) {
+            if (!$(e.target).is('input, button')) {
+                $(this).find('.row-check').prop('checked', true);
+            }
+            $('#spctTable tbody tr').removeClass('table-info');
+            $(this).addClass('table-info');
+        });
+
+            // CheckAll
+        $('#checkAll').on('change', function() {
+            $('.row-check').prop('checked', this.checked);
+        });
+
         function generateProductDetails() {
             const tbody = $('#productDetailList');
             tbody.empty();
@@ -427,6 +439,7 @@
             // Kiểm tra các trường bắt buộc
             if (!sanPhamId || !thuongHieuId || !chatLieuId || !deGiayId) {
                 Swal.fire('Lỗi', 'Vui lòng chọn đầy đủ thông tin sản phẩm chi tiết', 'error');
+                return;
             }
 
             // Kiểm tra đã chọn màu sắc và kích thước
@@ -439,45 +452,234 @@
                 return;
             }
 
-            // Tạo tổ hợp sản phẩm chi tiết
+            // Nhóm sản phẩm chi tiết theo màu sắc
+            let groupedItems = {};
             selectedColors.forEach(color => {
                 selectedSizes.forEach(size => {
-                    tbody.append(`
-                        <tr
-                            data-sanpham-id="${sanPhamId}"
-                            data-thuonghieu-id="${thuongHieuId}"
-                            data-chatlieu-id="${chatLieuId}"
-                            data-degiay-id="${deGiayId}"
-                            data-mausac-id="${color.id}"
-                            data-kichthuoc-id="${size.id}"
-                            data-trangthai="${trangThai}">
-                            <td><input type="checkbox" class="product-checkbox" /></td>
-                            <td class="stt">${stt++}</td>
-                            <td class="product-name">${tenSanPham}</td>
-                            <td class="product-color">${color.ten}</td>
-                            <td class="product-size">${size.name}</td>
-                            <td><input type="number" class="form-control quantity-input" min="1" value="1" style="width: 80px;" /></td>
-                            <td>
-                                <div class="input-group" style="width: 200px;">
-                                    <input type="text" class="form-control price-input" value="1.000.000" />
-                                    <span class="input-group-text">VNĐ</span>
-                                </div>
-                            </td>
-                            <td>
-                                <button type="button" class="btn btn-danger btn-sm delete-row">
-                                    <i class="bx bx-trash"></i>
-                                </button>
-                            </td>
-                            <td>
-                                <button type="button" class="btn btn-light btn-sm upload-image">
-                                    <i class="bx bx-upload"></i> Upload
-                                </button>
-                            </td>
-                        </tr>
-                    `);
+                    const groupKey = `${sanPhamId}-${color.id}`;
+                    if (!groupedItems[groupKey]) {
+                        groupedItems[groupKey] = {
+                            color: color,
+                            items: []
+                        };
+                    }
+                    groupedItems[groupKey].items.push({
+                        stt: stt++,
+                        sanPhamId: sanPhamId,
+                        thuongHieuId: thuongHieuId,
+                        chatLieuId: chatLieuId,
+                        deGiayId: deGiayId,
+                        mauSacId: color.id,
+                        kichThuocId: size.id,
+                        tenSanPham: tenSanPham,
+                        sizeName: size.name,
+                        colorName: color.ten,
+                        trangThai: trangThai
+                    });
                 });
             });
+
+            // Render bảng với các nhóm hàng
+            for (const groupKey in groupedItems) {
+                const group = groupedItems[groupKey];
+                const groupSize = group.items.length;
+                group.items.forEach((item, index) => {
+                    let isFirstInGroup = index === 0;
+                    let row = $('<tr>').attr({
+                        'data-sanpham-id': item.sanPhamId,
+                        'data-thuonghieu-id': item.thuongHieuId,
+                        'data-chatlieu-id': item.chatLieuId,
+                        'data-degiay-id': item.deGiayId,
+                        'data-mausac-id': item.mauSacId,
+                        'data-kichthuoc-id': item.kichThuocId,
+                        'data-trangthai': item.trangThai,
+                        'data-color-group': groupKey
+                    });
+
+                    row.append(`<td><input type="checkbox" class="product-checkbox row-check" /></td>`);
+                    row.append(`<td class="stt">${item.stt}</td>`);
+                    row.append(`<td class="product-name">${item.tenSanPham} ( ${item.sizeName} - ${item.colorName} )</td>`);
+                    row.append(`<td><input type="number" class="form-control quantity-input" min="1" value="1" style="width: 80px;" /></td>`);
+                    row.append(`
+                        <td>
+                            <div class="input-group" style="width: 200px;">
+                                <input type="text" class="form-control price-input" value="1.000.000" />
+                                <span class="input-group-text">VNĐ</span>
+                            </div>
+                        </td>
+                    `);
+                    row.append(`
+                        <td style="text-align: center">
+                            <button type="button" class="btn btn-danger btn-sm delete-row">
+                                <i class="bx bx-trash"></i>
+                            </button>
+                        </td>
+                    `);
+
+                    // Chỉ thêm cột upload ảnh cho hàng đầu tiên trong nhóm
+                    if (isFirstInGroup) {
+                        let uploadCell = $('<td>').addClass('spct-images-cell').attr('rowspan', groupSize).css({
+                            'vertical-align': 'middle',
+                            'text-align': 'center'
+                        });
+                        uploadCell.append(`
+                            <button type="button" class="btn btn-light btn-sm upload-image" data-color-group-key="${groupKey}">
+                                <i class="bx bx-upload"></i> Upload
+                            </button>
+                            <div class="image-preview-container d-flex flex-wrap gap-1 justify-content-center mt-2"></div>
+                        `);
+                        row.append(uploadCell);
+                    }
+
+                    tbody.append(row);
+                });
+            }
         }
+
+        // Xử lý xóa dòng
+        $(document).on('click', '.delete-row', function() {
+            let row = $(this).closest('tr');
+            let groupKey = row.data('color-group');
+            let groupRows = $(`tr[data-color-group="${groupKey}"]`);
+
+            // Nếu chỉ còn 1 dòng trong nhóm, xóa luôn ảnh liên quan
+            if (groupRows.length === 1) {
+                delete spctImages[groupKey]; // Xóa ảnh khỏi spctImages
+            }
+
+            // Xóa dòng hiện tại
+            row.remove();
+
+            // Cập nhật lại rowspan và kiểm tra nếu không còn dòng nào trong nhóm
+            groupRows = $(`tr[data-color-group="${groupKey}"]`); // Cập nhật lại số lượng dòng
+            if (groupRows.length > 0) {
+                let firstRow = groupRows.first();
+                let uploadCell = firstRow.find('.spct-images-cell');
+                if (uploadCell.length) {
+                    uploadCell.attr('rowspan', groupRows.length);
+                } else {
+                    // Nếu dòng đầu tiên bị xóa, thêm lại upload cell cho dòng mới
+                    let newUploadCell = $('<td>').addClass('spct-images-cell').attr('rowspan', groupRows.length).css({
+                        'vertical-align': 'middle',
+                        'text-align': 'center'
+                    });
+                    newUploadCell.append(`
+                        <button type="button" class="btn btn-light btn-sm upload-image" data-color-group-key="${groupKey}">
+                            <i class="bx bx-upload"></i> Upload
+                        </button>
+                        <div class="image-preview-container d-flex flex-wrap gap-1 justify-content-center mt-2"></div>
+                    `);
+                    firstRow.append(newUploadCell);
+
+                    // Render lại ảnh nếu có
+                    if (spctImages[groupKey]) {
+                        let imgHtml = '';
+                        spctImages[groupKey].forEach((file, idx) => {
+                            let url = URL.createObjectURL(file);
+                            imgHtml += `
+                                <div class="spct-thumb-wrapper d-inline-block position-relative me-1 mb-1" style="width:48px;height:48px;">
+                                    <img src="${url}" class="spct-thumb-img" data-idx="${idx}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;cursor:pointer;" />
+                                    <button type="button" class="btn btn-danger btn-sm spct-thumb-delete position-absolute top-0 end-0 d-none" data-idx="${idx}" style="z-index:2;padding:2px 5px;">
+                                        <i class="bx bx-trash"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-light btn-sm spct-thumb-view position-absolute bottom-0 end-0 d-none" data-idx="${idx}" style="z-index:2;padding:2px 5px;">
+                                        <i class="bx bx-show"></i>
+                                    </button>
+                                </div>
+                            `;
+                        });
+                        firstRow.find('.image-preview-container').html(imgHtml);
+                    }
+                }
+
+                // Cập nhật lại số thứ tự (STT)
+                $('#productDetailList .stt').each(function(index) {
+                    $(this).text(index + 1);
+                });
+            }
+        });
+
+        // Khi bấm upload ảnh
+        $(document).on('click', '.upload-image', function() {
+            let colorGroupKey = $(this).data('color-group-key');
+            $('#modalUploadImage').data('colorGroupKey', colorGroupKey);
+            renderSpctImagePreview(colorGroupKey);
+            $('#modalUploadImage').modal('show');
+        });
+
+        // Khi chọn file ảnh
+        $('#spctImageInput').on('change', function() {
+            let files = Array.from(this.files);
+            let colorGroupKey = $('#modalUploadImage').data('colorGroupKey');
+
+            let currentFiles = spctImages[colorGroupKey] || [];
+            if (currentFiles.length + files.length > 3) {
+                Swal.fire('Lỗi', 'Chỉ được upload tối đa 3 ảnh cho mỗi nhóm sản phẩm cùng màu', 'error');
+                this.value = '';
+                return;
+            }
+
+            if (!spctImages[colorGroupKey]) spctImages[colorGroupKey] = [];
+            spctImages[colorGroupKey] = spctImages[colorGroupKey].concat(files);
+            renderSpctImagePreview(colorGroupKey);
+        });
+
+        // Hiển thị preview ảnh trong modal
+        function renderSpctImagePreview(colorGroupKey) {
+            let preview = $('#spctImagePreview');
+            preview.empty();
+            let files = spctImages[colorGroupKey] || [];
+            files.forEach((file, idx) => {
+                let url = URL.createObjectURL(file);
+                preview.append(`
+                    <div class="position-relative" style="display:inline-block;">
+                        <img src="${url}" style="width:100px;height:100px;object-fit:cover;border-radius:8px;" />
+                        <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 " id="remove-spct-image" data-idx="${idx}" style="z-index:2;">
+                            <i class="bx bx-trash"></i>
+                        </button>
+                    </div>
+                `);
+            });
+        }
+
+        // Xóa ảnh khỏi preview trong modal
+        $(document).on('click', '#remove-spct-image', function() {
+            let idx = $(this).data('idx');
+            let colorGroupKey = $('#modalUploadImage').data('colorGroupKey');
+            spctImages[colorGroupKey].splice(idx, 1);
+            renderSpctImagePreview(colorGroupKey);
+            $('#spctImageCount').text(`${spctImages[colorGroupKey].length} file(s)`);
+        });
+
+        // Lưu ảnh vào nhóm SPCT
+        $('#saveSpctImages').on('click', function() {
+            let colorGroupKey = $('#modalUploadImage').data('colorGroupKey');
+            let files = spctImages[colorGroupKey] || [];
+
+            if (files.length > 3) {
+                Swal.fire('Lỗi', 'Chỉ được upload tối đa 3 ảnh cho mỗi nhóm sản phẩm cùng màu', 'error');
+                return;
+            }
+
+            let imgHtml = '';
+            files.forEach((file, idx) => {
+                let url = URL.createObjectURL(file);
+                imgHtml += `
+                    <div class="spct-thumb-wrapper d-inline-block position-relative me-1 mb-1" style="width:48px;height:48px;">
+                        <img src="${url}" class="spct-thumb-img" data-idx="${idx}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;cursor:pointer;" />
+                        <button type="button" class="btn btn-danger btn-sm spct-thumb-delete position-absolute top-0 end-0 d-none" data-idx="${idx}" style="z-index:2;padding:2px 5px;">
+                            <i class="bx bx-trash"></i>
+                        </button>
+                        <button type="button" class="btn btn-light btn-sm spct-thumb-view position-absolute bottom-0 end-0 d-none" data-idx="${idx}" style="z-index:2;padding:2px 5px;">
+                            <i class="bx bx-show"></i>
+                        </button>
+                    </div>
+                `;
+            });
+
+            $(`tr[data-color-group="${colorGroupKey}"] .spct-images-cell .image-preview-container`).html(imgHtml);
+            $('#modalUploadImage').modal('hide');
+        });
 
         // Khi bấm Hoàn tất, Sửa giá, Sửa số lượng
         $('#btnHoanTat').on('click', async function(e) {
@@ -519,18 +721,28 @@
                 };
 
                 if (!item.MauSacId || !item.KichThuocId) {
-                    Swal.fire('Lỗi', `Dòng ${rowIndex + 1}: Vui lòng chọn màu sắc và kích thước`, 'error');
+                    Swal.fire('Lỗi', `Lỗi thêm màu sắc và kích thước dòng ${rowIndex + 1}`, 'error');
                     return;
                 }
                 if (isNaN(item.Gia) || isNaN(item.SoLuong)) {
-                    Swal.fire('Lỗi', `Dòng ${rowIndex + 1}: Giá và số lượng phải là số hợp lệ`, 'error');
+                    Swal.fire('Lỗi', `Lỗi thêm giá và số lượng dòng ${rowIndex + 1}`, 'error');
                     return;
                 }
                 items.push(item);
             });
 
-            // Gửi yêu cầu đến CreateMultiple
             try {
+                // Hiển thị loading
+                Swal.fire({
+                    title: 'Đang xử lý...',
+                    text: 'Vui lòng đợi trong giây lát',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                // Gửi yêu cầu tạo SPCT
                 let response = await $.ajax({
                     url: '/SPCT/CreateMultiple',
                     type: 'POST',
@@ -538,56 +750,64 @@
                     data: JSON.stringify(items)
                 });
 
-                // Hiển thị thông báo dựa trên phản hồi
-                if (response.success) {
-                    let uploadPromises = [];
-                    let uploadErrors = [];
-                    items.forEach((item, rowIndex) => {
-                        let files = spctImages[rowIndex] || [];
-                        // Kiểm tra số lượng ảnh tối đa là 3
-                        if (files.length > 3) {
-                            uploadErrors.push(`Dòng ${rowIndex + 1}: Chỉ được upload tối đa 3 ảnh. Bạn đã chọn ${files.length} ảnh.`);
-                            return;
+                if (!response.success) {
+                    throw new Error(response.message || 'Có lỗi khi tạo sản phẩm chi tiết');
+                }
+
+                // Upload ảnh cho từng SPCT
+                let uploadPromises = [];
+                let uploadErrors = [];
+                
+                for (let i = 0; i < items.length; i++) {
+                    const item = items[i];
+                    const colorGroupKey = `${item.SanPhamId}-${item.MauSacId}`;
+                    const files = spctImages[colorGroupKey] || [];
+                    
+                    if (files.length > 0) {
+                        const sanPhamChiTietId = response.data[i]?.id;
+                        if (!sanPhamChiTietId) {
+                            console.error(`Không tìm thấy ID SPCT cho item ${i}:`, response.data[i]);
+                            uploadErrors.push(`Lỗi không tìm thấy ID sản phẩm chi tiết để upload ảnh dòng ${i + 1}`);
+                            continue;
                         }
-                        if (files.length > 0) {
-                            let uploadData = new FormData();
-                            let sanPhamChiTietId = response.data[rowIndex]?.id;
-                            if (!sanPhamChiTietId) {
-                                uploadErrors.push(`Dòng ${rowIndex + 1}: Không tìm thấy ID sản phẩm chi tiết để upload ảnh`);
-                                return;
-                            }
-                            uploadData.append('sanPhamChiTietId', sanPhamChiTietId);
-                            for (let i = 0; i < files.length; i++) {
-                                uploadData.append('files', files[i]);
-                            }
-                            let uploadPromise = $.ajax({
+
+                        const uploadData = new FormData();
+                        uploadData.append('sanPhamChiTietId', sanPhamChiTietId);
+                        files.forEach(file => {
+                            uploadData.append('files', file);
+                        });
+
+                        try {
+                            const uploadResponse = await $.ajax({
                                 url: '/SPCT/UploadImages',
                                 type: 'POST',
                                 data: uploadData,
                                 processData: false,
                                 contentType: false
-                            }).then(uploadResponse => {
-                                if (!uploadResponse.success) {
-                                    uploadErrors.push(`Dòng ${rowIndex + 1}: ${uploadResponse.message || 'Upload ảnh thất bại'}`);
-                                }
-                            }).catch(error => {
-                                uploadErrors.push(`Dòng ${rowIndex + 1}: Upload ảnh thất bại - ${error.responseJSON?.message || error.statusText}`);
                             });
-                            uploadPromises.push(uploadPromise);
+
+                            if (!uploadResponse.success) {
+                                console.error(`Lỗi upload ảnh cho SPCT ${sanPhamChiTietId}:`, uploadResponse);
+                                uploadErrors.push(`Lỗi thêm ảnh dòng ${i + 1}`);
+                            }
+                        } catch (uploadError) {
+                            console.error(`Lỗi upload ảnh cho SPCT ${sanPhamChiTietId}:`, uploadError);
+                            uploadErrors.push(`Lỗi thêm ảnh dòng ${i + 1}`);
                         }
-                    });
-
-                    await Promise.all(uploadPromises);
-
-                    let message = response.message || 'Tạo mới sản phẩm chi tiết thành công!';
-                    if (uploadErrors.length > 0) {
-                        message += `\nLỗi upload ảnh: ${uploadErrors.join('; ')}`;
                     }
-                    Swal.fire('Thành công', message, 'success').then(() => {
+                }
+
+                // Hiển thị kết quả
+                let message = response.message || 'Tạo mới sản phẩm chi tiết thành công!';
+                if (uploadErrors.length > 0) {
+                    message += `\nLỗi upload ảnh: ${uploadErrors.join('; ')}`;
+                    Swal.fire('Cảnh báo', message, 'warning').then(() => {
                         window.location.href = '/SPCT/Index';
                     });
                 } else {
-                    Swal.fire('Cảnh báo', response.message || 'Có sản phẩm chi tiết tạo thất bại!', 'warning');
+                    Swal.fire('Thành công', message, 'success').then(() => {
+                        window.location.href = '/SPCT/Index';
+                    });
                 }
             } catch (error) {
                 console.error('Lỗi:', error);
@@ -599,236 +819,13 @@
             }
         });
 
-        // $('#btnHoanTat').on('click', async function(e) {
-        //     e.preventDefault();
-        //     Kiểm tra các trường bắt buộc
-        //     const sanPhamId = $('select[name="SanPhamId"]').val();
-        //     const thuongHieuId = $('select[name="ThuongHieuId"]').val();
-        //     const chatLieuId = $('select[name="ChatLieuId"]').val();
-        //     const deGiayId = $('select[name="DeGiayId"]').val();
-        //     if (!sanPhamId || !thuongHieuId || !chatLieuId || !deGiayId) {
-        //         Swal.fire('Lỗi', 'Vui lòng chọn đầy đủ thông tin sản phẩm chi tiết', 'error');
-        //         return;
-        //     }
-        //     if (selectedColors.length === 0 || selectedSizes.length === 0) {
-        //         Swal.fire('Lỗi', 'Vui lòng chọn ít nhất một màu sắc và một kích thước', 'error');
-        //         return;
-        //     }
-
-        //     let trs = $('#productDetailList tr');
-        //     if (trs.length === 0) {
-        //         Swal.fire('Lỗi', 'Chưa có sản phẩm chi tiết nào!', 'error');
-        //         return;
-        //     }
-
-        //     Tạo mảng dữ liệu JSON
-        //     let items = [];
-        //     trs.each(function(rowIndex) {
-        //         let $tr = $(this);
-        //         let item = {
-        //             SanPhamId: $tr.data('sanpham-id') || sanPhamId,
-        //             ThuongHieuId: $tr.data('thuonghieu-id') || thuongHieuId,
-        //             ChatLieuId: $tr.data('chatlieu-id') || chatLieuId,
-        //             DeGiayId: $tr.data('degiay-id') || deGiayId,
-        //             MauSacId: $tr.data('mausac-id'),
-        //             KichThuocId: $tr.data('kichthuoc-id'),
-        //             SoLuong: parseInt($tr.find('.quantity-input').val()) || 0,
-        //             Gia: parseInt($tr.find('.price-input').val().replace(/\./g, '')) || 0,
-        //             TrangThai: $('#trangThaiSelect').val() === "true"
-        //         };
-
-        //         if (!item.MauSacId || !item.KichThuocId) {
-        //             Swal.fire('Lỗi', `Dòng ${rowIndex + 1}: Vui lòng chọn màu sắc và kích thước`, 'error');
-        //             return;
-        //         }
-        //         if (isNaN(item.Gia) || isNaN(item.SoLuong)) {
-        //             Swal.fire('Lỗi', `Dòng ${rowIndex + 1}: Giá và số lượng phải là số hợp lệ`, 'error');
-        //             return;
-        //         }
-        //         items.push(item);
-        //     });
-
-        //     Gửi yêu cầu đến CreateMultiple
-        //     try {
-        //         let response = await $.ajax({
-        //             url: '/SPCT/CreateMultiple',
-        //             type: 'POST',
-        //             contentType: 'application/json',
-        //             data: JSON.stringify(items)
-        //         });
-
-        //         Hiển thị thông báo dựa trên phản hồi
-        //         if (response.success) {
-        //             let uploadPromises = [];
-        //             let uploadErrors = [];
-        //             items.forEach((item, rowIndex) => {
-        //                 let files = spctImages[rowIndex] || [];
-        //                 Kiểm tra số lượng ảnh tối đa là 3
-        //                 if (files.length > 3) {
-        //                     uploadErrors.push(`Dòng ${rowIndex + 1}: Chỉ được upload tối đa 3 ảnh. Bạn đã chọn ${files.length} ảnh.`);
-        //                     return;
-        //                 }
-        //                 if (files.length > 0) {
-        //                     let uploadData = new FormData();
-        //                     let sanPhamChiTietId = response.data[rowIndex]?.id;
-        //                     if (!sanPhamChiTietId) {
-        //                         uploadErrors.push(`Dòng ${rowIndex + 1}: Không tìm thấy ID sản phẩm chi tiết để upload ảnh`);
-        //                         return;
-        //                     }
-        //                     uploadData.append('sanPhamChiTietId', sanPhamChiTietId);
-        //                     for (let i = 0; i < files.length; i++) {
-        //                         uploadData.append('files', files[i]);
-        //                     }
-        //                     let uploadPromise = $.ajax({
-        //                         url: '/SPCT/UploadImages',
-        //                         type: 'POST',
-        //                         data: uploadData,
-        //                         processData: false,
-        //                         contentType: false
-        //                     }).then(uploadResponse => {
-        //                         if (!uploadResponse.success) {
-        //                             uploadErrors.push(`Dòng ${rowIndex + 1}: ${uploadResponse.message || 'Upload ảnh thất bại'}`);
-        //                         }
-        //                     }).catch(error => {
-        //                         uploadErrors.push(`Dòng ${rowIndex + 1}: Upload ảnh thất bại - ${error.responseJSON?.message || error.statusText}`);
-        //                     });
-        //                     uploadPromises.push(uploadPromise);
-        //                 }
-        //             });
-
-        //             await Promise.all(uploadPromises);
-
-        //             let message = response.message || 'Tạo mới sản phẩm chi tiết thành công!';
-        //             if (uploadErrors.length > 0) {
-        //                 message += `\n${uploadErrors.join('; ')}`;
-        //             }
-        //             Swal.fire('Thành công', message, 'success').then(() => {
-        //                 window.location.href = '/SPCT/Index';
-        //             });
-        //         } else {
-        //             Swal.fire('Cảnh báo', response.message || 'Có sản phẩm chi tiết tạo thất bại!', 'warning');
-        //         }
-        //     } catch (error) {
-        //         console.error('Lỗi:', error);
-        //         let errorMsg = 'Có lỗi khi tạo sản phẩm chi tiết!';
-        //         if (error.responseJSON && error.responseJSON.message) {
-        //             errorMsg = error.responseJSON.message;
-        //         }
-        //         Swal.fire('Lỗi', errorMsg, 'error');
-        //     }
-        // });
-
-
-
         // Xóa dòng sản phẩm chi tiết
         $(document).on('click', '.delete-row', function() {
             $(this).closest('tr').remove();
         });
 
-
-        // Khi bấm upload ảnh
-        $(document).on('click', '.upload-image', function() {
-            let $row = $(this).closest('tr');
-            let rowIndex = $row.index();
-            $('#modalUploadImage').data('rowIndex', rowIndex);
-            // Hiển thị preview ảnh đã chọn trước đó
-            renderSpctImagePreview(rowIndex);
-            $('#modalUploadImage').modal('show');
-        });
-
-        // Khi chọn file ảnh
-        $('#spctImageInput').on('change', function() {
-            let files = Array.from(this.files);
-            let rowIndex = $('#modalUploadImage').data('rowIndex');
-
-            // Kiểm tra số lượng ảnh hiện tại và mới
-            let currentFiles = spctImages[rowIndex] || [];
-            if (currentFiles.length + files.length > 3) {
-                Swal.fire('Lỗi', 'Chỉ được upload tối đa 3 ảnh cho mỗi sản phẩm chi tiết', 'error');
-                this.value = ''; // Reset input
-                return;
-            }
-
-            if (!spctImages[rowIndex]) spctImages[rowIndex] = [];
-            spctImages[rowIndex] = spctImages[rowIndex].concat(files);
-            renderSpctImagePreview(rowIndex);
-            $('#spctImageCount').text(`${spctImages[rowIndex].length} file(s)`);
-        });
-
-        // Hiển thị preview ảnh
-        function renderSpctImagePreview(rowIndex) {
-            let preview = $('#spctImagePreview');
-            preview.empty();
-            let files = spctImages[rowIndex] || [];
-            files.forEach((file, idx) => {
-                let url = URL.createObjectURL(file);
-                preview.append(`
-                    <div class="position-relative" style="display:inline-block;">
-                        <img src="${url}" style="width:100px;height:100px;object-fit:cover;border-radius:8px;" />
-                        <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 " id="remove-spct-image" data-idx="${idx}" style="z-index:2;">
-                            <i class="bx bx-trash"></i>
-                        </button>
-                    </div>
-                `);
-            });
-        }
-
-        // Xóa ảnh khỏi preview
-        $(document).on('click', '#remove-spct-image', function() {
-            let idx = $(this).data('idx');
-            let rowIndex = $('#modalUploadImage').data('rowIndex');
-            spctImages[rowIndex].splice(idx, 1);
-            renderSpctImagePreview(rowIndex);
-        });
-
-        // Lưu ảnh vào dòng SPCT
-        $('#saveSpctImages').on('click', function() {
-            let rowIndex = $('#modalUploadImage').data('rowIndex');
-            let $row = $('#productDetailList tr').eq(rowIndex);
-            let files = spctImages[rowIndex] || [];
-
-            // Kiểm tra số lượng ảnh trước khi lưu
-            if (files.length > 3) {
-                Swal.fire('Lỗi', 'Chỉ được upload tối đa 3 ảnh cho mỗi sản phẩm chi tiết', 'error');
-                return;
-            }
-
-            let imgHtml = '';
-            files.forEach((file, idx) => {
-                let url = URL.createObjectURL(file);
-                imgHtml += `
-                    <div class="spct-thumb-wrapper d-inline-block position-relative me-1 mb-1" style="width:48px;height:48px;">
-                        <img src="${url}" class="spct-thumb-img" data-idx="${idx}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;cursor:pointer;" />
-                        <button type="button" class="btn btn-danger btn-sm spct-thumb-delete position-absolute top-0 end-0 d-none" data-idx="${idx}" style="z-index:2;padding:2px 5px;">
-                            <i class="bx bx-trash"></i>
-                        </button>
-                        <button type="button" class="btn btn-light btn-sm spct-thumb-view position-absolute bottom-0 end-0 d-none" data-idx="${idx}" style="z-index:2;padding:2px 5px;">
-                            <i class="bx bx-show"></i>
-                        </button>
-                    </div>
-                `;
-            });
-            // Luôn thay thế cell upload ảnh (cell cuối cùng)
-            let $imgCell = $row.find('.spct-images-cell');
-            if ($imgCell.length === 0) {
-                $row.find('td:last').replaceWith(`<td class="spct-images-cell">${imgHtml}</td>`);
-            } else {
-                $imgCell.html(imgHtml);
-            }
-            $('#modalUploadImage').modal('hide');
-        });
-
-        // Click vào thumbnail ảnh để mở lại modal upload ảnh
-        $(document).on('click', '.spct-thumb-img', function() {
-            let $row = $(this).closest('tr');
-            let rowIndex = $row.index();
-            $('#modalUploadImage').data('rowIndex', rowIndex);
-            renderSpctImagePreview(rowIndex);
-            $('#modalUploadImage').modal('show');
-        });
-
         // Xử lý nút thêm kích thước mới
-        $('#addNewSize').on('click', function() {
+        $('#addNewSizeBtn').on('click', function() {
             $.get('/KichThuoc/Create', function(html) {
                 $('#modalAddKichThuocContent').html(html);
                 $('#modalAddKichThuoc').modal('show');
@@ -853,7 +850,23 @@
         // Xử lý submit form trong modal kích thước
         $(document).on('submit', '#createKichThuocForm', function(e) {
             e.preventDefault();
-            handleFormSubmit(this, '/KichThuoc/Create', 'KichThuocId', 'maKichThuoc');
+            let formData = $(this).serialize();
+            $.ajax({
+                url: '/KichThuoc/Create',
+                type: 'POST',
+                data: formData,
+                success: function(res) {
+                    if(res.success || res === true) {
+                        $('#modalAddKichThuoc').modal('hide');
+                        openSizeModal(); // Re-open size modal to refresh the list
+                    } else {
+                        Swal.fire('Lỗi', res.message || 'Không thể thêm kích thước mới', 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Lỗi', 'Không thể thêm kích thước mới', 'error');
+                }
+            });
         });
 
         // Xử lý submit form trong modal màu sắc
@@ -1039,27 +1052,6 @@
             value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
             $(this).val(value);
         });
-
-        // Xem ảnh lớn
-        $(document).on('click', '.spct-thumb-view', function(e) {
-            e.stopPropagation();
-            let rowIndex = $('#modalUploadImage').data('rowIndex');
-            let idx = $(this).data('idx');
-            let file = spctImages[rowIndex][idx];
-            let url = URL.createObjectURL(file);
-            $('#previewLargeImg').attr('src', url);
-            $('#modalPreviewImage').modal('show');
-        });
-
-        // Xóa ảnh
-        $(document).on('click', '.spct-thumb-delete', function(e) {
-            e.stopPropagation();
-            let rowIndex = $('#modalUploadImage').data('rowIndex');
-            let idx = $(this).data('idx');
-            spctImages[rowIndex].splice(idx, 1);
-            renderSpctImagePreview(rowIndex);
-            $('#spctImageCount').text(`${spctImages[rowIndex].length} file(s)`);
-        });
     </script>
 }
 
@@ -1067,7 +1059,7 @@
 <template id="productRowTemplate">
     <tr>
         <td>
-            <input type="checkbox" class="product-checkbox" />
+            <input type="checkbox" class="product-checkbox row-check" />
         </td>
         <td class="stt"></td>
         <td class="product-name"></td>
@@ -1115,6 +1107,9 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+                <div class="d-flex align-items-center mb-3">
+                    <button class="btn btn-primary" id="addNewSizeBtn">+ Thêm kích thước</button>
+                </div>
                 <div class="size-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 12px;">
                     <!-- Kích thước sẽ được thêm vào đây bằng JavaScript -->
                 </div>
