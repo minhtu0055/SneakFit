@@ -1,5 +1,4 @@
-﻿using SneakFit.ViewModels.Catalog.MauSac;
-using SneakFit.ViewModels.Catalog.ThuongHieu;
+﻿using SneakFit.ViewModels.Catalog.ThuongHieu;
 using SneakFit.ViewModels.Common;
 
 namespace SneakFit.ApiIntegration.Services

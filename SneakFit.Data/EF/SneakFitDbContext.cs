@@ -24,7 +24,7 @@ namespace SneakFit.Data.EF
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server=LAPTOP-PH9VPOUT\\SQLEXPRESS;Database=SneakFit;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true");       
+            optionsBuilder.UseSqlServer("Server=GIGABYTE\\SQLEXPRESS;Database=SneakFit;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true");       
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -44,6 +44,7 @@ namespace SneakFit.Data.EF
             modelBuilder.ApplyConfiguration(new SanPhamConfiguration());
             modelBuilder.ApplyConfiguration(new ThuongHieuConfiguration());
             modelBuilder.ApplyConfiguration(new SanPhamConfiguration());
+            modelBuilder.ApplyConfiguration(new DiaChiConfiguration());
             modelBuilder.Entity<IdentityUserClaim<Guid>>();
             modelBuilder.Entity<IdentityUserRole<Guid>>().HasKey(x => new { x.UserId, x.RoleId });
             modelBuilder.Entity<IdentityUserLogin<Guid>>().HasKey(x => x.UserId);
@@ -52,6 +53,7 @@ namespace SneakFit.Data.EF
             modelBuilder.Seed();
         }
         public DbSet<ChatLieu> ChatLieu { get; set; }
+        public DbSet<DiaChi> DiaChi { get; set; }
         public DbSet<DanhMuc> DanhMuc { get; set; }
         public DbSet<DeGiay> DeGiay { get; set; }
         public DbSet<GioHang> GioHang { get; set; }

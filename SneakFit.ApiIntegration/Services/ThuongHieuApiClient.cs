@@ -1,6 +1,4 @@
 ﻿using Newtonsoft.Json;
-using SneakFit.ViewModels.Catalog.KichThuoc;
-using SneakFit.ViewModels.Catalog.SanPhamChiTiet;
 using SneakFit.ViewModels.Catalog.ThuongHieu;
 using SneakFit.ViewModels.Common;
 using System.Net.Http.Headers;

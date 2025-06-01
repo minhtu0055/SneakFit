@@ -1,3 +1,4 @@
+using Azure.Core;
 using Newtonsoft.Json;
 using SneakFit.ViewModels.Catalog.DanhMuc;
 using SneakFit.ViewModels.Common;
@@ -89,6 +90,7 @@ namespace SneakFit.ApiIntegration.Services
             client.BaseAddress = new Uri(_configuration["BaseAddress"]);
             var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
             var response = await client.GetAsync($"/api/danhmuc/GetAll");
             var body = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)

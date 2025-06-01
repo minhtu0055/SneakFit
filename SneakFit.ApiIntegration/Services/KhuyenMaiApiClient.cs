@@ -2,7 +2,6 @@
 using SneakFit.Data.Enums;
 using SneakFit.ViewModels.Catalog.KhuyenMai;
 using SneakFit.ViewModels.Common;
-using SneakFit.ViewModels.System.User;
 using System.Net.Http.Headers;
 using System.Text;
 

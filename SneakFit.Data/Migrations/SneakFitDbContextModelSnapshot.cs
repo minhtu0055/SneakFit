@@ -188,6 +188,13 @@ namespace SneakFit.Data.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("GioiTinh")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("HoVaTen")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
@@ -236,14 +243,16 @@ namespace SneakFit.Data.Migrations
                         {
                             Id = new Guid("69bd714f-9576-45ba-b5b7-f00649be00de"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "a90f90a8-4313-4ed3-8d62-8a6888016081",
+                            ConcurrencyStamp = "dd7ad18c-7a2e-4afc-9aee-fab44fc18e32",
                             Email = "tupmph49568@gmail.com",
                             EmailConfirmed = true,
+                            GioiTinh = false,
+                            HoVaTen = "Phí Minh Tú",
                             LockoutEnabled = false,
                             NgaySinh = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NormalizedEmail = "tupmph49568@gmail.com",
                             NormalizedUserName = "Admin",
-                            PasswordHash = "AQAAAAIAAYagAAAAEKiB+rhhsCoLA5F0FKSGq2fDxBSqs5JI7uAj2DHh6x2fwUHAu7ZmpspId0hyU73kZA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEPAqAfZqHsPD/0gAO2NWOX19IHjxsFFYNeIwnCQxcJObIIMzVEw7yAlmFOiQ8TravQ==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
                             TrangThai = true,
@@ -334,6 +343,53 @@ namespace SneakFit.Data.Migrations
                             Id = new Guid("8f8d4a1e-2bfa-4e8c-9d2c-3f6a7e9b81cb"),
                             TenDeGiay = "Nhựa"
                         });
+                });
+
+            modelBuilder.Entity("SneakFit.Data.Entities.DiaChi", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("Mac_Dinh")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SoDienThoai")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TenDiaChi")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("TenHuyen")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("TenNguoiNhan")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TenThanhPho")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("TenXa")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("DiaChi");
                 });
 
             modelBuilder.Entity("SneakFit.Data.Entities.GioHang", b =>
@@ -777,6 +833,17 @@ namespace SneakFit.Data.Migrations
                     b.ToTable("Voucher");
                 });
 
+            modelBuilder.Entity("SneakFit.Data.Entities.DiaChi", b =>
+                {
+                    b.HasOne("SneakFit.Data.Entities.AppUser", "User")
+                        .WithMany("DiaChi")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("SneakFit.Data.Entities.GioHang", b =>
                 {
                     b.HasOne("SneakFit.Data.Entities.AppUser", "User")
@@ -937,6 +1004,8 @@ namespace SneakFit.Data.Migrations
 
             modelBuilder.Entity("SneakFit.Data.Entities.AppUser", b =>
                 {
+                    b.Navigation("DiaChi");
+
                     b.Navigation("GioHang")
                         .IsRequired();
 

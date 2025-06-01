@@ -4,9 +4,6 @@ using SneakFit.ViewModels.Common;
 using System.Net.Http.Headers;
 using System.Net.Http;
 using System.Text;
-using SneakFit.ViewModels.System.User;
-using SneakFit.ViewModels.Catalog.MauSac;
-using SneakFit.ViewModels.Catalog.SanPham;
 
 namespace SneakFit.ApiIntegration.Services
 {

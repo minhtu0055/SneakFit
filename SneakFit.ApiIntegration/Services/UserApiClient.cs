@@ -55,7 +55,7 @@ namespace SneakFit.ApiIntegration.Services
             client.BaseAddress = new Uri(_configuration["BaseAddress"]);
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
             var response = await client.GetAsync($"/api/user/paging?pageIndex=" +
-                $"{request.PageIndex}&pageSize={request.PageSize}&tukhoa={request.TuKhoa}");
+                $"{request.PageIndex}&pageSize={request.PageSize}&tukhoa={request.TuKhoa}&role={request.Role}");
             var body = await response.Content.ReadAsStringAsync();
             var users = JsonConvert.DeserializeObject<ApiSuccessResult<PagedResult<UserViewModels>>>(body);
             return users;
@@ -116,6 +116,23 @@ namespace SneakFit.ApiIntegration.Services
             var response = await client.PutAsync($"/api/user/{id}/role", httpContent);
             var result = await response.Content.ReadAsStringAsync();
 
+            if (response.IsSuccessStatusCode)
+                return JsonConvert.DeserializeObject<ApiSuccessResult<bool>>(result);
+
+            return JsonConvert.DeserializeObject<ApiErrorResult<bool>>(result);
+        }
+        public async Task<ApiResult<bool>> Update(UserUpdateRequest request)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var json = JsonConvert.SerializeObject(request);
+            var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await client.PutAsync($"/api/user/{request.Id}", httpContent);
+            var result = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)
                 return JsonConvert.DeserializeObject<ApiSuccessResult<bool>>(result);
 

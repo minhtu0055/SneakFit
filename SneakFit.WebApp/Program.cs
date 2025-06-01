@@ -12,7 +12,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 .AddCookie(options =>
     {
         options.LoginPath = "/Login/Index";
-        options.AccessDeniedPath = "/User/Forbidden/";
+        options.AccessDeniedPath = "/Forbidden/Index";
         // Thêm các cấu hình sau
         options.Cookie.Name = "SneakFit.Admin";
         options.Cookie.HttpOnly = true;
@@ -41,6 +41,7 @@ builder.Services.AddScoped<ISpctApiClient, SpctApiClient>();
 builder.Services.AddScoped<IThuongHieuApiClient, ThuongHieuApiClient>();
 builder.Services.AddScoped<IDanhMucApiClient, DanhMucApiClient>();
 builder.Services.AddScoped<IVoucherApiClient, VoucherApiClient>();
+builder.Services.AddScoped<IHoaDonApiClient, HoaDonApiClient>();
 
 
 

@@ -95,6 +95,8 @@ namespace SneakFit.ApiIntegration.Services
         {
             var client = _httpClientFactory.CreateClient();
             client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
             var response = await client.GetAsync($"/api/sanpham/GetAll");
             var body = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)
@@ -192,6 +194,7 @@ namespace SneakFit.ApiIntegration.Services
             var json = JsonConvert.SerializeObject(model);
             var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
             var response = await client.PutAsync($"/api/SanPham/UpdateSPCTDetail", httpContent);
+
             var body = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)
                 return true;

@@ -6,34 +6,16 @@
 
 
 <div class="container-fluid">
-    <h1 class="mt-4">Tạo mới voucher</h1>
+    <h3 class="mt-4">Tạo mới voucher</h3>
     <ol class="breadcrumb mb-4">
         <li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
         <li class="breadcrumb-item"><a asp-action="Index">Danh sách voucher</a></li>
         <li class="breadcrumb-item active">Tạo mới</li>
     </ol>
     <div class="card mb-4">
-        <div class="card-header">
-            <div class="row">
-                <div class="col-md-6 col-xs-12">
-                    <a class="btn btn-success" asp-action="Index">
-                        <i class="bx bx-arrow-back me-1"></i> Về danh sách
-                    </a>
-                </div>
-            </div>
-        </div>
-
         <div class="card-body">
             <div class="col-md-8 mx-auto">
                 <form asp-action="Create" method="post" id="create-form" class="needs-validation" novalidate>
-                    <div asp-validation-summary="All" class="alert alert-danger mb-4" role="alert">
-                        <h5 class="alert-heading">Vui lòng kiểm tra lại các thông tin sau:</h5>
-                        <ul class="mb-0">
-                            <li>Vui lòng điền đầy đủ thông tin bắt buộc</li>
-                            <li>Kiểm tra định dạng và giá trị hợp lệ</li>
-                        </ul>
-                    </div>
-
                     <div class="mb-3 row">
                         <label asp-for="MaVoucher" class="col-sm-3 col-form-label">Mã voucher <span class="text-danger">*</span></label>
                         <div class="col-sm-9">
@@ -43,7 +25,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="mb-3 row">
                         <label asp-for="LoaiGiamGia" class="col-sm-3 col-form-label">Loại Giảm giá <span class="text-danger">*</span></label>
                         <div class="col-sm-9">
@@ -55,7 +36,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="mb-3 row">
                         <label asp-for="GiaTriGiamGia" class="col-sm-3 col-form-label">Giá trị giảm giá <span class="text-danger">*</span></label>
                         <div class="col-sm-9">
@@ -69,7 +49,6 @@
                             <small class="form-text text-muted discount-hint"></small>
                         </div>
                     </div>
-
                     <div class="mb-3 row">
                         <label asp-for="DieuKienApDung" class="col-sm-3 col-form-label">Điều kiện áp dụng <span class="text-danger">*</span></label>
                         <div class="col-sm-9">
@@ -82,7 +61,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="mb-3 row">
                         <label asp-for="SoLuong" class="col-sm-3 col-form-label">Số Lượng <span class="text-danger">*</span></label>
                         <div class="col-sm-9">
@@ -94,7 +72,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="mb-3 row">
                         <label asp-for="ThoiGianBatDau" class="col-sm-3 col-form-label">Thời gian bắt đầu <span class="text-danger">*</span></label>
                         <div class="col-sm-9">
@@ -106,7 +83,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="mb-3 row">
                         <label asp-for="ThoiGianKetThuc" class="col-sm-3 col-form-label">Thời gian kết thúc <span class="text-danger">*</span></label>
                         <div class="col-sm-9">
@@ -118,10 +94,9 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="mb-3 row">
-                        <div class="col-sm-9 offset-sm-3">
-                            <button type="submit" class="btn btn-primary me-2">
+                        <div class="col-sm-9 offset-sm-8">
+                            <button type="submit" class="btn btn-primary me-4">
                                 <i class="bx bx-save me-1"></i> Tạo mới
                             </button>
                             <a asp-action="Index" class="btn btn-secondary">
@@ -134,7 +109,6 @@
         </div>
     </div>
 </div>
-
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");

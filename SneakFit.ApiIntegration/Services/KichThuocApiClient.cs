@@ -1,12 +1,9 @@
 ﻿using Newtonsoft.Json;
-using SneakFit.ViewModels.Catalog.ChatLieu;
 using SneakFit.ViewModels.Common;
 using System.Net.Http.Headers;
 using System.Net.Http;
 using System.Text;
-using SneakFit.ViewModels.System.User;
 using SneakFit.ViewModels.Catalog.KichThuoc;
-using SneakFit.ViewModels.Catalog.MauSac;
 
 namespace SneakFit.ApiIntegration.Services
 {

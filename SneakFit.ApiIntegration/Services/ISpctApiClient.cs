@@ -1,5 +1,4 @@
-﻿using SneakFit.ViewModels.Catalog.SanPham;
-using SneakFit.ViewModels.Catalog.SanPhamChiTiet;
+﻿using SneakFit.ViewModels.Catalog.SanPhamChiTiet;
 using SneakFit.ViewModels.Common;
 
 namespace SneakFit.ApiIntegration.Services

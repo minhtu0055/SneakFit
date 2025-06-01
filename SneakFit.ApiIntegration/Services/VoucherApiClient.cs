@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
 using SneakFit.Data.Entities;
 using SneakFit.Data.Enums;
-using SneakFit.ViewModels.Catalog.KhuyenMai;
 using SneakFit.ViewModels.Catalog.Voucher;
 using SneakFit.ViewModels.Common;
 using System.Net.Http.Headers;
