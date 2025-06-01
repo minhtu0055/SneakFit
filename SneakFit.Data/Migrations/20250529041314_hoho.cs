@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SneakFit.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class s : Migration
+    public partial class hoho : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -182,7 +182,9 @@ namespace SneakFit.Data.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UrlHinhAnh = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     NgaySinh = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    GioiTinh = table.Column<bool>(type: "bit", nullable: false),
                     TrangThai = table.Column<bool>(type: "bit", nullable: false),
+                    HoVaTen = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -254,6 +256,31 @@ namespace SneakFit.Data.Migrations
                         name: "FK_SanPham_DanhMuc_DanhMucId",
                         column: x => x.DanhMucId,
                         principalTable: "DanhMuc",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DiaChi",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TenNguoiNhan = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SoDienThoai = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TenDiaChi = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    TenThanhPho = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    TenHuyen = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    TenXa = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    Mac_Dinh = table.Column<bool>(type: "bit", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DiaChi", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DiaChi_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -535,8 +562,13 @@ namespace SneakFit.Data.Migrations
 
             migrationBuilder.InsertData(
                 table: "Users",
-                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "LockoutEnabled", "LockoutEnd", "NgaySinh", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TrangThai", "TwoFactorEnabled", "UrlHinhAnh", "UserName" },
-                values: new object[] { new Guid("69bd714f-9576-45ba-b5b7-f00649be00de"), 0, "a90f90a8-4313-4ed3-8d62-8a6888016081", "tupmph49568@gmail.com", true, false, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "tupmph49568@gmail.com", "Admin", "AQAAAAIAAYagAAAAEKiB+rhhsCoLA5F0FKSGq2fDxBSqs5JI7uAj2DHh6x2fwUHAu7ZmpspId0hyU73kZA==", null, false, "", true, false, null, "Admin" });
+                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "GioiTinh", "HoVaTen", "LockoutEnabled", "LockoutEnd", "NgaySinh", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TrangThai", "TwoFactorEnabled", "UrlHinhAnh", "UserName" },
+                values: new object[] { new Guid("69bd714f-9576-45ba-b5b7-f00649be00de"), 0, "dd7ad18c-7a2e-4afc-9aee-fab44fc18e32", "tupmph49568@gmail.com", true, false, "Phí Minh Tú", false, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "tupmph49568@gmail.com", "Admin", "AQAAAAIAAYagAAAAEPAqAfZqHsPD/0gAO2NWOX19IHjxsFFYNeIwnCQxcJObIIMzVEw7yAlmFOiQ8TravQ==", null, false, "", true, false, null, "Admin" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_DiaChi_UserId",
+                table: "DiaChi",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_GioHang_UserId",
@@ -628,6 +660,9 @@ namespace SneakFit.Data.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "DiaChi");
+
             migrationBuilder.DropTable(
                 name: "GioHangChiTiet");
 

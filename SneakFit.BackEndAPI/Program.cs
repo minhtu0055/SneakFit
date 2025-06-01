@@ -23,6 +23,7 @@ using SneakFit.Application.System.Role;
 using SneakFit.Application.Catalog.GioHang;
 using SneakFit.Application.Email;
 using SneakFit.Application.System.DiaChi;
+using SneakFit.Application.Catalog.HoaDon;
 
 
 
@@ -84,6 +85,7 @@ builder.Services.AddScoped<IVoucherService, VoucherService>(); // khai báo dị
 builder.Services.AddScoped<IGioHangService, GioHangService>(); // khai báo dịch vụ
 builder.Services.AddScoped<IEmailSender, EmailSender>(); // khai báo dịch vụ
 builder.Services.AddScoped<IDiaChiService, DiaChiService>(); // khai báo dịch vụ
+builder.Services.AddScoped<IHoaDonService, HoaDonService>();// khai báo dịch vụ
 
 
 builder.Services.AddEndpointsApiExplorer();
