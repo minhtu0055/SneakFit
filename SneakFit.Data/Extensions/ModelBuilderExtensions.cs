@@ -49,7 +49,7 @@ namespace SneakFit.Data.Extensions
                 {
                     Id = new Guid("8f8d4a5e-2bfa-4e9c-9d2c-3f6a7e9b87cb"),
                     TenMauSac = "Giày Đá Bóng",
-                    MaMauSac = "#FF0000",
+                    MaMauSac = "#FFFFFF",
                 }
             );
             modelBuilder.Entity<KichThuoc>().HasData(

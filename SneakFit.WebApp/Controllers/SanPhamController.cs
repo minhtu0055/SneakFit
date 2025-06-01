@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using SneakFit.ApiIntegration.Services;
 using SneakFit.ViewModels.Catalog.SanPham;
 using SneakFit.ViewModels.Catalog.SanPhamChiTiet;
+using Microsoft.AspNetCore.Http;
 
 namespace SneakFit.Admin.Controllers
 {
@@ -16,15 +17,17 @@ namespace SneakFit.Admin.Controllers
         private readonly IChatLieuApiClient _chatLieuApiClient;
         private readonly IThuongHieuApiClient _thuongHieuApiClient;
         private readonly IDeGiayApiClient _deGiayApiClient;
+        private readonly IConfiguration _configuration;
 
-        public SanPhamController(ISanPhamApiClient sanPhamApiClient,
+        public SanPhamController(ISanPhamApiClient sanPhamApiClient, 
                                 IDanhMucApiClient danhMucApiClient,
                                 ISpctApiClient spctApiClient,
                                 IKichThuocApiClient kichThuocApiClient,
                                 IMauSacApiClient mauSacApiClient,
                                 IChatLieuApiClient chatLieuApiClient,
                                 IThuongHieuApiClient thuongHieuApiClient,
-                                IDeGiayApiClient deGiayApiClient)
+                                IDeGiayApiClient deGiayApiClient,
+                                IConfiguration configuration)
         {
             _sanPhamApiClient = sanPhamApiClient;
             _danhMucApiClient = danhMucApiClient;
@@ -34,8 +37,10 @@ namespace SneakFit.Admin.Controllers
             _chatLieuApiClient = chatLieuApiClient;
             _thuongHieuApiClient = thuongHieuApiClient;
             _deGiayApiClient = deGiayApiClient;
+            _configuration = configuration;
         }
 
+        // Hiển thị danh sách sản phẩm với phân trang và tìm kiếm
         public async Task<IActionResult> Index(string keyWord, Guid? danhMucId, int pageIndex = 1, int pageSize = 8)
         {
             var request = new SanPhamPagingRequest()
@@ -64,6 +69,7 @@ namespace SneakFit.Admin.Controllers
             return View(data);
         }
 
+        // Hiển thị form thêm mới sản phẩm
         [HttpGet]
         public async Task<IActionResult> Create()
         {
@@ -76,6 +82,7 @@ namespace SneakFit.Admin.Controllers
             return PartialView("Create");
         }
 
+        // Xử lý thêm mới sản phẩm
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ThemSanPham request)
@@ -99,6 +106,7 @@ namespace SneakFit.Admin.Controllers
             return Json(new { success = false, message = "Thêm sản phẩm thất bại" });
         }
 
+        // Hiển thị form chỉnh sửa sản phẩm
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
         {
@@ -124,6 +132,7 @@ namespace SneakFit.Admin.Controllers
             return PartialView("Edit", editModel);
         }
 
+        // Xử lý cập nhật sản phẩm
         [HttpPut]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(SuaSanPham request)
@@ -154,6 +163,7 @@ namespace SneakFit.Admin.Controllers
             return Ok(result);
         }
 
+        // Cập nhật trạng thái sản phẩm (active/inactive)
         [HttpPost]
         public async Task<IActionResult> CapNhatTrangThai(Guid id, bool trangThai)
         {
@@ -172,8 +182,9 @@ namespace SneakFit.Admin.Controllers
             return Json(new { success = false, message = "Cập nhật trạng thái thất bại" });
         }
 
+        // Hiển thị form chỉnh sửa chi tiết sản phẩm (SPCT)
         [HttpGet]
-        public async Task<IActionResult> EditSPCT(Guid id)
+        public async Task<IActionResult> EditSPCT(Guid id) 
         {
             var sanPham = await _sanPhamApiClient.GetById(id);
             if (sanPham == null) return NotFound();
@@ -184,7 +195,9 @@ namespace SneakFit.Admin.Controllers
             var deGiays = await _deGiayApiClient.GetAll();
             var kichThuocs = await _kichThuocApiClient.GetAll();
             var mauSacs = await _mauSacApiClient.GetAll();
+            var sanphams = await _sanPhamApiClient.GetAll();
 
+            ViewBag.SanPhams = sanphams.ToDictionary(x => x.Id, x => x.TenSanPham);
             ViewBag.ChatLieus = chatLieus.ToDictionary(x => x.Id, x => x.TenChatLieu);
             ViewBag.ThuongHieus = thuongHieus.ToDictionary(x => x.Id, x => x.TenThuongHieu);
             ViewBag.DeGiays = deGiays.ToDictionary(x => x.Id, x => x.TenDeGiay);
@@ -202,18 +215,80 @@ namespace SneakFit.Admin.Controllers
             return View(model);
         }
 
+        // Cập nhật thông tin chi tiết sản phẩm
         [HttpPost]
-        public async Task<IActionResult> UpdateSPCT(Guid id, [FromBody] List<SanPhamChiTietCapNhat> updates)
+        public async Task<IActionResult> UpdateSPCT([FromBody] List<SanPhamChiTietCapNhat> updates) // ở ngoài table list danh sách spct
         {
             try
             {
-                var result = await _sanPhamApiClient.UpdateSPCT(id, updates);
-                return Json(new { success = true, message = "Cập nhật thành công" });
+                var result = await _sanPhamApiClient.UpdateSPCT(updates);
+                if (result)
+                    return Json(new { success = true, message = "Cập nhật thành công" });
+                return Json(new { success = false, message = "Cập nhật thất bại" });
             }
             catch (Exception ex)
             {
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
+        // Lấy chi tiết một sản phẩm chi tiết
+        [HttpGet]
+        public async Task<IActionResult> GetSPCTDetail(Guid id)
+        {
+            var detail = await _sanPhamApiClient.GetSPCTDetail(id);
+            var apiBaseUrl = _configuration["BackEndApiBaseUrl"];
+            foreach (var img in detail.Images)
+            {
+                if (!string.IsNullOrEmpty(img.UrlHinhAnh) && !img.UrlHinhAnh.StartsWith("http"))
+                {
+                    img.UrlHinhAnh = apiBaseUrl.TrimEnd('/') + img.UrlHinhAnh;
+                }
+            }
+            return Json(detail);
+        }
+
+        // Cập nhật chi tiết một sản phẩm chi tiết
+        [HttpPost]
+        public async Task<IActionResult> UpdateSPCTDetail([FromBody] SuaSPCTDetailViewModel model) // ở trong modal detail spct
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList(); // mess báo lỗi
+                return Json(new { success = false, message = "Dữ liệu không hợp lệ", errors });
+            }
+
+            var result = await _sanPhamApiClient.UpdateSPCTDetail(model);
+            if (result)
+                return Json(new { success = true });
+            return Json(new { success = false, message = "Cập nhật thất bại" });
+        }
+
+        // Upload ảnh cho sản phẩm chi tiết
+        [HttpPost]
+        public async Task<IActionResult> UploadImages(Guid sanPhamChiTietId, List<IFormFile> files)
+        {
+            var result = await _sanPhamApiClient.UploadImages(sanPhamChiTietId, files);
+            if (result)
+            {
+                var spctDetail = await _sanPhamApiClient.GetSPCTDetail(sanPhamChiTietId);
+                return Json(new { success = true, images = spctDetail.Images });
+            }
+            return Json(new { success = false, message = "Upload ảnh thất bại" });
+        }
+
+        // Xóa ảnh của sản phẩm chi tiết
+        [HttpDelete]
+        public async Task<IActionResult> DeleteImage(Guid imageId, Guid sanPhamChiTietId)
+        {
+            var result = await _sanPhamApiClient.DeleteImage(imageId, sanPhamChiTietId);
+            if (result)
+            {
+                var spctDetail = await _sanPhamApiClient.GetSPCTDetail(sanPhamChiTietId);
+                return Json(new { success = true, images = spctDetail.Images });
+            }
+            return Json(new { success = false, message = "Xóa ảnh thất bại" });
+        }
+
     }
 }

@@ -11,6 +11,7 @@ using SneakFit.ViewModels.Catalog.SanPham;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
 
 namespace SneakFit.Admin.Controllers
 {
@@ -48,6 +49,7 @@ namespace SneakFit.Admin.Controllers
             _logger = logger;
         }
 
+        // Hiển thị danh sách sản phẩm chi tiết với phân trang và tìm kiếm
         public async Task<IActionResult> Index(string tuKhoa, int pageIndex = 1, int pageSize = 10)
         {
             var request = new PhanTrangSPCT()
@@ -124,6 +126,7 @@ namespace SneakFit.Admin.Controllers
             });
         }
 
+        // Hiển thị form thêm mới sản phẩm chi tiết
         [HttpGet]
         public async Task<IActionResult> Create()
         {
@@ -139,6 +142,7 @@ namespace SneakFit.Admin.Controllers
             }
         }
 
+        // Xử lý thêm mới sản phẩm chi tiết
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ThemSPCT request)
@@ -146,10 +150,9 @@ namespace SneakFit.Admin.Controllers
             if (!ModelState.IsValid)
             {
                 await LoadCombobox();
-                // Hiển thị lỗi từng trường cho người dùng
                 return View(request);
             }
-
+            // Gọi qua ApiClient, không xử lý ảnh ở đây
             var result = await _spctApiClient.Create(request);
             if (result.IsSuccessed)
             {
@@ -158,13 +161,13 @@ namespace SneakFit.Admin.Controllers
             }
             else
             {
-                // Hiển thị rõ message lỗi từ backend
                 ModelState.AddModelError("", result.Message ?? "Thêm sản phẩm chi tiết thất bại");
                 await LoadCombobox();
                 return View(request);
             }
         }
-
+        
+        // Xử lý thêm mới nhiều sản phẩm chi tiết
         [HttpPost]
         public async Task<IActionResult> CreateMultiple([FromBody] List<SPCTViewModels> items)
         {
@@ -172,7 +175,9 @@ namespace SneakFit.Admin.Controllers
                 return Json(new { success = false, message = "Dữ liệu không hợp lệ hoặc chưa chọn màu/kích thước" });
 
             var errorList = new List<string>();
+            var createdItems = new List<SPCTViewModels>(); // Lưu danh sách sản phẩm đã tạo
             int resultCount = 0;
+
             foreach (var item in items)
             {
                 var request = new ThemSPCT
@@ -184,23 +189,31 @@ namespace SneakFit.Admin.Controllers
                     MauSacId = item.MauSacId,
                     KichThuocId = item.KichThuocId,
                     SoLuong = item.SoLuong,
-                    Gia = item.Gia
+                    Gia = item.Gia,
+                    TrangThai = item.TrangThai
                 };
 
                 var result = await _spctApiClient.Create(request);
                 if (result.IsSuccessed)
+                {
                     resultCount++;
+                    createdItems.Add(result.ResultObj);
+                }
                 else
+                {
                     errorList.Add($"[{item.MauSacId}-{item.KichThuocId}]: {result.Message}");
+                }
             }
 
-            if (resultCount > 0 && errorList.Count == 0)
+            // Luôn trả về success: true nếu có ít nhất một sản phẩm được tạo thành công
+            if (resultCount > 0)
             {
-                return Json(new { success = true, message = $"Thêm mới {resultCount} sản phẩm chi tiết thành công" });
-            }
-            else if (resultCount > 0 && errorList.Count > 0)
-            {
-                return Json(new { success = true, message = $"Thêm mới {resultCount} sản phẩm chi tiết thành công. Một số sản phẩm bị lỗi: {string.Join("; ", errorList)}" });
+                string message = $"Thêm mới {resultCount} sản phẩm chi tiết thành công.";
+                if (errorList.Count > 0)
+                {
+                    message += $"\nMột số sản phẩm bị lỗi: {string.Join("; ", errorList)}";
+                }
+                return Json(new { success = true, message = message, data = createdItems });
             }
             else
             {
@@ -208,7 +221,7 @@ namespace SneakFit.Admin.Controllers
             }
         }
 
-        
+        // Hiển thị form chỉnh sửa sản phẩm chi tiết
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
         {
@@ -233,6 +246,7 @@ namespace SneakFit.Admin.Controllers
             return View(viewModel);
         }
 
+        // Xử lý cập nhật sản phẩm chi tiết
         [HttpPost]
         public async Task<IActionResult> Edit(SuaSPCT request)
         {
@@ -252,6 +266,7 @@ namespace SneakFit.Admin.Controllers
             return View(request);
         }
 
+        // Cập nhật trạng thái sản phẩm chi tiết
         [HttpPost]
         public async Task<IActionResult> CapNhatTrangThai(Guid id, bool trangThai)
         {
@@ -270,6 +285,7 @@ namespace SneakFit.Admin.Controllers
             return Json(new { success = false, message = "Cập nhật trạng thái thất bại" });
         }
 
+        // Cập nhật giá sản phẩm chi tiết
         [HttpPost]
         public async Task<IActionResult> CapNhatGia(Guid id, decimal giaMoi)
         {
@@ -289,6 +305,7 @@ namespace SneakFit.Admin.Controllers
             }
         }
 
+        // Cập nhật số lượng sản phẩm chi tiết
         [HttpPost]
         public async Task<IActionResult> CapNhatSoLuong(Guid id, int soLuongThem)
         {
@@ -308,5 +325,46 @@ namespace SneakFit.Admin.Controllers
             }
         }
 
+        // Upload ảnh cho sản phẩm chi tiết
+        [HttpPost]
+        public async Task<IActionResult> UploadImages(Guid sanPhamChiTietId, List<IFormFile> files)
+        {
+            if (files == null || !files.Any())
+                return Json(new { success = false, message = "Không có file để upload" });
+
+            // Kiểm tra số lượng file
+            if (files.Count > 3)
+                return Json(new { success = false, message = "Chỉ được upload tối đa 3 ảnh" });
+
+            int successCount = 0;
+            var errors = new List<string>();
+
+            foreach (var file in files)
+            {
+                try
+                {
+                    int result = await _spctApiClient.AddImage(sanPhamChiTietId, file);
+                    if (result > 0)
+                        successCount++;
+                    else
+                        errors.Add($"Không thể upload file {file.FileName}");
+                }
+                catch (Exception ex)
+                {
+                    errors.Add($"Lỗi upload file {file.FileName}: {ex.Message}");
+                }
+            }
+
+            if (successCount > 0)
+            {
+                string message = $"Upload thành công {successCount}/{files.Count} file.";
+                if (errors.Any())
+                    message += $"\nLỗi: {string.Join("; ", errors)}";
+                return Json(new { success = true, message = message });
+            }
+            return Json(new { success = false, message = $"Upload thất bại: {string.Join("; ", errors)}" });
+        }
+
+        
     }
 }

@@ -1,9 +1,11 @@
+using Azure.Core;
 using Newtonsoft.Json;
 using SneakFit.ViewModels.Catalog.SanPham;
 using SneakFit.ViewModels.Catalog.SanPhamChiTiet;
 using SneakFit.ViewModels.Common;
 using System.Net.Http.Headers;
 using System.Text;
+using Microsoft.AspNetCore.Http;
 
 namespace SneakFit.ApiIntegration.Services
 {
@@ -134,7 +136,7 @@ namespace SneakFit.ApiIntegration.Services
             throw new Exception($"Không thể cập nhật trạng thái. Error: {result}");
         }
 
-        public async Task<bool> UpdateSPCT(Guid id, List<SanPhamChiTietCapNhat> updates)
+        public async Task<bool> UpdateSPCT(List<SanPhamChiTietCapNhat> updates)
         {
             var client = _httpClientFactory.CreateClient();
             client.BaseAddress = new Uri(_configuration["BaseAddress"]);
@@ -144,39 +146,11 @@ namespace SneakFit.ApiIntegration.Services
 
             var json = JsonConvert.SerializeObject(updates);
             var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
-
-            var response = await client.PutAsync($"/api/SanPham/{id}/spct", httpContent);
-            var result = await response.Content.ReadAsStringAsync();
-            if (response.IsSuccessStatusCode)
-            {
-                var settings = new JsonSerializerSettings
-                {
-                    NullValueHandling = NullValueHandling.Ignore,
-                    MissingMemberHandling = MissingMemberHandling.Ignore
-                };
-                var apiResult = JsonConvert.DeserializeObject<ApiSuccessResult<bool>>(result, settings);
-                return apiResult.ResultObj;
-            }
-
-            throw new Exception($"Không thể cập nhật SPCT. Error: {result}");
-        }
-
-        public async Task<List<SPCTViewModels>> GetSPCTByFilter(SPCTFilterRequest request)
-        {
-            var client = _httpClientFactory.CreateClient();
-            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
-            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
-            var json = JsonConvert.SerializeObject(request);
-            var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await client.PostAsync($"/api/SanPham/GetSPCTByFilter", httpContent);
+            var response = await client.PutAsync($"/api/SanPham/UpdateSPCT", httpContent);
             var body = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)
-            {
-                var result = JsonConvert.DeserializeObject<List<SPCTViewModels>>(body);
-                return result ?? new List<SPCTViewModels>();
-            }
-            throw new Exception("Không thể lấy danh sách SPCT theo filter");
+                return true;
+            return false;
         }
 
         public async Task<List<SPCTViewModels>> GetSPCTByProductName(string productName)
@@ -194,5 +168,65 @@ namespace SneakFit.ApiIntegration.Services
             }
             throw new Exception("Không thể lấy danh sách SPCT theo tên sản phẩm");
         }
+
+        public async Task<SPCTDetailViewModel> GetSPCTDetail(Guid spctId)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var response = await client.GetAsync($"/api/SanPham/GetSPCTDetail/{spctId}");
+            var body = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonConvert.DeserializeObject<SPCTDetailViewModel>(body);
+                return result;
+            }
+            throw new Exception("Không thể lấy chi tiết SPCT");
+        }
+
+        public async Task<bool> UpdateSPCTDetail(SuaSPCTDetailViewModel model)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var json = JsonConvert.SerializeObject(model);
+            var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await client.PutAsync($"/api/SanPham/UpdateSPCTDetail", httpContent);
+
+            var body = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+                return true;
+            return false;
+        }
+
+        public async Task<bool> UploadImages(Guid sanPhamChiTietId, List<IFormFile> files)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+            using var content = new MultipartFormDataContent();
+            foreach (var file in files)
+            {
+                var fileContent = new StreamContent(file.OpenReadStream());
+                content.Add(fileContent, "files", file.FileName);
+            }
+            content.Add(new StringContent(sanPhamChiTietId.ToString()), "sanPhamChiTietId");
+            var response = await client.PostAsync($"/api/SanPham/UploadImages", content);
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> DeleteImage(Guid imageId, Guid sanPhamChiTietId)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+            var response = await client.DeleteAsync($"/api/SanPham/DeleteImage/{imageId}?sanPhamChiTietId={sanPhamChiTietId}");
+            return response.IsSuccessStatusCode;
+        }
+
     }
 }

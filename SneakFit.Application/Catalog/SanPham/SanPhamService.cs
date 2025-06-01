@@ -9,20 +9,30 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
+using Microsoft.AspNetCore.Http;
 
 namespace SneakFit.Application.Catalog.SanPham
 {
     public class SanPhamService : ISanPhamService
     {
         private readonly SneakFitDbContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public SanPhamService(SneakFitDbContext context)
+        public SanPhamService(SneakFitDbContext context,
+                              IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
+        
+        // Lấy danh sách sản phẩm có phân trang
         public async Task<PagedResult<SanPhamViewModels>> GetAllPaging(SanPhamPagingRequest request)
         {
-            var query = _context.SanPham.Include(x => x.DanhMuc).AsQueryable();
+            var query = _context.SanPham
+                .Include(x => x.DanhMuc)
+                .Include(x => x.SanPhamChiTiet)
+                .AsQueryable();
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 query = query.Where(x => x.TenSanPham.Contains(request.Keyword));
@@ -37,7 +47,8 @@ namespace SneakFit.Application.Catalog.SanPham
                     Mota = x.Mota,
                     DanhMucId = x.DanhMucId,
                     TenDanhMuc = x.DanhMuc.TenDanhMuc,
-                    TrangThai = x.TrangThai 
+                    TrangThai = x.TrangThai,
+                    TongSoSanPham = x.SanPhamChiTiet.Where(spct => spct.TrangThai).Sum(spct => spct.SoLuong)
                 }).ToListAsync();
             var PageResult = new PagedResult<SanPhamViewModels>()
             {
@@ -48,6 +59,8 @@ namespace SneakFit.Application.Catalog.SanPham
             };
             return PageResult;
         }
+
+        // Lấy danh sách tất cả sản phẩm
         public async Task<List<SanPhamViewModels>> GetAll()
         {
             var list = await _context.SanPham
@@ -66,6 +79,7 @@ namespace SneakFit.Application.Catalog.SanPham
             return list;
         }
 
+        // Lấy chi tiết một sản phẩm
         public async Task<SanPhamViewModels?> GetById(Guid id)
         {
             var entity = await _context.SanPham
@@ -85,6 +99,7 @@ namespace SneakFit.Application.Catalog.SanPham
             };
         }
 
+        // Thêm mới sản phẩm
         public async Task<SanPhamViewModels> Create(ThemSanPham request)
         {
             var danhMuc = await _context.DanhMuc.FindAsync(request.DanhMucId);
@@ -97,7 +112,7 @@ namespace SneakFit.Application.Catalog.SanPham
                 TenSanPham = request.TenSanPham,
                 Mota = request.Mota,
                 DanhMucId = request.DanhMucId,
-                TrangThai = true  // Thêm dòng này
+                TrangThai = true 
             };
 
             _context.SanPham.Add(newSanPham);
@@ -114,7 +129,7 @@ namespace SneakFit.Application.Catalog.SanPham
             };
         }
 
-
+        // Cập nhật sản phẩm
         public async Task<SanPhamViewModels?> Update(SuaSanPham request)
         {
             var entity = await _context.SanPham
@@ -144,6 +159,7 @@ namespace SneakFit.Application.Catalog.SanPham
             };
         }
 
+        // Cập nhật trạng thái sản phẩm
         public async Task<bool> UpdateTrangThai(Guid id, bool trangThai)
         {
             var sanPham = await _context.SanPham.FindAsync(id);
@@ -155,79 +171,22 @@ namespace SneakFit.Application.Catalog.SanPham
             return await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task<bool> UpdateSPCT(Guid id, List<SanPhamChiTietCapNhat> updates)
+        // Cập nhật chi tiết sản phẩm
+        public async Task<bool> UpdateSPCT(List<SanPhamChiTietCapNhat> updates)
         {
-            var sanPham = await _context.SanPham
-                .Include(x => x.SanPhamChiTiet)
-                .FirstOrDefaultAsync(x => x.Id == id);
-
-            if (sanPham == null)
-                return false;
-
             foreach (var update in updates)
             {
-                var spct = sanPham.SanPhamChiTiet.FirstOrDefault(x => x.ID == update.Id);
+                var spct = await _context.SanPhamChiTiet.FirstOrDefaultAsync(x => x.ID == update.Id);
                 if (spct != null)
                 {
-                    spct.SoLuong = update.SoLuong;
-                    spct.Gia = update.Gia;
-                    spct.TrangThai = update.TrangThai;
+                    if (update.SoLuong > 0) spct.SoLuong = update.SoLuong;
+                    if (update.Gia > 0) spct.Gia = update.Gia;
                 }
             }
-
-            await _context.SaveChangesAsync();
-            return true;
+            return await _context.SaveChangesAsync() > 0;
         }
 
-
-        public async Task<List<SPCTViewModels>> GetSPCTByFilter(SPCTFilterRequest request)
-        {
-            var query = _context.SanPhamChiTiet.Include(x => x.SanPham).AsQueryable();
-
-            if (request.SanPhamId.HasValue)
-                query = query.Where(x => x.SanPhamId == request.SanPhamId);
-            else if (!string.IsNullOrEmpty(request.TenSanPham))
-                query = query.Where(x => x.SanPham.TenSanPham == request.TenSanPham);
-
-            // Thêm xử lý TuKhoa
-            if (!string.IsNullOrEmpty(request.TuKhoa))
-                query = query.Where(x => x.SanPham.TenSanPham.Contains(request.TuKhoa));
-
-            if (request.KichThuocId.HasValue)
-                query = query.Where(x => x.KichThuocId == request.KichThuocId);
-            if (request.MauSacId.HasValue)
-                query = query.Where(x => x.MauSacId == request.MauSacId);
-            if (request.ChatLieuId.HasValue)
-                query = query.Where(x => x.ChatLieuId == request.ChatLieuId);
-            if (request.DeGiayId.HasValue)
-                query = query.Where(x => x.DeGiayId == request.DeGiayId);
-            if (request.ThuongHieuId.HasValue)
-                query = query.Where(x => x.ThuongHieuId == request.ThuongHieuId);
-            if (!string.IsNullOrEmpty(request.TrangThai))
-                query = query.Where(x => x.TrangThai == (request.TrangThai == "true"));
-            if (request.GiaTu.HasValue)
-                query = query.Where(x => x.Gia >= request.GiaTu.Value);
-            if (request.GiaDen.HasValue)
-                query = query.Where(x => x.Gia <= request.GiaDen.Value);
-
-            var danhSachSPCT = await query
-                .Select(spct => new SPCTViewModels
-                {
-                    Id = spct.ID,
-                    SanPhamId = spct.SanPhamId,
-                    SoLuong = spct.SoLuong,
-                    Gia = spct.Gia,
-                    TrangThai = spct.TrangThai,
-                    KichThuocId = spct.KichThuocId,
-                    MauSacId = spct.MauSacId,
-                    ChatLieuId = spct.ChatLieuId,
-                    DeGiayId = spct.DeGiayId,
-                    ThuongHieuId = spct.ThuongHieuId,
-                }).ToListAsync();
-
-            return danhSachSPCT;
-        }
-
+        // Lấy danh sách sản phẩm chi tiết theo tên sản phẩm
         public async Task<List<SPCTViewModels>> GetSPCTByProductName(string productName)
         {
             var query = _context.SanPhamChiTiet
@@ -247,9 +206,130 @@ namespace SneakFit.Application.Catalog.SanPham
                     ChatLieuId = spct.ChatLieuId,
                     DeGiayId = spct.DeGiayId,
                     ThuongHieuId = spct.ThuongHieuId,
+                    Images = spct.HinhAnhSanPham.Select(i => i.UrlHinhAnh).ToList(),
                 }).ToListAsync();
 
             return danhSachSPCT;
         }
+
+        // Lấy chi tiết một sản phẩm chi tiết
+        public async Task<SPCTDetailViewModel> GetSPCTDetail(Guid spctId)
+        {
+            var spct = await _context.SanPhamChiTiet
+                .Include(x => x.SanPham)
+                .Include(x => x.HinhAnhSanPham)
+                .FirstOrDefaultAsync(x => x.ID == spctId);
+
+            if (spct == null) return null;
+
+            var request = _httpContextAccessor.HttpContext.Request;
+            var baseUrl = $"{request.Scheme}://{request.Host}";
+            var images = spct.HinhAnhSanPham?
+                .Select((img, idx) => new ImageViewModel
+                {
+                    Id = img.Id,
+                    UrlHinhAnh = baseUrl + img.UrlHinhAnh,
+                    IsDefault = idx == 0
+                }).ToList() ?? new List<ImageViewModel>();
+
+            return new SPCTDetailViewModel
+            {
+                Id = spct.ID,
+                TenSanPham = spct.SanPham.TenSanPham,
+                MoTa = spct.SanPham.Mota,
+                ThuongHieuId = spct.ThuongHieuId,
+                TrangThai = spct.TrangThai,
+                ChatLieuId = spct.ChatLieuId,
+                DeGiayId = spct.DeGiayId,
+                MauSacId = spct.MauSacId,
+                KichThuocId = spct.KichThuocId,
+                SoLuong = spct.SoLuong,
+                GiaBan = spct.Gia,
+                Images = images
+            };
+        }
+
+        // Cập nhật chi tiết sản phẩm chi tiết
+        public async Task<bool> UpdateSPCTDetail(SuaSPCTDetailViewModel model)
+        {
+            var spct = await _context.SanPhamChiTiet.FirstOrDefaultAsync(x => x.ID == model.Id);
+            if (spct == null) return false;
+
+            // Nếu muốn update cả bảng SanPham thì lấy entity SanPham ra và update
+            var sanPham = await _context.SanPham.FirstOrDefaultAsync(x => x.Id == spct.SanPhamId);
+            if (sanPham != null)
+            {
+                sanPham.TenSanPham = model.TenSanPham;
+                sanPham.Mota = model.MoTa;
+            }
+
+            spct.ThuongHieuId = model.ThuongHieuId;
+            spct.ChatLieuId = model.ChatLieuId;
+            spct.DeGiayId = model.DeGiayId;
+            spct.KichThuocId = model.KichThuocId;
+            spct.MauSacId = model.MauSacId;
+            spct.TrangThai = model.TrangThai;
+            spct.SoLuong = model.SoLuong;
+            spct.Gia = model.GiaBan;
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        // Upload ảnh cho sản phẩm chi tiết
+        public async Task<bool> UploadImages(UploadImageRequest request)
+        {
+            var spct = await _context.SanPhamChiTiet
+                .Include(x => x.HinhAnhSanPham)
+                .FirstOrDefaultAsync(x => x.ID == request.SanPhamChiTietId);
+
+            if (spct == null) return false;
+
+            int currentCount = spct.HinhAnhSanPham.Count();
+            if (currentCount + request.Files.Count > 3)
+                return false;
+
+            foreach (var file in request.Files)
+            {
+                if (file.Length > 0)
+                {
+                    var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+                    var filePath = Path.Combine("wwwroot", "images", "products", fileName);
+                    Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+                    var image = new Data.Entities.HinhAnhSanPham
+                    {
+                        Id = Guid.NewGuid(),
+                        SanPhamChiTietId = request.SanPhamChiTietId,
+                        UrlHinhAnh = $"/images/products/{fileName}"
+                    };
+                    _context.HinhAnhSanPham.Add(image);
+                }
+            }
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        // Xóa ảnh của sản phẩm chi tiết
+        public async Task<bool> DeleteImage(DeleteImageRequest request)
+        {
+            var image = await _context.HinhAnhSanPham
+                .FirstOrDefaultAsync(x => x.Id == request.ImageId && x.SanPhamChiTietId == request.SanPhamChiTietId);
+
+            if (image == null) return false;
+
+            var filePath = Path.Combine("wwwroot", image.UrlHinhAnh.TrimStart('/'));
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+            }
+            _context.HinhAnhSanPham.Remove(image);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
     }
 }

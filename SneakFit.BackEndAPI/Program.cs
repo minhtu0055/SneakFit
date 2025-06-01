@@ -10,7 +10,6 @@ using SneakFit.Application.Catalog.KichThuoc;
 using SneakFit.Application.Catalog.MauSac;
 using SneakFit.Application.Catalog.SanPham;
 using SneakFit.Application.Catalog.SanPhamChiTiet;
-using SneakFit.Application.Catalog.SanPhamChiTietChiTiet;
 using SneakFit.Application.Catalog.KhuyenMai;
 using SneakFit.Application.Catalog.ThuongHieu;
 using SneakFit.Application.Catalog.Voucher;
@@ -79,7 +78,7 @@ builder.Services.AddScoped<IKichThuocService, KichThuocService>(); // khai báo 
 builder.Services.AddScoped<IMauSacService, MauSacService>(); // khai báo dịch vụ
 builder.Services.AddScoped<IDanhMucService, DanhMucService>(); // khai báo dịch vụ
 builder.Services.AddScoped<ISanPhamService, SanPhamService>(); // khai báo dịch vụ
-builder.Services.AddScoped<ISanPhamChiTetService, SanPhamChiTietChiTetService>(); // khai báo dịch vụ
+builder.Services.AddScoped<ISanPhamChiTetService, SanPhamChiTietService>(); // khai báo dịch vụ
 builder.Services.AddScoped<IKhuyenMaiService, KhuyenMaiService>();
 builder.Services.AddScoped<IVoucherService, VoucherService>(); // khai báo dịch vụ
 builder.Services.AddScoped<IGioHangService, GioHangService>(); // khai báo dịch vụ
@@ -152,6 +151,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseStaticFiles();
 
 app.UseHttpsRedirection();
 app.UseAuthentication();

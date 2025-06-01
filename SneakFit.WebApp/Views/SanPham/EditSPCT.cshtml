@@ -1,5 +1,8 @@
 @model SneakFit.ViewModels.Catalog.SanPhamChiTiet.SuaSPCT
-
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+@{
+    var baseUrl = Configuration["BaseAddress"];
+}
 <div class="container-fluid">
     <!-- KHỐI 1: BỘ LỌC -->
     <div class="card mb-3">
@@ -7,133 +10,144 @@
             <i class="fa fa-filter"></i> Bộ lọc
         </div>
         <div class="card-body">
-            <form id="filterForm" class="row g-2 align-items-end" method="get">
-                <div class="col-md-3">
-                    <input type="text" class="form-control" name="TuKhoa" placeholder="Nhập tên sản phẩm" value="@Context.Request.Query["TuKhoa"]" />
+            <form id="filterForm" method="get">
+                <!-- Hàng 1: Tên sản phẩm -->
+                <div class="row mb-2">
+                    <div class="col-md-12">
+                        <input type="text" class="form-control" name="TuKhoa" placeholder="Nhập tên sản phẩm" value="@Context.Request.Query["TuKhoa"]" />
+                    </div>
                 </div>
-                <div class="col-md-2">
-                    <select class="form-select" name="ChatLieuId">
-                        <option value="">Chất liệu</option>
-                        @foreach (var cl in (IDictionary<Guid, string>)ViewBag.ChatLieus)
-                        {
-                            var isSelected = Context.Request.Query["ChatLieuId"] == cl.Key.ToString();
-                            if (isSelected)
+                <!-- Hàng 2: Chất liệu, Thương hiệu, Đế giày, Khoảng giá Từ -->
+                <div class="row mb-2">
+                    <div class="col-md-3">
+                        <select class="form-select" name="ChatLieuId">
+                            <option value="">Chất liệu</option>
+                            @foreach (var cl in (IDictionary<Guid, string>)ViewBag.ChatLieus)
                             {
-                                <option value="@cl.Key" selected>@cl.Value</option>
+                                var isSelected = Context.Request.Query["ChatLieuId"] == cl.Key.ToString();
+                                if (isSelected)
+                                {
+                                    <option value="@cl.Key" selected>@cl.Value</option>
+                                }
+                                else
+                                {
+                                    <option value="@cl.Key">@cl.Value</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" name="ThuongHieuId">
+                            <option value="">Thương hiệu</option>
+                            @foreach (var th in (IDictionary<Guid, string>)ViewBag.ThuongHieus)
+                            {
+                                var isSelected = Context.Request.Query["ThuongHieuId"] == th.Key.ToString();
+                                if (isSelected)
+                                {
+                                    <option value="@th.Key" selected>@th.Value</option>
+                                }
+                                else
+                                {
+                                    <option value="@th.Key">@th.Value</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" name="DeGiayId">
+                            <option value="">Đế giày</option>
+                            @foreach (var dg in (IDictionary<Guid, string>)ViewBag.DeGiays)
+                            {
+                                var isSelected = Context.Request.Query["DeGiayId"] == dg.Key.ToString();
+                                if (isSelected)
+                                {
+                                    <option value="@dg.Key" selected>@dg.Value</option>
+                                }
+                                else
+                                {
+                                    <option value="@dg.Key">@dg.Value</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="number" class="form-control gia-ban" name="GiaTu" placeholder="Giá từ" value="@Context.Request.Query["GiaTu"]" />
+                    </div>
+                </div>
+                <!-- Hàng 3: Kích cỡ, Màu sắc, Trạng thái, Khoảng giá Đến -->
+                <div class="row mb-2">
+                    <div class="col-md-3">
+                        <select class="form-select" name="KichThuocId">
+                            <option value="">Kích cỡ</option>
+                            @foreach (var kt in (IDictionary<Guid, string>)ViewBag.KichThuocs)
+                            {
+                                var isSelected = Context.Request.Query["KichThuocId"] == kt.Key.ToString();
+                                if (isSelected)
+                                {
+                                    <option value="@kt.Key" selected>@kt.Value</option>
+                                }
+                                else
+                                {
+                                    <option value="@kt.Key">@kt.Value</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" name="MauSacId">
+                            <option value="">Màu sắc</option>
+                            @foreach (var ms in (IDictionary<Guid, string>)ViewBag.MauSacs)
+                            {
+                                var isSelected = Context.Request.Query["MauSacId"] == ms.Key.ToString();
+                                if (isSelected)
+                                {
+                                    <option value="@ms.Key" selected>@ms.Value</option>
+                                }
+                                else
+                                {
+                                    <option value="@ms.Key">@ms.Value</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" name="TrangThai">
+                            <option value="">Trạng thái</option>
+                            @{
+                                var isSelectedTrue = Context.Request.Query["TrangThai"] == "true";
+                                var isSelectedFalse = Context.Request.Query["TrangThai"] == "false";
+                            }
+                            @if (isSelectedTrue)
+                            {
+                                <option value="true" selected>Đang kinh doanh</option>
                             }
                             else
                             {
-                                <option value="@cl.Key">@cl.Value</option>
+                                <option value="true">Đang kinh doanh</option>
                             }
-                        }
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select class="form-select" name="ThuongHieuId">
-                        <option value="">Thương hiệu</option>
-                        @foreach (var th in (IDictionary<Guid, string>)ViewBag.ThuongHieus)
-                        {
-                            var isSelected = Context.Request.Query["ThuongHieuId"] == th.Key.ToString();
-                            if (isSelected)
+                            @if (isSelectedFalse)
                             {
-                                <option value="@th.Key" selected>@th.Value</option>
+                                <option value="false" selected>Ngừng kinh doanh</option>
                             }
                             else
                             {
-                                <option value="@th.Key">@th.Value</option>
+                                <option value="false">Ngừng kinh doanh</option>
                             }
-                        }
-                    </select>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="number" class="form-control gia-ban" name="GiaDen" placeholder="Giá đến" value="@Context.Request.Query["GiaDen"]" />
+                    </div>
                 </div>
-                <div class="col-md-2">
-                    <select class="form-select" name="DeGiayId">
-                        <option value="">Đế giày</option>
-                        @foreach (var dg in (IDictionary<Guid, string>)ViewBag.DeGiays)
-                        {
-                            var isSelected = Context.Request.Query["DeGiayId"] == dg.Key.ToString();
-                            if (isSelected)
-                            {
-                                <option value="@dg.Key" selected>@dg.Value</option>
-                            }
-                            else
-                            {
-                                <option value="@dg.Key">@dg.Value</option>
-                            }
-                        }
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select class="form-select" name="KichThuocId">
-                        <option value="">Kích cỡ</option>
-                        @foreach (var kt in (IDictionary<Guid, string>)ViewBag.KichThuocs)
-                        {
-                            var isSelected = Context.Request.Query["KichThuocId"] == kt.Key.ToString();
-                            if (isSelected)
-                            {
-                                <option value="@kt.Key" selected>@kt.Value</option>
-                            }
-                            else
-                            {
-                                <option value="@kt.Key">@kt.Value</option>
-                            }
-                        }
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select class="form-select" name="MauSacId">
-                        <option value="">Màu sắc</option>
-                        @foreach (var ms in (IDictionary<Guid, string>)ViewBag.MauSacs)
-                        {
-                            var isSelected = Context.Request.Query["MauSacId"] == ms.Key.ToString();
-                            if (isSelected)
-                            {
-                                <option value="@ms.Key" selected>@ms.Value</option>
-                            }
-                            else
-                            {
-                                <option value="@ms.Key">@ms.Value</option>
-                            }
-                        }
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <select class="form-select" name="TrangThai">
-                        <option value="">Trạng thái</option>
-                        @{
-                            var isSelectedTrue = Context.Request.Query["TrangThai"] == "true";
-                            var isSelectedFalse = Context.Request.Query["TrangThai"] == "false";
-                        }
-                        @if (isSelectedTrue)
-                        {
-                            <option value="true" selected>Đang kinh doanh</option>
-                        }
-                        else
-                        {
-                            <option value="true">Đang kinh doanh</option>
-                        }
-                        @if (isSelectedFalse)
-                        {
-                            <option value="false" selected>Ngừng kinh doanh</option>
-                        }
-                        else
-                        {
-                            <option value="false">Ngừng kinh doanh</option>
-                        }
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label>Khoảng giá:</label>
-                    <input type="number" class="form-control" name="GiaTu" placeholder="Từ" value="@Context.Request.Query["GiaTu"]" />
-                    <input type="number" class="form-control mt-1" name="GiaDen" placeholder="Đến" value="@Context.Request.Query["GiaDen"]" />
-                </div>
-                <div class="col-md-2">
-                    @* <button type="submit" class="btn btn-primary">Tìm kiếm</button>
-                    <button type="reset" class="btn btn-danger">Làm mới</button> *@
-                    <button type="submit" class="btn btn-primary">Tìm kiếm</button>
-                    <button type="reset" class="btn btn-danger" onclick="window.location.href=window.location.pathname">Làm mới</button>
-                </div>
-                <div class="col-md-2">
-                    <button type="button" class="btn btn-info">QR Code sản phẩm</button>
+                <!-- Hàng 4: Tìm kiếm, Làm mới, QR Code -->
+                <div class="row mb-2">
+                    <div class="col-md-12 d-flex justify-content-end gap-2">
+                        <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                        <button type="reset" class="btn btn-dark" onclick="window.location.href=window.location.pathname">
+                            <i class="bx bx-reset"></i> Reset
+                        </button>
+                        <button type="button" class="btn btn-primary">QR Code sản phẩm</button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -147,21 +161,19 @@
         <div class="card-body">
             <div class="mb-2 text-end">
                 <button class="btn btn-primary" id="updateAll">Chỉnh số lượng và giá chung</button>
-                <button class="btn btn-success" id="updateSelected">Update sản phẩm</button>
+                <button class="btn btn-primary" style="margin-left: 5px" id="updateSelected">Update sản phẩm</button>
             </div>
             <table class="table table-hover align-middle" id="spctTable">
-                <thead class="table-warning">
-                    <tr>
-                        <th><input type="checkbox" id="checkAll" /></th>
-                        <th>STT</th>
-                        <th>Ảnh</th>
-                        <th>Tên Sản Phẩm</th>
-                        <th>Số Lượng</th>
-                        <th>Giá Bán</th>
-                        <th>Kích Thước</th>
-                        <th>Màu Sắc</th>
-                        <th>Trạng Thái</th>
-                        <th>Hành động</th>
+                <thead class="table">
+                    <tr style="background-color: mediumpurple; color: white;">
+                        <th style="width: 30px;"><input type="checkbox" id="checkAll" /></th>
+                        <th style="width: 30px;">STT</th>
+                        <th style="width: 100px;">Ảnh</th>
+                        <th style="min-width: 250px;">Tên Sản Phẩm</th>
+                        <th style="width: 112px;">Số Lượng</th>
+                        <th style="width: 120px;">Giá Bán</th>
+                        <th style="width: 120px;">Trạng Thái</th>
+                        <th style="width: 1px">@* Hành động *@</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -171,24 +183,62 @@
                     }
                     @foreach (var item in Model.DanhSachSPCT)
                     {
-                        <tr data-id="@item.Id">
+                        <tr data-id="@item.Id" data-so-luong="@item.SoLuong" data-gia-ban="@item.Gia">
                             <td><input type="checkbox" class="row-check" /></td>
                             <td>@stt</td>
                             <td>
-                                <img src="@(item.Images != null && item.Images.Count > 0 ? item.Images[0] : "/images/no-image.png")" width="60" />
+                                @if (item.Images != null && item.Images.Any())
+                                {
+                                    if (item.Images.Count == 1)
+                                    {
+                                        <img src="@(baseUrl + item.Images.First())" alt="@item.HinhAnh" class="rounded" style="width: 80px; height: 80px; object-fit: cover;" onerror="this.src='/images/no-image.png'" />
+                                    }
+                                    else
+                                    {
+                                        <div id="carousel-@item.Id" class="carousel slide" data-bs-ride="carousel" style="width: 80px; height: 80px;">
+                                            <div class="carousel-inner">
+                                                @for (int i = 0; i < item.Images.Count; i++)
+                                                {
+                                                    <div class="carousel-item @(i == 0 ? "active" : "")">
+                                                        <img src="@(baseUrl + item.Images[i])" alt="@item.HinhAnh" class="d-block w-100 rounded" style="height: 80px; object-fit: cover;" onerror="this.src='/images/no-image.png'" />
+                                                    </div>
+                                                }
+                                            </div>
+                                            <button class="carousel-control-prev" type="button" data-bs-target="#carousel-@item.Id" data-bs-slide="prev">
+                                                <span class="carousel-control-prev-icon"></span>
+                                            </button>
+                                            <button class="carousel-control-next" type="button" data-bs-target="#carousel-@item.Id" data-bs-slide="next">
+                                                <span class="carousel-control-next-icon"></span>
+                                            </button>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <img src="/images/no-image.png" alt="No Image" class="rounded" style="width: 80px; height: 80px; object-fit: cover;" />
+                                }
                             </td>
-                            <td>@(sanPhams != null && sanPhams.ContainsKey(item.SanPhamId) ? sanPhams[item.SanPhamId] : "")</td>
-                            <td><input type="number" class="form-control so-luong" value="@item.SoLuong" min="0" /></td>
-                            <td><input type="number" class="form-control gia-ban" value="@item.Gia" min="0" step="1000" /></td>
-                            <td>@(ViewBag.KichThuocs[item.KichThuocId])</td>
                             <td>
-                                <span style="background:@(ViewBag.MauSacs[item.MauSacId].ToLower());display:inline-block;width:30px;height:20px;"></span>
+                                @{
+                                    var tenSanPham = (sanPhams != null && sanPhams.ContainsKey(item.SanPhamId)) ? sanPhams[item.SanPhamId] : "";
+                                    var kichThuoc = ViewBag.KichThuocs[item.KichThuocId];
+                                    var mauSac = ViewBag.MauSacs[item.MauSacId];
+                                }
+                                @($"{tenSanPham} ( {kichThuoc} - {mauSac} )")
+                            </td>
+                            <td style="width: 100px;">
+                                <input type="number" class="form-control so-luong" value="@item.SoLuong" min="0" style="width: 70px; padding: 2px 6px; font-size: 0.95em;" />
+                            </td>
+                            <td style="width: 120px;">
+                                <input type="text" class="form-control gia-ban" value="@item.Gia.ToString("N0", new System.Globalization.CultureInfo("vi-VN"))" style="width: 110px; padding: 2px 6px; font-size: 0.95em;" />
                             </td>
                             <td>
-                                <span class="badge bg-success">@(item.TrangThai ? "Đang kinh doanh" : "Ngừng kinh doanh")</span>
+                                <span class="badge @(item.TrangThai ? "bg-success" : "bg-danger")">
+                                    @(item.TrangThai ? "Đang kinh doanh" : "Ngừng kinh doanh")
+                                </span>
                             </td>
                             <td>
-                                <button type="button" class="btn btn-warning btn-view" data-id="@item.Id">👁️</button>
+                                <button type="button" class="btn btn-primary btn-view" style="width: 40px" data-id="@item.Id">👁️</button>
                             </td>
                         </tr>
                         stt++;
@@ -199,8 +249,258 @@
     </div>
 </div>
 
+<!-- Modal chi tiết sản phẩm -->
+<div class="modal fade" id="productDetailModal" tabindex="-1" aria-labelledby="productDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" style="min-width:900px;max-width:1200px;width:90vw;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productDetailModalLabel">Thông Tin Sản Phẩm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="max-height:70vh; overflow-y:auto;">
+                <form id="productDetailForm">
+                    <div class="mb-2">
+                        <label class="form-label fw-bold">Tên sản phẩm :</label>
+                        <input type="text" class="form-control" name="TenSanPham" required />
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-bold">Mô tả :</label>
+                        <textarea class="form-control" name="MoTa" rows="2" required></textarea>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Thương hiệu :</label>
+                            <div class="input-group align-items-center">
+                                <select class="form-select" name="ThuongHieuId" style="border-radius: 8px;" required></select>
+                                <button type="button" class="btn btn-primary ms-2" style="border-radius: 8px; width: 40px; height: 40px; padding: 0;" data-type="thuonghieu">
+                                    <i class="bx bx-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Chất Liệu :</label>
+                            <div class="input-group align-items-center">
+                                <select class="form-select" name="ChatLieuId" style="border-radius: 8px;" required></select>
+                                <button type="button" class="btn btn-primary ms-2" style="border-radius: 8px; width: 40px; height: 40px; padding: 0;" data-type="chatlieu">
+                                    <i class="bx bx-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Đế Giày :</label>
+                            <div class="input-group align-items-center">
+                                <select class="form-select" name="DeGiayId" style="border-radius: 8px;" required></select>
+                                <button type="button" class="btn btn-primary ms-2" style="border-radius: 8px; width: 40px; height: 40px; padding: 0;" data-type="degiay">
+                                    <i class="bx bx-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Kích Cỡ :</label>
+                            <div class="input-group align-items-center">
+                                <select class="form-select" name="KichThuocId" style="border-radius: 8px;" required></select>
+                                <button type="button" class="btn btn-primary ms-2" style="border-radius: 8px; width: 40px; height: 40px; padding: 0;" data-type="kichthuoc">
+                                    <i class="bx bx-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Màu Sắc :</label>
+                            <div class="input-group align-items-center">
+                                <select class="form-select" name="MauSacId" style="border-radius: 8px;" required>
+                                    <span class="input-group-text" id="colorPreview" style="width:40px;"></span>
+                                </select>
+                                <button type="button" class="btn btn-primary ms-2" style="border-radius: 8px; width: 40px; height: 40px; padding: 0;" data-type="mausac">
+                                    <i class="bx bx-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Trạng thái :</label>
+                            <select class="form-select" name="TrangThai" required>
+                                <option value="true">Kinh Doanh</option>
+                                <option value="false">Ngừng Kinh Doanh</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Số Lượng đang bán :</label>
+                            <input type="number" class="form-control" name="SoLuong" min="0" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Giá Bán :</label>
+                            <input type="text" class="form-control" name="GiaBan" required />
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        @* <div class="col-md-6">
+                            <label class="form-label fw-bold">Số Lượng Hàng Trả :</label>
+                            <input type="number" class="form-control" name="SoLuongHangTra" min="0" />
+                        </div> *@
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">QR Code :</label>
+                            <div id="qrCodePreview"></div>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-bold d-block text-center" style="font-size: 1.2em;">Ảnh Sản Phẩm</label>
+                        <div id="productImages" class="d-flex flex-wrap gap-2 justify-content-center mb-2">
+                            <!-- Ảnh sẽ được render ở đây bằng JS -->
+                        </div>
+                        <div class="text-center">
+                            <input type="file" id="uploadImageInput" accept="image/*" style="display:none;" multiple />
+                            <button type="button" class="btn btn-outline-primary" id="btnUploadImage">+ Upload</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="btnSaveProductDetail">Chỉnh sửa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal thêm mới Thương hiệu -->
+<div class="modal fade" id="modalAddThuongHieu" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm thương hiệu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalAddThuongHieuContent"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal thêm mới Chất liệu -->
+<div class="modal fade" id="modalAddChatLieu" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm chất liệu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalAddChatLieuContent"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal thêm mới Đế giày -->
+<div class="modal fade" id="modalAddDeGiay" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm đế giày</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalAddDeGiayContent"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal thêm mới Kích cỡ -->
+<div class="modal fade" id="modalAddKichThuoc" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm kích thước</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalAddKichThuocContent"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal thêm mới Màu sắc -->
+<div class="modal fade" id="modalAddMauSac" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm màu sắc mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Chọn màu sắc</label><br />
+                    <input type="color" id="addColorPicker" class="form-control" style="width: 120px; display:inline-block;" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Mã màu</label>
+                    <input type="text" id="addColorHex" class="form-control" readonly style="width: 120px; background:#fff; color:#000; font-weight:bold; text-align:center;" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Tên màu sắc</label>
+                    <input type="text" id="addColorName" class="form-control" placeholder="Nhập tên màu sắc" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="saveNewColor">Lưu</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Sửa Giá và Số Lượng Chung -->
+<div class="modal fade" id="modalEditPriceQuantity" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Sửa giá và số lượng chung</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Giá bán (VNĐ)</label>
+                    <input type="text" id="editAllPrice" class="form-control gia-ban" placeholder="Nhập giá, ví dụ: 1.000.000" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Số lượng</label>
+                    <input type="number" id="editAllQuantity" class="form-control so-luong" min="10" placeholder="Nhập số lượng" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="btnApplyEditAll">Áp dụng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal xem ảnh lớn -->
+<div class="modal fade" id="imageReviewModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+  <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="width: 550px; height: 450px;">
+      <div class="modal-header">
+        <h5 class="modal-title">Xem ảnh sản phẩm</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img id="reviewImage" src="" style="width:450px; height:330px; border-radius:8px;" />
+      </div>
+    </div>
+  </div>
+</div>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <!-- jQuery (nên đã có) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap JS (nếu dùng) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+    <!-- Bootstrap Colorpicker CSS & JS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/3.4.0/css/bootstrap-colorpicker.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/3.4.0/js/bootstrap-colorpicker.min.js"></script>
+
     <script>
         $(document).ready(function() {
             // Chọn dòng
@@ -217,29 +517,71 @@
                 $('.row-check').prop('checked', this.checked);
             });
 
-            // Chỉnh số lượng và giá chung
-            $('#updateAll').on('click', function() {
-                var soLuong = prompt("Nhập số lượng mới:");
-                var giaBan = prompt("Nhập giá bán mới:");
-                if (soLuong && giaBan) {
-                    $('.so-luong').val(soLuong);
-                    $('.gia-ban').val(giaBan);
+            // Format giá bán khi nhập
+            $(document).on('input', '.gia-ban', function() {
+                let value = $(this).val().replace(/\D/g, '');
+                if (value) {
+                    value = parseInt(value, 10).toLocaleString('vi-VN');
                 }
+                $(this).val(value);
+            });
+
+            // Thay thế sự kiện #updateAll:
+            $('#updateAll').off('click').on('click', function() {
+                // Lấy giá và số lượng đầu tiên để fill vào modal (nếu có)
+                let firstPrice = $('.gia-ban').first().val() || '';
+                let firstQuantity = $('.so-luong').first().val() || '';
+                $('#editAllPrice').val(firstPrice);
+                $('#editAllQuantity').val(firstQuantity);
+                $('#modalEditPriceQuantity').modal('show');
+            });
+
+            // Xử lý khi bấm Áp dụng trong modal
+            $('#btnApplyEditAll').off('click').on('click', function() {
+                let price = $('#editAllPrice').val().replace(/\./g, '');
+                let quantity = $('#editAllQuantity').val();
+                
+                if (!price || !quantity) {
+                    alert('Vui lòng nhập đầy đủ giá và số lượng!');
+                    return;
+                }
+
+                // Format giá trước khi hiển thị
+                let formattedPrice = parseInt(price).toLocaleString('vi-VN');
+                $('.gia-ban').val(formattedPrice);
+                $('.so-luong').val(quantity);
+                $('#modalEditPriceQuantity').modal('hide');
             });
 
             // Update selected
             $('#updateSelected').on('click', function() {
                 var selectedRows = $('.row-check:checked').closest('tr');
+                if (selectedRows.length === 0) {
+                    alert('Vui lòng chọn ít nhất một sản phẩm!');
+                    return;
+                }
+
                 var updates = [];
                 selectedRows.each(function() {
                     var row = $(this);
-                    updates.push({
-                        id: row.data('id'),
-                        soLuong: row.find('.so-luong').val(),
-                        giaBan: row.find('.gia-ban').val(),
-                        trangThai: row.find('.badge').text().trim() === "Đang kinh doanh"
-                    });
+                    var soLuongInput = row.find('.so-luong').val();
+                    var giaBanInput = row.find('.gia-ban').val();
+
+                    // Xử lý giá trị số lượng
+                    var soLuong = parseInt(soLuongInput) || 0;
+
+                    // Xử lý giá trị giá bán - loại bỏ dấu phẩy và chấm
+                    var giaBan = parseInt(giaBanInput.replace(/[.,]/g, '')) || 0;
+
+                    if (soLuong >= 0 && giaBan > 0) {
+                        updates.push({
+                            id: row.data('id'),
+                            soLuong: soLuong,
+                            gia: giaBan
+                        });
+                    }
                 });
+
                 if (updates.length > 0) {
                     $.ajax({
                         url: '/SanPham/UpdateSPCT',
@@ -251,17 +593,445 @@
                                 alert('Cập nhật thành công!');
                                 location.reload();
                             } else {
-                                alert('Có lỗi xảy ra: ' + response.message);
+                                alert('Có lỗi xảy ra: ' + (response.message || 'Không xác định'));
                             }
                         },
-                        error: function() {
-                            alert('Có lỗi xảy ra khi gửi yêu cầu!');
+                        error: function(xhr) {
+                            alert('Có lỗi xảy ra khi gửi yêu cầu! Chi tiết: ' + xhr.responseText);
                         }
                     });
-                } else {
-                    alert('Vui lòng chọn ít nhất một sản phẩm!');
                 }
             });
+
+            // Thêm xử lý format giá tiền khi nhập
+            $('.gia-ban').on('input', function() {
+                let value = $(this).val().replace(/[^0-9]/g, '');
+                if (value) {
+                    value = parseInt(value).toLocaleString('vi-VN');
+                    $(this).val(value);
+                }
+            });
+
+            // Format giá bán khi nhập trong modal
+            $('#editAllPrice').on('input', function() {
+                let value = $(this).val().replace(/\D/g, '');
+                if (value) {
+                    value = parseInt(value, 10).toLocaleString('vi-VN');
+                }
+                $(this).val(value);
+            });
+
+            // Fill combobox dữ liệu từ ViewBag khi mở modal
+            function fillCombobox(selector, data, value, text) {
+                var $select = $(selector);
+                $select.empty();
+                $select.append('<option value="">Chọn</option>');
+                for (var i = 0; i < data.length; i++) {
+                    $select.append('<option value="' + data[i][value] + '">' + data[i][text] + '</option>');
+                }
+            }
+
+            // Khi click 👁️
+            $(document).on('click', '.btn-view', function() {
+                var id = $(this).closest('tr').data('id');
+                // Lấy dữ liệu combobox từ ViewBag (render ra JS object ở view)
+                var thuongHieus = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.ThuongHieus));
+                var chatLieus = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.ChatLieus));
+                var deGiays = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.DeGiays));
+                var kichThuocs = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.KichThuocs));
+                var mauSacs = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.MauSacs));
+                // Chuyển đổi đối tượng thành mảng để vòng lặp dễ dàng hơn
+                function objToArr(obj) {
+                    return Object.keys(obj).map(function(key) {
+                        return { id: key, name: obj[key] };
+                    });
+                }
+                fillCombobox("#productDetailModal select[name='ThuongHieuId']", objToArr(thuongHieus), 'id', 'name');
+                fillCombobox("#productDetailModal select[name='ChatLieuId']", objToArr(chatLieus), 'id', 'name');
+                fillCombobox("#productDetailModal select[name='DeGiayId']", objToArr(deGiays), 'id', 'name');
+                fillCombobox("#productDetailModal select[name='KichThuocId']", objToArr(kichThuocs), 'id', 'name');
+                fillCombobox("#productDetailModal select[name='MauSacId']", objToArr(mauSacs), 'id', 'name');
+                // Gọi backend lấy chi tiết sản phẩm
+                $.get('/SanPham/GetSPCTDetail', { id: id }, function(data) {
+                    // Fill dữ liệu vào các trường như cũ
+                    $("#productDetailModal input[name='TenSanPham']").val(data.tenSanPham);
+                    $("#productDetailModal textarea[name='MoTa']").val(data.moTa);
+                    $("#productDetailModal select[name='ThuongHieuId']").val(data.thuongHieuId);
+                    $("#productDetailModal select[name='TrangThai']").val(data.trangThai ? 'true' : 'false');
+                    $("#productDetailModal select[name='ChatLieuId']").val(data.chatLieuId);
+                    $("#productDetailModal select[name='DeGiayId']").val(data.deGiayId);
+                    $("#productDetailModal select[name='KichThuocId']").val(data.kichThuocId);
+                    $("#productDetailModal select[name='MauSacId']").val(data.mauSacId).trigger('change');
+                    $("#productDetailModal input[name='SoLuong']").val(data.soLuong);
+                    // $("#productDetailModal input[name='SoLuongHangTra']").val(data.soLuongHangTra);
+                    $("#productDetailModal input[name='GiaBan']").val(Number(data.giaBan).toLocaleString('vi-VN'));
+                    // QR code
+                    $("#qrCodePreview").html('<img src="' + data.qrCodeUrl + '" style="width:100px;" />');
+                    // Ảnh sản phẩm
+                    renderProductImages(data.images);
+                    $('#productDetailModal').modal('show');
+                });
+            });
+
+            // Render ảnh sản phẩm
+            function renderProductImages(images) {
+                var html = '';
+                (images || []).forEach(function(img, idx) {
+                    html += `
+                        <div class="product-image-wrapper position-relative d-inline-block m-2">
+                            <img src="${img.urlHinhAnh}" class="product-image-thumb" style="width:120px;height:120px;object-fit:contain;border-radius:8px;"/>
+                            <div class="image-actions position-absolute top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-center gap-2" style="display:none;z-index:2;">
+                                <button type="button" class="btn btn-light btn-sm btn-review-image" data-url="${img.urlHinhAnh}" title="Xem ảnh">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button type="button" class="btn btn-primary btn-sm btn-delete-image" data-id="${img.id}" title="Xóa ảnh">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                $('#productImages').html(html);
+            }
+
+            // Thêm ảnh
+            $('#btnUploadImage').on('click', function() {
+                $('#uploadImageInput').click();
+            });
+
+            $('#uploadImageInput').on('change', function() {
+                var files = this.files;
+                var spctId = $('#spctTable tr.table-info').data('id');
+                // Lấy số lượng ảnh hiện tại
+                $.get('/SanPham/GetSPCTDetail', { id: spctId }, function(data) {
+                    var currentCount = data.images.length;
+                    if (currentCount + files.length > 3) {
+                        alert('Mỗi sản phẩm chỉ được tối đa 3 ảnh!');
+                        return;
+                    }
+                    // Kiểm tra định dạng file
+                    var allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                    for (let i = 0; i < files.length; i++) {
+                        let ext = files[i].name.split('.').pop().toLowerCase();
+                        if (!allowedExtensions.includes(ext)) {
+                            alert('Chỉ cho phép upload các file ảnh: jpg, jpeg, png, gif, webp!');
+                            return;
+                        }
+                    }
+
+                    var formData = new FormData();
+                    for (let i = 0; i < files.length; i++) {
+                        formData.append('files', files[i]);
+                    }
+
+                    formData.append('sanPhamChiTietId', spctId);
+
+                    $.ajax({
+                        url: '/SanPham/UploadImages',
+                        type: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function(response) {
+                            if(response.success) {
+                                // Sau khi upload thành công, lấy lại danh sách ảnh mới
+                                $.get('/SanPham/GetSPCTDetail', { id: spctId }, function(data) {
+                                    renderProductImages(data.images);
+                                    @* location.reload(); *@
+                                });
+                            } else {
+                                alert('Upload ảnh thất bại: ' + (response.message || 'Không xác định'));
+                            }
+                        },
+                        error: function(xhr) {
+                            alert('Có lỗi khi upload ảnh: ' + xhr.responseText);
+                        }
+                    });
+                });
+            });
+
+            // Xóa ảnh
+            $(document).on('click', '.btn-delete-image', function() {
+                if (!confirm('Bạn có chắc muốn xóa ảnh này?')) return;
+
+                var imageId = $(this).data('id');
+                var spctId = $('#spctTable tr.table-info').data('id');
+
+                $.ajax({
+                    url: '/SanPham/DeleteImage',
+                    type: 'DELETE',
+                    data: { imageId: imageId, sanPhamChiTietId: spctId },
+                    success: function(response) {
+                        if(response.success) {
+                            // Sau khi xóa thành công, lấy lại danh sách ảnh mới
+                            $.get('/SanPham/GetSPCTDetail', { id: spctId }, function(data) {
+                                renderProductImages(data.images);
+                                @* if (!data.images || data.images.length === 0) {
+                                    location.reload();
+                                } else {
+                                    renderProductImages(data.images);
+                                } *@
+                            });
+                        } else {
+                            alert('Xóa ảnh thất bại: ' + (response.message || 'Không xác định'));
+                        }
+                    },
+                    error: function(xhr) {
+                        alert('Có lỗi khi xóa ảnh: ' + xhr.responseText);
+                    }
+                });
+            });
+
+            // Xem ảnh lớn
+            $(document).on('click', '.btn-review-image', function(e) {
+                e.stopPropagation();
+                var url = $(this).data('url');
+                $('#reviewImage').attr('src', url);
+                var modal = new bootstrap.Modal(document.getElementById('imageReviewModal'), {
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                modal.show();
+            });
+
+            // Khi chọn màu sắc thì đổi màu preview
+            $("#productDetailModal select[name='MauSacId']").on('change', function() {
+                var color = $(this).find('option:selected').text();
+                $('#colorPreview').css('background', color);
+            });
+
+            // Hàm mở modal thêm thương hiệu
+            function openAddThuongHieuModal() {
+                $.get('/ThuongHieu/Create', function(html) {
+                    $('#modalAddThuongHieuContent').html(html);
+                    $('#modalAddThuongHieu').modal('show');
+                });
+            }
+
+            // Hàm mở modal thêm đế giày
+            function openAddDeGiayModal() {
+                $.get('/DeGiay/Create', function(html) {
+                    $('#modalAddDeGiayContent').html(html);
+                    $('#modalAddDeGiay').modal('show');
+                });
+            }
+
+            // Hàm mở modal thêm chất liệu
+            function openAddChatLieuModal() {
+                $.get('/ChatLieu/Create', function(html) {
+                    $('#modalAddChatLieuContent').html(html);
+                    $('#modalAddChatLieu').modal('show');
+                });
+            }
+
+            // Hàm mở modal thêm kích thước
+            function openAddKichThuocModal() {
+                $.get('/KichThuoc/Create', function(html) {
+                    $('#modalAddKichThuocContent').html(html);
+                    $('#modalAddKichThuoc').modal('show');
+                });
+            }
+
+            // Xử lý sự kiện click cho các button +
+            $(document).on('click', 'button[data-type]', function() {
+                var type = $(this).data('type');
+                switch(type) {
+                    case 'thuonghieu':
+                        openAddThuongHieuModal();
+                        break;
+                    case 'chatlieu':
+                        openAddChatLieuModal();
+                        break;
+                    case 'degiay':
+                        openAddDeGiayModal();
+                        break;
+                    case 'kichthuoc':
+                        openAddKichThuocModal();
+                        break;
+                    case 'mausac':
+                        $('#modalAddMauSac').modal('show');
+                        break;
+                }
+            });
+
+            // Handle color picker
+            if ($('#addColorPicker').length) {
+                $('#addColorPicker').on('input', function() {
+                    $('#addColorHex').val($(this).val());
+                });
+            }
+
+            // Xử lý lưu màu mới
+            $('#saveNewColor').on('click', function() {
+                const colorName = $('#addColorName').val();
+                const colorHex = $('#addColorHex').val();
+                
+                if (!colorName || !colorHex) {
+                    alert('Vui lòng nhập đầy đủ thông tin màu sắc!');
+                    return;
+                }
+
+                $.post('/SanPham/AddMauSac', {
+                    tenMauSac: colorName,
+                    maMau: colorHex
+                }, function(response) {
+                    if (response.success) {
+                        $('#modalAddMauSac').modal('hide');
+                        // Làm mới danh sách thả xuống màu sắc
+                        location.reload();
+                    } else {
+                        alert('Có lỗi xảy ra: ' + response.message);
+                    }
+                });
+            });
+
+            // Xử lý việc gửi biểu mẫu cho các phương thức khác
+            $(document).on('submit', '#formAddThuongHieu', function(e) {
+                e.preventDefault();
+                const formData = $(this).serialize();
+                $.post('/SanPham/AddThuongHieu', formData, function(response) {
+                    if (response.success) {
+                        $('#modalAddThuongHieu').modal('hide');
+                        location.reload();
+                    } else {
+                        alert('Có lỗi xảy ra: ' + response.message);
+                    }
+                });
+            });
+
+            $(document).on('submit', '#formAddChatLieu', function(e) {
+                e.preventDefault();
+                const formData = $(this).serialize();
+                $.post('/SanPham/AddChatLieu', formData, function(response) {
+                    if (response.success) {
+                        $('#modalAddChatLieu').modal('hide');
+                        location.reload();
+                    } else {
+                        alert('Có lỗi xảy ra: ' + response.message);
+                    }
+                });
+            });
+
+            $(document).on('submit', '#formAddDeGiay', function(e) {
+                e.preventDefault();
+                const formData = $(this).serialize();
+                $.post('/SanPham/AddDeGiay', formData, function(response) {
+                    if (response.success) {
+                        $('#modalAddDeGiay').modal('hide');
+                        location.reload();
+                    } else {
+                        alert('Có lỗi xảy ra: ' + response.message);
+                    }
+                });
+            });
+
+            $(document).on('submit', '#formAddKichThuoc', function(e) {
+                e.preventDefault();
+                const formData = $(this).serialize();
+                $.post('/SanPham/AddKichThuoc', formData, function(response) {
+                    if (response.success) {
+                        $('#modalAddKichThuoc').modal('hide');
+                        location.reload();
+                    } else {
+                        alert('Có lỗi xảy ra: ' + response.message);
+                    }
+                });
+            });
+
+            $('#btnSaveProductDetail').on('click', function() {
+                var spctId = $('#spctTable tr.table-info').data('id');
+                var formData = {
+                    Id: spctId,
+                    TenSanPham: $("#productDetailModal input[name='TenSanPham']").val(),
+                    MoTa: $("#productDetailModal textarea[name='MoTa']").val(),
+                    ThuongHieuId: $("#productDetailModal select[name='ThuongHieuId']").val(),
+                    ChatLieuId: $("#productDetailModal select[name='ChatLieuId']").val(),
+                    DeGiayId: $("#productDetailModal select[name='DeGiayId']").val(),
+                    KichThuocId: $("#productDetailModal select[name='KichThuocId']").val(),
+                    MauSacId: $("#productDetailModal select[name='MauSacId']").val(),
+                    TrangThai: $("#productDetailModal select[name='TrangThai']").val() === "true",
+                    SoLuong: $("#productDetailModal input[name='SoLuong']").val(),
+                    GiaBan: parseInt($("#productDetailModal input[name='GiaBan']").val().replace(/[^0-9]/g, ''), 10) || 0
+                };
+                $.ajax({
+                    url: '/SanPham/UpdateSPCTDetail',
+                    type: 'POST',
+                    data: JSON.stringify(formData),
+                    contentType: 'application/json',
+                    success: function(response) {
+                        if (response.success) {
+                            alert('Cập nhật thành công!');
+                            location.reload();
+                        } else {
+                            alert('Có lỗi xảy ra: ' + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('Có lỗi xảy ra khi gửi yêu cầu!');
+                    }
+                });
+            });
+        });
+
+        // Chỉ cho nhập số và tự động format giá bán
+        $(document).on('input', '.gia-ban, .price-input', function() {
+            let value = $(this).val().replace(/[^0-9]/g, ''); // Loại bỏ ký tự không phải số
+            if (value) {
+                value = value.replace(/^0+/, ''); // Loại bỏ số 0 ở đầu
+                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Thêm dấu chấm hàng nghìn
+            }
+            $(this).val(value);
+        });
+
+        // Chỉ cho nhập số lượng là số nguyên dương
+        $(document).on('input', '.so-luong, .quantity-input', function() {
+            let value = $(this).val().replace(/[^0-9]/g, '');
+            value = value.replace(/^0+/, ''); // Loại bỏ số 0 ở đầu
+            $(this).val(value);
         });
     </script>
 }
+
+<style>
+.btn-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #6c63ff;
+    color: #fff;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(108,99,255,0.15);
+    border: none;
+    transition: background 0.2s;
+}
+.btn-circle:hover {
+    background: #554ee2;
+    color: #fff;
+}
+.btn-circle span {
+    font-weight: bold;
+    font-size: 1.5rem;
+    line-height: 1;
+}
+.product-image-wrapper {
+    position: relative;
+    cursor: pointer;
+}
+.product-image-wrapper .image-actions {
+    display: none !important;
+    background: rgba(0,0,0,0.4);
+    transition: 0.2s;
+}
+.product-image-wrapper:hover .image-actions {
+    display: flex !important;
+}
+.product-image-thumb {
+    transition: 0.2s;
+}
+.product-image-wrapper:hover .product-image-thumb {
+    filter: blur(1px) brightness(0.7);
+}
+</style>
