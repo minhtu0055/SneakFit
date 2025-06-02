@@ -215,7 +215,7 @@ namespace SneakFit.Admin.Controllers
             return View(model);
         }
 
-        // Cập nhật thông tin chi tiết sản phẩm
+        // Cập nhật giá và số lượng = button hoàn tất
         [HttpPost]
         public async Task<IActionResult> UpdateSPCT([FromBody] List<SanPhamChiTietCapNhat> updates) // ở ngoài table list danh sách spct
         {

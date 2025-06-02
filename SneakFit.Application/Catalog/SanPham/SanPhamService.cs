@@ -171,7 +171,7 @@ namespace SneakFit.Application.Catalog.SanPham
             return await _context.SaveChangesAsync() > 0;
         }
 
-        // Cập nhật chi tiết sản phẩm
+        // Cập nhật giá và số lượng = button hoàn tất
         public async Task<bool> UpdateSPCT(List<SanPhamChiTietCapNhat> updates)
         {
             foreach (var update in updates)
