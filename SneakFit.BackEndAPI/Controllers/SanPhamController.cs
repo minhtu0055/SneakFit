@@ -77,6 +77,8 @@ namespace SneakFit.BackEndAPI.Controllers
 
             return Ok(new ApiSuccessResult<bool>(true));
         }
+
+        // Cập nhật giá và số lượng = button hoàn tất
         [HttpPut("UpdateSPCT")]
         public async Task<IActionResult> UpdateSPCT([FromBody] List<SanPhamChiTietCapNhat> updates)
         {

@@ -31,7 +31,7 @@ namespace SneakFit.BackEndAPI.Controllers
             var list = await _danhMucService.GetAll();
             return Ok(list);
         }
-        [HttpGet("GetById")]
+        [HttpGet("GetById/{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
             var getid = await _danhMucService.GetById(id);

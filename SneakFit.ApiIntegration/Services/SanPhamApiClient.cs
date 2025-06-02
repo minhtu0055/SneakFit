@@ -136,6 +136,7 @@ namespace SneakFit.ApiIntegration.Services
             throw new Exception($"Không thể cập nhật trạng thái. Error: {result}");
         }
 
+        // Cập nhật giá và số lượng = button hoàn tất
         public async Task<bool> UpdateSPCT(List<SanPhamChiTietCapNhat> updates)
         {
             var client = _httpClientFactory.CreateClient();
