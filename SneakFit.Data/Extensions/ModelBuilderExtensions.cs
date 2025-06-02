@@ -29,26 +29,26 @@ namespace SneakFit.Data.Extensions
                 new ChatLieu()
                 {
                     Id = new Guid("8f4d4a5e-2bfa-4e8c-9d2c-4f6a7e9b87cb"),
-                    TenChatLieu = "Giày Chạy Bộ",
+                    TenChatLieu = "Cao Su",
                 },
                  new ChatLieu()
                  {
                      Id = new Guid("8f8d4a5e-3bfa-4e8c-9d2c-3f6a7e9b87cb"),
-                     TenChatLieu = "Giày Đá Bóng",
+                     TenChatLieu = "Da cá",
                  }
             );
             modelBuilder.Entity<MauSac>().HasData(
                 new MauSac()
                 {
                     Id = new Guid("8f4d4a5e-2bfa-2e8c-9d2c-3f6a7e9b87cb"),
-                    TenMauSac = "Giày Chạy Bộ",
+                    TenMauSac = "Đen",
                     MaMauSac = "#FF0000",
 
                 },
                 new MauSac()
                 {
                     Id = new Guid("8f8d4a5e-2bfa-4e9c-9d2c-3f6a7e9b87cb"),
-                    TenMauSac = "Giày Đá Bóng",
+                    TenMauSac = "Đỏ",
                     MaMauSac = "#FFFFFF",
                 }
             );
@@ -74,6 +74,18 @@ namespace SneakFit.Data.Extensions
                 {
                     Id = new Guid("8f8d4a1e-2bfa-4e8c-9d2c-3f6a7e9b81cb"),
                     TenDeGiay = "Nhựa",
+                }
+            );
+            modelBuilder.Entity<ThuongHieu>().HasData(
+                new ThuongHieu()
+                {
+                    Id = new Guid("9f4d4a6e-2bfa-5e8c-9d3c-3f6a7e9b87cb"),
+                    TenThuongHieu = "Adidas",
+                },
+                new ThuongHieu()
+                {
+                    Id = new Guid("8f9d4a1e-2bfa-4e8c-9d2c-3f6a7e9b82cb"),
+                    TenThuongHieu = "Nike",
                 }
             );
             // any guid
