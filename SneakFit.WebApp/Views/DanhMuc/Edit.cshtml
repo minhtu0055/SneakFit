@@ -1,218 +1,49 @@
-@using SneakFit.ViewModels.Common
-@model PagedResult<SneakFit.ViewModels.Catalog.DanhMuc.DanhMucViewModels>
-@{
-    ViewData["Title"] = "Danh sách danh mục";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+@model SneakFit.ViewModels.Catalog.DanhMuc.SuaDanhMuc
+
+<form asp-controller="DanhMuc" asp-action="Edit" id="editDanhMucForm" method="post">
+    <input type="hidden" asp-for="Id" />
+    <div class="mb-3">
+        <label asp-for="TenDanhMuc" class="form-label">Tên danh mục</label>
+        <input asp-for="TenDanhMuc" class="form-control" placeholder="Nhập tên danh mục"
+               pattern="^[a-zA-ZÀ-ỹ\s]+$" 
+               oninput="validateDanhMucInput(this)"
+               maxlength="50"
+               title="Vui lòng chỉ nhập chữ cái" />
+        <span asp-validation-for="TenDanhMuc" class="text-danger"></span>
+        <span id="editDanhMucValidationError" class="text-danger" style="display: none;">Vui lòng chỉ nhập chữ cái</span>
+    </div>
+    <div class="mb-3">
+        <label class="form-label d-block">Trạng Thái</label>
+        @* <div class="form-check form-check-inline">
+            <input type="radio" class="form-check-input" asp-for="TrangThai" id="trangThaiTrue" value="true" />
+            <label class="form-check-label" for="trangThaiTrue">Hoạt động</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input type="radio" class="form-check-input" asp-for="TrangThai" id="trangThaiFalse" value="false" />
+            <label class="form-check-label" for="trangThaiFalse">Ngừng hoạt động</label>
+        </div> *@
+    </div>
+    <div class="text-end">
+        <button type="submit" class="btn btn-primary">
+            <i class="bx bx-save me-1"></i> Lưu
+        </button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="bx bx-x me-1"></i> Hủy
+        </button>
+    </div>
+</form>
+
+<script>
+function validateDanhMucInput(input) {
+    const pattern = /^[a-zA-ZÀ-ỹ\s]+$/;
+    const errorSpan = document.getElementById('editDanhMucValidationError');
+    
+    if (!pattern.test(input.value) && input.value !== '') {
+        errorSpan.style.display = 'block';
+        input.setCustomValidity('Vui lòng chỉ nhập chữ cái');
+    } else {
+        errorSpan.style.display = 'none';
+        input.setCustomValidity('');
+    }
 }
-<div class="text-end mb-4">
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#taoDanhMucModal">
-        <i class="bx bx-plus me-1"></i> Thêm mới danh mục
-    </button>
-</div>
-<!-- Modal -->
-<div class="modal fade" id="taoDanhMucModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Thêm mới danh mục</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="danhmuc-create-modal-content">
-                <!-- Nội dung form sẽ được load bằng Ajax -->
-            </div>
-        </div>
-    </div>
-</div>
-<!-- Modal Edit -->
-<div class="modal fade" id="editDanhMucModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Chỉnh sửa danh mục</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="danhmuc-edit-modal-content">
-                <!-- Nội dung form sẽ được load bằng Ajax -->
-            </div>
-        </div>
-    </div>
-</div>
-<div class="card">
-    <div class="card-header">
-        <div class="row">
-            <div class="col-md-6 col-xs-12">
-                <form asp-action="Index" method="get">
-                    <div class="row">
-                        <div class="col-md-9">
-                            <input type="text" value="@ViewBag.Keyword" placeholder="Tìm kiếm theo tên danh mục" name="Keyword" class="form-control" />
-                        </div>
-                        <div class="col-md-2 mb-2 d-flex align-items-end">
-                            <div class="btn-group w-100">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="bx bx-search"></i> Tìm
-                                </button>
-                                <button type="button" onclick="window.location.href='/DanhMuc/Index'" class="btn btn-dark">
-                                    <i class="bx bx-reset"></i> Reset
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-    <div class="table-responsive text-nowrap">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Tên Danh Mục</th>
-                    <th>Số Sản Phẩm</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody class="table-border-bottom-0">
-                @foreach (var item in Model.Items)
-                {
-                    <tr>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.TenDanhMuc)
-                        </td>
-                        <td>
-                            <span class="badge bg-label-primary" data-bs-toggle="tooltip" data-bs-placement="top">
-                                @Html.DisplayFor(modelItem => item.SoSanPham)
-                            </span>
-                        </td>
-                        <td>
-                            <div class="dropdown">
-                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                                    <i class="bx bx-dots-vertical-rounded"></i>
-                                </button>
-                                <div class="dropdown-menu">
-                                    <a class="dropdown-item edit-danhmuc" href="javascript:void(0)" data-id="@item.Id" data-bs-toggle="modal" data-bs-target="#editDanhMucModal">
-                                        <i class="bx bx-edit-alt me-1"></i> Sửa
-                                    </a>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-    @await Component.InvokeAsync("Pager", Model)
-</div>
-@section Scripts {
-    <script>
-        $(document).ready(function () {
-            // Css cho tổng số sản phẩm đang dùng danh mục
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl)
-            });
-
-            // Xử lý khi click vào nút thêm mới
-            $('[data-bs-target="#taoDanhMucModal"]').click(function () {
-                $.ajax({
-                    url: '/DanhMuc/Create',
-                    type: 'GET',
-                    success: function (result) {
-                        $('#danhmuc-create-modal-content').html(result);
-                    },
-                    error: function (err) {
-                        toastr.error('Có lỗi xảy ra khi tải form');
-                    }
-                });
-            });
-
-            // Xử lý submit form create bằng Ajax
-            $(document).on('submit', '#createDanhMucForm', function (e) {
-                e.preventDefault();
-                var formData = $(this).serialize();
-                $.ajax({
-                    url: '/DanhMuc/Create',
-                    type: 'POST',
-                    data: formData,
-                    success: function (result) {
-                        if (result.success) {
-                            $('#taoDanhMucModal').modal('hide');
-                            toastr.success('Thêm mới thành công');
-                            setTimeout(function() {
-                                window.location.reload();
-                            }, 1000);
-                        } else {
-                            toastr.error(result.message);
-                        }
-                    },
-                    error: function (err) {
-                        toastr.error('Có lỗi xảy ra khi thêm mới');
-                    }
-                });
-            });
-
-            // Xử lý khi click vào nút edit
-            $('.edit-danhmuc').click(function () {
-                var id = $(this).data('id');
-                var soSanPham = $(this).closest('tr').find('td:eq(1)').text().trim();
-
-                $.ajax({
-                    url: '/DanhMuc/Edit/' + id,
-                    type: 'GET',
-                    success: function (result) {
-                        $('#danhmuc-edit-modal-content').html(result);
-
-                        // Thêm thông tin số sản phẩm vào modal
-                        var warningHtml = '';
-                        if (parseInt(soSanPham) > 0) {
-                            warningHtml = `
-                                <div class="alert alert-warning mt-3">
-                                    <i class="bx bx-info-circle me-1"></i>
-                                    Danh mục này hiện đang được sử dụng bởi ${soSanPham} sản phẩm.
-                                </div>
-                            `;
-                        }
-                        $('#danhmuc-edit-modal-content').append(warningHtml);
-                    },
-                    error: function (err) {
-                        toastr.error('Có lỗi xảy ra khi tải form');
-                    }
-                });
-            });
-
-            // Xử lý submit form edit bằng Ajax
-            $(document).on('submit', '#editDanhMucForm', function (e) {
-                e.preventDefault();
-                var formData = $(this).serialize();
-                $.ajax({
-                    url: '/DanhMuc/Edit',
-                    type: 'POST',
-                    data: formData,
-                    success: function (result) {
-                        if (result.success) {
-                            $('#editDanhMucModal').modal('hide');
-                            toastr.success('Cập nhật thành công');
-                            setTimeout(function() {
-                                window.location.reload();
-                            }, 1000);
-                        } else {
-                            toastr.error(result.message);
-                        }
-                    },
-                    error: function (err) {
-                        toastr.error('Có lỗi xảy ra khi cập nhật');
-                    }
-                });
-            });
-
-            // Kiểm tra và hiển thị thông báo thành công
-            var successMessage = '@TempData["SuccessMessage"]';
-            if (successMessage) {
-                toastr.success(successMessage);
-            }
-            // Kiểm tra và hiển thị thông báo lỗi
-            var errorMessage = '@TempData["ErrorMessage"]';
-            if (errorMessage) {
-                toastr.error(errorMessage);
-            }
-        });
-    </script>
-}
+</script>

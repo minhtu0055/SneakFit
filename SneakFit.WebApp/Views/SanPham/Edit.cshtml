@@ -22,40 +22,4 @@
         <button type="submit" class="btn btn-primary">Lưu</button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
     </div>
-</form>
-
-@section Scripts {
-    <script>
-        $(document).ready(function () {
-            $('#editSanPhamForm').submit(function (e) {
-                e.preventDefault();
-
-                var form = $(this);
-                var url = form.attr('action');
-                var formData = form.serialize();
-                var productId = $('#Id').val(); // Giả sử đầu vào ẩn cho Id có ID 'Id'
-
-                // Xây dựng URL chính xác với ID sản phẩm
-                var editUrl = url + '/' + productId;
-
-                $.ajax({
-                    type: 'POST',
-                    url: editUrl,
-                    data: formData,
-                    success: function (response) {
-                        if (response.success) {
-                            alert('Cập nhật sản phẩm thành công!');
-                             window.location.reload(); // Tải lại trang khi thành công
-                        } else {
-                            alert('Cập nhật sản phẩm thất bại: ' + response.message);
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        alert('Đã xảy ra lỗi khi cập nhật sản phẩm.');
-                        console.error(xhr.responseText);
-                    }
-                });
-            });
-        });
-    </script>
-} 
+</form> 
