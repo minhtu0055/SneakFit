@@ -503,28 +503,49 @@
 
     <script>
         $(document).ready(function() {
-            // Chọn dòng
+            // Chọn dòng bằng double click
             $('#spctTable tbody tr').on('dblclick', function(e) {
+                // Bỏ qua nếu click vào input hoặc button
                 if (!$(e.target).is('input, button')) {
                     var $row = $(this);
-                    var isSelected = $row.find('.row-check').prop('checked');
+                    var $checkbox = $row.find('.row-check');
+                    var isSelected = $checkbox.prop('checked');
 
                     // Toggle checkbox
-                    $row.find('.row-check').prop('checked', !isSelected);
+                    $checkbox.prop('checked', !isSelected);
 
-                    // Toggle highlight
-                    if (!isSelected) {
-                        $row.addClass('table-info');
-                    } else {
-                        $row.removeClass('table-info');
-                    }
+                    // Toggle highlight cho dòng
+                    $row.toggleClass('table-info', !isSelected);
+
+                    // Kiểm tra và cập nhật trạng thái của checkAll
+                    updateCheckAllState();
                 }
             });
 
-            // CheckAll
+            // CheckAll: Chọn hoặc bỏ chọn tất cả
             $('#checkAll').on('change', function() {
-                $('.row-check').prop('checked', this.checked);
+                var isChecked = $(this).prop('checked');
+                $('.row-check').prop('checked', isChecked);
+                $('#spctTable tbody tr').toggleClass('table-info', isChecked);
             });
+
+            // Thêm sự kiện change cho các checkbox .row-check
+            $('#spctTable tbody').on('change', '.row-check', function() {
+                updateCheckAllState();
+            });
+
+            // Hàm kiểm tra và cập nhật trạng thái checkAll
+            function updateCheckAllState() {
+                var allChecked = $('.row-check').length === $('.row-check:checked').length;
+
+                // Nếu không phải tất cả đều được chọn, bỏ tích checkAll
+                if (!allChecked) {
+                    $('#checkAll').prop('checked', false);
+                } else {
+                    // Nếu tất cả đều được chọn, check lại checkAll
+                    $('#checkAll').prop('checked', true);
+                }
+            }
 
             // Chỉ cho nhập số và tự động format giá bán
             $(document).on('input', '.gia-ban', function() {
@@ -544,6 +565,13 @@
 
             // Thay thế sự kiện #updateAll:
             $('#updateAll').off('click').on('click', function() {
+                // Kiểm tra xem có dòng nào được chọn không
+                var selectedRows = $('.row-check:checked').closest('tr');
+                if (selectedRows.length === 0) {
+                    toastr.error('Vui lòng chọn ít nhất một sản phẩm!');
+                    return;
+                }
+
                 // Lấy giá và số lượng đầu tiên để fill vào modal (nếu có)
                 let firstPrice = $('.gia-ban').first().val() || '';
                 let firstQuantity = $('.so-luong').first().val() || '';
@@ -552,22 +580,24 @@
                 $('#modalEditPriceQuantity').modal('show');
             });
 
-            // Xử lý khi bấm Áp dụng trong modal
+            // Xử lý khi bấm Áp dụng trong modal sửa giá và số lượng chung
             $('#btnApplyEditAll').off('click').on('click', function() {
+            
+                // Lấy các dòng được chọn
+                var selectedRows = $('.row-check:checked').closest('tr');
+                if (selectedRows.length === 0) {
+                    // Nếu không có dòng nào được chọn, im lặng và thoát
+                    return;
+                }
+            
                 let price = $('#editAllPrice').val().replace(/\./g, '');
                 let quantity = $('#editAllQuantity').val();
 
                 if (!price && !quantity) {
-                    alert('Vui lòng nhập ít nhất một trong hai trường giá hoặc số lượng!');
+                    toastr.error('Vui lòng nhập ít nhất một trong hai trường giá hoặc số lượng!');
                     return;
                 }
 
-                // Lấy các dòng được chọn
-                var selectedRows = $('.row-check:checked').closest('tr');
-                if (selectedRows.length === 0) {
-                    alert('Vui lòng chọn ít nhất một sản phẩm!');
-                    return;
-                }
 
                 // Tạo mảng chứa dữ liệu cần cập nhật
                 var updates = [];
@@ -607,11 +637,11 @@
                             $('#modalEditPriceQuantity').modal('hide');
                             location.reload();
                         } else {
-                            alert('Có lỗi xảy ra: ' + (response.message || 'Không xác định'));
+                            toastr.error('Có lỗi xảy ra: ' + (response.message || 'Không xác định'));
                         }
                     },
                     error: function(xhr) {
-                        alert('Có lỗi xảy ra khi gửi yêu cầu! Chi tiết: ' + xhr.responseText);
+                        toastr.error('Có lỗi xảy ra khi gửi yêu cầu! Chi tiết: ' + xhr.responseText);
                     }
                 });
             });
@@ -620,7 +650,7 @@
             $('#updateSelected').on('click', function() {
                 var selectedRows = $('.row-check:checked').closest('tr');
                 if (selectedRows.length === 0) {
-                    alert('Vui lòng chọn ít nhất một sản phẩm!');
+                    toastr.error('Vui lòng chọn ít nhất một sản phẩm!');
                     return;
                 }
 
@@ -656,11 +686,11 @@
                                 alert('Cập nhật thành công!');
                                 location.reload();
                             } else {
-                                alert('Có lỗi xảy ra: ' + (response.message || 'Không xác định'));
+                                toastr.error('Bạn chưa sửa giá và số lượng => ' + (response.message || 'Không xác định'));
                             }
                         },
                         error: function(xhr) {
-                            alert('Có lỗi xảy ra khi gửi yêu cầu! Chi tiết: ' + xhr.responseText);
+                            toastr.error('Có lỗi xảy ra khi gửi yêu cầu! Chi tiết: ' + xhr.responseText);
                         }
                     });
                 }
@@ -687,6 +717,14 @@
 
             // Khi click 👁️
             $(document).on('click', '.btn-view', function() {
+                // Kiểm tra nếu tất cả checkbox đều được chọn
+                var allChecked = $('.row-check').length === $('.row-check:checked').length;
+                if ($('#checkAll').is(':checked')) {
+                    // Nếu Check All đang được chọn, hiển thị thông báo lỗi và không mở modal
+                    alert('Không thể mở modal khi đang chọn tất cả sản phẩm!');
+                    return;
+                }
+                
                 var id = $(this).closest('tr').data('id');
                 // Lấy dữ liệu combobox từ ViewBag (render ra JS object ở view)
                 var thuongHieus = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.ThuongHieus));
@@ -760,7 +798,7 @@
                 $.get('/SanPham/GetSPCTDetail', { id: spctId }, function(data) {
                     var currentCount = data.images.length;
                     if (currentCount + files.length > 3) {
-                        alert('Mỗi sản phẩm chỉ được tối đa 3 ảnh!');
+                        toastr.error('Mỗi sản phẩm chỉ được tối đa 3 ảnh!');
                         return;
                     }
                     // Kiểm tra định dạng file
@@ -768,7 +806,7 @@
                     for (let i = 0; i < files.length; i++) {
                         let ext = files[i].name.split('.').pop().toLowerCase();
                         if (!allowedExtensions.includes(ext)) {
-                            alert('Chỉ cho phép upload các file ảnh: jpg, jpeg, png, gif, webp!');
+                            toastr.error('Chỉ cho phép upload các file ảnh: jpg, jpeg, png, gif, webp!');
                             return;
                         }
                     }
@@ -791,14 +829,14 @@
                                 // Sau khi upload thành công, lấy lại danh sách ảnh mới
                                 $.get('/SanPham/GetSPCTDetail', { id: spctId }, function(data) {
                                     renderProductImages(data.images);
-        @* location.reload(); *@
+                                    @* location.reload(); *@
                                 });
                             } else {
-                                alert('Upload ảnh thất bại: ' + (response.message || 'Không xác định'));
+                                toastr.error('Upload ảnh thất bại: ' + (response.message || 'Không xác định'));
                             }
                         },
                         error: function(xhr) {
-                            alert('Có lỗi khi upload ảnh: ' + xhr.responseText);
+                            toastr.error('Có lỗi khi upload ảnh: ' + xhr.responseText);
                         }
                     });
                 });
@@ -820,18 +858,18 @@
                             // Sau khi xóa thành công, lấy lại danh sách ảnh mới
                             $.get('/SanPham/GetSPCTDetail', { id: spctId }, function(data) {
                                 renderProductImages(data.images);
-        @* if (!data.images || data.images.length === 0) {
+                                @* if (!data.images || data.images.length === 0) {
                                     location.reload();
                                 } else {
                                     renderProductImages(data.images);
                                 } *@
                             });
                         } else {
-                            alert('Xóa ảnh thất bại: ' + (response.message || 'Không xác định'));
+                            toastr.error('Xóa ảnh thất bại: ' + (response.message || 'Không xác định'));
                         }
                     },
                     error: function(xhr) {
-                        alert('Có lỗi khi xóa ảnh: ' + xhr.responseText);
+                        toastr.error('Có lỗi khi xóa ảnh: ' + xhr.responseText);
                     }
                 });
             });
@@ -921,7 +959,7 @@
                 const colorHex = $('#addColorHex').val();
 
                 if (!colorName || !colorHex) {
-                    alert('Vui lòng nhập đầy đủ thông tin màu sắc!');
+                    toastr.error('Vui lòng nhập đầy đủ thông tin màu sắc!');
                     return;
                 }
 
@@ -934,7 +972,7 @@
                         // Làm mới danh sách thả xuống màu sắc
                         location.reload();
                     } else {
-                        alert('Có lỗi xảy ra: ' + response.message);
+                        toastr.error('Có lỗi xảy ra: ' + response.message);
                     }
                 });
             });
@@ -948,7 +986,7 @@
                         $('#modalAddThuongHieu').modal('hide');
                         location.reload();
                     } else {
-                        alert('Có lỗi xảy ra: ' + response.message);
+                        toastr.error('Có lỗi xảy ra: ' + response.message);
                     }
                 });
             });
@@ -961,7 +999,7 @@
                         $('#modalAddChatLieu').modal('hide');
                         location.reload();
                     } else {
-                        alert('Có lỗi xảy ra: ' + response.message);
+                        toastr.error('Có lỗi xảy ra: ' + response.message);
                     }
                 });
             });
@@ -974,7 +1012,7 @@
                         $('#modalAddDeGiay').modal('hide');
                         location.reload();
                     } else {
-                        alert('Có lỗi xảy ra: ' + response.message);
+                        toastr.error('Có lỗi xảy ra: ' + response.message);
                     }
                 });
             });
@@ -987,7 +1025,7 @@
                         $('#modalAddKichThuoc').modal('hide');
                         location.reload();
                     } else {
-                        alert('Có lỗi xảy ra: ' + response.message);
+                        toastr.error('Có lỗi xảy ra: ' + response.message);
                     }
                 });
             });
@@ -1017,11 +1055,11 @@
                             alert('Cập nhật thành công!');
                             location.reload();
                         } else {
-                            alert('Có lỗi xảy ra: ' + response.message);
+                            toastr.error('Bạn không tích ô checkbox => ' + response.message);
                         }
                     },
                     error: function() {
-                        alert('Có lỗi xảy ra khi gửi yêu cầu!');
+                        toastr.error('Có lỗi xảy ra khi gửi yêu cầu!');
                     }
                 });
             });

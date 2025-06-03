@@ -1,5 +1,6 @@
 @model SneakFit.ViewModels.Catalog.SanPham.SuaSanPham
-<form asp-controller="SanPham" asp-action="Edit" id="editSanPhamForm" method="post">
+<form asp-controller="SanPham" asp-action="Edit" id="editSanPhamForm" method="put">
+    @Html.AntiForgeryToken()
     <input type="hidden" asp-for="Id" />
     <div class="mb-3">
         <label asp-for="TenSanPham" class="form-label">Tên sản phẩm</label>
@@ -33,19 +34,15 @@
                 var form = $(this);
                 var url = form.attr('action');
                 var formData = form.serialize();
-                var productId = $('#Id').val(); // Giả sử đầu vào ẩn cho Id có ID 'Id'
-
-                // Xây dựng URL chính xác với ID sản phẩm
-                var editUrl = url + '/' + productId;
 
                 $.ajax({
-                    type: 'POST',
-                    url: editUrl,
+                    type: 'PUT',
+                    url: url,
                     data: formData,
                     success: function (response) {
                         if (response.success) {
                             alert('Cập nhật sản phẩm thành công!');
-                             window.location.reload(); // Tải lại trang khi thành công
+                            window.location.reload();
                         } else {
                             alert('Cập nhật sản phẩm thất bại: ' + response.message);
                         }
