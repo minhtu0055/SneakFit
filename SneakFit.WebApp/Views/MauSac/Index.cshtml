@@ -1,15 +1,15 @@
 @using SneakFit.ViewModels.Common
 @model PagedResult<SneakFit.ViewModels.Catalog.MauSac.MauSacViewModels>
 @{
-	ViewData["Title"] = "Danh sách màu sắc";
-	Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Danh sách màu sắc";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <div class="text-end mb-4">
-	<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#taoMauSacModal">
-		<i class="bx bx-plus me-1"></i> Thêm mới màu sắc
-	</button>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#taoMauSacModal">
+        <i class="bx bx-plus me-1"></i> Thêm mới màu sắc
+    </button>
 </div>
-<!-- Modal -->
+<!-- Modal Thêm mới màu sắc (load nội dung bằng Ajax) -->
 <div class="modal fade" id="taoMauSacModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -23,7 +23,7 @@
         </div>
     </div>
 </div>
-<!-- Modal Edit -->
+<!-- Modal Chỉnh sửa màu sắc (load nội dung bằng Ajax) -->
 <div class="modal fade" id="editMauSacModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -38,67 +38,97 @@
     </div>
 </div>
 <div class="card">
-	<div class="card-header">
-		<div class="row">
-			<div class="col-md-6 col-xs-12">
-				<form asp-action="Index" method="get">
-					<div class="row">
-						<div class="col-md-9">
-							<input type="text" value="@ViewBag.Keyword" placeholder="Tìm kiếm theo tên màu sắc" name="Keyword" class="form-control" />
-						</div>
-						<div class="col-md-2 mb-2 d-flex align-items-end">
-							<div class="btn-group w-100">
-								<button type="submit" class="btn btn-primary">
-									<i class="bx bx-search"></i> Tìm
-								</button>
-								<button type="button" onclick="window.location.href='/MauSac/Index'" class="btn btn-dark">
-									<i class="bx bx-reset"></i> Reset
-								</button>
-							</div>
-						</div>
-					</div>
-				</form>
-			</div>
-		</div>
-	</div>
-	<div class="table-responsive text-nowrap">
-		<table class="table">
-			<thead>
-				<tr>
-					<th>Tên Màu Sắc</th>
-					<th></th>
-				</tr>
-			</thead>
-			<tbody class="table-border-bottom-0">
-				@foreach (var item in Model.Items)
-				{
-					<tr>
-						<td>
-							@Html.DisplayFor(modelItem => item.TenMauSac)
-						</td>
-						<td>
-							<div class="dropdown">
-								<button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-									<i class="bx bx-dots-vertical-rounded"></i>
-								</button>
-								<div class="dropdown-menu">
-									<a class="dropdown-item edit-mausac" href="javascript:void(0)" data-id="@item.Id" data-bs-toggle="modal" data-bs-target="#editMauSacModal">
-										<i class="bx bx-edit-alt me-1"></i> Sửa
-									</a>
-								</div>
-							</div>
-						</td>
-					</tr>
-				}
-			</tbody>
-		</table>
-	</div>
-	@await Component.InvokeAsync("Pager", Model)
+    <div class="card-header">
+        <div class="row">
+            <div class="col-md-6 col-xs-12">
+                <form asp-action="Index" method="get">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <input type="text" value="@ViewBag.Keyword" placeholder="Tìm kiếm theo tên màu sắc" name="Keyword" class="form-control" />
+                        </div>
+                        <div class="col-md-2 mb-2 d-flex align-items-end">
+                            <div class="btn-group w-100">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bx bx-search"></i> Tìm
+                                </button>
+                                <button type="button" onclick="window.location.href='/MauSac/Index'" class="btn btn-dark">
+                                    <i class="bx bx-reset"></i> Reset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="col-md-6 col-xs-12 text-end">
+                @* Placeholder for potential future elements in card-header right side *@
+            </div>
+        </div>
+    </div>
+    <div class="table-responsive text-nowrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Mã Màu Sắc</th>
+                    <th>Tên Màu Sắc</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody class="table-border-bottom-0">
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="color-preview me-2" style="width: 24px; height: 24px; border-radius: 4px; background-color: @item.MaMauSac;"></div>
+                                <span>@item.MaMauSac</span>
+                            </div>
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.TenMauSac)
+                        </td>
+                        <td>
+                            <div class="dropdown">
+                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item edit-mausac" href="javascript:void(0)" data-id="@item.Id" data-bs-toggle="modal" data-bs-target="#editMauSacModal">
+                                        <i class="bx bx-edit-alt me-1"></i> Sửa
+                                    </a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    @await Component.InvokeAsync("Pager", Model)
 </div>
 @section Scripts {
-	<script>
-		$(document).ready(function () {
-			// Xử lý khi click vào nút thêm mới
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-minicolors/2.3.6/jquery.minicolors.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-minicolors/2.3.6/jquery.minicolors.min.js"></script>
+    <style>
+        .color-preview {
+            border: 1px solid #ddd;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+    </style>
+    <script>
+        // Helper function to determine text color based on background
+        function getContrastYIQ(hexcolor) {
+            hexcolor = hexcolor.replace('#', '');
+            if(hexcolor.length === 3) hexcolor = hexcolor[0]+hexcolor[0]+hexcolor[1]+hexcolor[1]+hexcolor[2]+hexcolor[2];
+            var r = parseInt(hexcolor.substr(0,2),16);
+            var g = parseInt(hexcolor.substr(2,2),16);
+            var b = parseInt(hexcolor.substr(4,2),16);
+            var yiq = ((r*299)+(g*587)+(b*114))/1000;
+            return (yiq >= 128) ? '#000' : '#fff';
+        }
+
+        $(document).ready(function () {
+            // Xử lý khi click vào nút thêm mới (mở modal và load form)
             $('[data-bs-target="#taoMauSacModal"]').click(function () {
                 $.ajax({
                     url: '/MauSac/Create',
@@ -107,18 +137,48 @@
                         $('#createModalContent').html(result);
                     },
                     error: function (err) {
-                        toastr.error('Có lỗi xảy ra khi tải form');
+                        toastr.error('Có lỗi xảy ra khi tải form thêm mới');
                     }
                 });
             });
 
+            // Khởi tạo MiniColors và cập nhật style khi modal thêm mới hiển thị
+            $('#taoMauSacModal').on('shown.bs.modal', function () {
+                 $('#createModalContent').find('#createColorPicker').minicolors({
+                     control: 'hue',
+                     format: 'hex',
+                     theme: 'bootstrap',
+                     swatches: [],
+                     position: 'bottom left'
+                 });
+                 let defaultHex = $('#createModalContent').find('#create_MaMauSac').val() || '#000000';
+                  $('#createModalContent').find('#create_MaMauSac').css({
+                      'background': defaultHex,
+                      'color': getContrastYIQ(defaultHex)
+                  });
+            });
+
+            // Update hex input khi màu thay đổi trong modal thêm mới (sử dụng delegation)
+            $(document).on('change', '#createModalContent #createColorPicker', function() {
+                let hex = $(this).val();
+                $('#createModalContent #create_MaMauSac').val(hex).css({
+                    'background': hex,
+                    'color': getContrastYIQ(hex)
+                });
+            });
+
             // Xử lý submit form create bằng Ajax
-            $(document).on('submit', '#createMauSacForm', function (e) {
+            $(document).on('submit', '#createColorForm', function (e) {
                 e.preventDefault();
-                var formData = $(this).serialize();
+                var form = $(this);
+                var formData = form.serialize();
+                var url = form.attr('asp-action') ? '/' + form.attr('asp-controller') + '/' + form.attr('asp-action') : form.attr('action');
+
+                form.find('.text-danger').text(''); // Xóa thông báo lỗi cũ
+
                 $.ajax({
-                    url: '/MauSac/Create',
-                    type: 'POST',
+                    url: url,
+                    type: form.attr('method'),
                     data: formData,
                     success: function (result) {
                         if (result.success) {
@@ -128,36 +188,89 @@
                                 window.location.reload();
                             }, 1000);
                         } else {
-                            toastr.error(result.message);
+                            if (result.errors) {
+                                for (var key in result.errors) {
+                                    if (result.errors.hasOwnProperty(key)) {
+                                        var validationSpan = form.find('[data-valmsg-for="' + key + '"], [data-valmsg-for="' + key.charAt(0).toUpperCase() + key.slice(1) + '"]');
+                                        if (validationSpan.length > 0) {
+                                             validationSpan.text(result.errors[key].join(' '));
+                                        } else {
+                                            toastr.error(key + ': ' + result.errors[key].join(' '));
+                                        }
+                                    }
+                                }
+                            } else {
+                                toastr.error(result.message || 'Thêm mới màu sắc thất bại');
+                            }
                         }
                     },
                     error: function (err) {
-                        toastr.error('Có lỗi xảy ra khi thêm mới');
+                         if (err.responseJSON && err.responseJSON.message) {
+                            toastr.error('Lỗi từ server: ' + err.responseJSON.message);
+                         } else if (err.responseText) {
+                             toastr.error('Lỗi AJAX: ' + err.responseText);
+                         } 
+                         else {
+                            toastr.error('Có lỗi xảy ra khi thêm mới');
+                         }
                     }
                 });
             });
-			// Xử lý khi click vào nút edit
+
+            // Xử lý khi click vào nút edit (mở modal và load data)
             $('.edit-mausac').click(function () {
                 var id = $(this).data('id');
+                $('#editMauSacModal .text-danger').text(''); // Clear previous validation messages
+
                 $.ajax({
-                    url: '/MauSac/Edit/' + id,
+                    url: '/MauSac/Edit/' + id, // Gọi action Edit (GET) của WebApp Controller
                     type: 'GET',
                     success: function (result) {
                         $('#mausac-edit-modal-content').html(result);
                     },
                     error: function (err) {
-                        toastr.error('Có lỗi xảy ra khi tải form');
+                        toastr.error('Có lỗi xảy ra khi tải form chỉnh sửa màu sắc');
                     }
                 });
             });
 
-            // Xử lý submit form edit bằng Ajax
-            $(document).on('submit', '#mausac-edit-form', function (e) {
+            // Khởi tạo MiniColors và cập nhật style khi modal chỉnh sửa hiển thị
+             $('#editMauSacModal').on('shown.bs.modal', function () {
+                 $('#mausac-edit-modal-content').find('#editColorPicker').minicolors({
+                     control: 'hue',
+                     format: 'hex',
+                     theme: 'bootstrap',
+                     swatches: [],
+                     position: 'bottom left'
+                 });
+                 let currentColor = $('#mausac-edit-modal-content').find('#edit_MaMauSac').val() || '#000000';
+                  $('#mausac-edit-modal-content').find('#edit_MaMauSac').css({
+                      'background': currentColor,
+                      'color': getContrastYIQ(currentColor)
+                  });
+             });
+
+            // Update hex input khi màu thay đổi trong modal chỉnh sửa (sử dụng delegation)
+            $(document).on('change', '#mausac-edit-modal-content #editColorPicker', function() {
+                let hex = $(this).val();
+                $('#mausac-edit-modal-content #edit_MaMauSac').val(hex).css({
+                    'background': hex,
+                    'color': getContrastYIQ(hex)
+                });
+            });
+
+            // Xử lý submit form edit bằng Ajax (sử dụng delegation)
+            $(document).on('submit', '#editColorForm', function (e) {
                 e.preventDefault();
-                var formData = $(this).serialize();
+                var form = $(this);
+                var formData = form.serialize();
+                var url = form.attr('asp-action') ? '/' + form.attr('asp-controller') + '/' + form.attr('asp-action') : form.attr('action');
+
+                form.find('.text-danger').text('');
+
                 $.ajax({
-                    url: '/MauSac/Edit',
-                    type: 'POST',
+                    url: url,
+                    type: form.attr('method'),
                     data: formData,
                     success: function (result) {
                         if (result.success) {
@@ -167,25 +280,45 @@
                                 window.location.reload();
                             }, 1000);
                         } else {
-                            toastr.error(result.message);
+                            if (result.errors) {
+                                form.find('.text-danger').text('');
+                                for (var key in result.errors) {
+                                    if (result.errors.hasOwnProperty(key)) {
+                                        var validationSpan = form.find('[data-valmsg-for="' + key + '"], [data-valmsg-for="' + key.charAt(0).toUpperCase() + key.slice(1) + '"]');
+                                        if (validationSpan.length > 0) {
+                                             validationSpan.text(result.errors[key].join(' '));
+                                        } else {
+                                            toastr.error(key + ': ' + result.errors[key].join(' '));
+                                        }
+                                    }
+                                }
+                            } else {
+                                toastr.error(result.message || 'Cập nhật màu sắc thất bại');
+                            }
                         }
                     },
                     error: function (err) {
-                        toastr.error('Có lỗi xảy ra khi cập nhật');
+                         if (err.responseJSON && err.responseJSON.message) {
+                            toastr.error('Lỗi từ server: ' + err.responseJSON.message);
+                         } else if (err.responseText) {
+                             toastr.error('Lỗi AJAX: ' + err.responseText);
+                         } 
+                         else {
+                            toastr.error('Có lỗi xảy ra khi cập nhật');
+                         }
                     }
                 });
             });
-			
-			// Kiểm tra và hiển thị thông báo thành công
-			var successMessage = '@TempData["SuccessMessage"]';
-			if (successMessage) {
-				toastr.success(successMessage);
-			}
-			// Kiểm tra và hiển thị thông báo lỗi
+
+            // Kiểm tra và hiển thị thông báo
+            var successMessage = '@TempData["SuccessMessage"]';
+            if (successMessage) {
+                toastr.success(successMessage);
+            }
             var errorMessage = '@TempData["ErrorMessage"]';
             if (errorMessage) {
                 toastr.error(errorMessage);
             }
-		});
-	</script>
+        });
+    </script>
 }

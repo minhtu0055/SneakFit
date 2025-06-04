@@ -582,14 +582,14 @@
 
             // Xử lý khi bấm Áp dụng trong modal sửa giá và số lượng chung
             $('#btnApplyEditAll').off('click').on('click', function() {
-            
+
                 // Lấy các dòng được chọn
                 var selectedRows = $('.row-check:checked').closest('tr');
                 if (selectedRows.length === 0) {
-                    // Nếu không có dòng nào được chọn, im lặng và thoát
+                    toastr.error('Vui lòng chọn ít nhất một sản phẩm!');
                     return;
                 }
-            
+
                 let price = $('#editAllPrice').val().replace(/\./g, '');
                 let quantity = $('#editAllQuantity').val();
 
@@ -721,10 +721,10 @@
                 var allChecked = $('.row-check').length === $('.row-check:checked').length;
                 if ($('#checkAll').is(':checked')) {
                     // Nếu Check All đang được chọn, hiển thị thông báo lỗi và không mở modal
-                    alert('Không thể mở modal khi đang chọn tất cả sản phẩm!');
+                    Swal.fire('Lỗi', 'Không thể mở modal khi đang chọn tất cả sản phẩm!', 'error');
                     return;
                 }
-                
+
                 var id = $(this).closest('tr').data('id');
                 // Lấy dữ liệu combobox từ ViewBag (render ra JS object ở view)
                 var thuongHieus = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.ThuongHieus));
@@ -829,7 +829,6 @@
                                 // Sau khi upload thành công, lấy lại danh sách ảnh mới
                                 $.get('/SanPham/GetSPCTDetail', { id: spctId }, function(data) {
                                     renderProductImages(data.images);
-                                    @* location.reload(); *@
                                 });
                             } else {
                                 toastr.error('Upload ảnh thất bại: ' + (response.message || 'Không xác định'));
@@ -858,11 +857,6 @@
                             // Sau khi xóa thành công, lấy lại danh sách ảnh mới
                             $.get('/SanPham/GetSPCTDetail', { id: spctId }, function(data) {
                                 renderProductImages(data.images);
-                                @* if (!data.images || data.images.length === 0) {
-                                    location.reload();
-                                } else {
-                                    renderProductImages(data.images);
-                                } *@
                             });
                         } else {
                             toastr.error('Xóa ảnh thất bại: ' + (response.message || 'Không xác định'));
@@ -1031,7 +1025,8 @@
             });
 
             $('#btnSaveProductDetail').on('click', function() {
-                var spctId = $('#spctTable tr.table-info').data('id');
+                // var spctId = $('#spctTable tr.table-info').data('id');
+                var spctId = $('.btn-view').data('id');
                 var formData = {
                     Id: spctId,
                     TenSanPham: $("#productDetailModal input[name='TenSanPham']").val(),
@@ -1055,7 +1050,7 @@
                             alert('Cập nhật thành công!');
                             location.reload();
                         } else {
-                            toastr.error('Bạn không tích ô checkbox => ' + response.message);
+                            toastr.error('Có lỗi xảy ra khi cập nhật!' + response.message);
                         }
                     },
                     error: function() {
