@@ -309,9 +309,11 @@
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Màu Sắc :</label>
                             <div class="input-group align-items-center">
-                                <select class="form-select" name="MauSacId" style="border-radius: 8px;" required>
-                                    <span class="input-group-text" id="colorPreview" style="width:40px;"></span>
-                                </select>
+                                <select class="form-select" name="MauSacId" style="border-radius: 8px;" required></select>
+                                <span class="input-group-text" id="colorPreview"
+                                      style="width:40px; height: 38px; border-radius: 8px; margin-left: 5px; 
+                                             display: flex; align-items: center; justify-content: center;">
+                                </span>
                                 <button type="button" class="btn btn-primary ms-2" style="border-radius: 8px; width: 40px; height: 40px; padding: 0;" data-type="mausac">
                                     <i class="bx bx-plus"></i>
                                 </button>
@@ -347,7 +349,7 @@
                             <!-- Ảnh sẽ được render ở đây bằng JS -->
                         </div>
                         <div class="text-center">
-                            <input type="file" id="uploadImageInput" accept="image/*" style="display:none;" multiple />
+                            <input type="file" id="uploadImageInput" accept="image" style="display:none;" multiple />
                             <button type="button" class="btn btn-outline-primary" id="btnUploadImage">+ Upload</button>
                         </div>
                     </div>
@@ -418,27 +420,10 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Thêm màu sắc mới</h5>
+                <h5 class="modal-title">Thêm màu sắc</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label">Chọn màu sắc</label><br />
-                    <input type="color" id="addColorPicker" class="form-control" style="width: 120px; display:inline-block;" />
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Mã màu</label>
-                    <input type="text" id="addColorHex" class="form-control" readonly style="width: 120px; background:#fff; color:#000; font-weight:bold; text-align:center;" />
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Tên màu sắc</label>
-                    <input type="text" id="addColorName" class="form-control" placeholder="Nhập tên màu sắc" />
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-primary" id="saveNewColor">Lưu</button>
-            </div>
+            <div class="modal-body" id="modalAddMauSacContent"></div>
         </div>
     </div>
 </div>
@@ -487,7 +472,11 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <!-- Bootstrap Icons (dùng CDN để tránh lỗi) -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Thêm thư viện color picker -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-minicolors/2.3.6/jquery.minicolors.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-minicolors/2.3.6/jquery.minicolors.min.js"></script>
     
     <script>
         $(document).ready(function() {
@@ -621,9 +610,9 @@
                     contentType: 'application/json',
                     success: function(response) {
                         if (response.success) {
-                            alert('Cập nhật thành công!');
-                            $('#modalEditPriceQuantity').modal('hide');
-                            location.reload();
+                            Swal.fire('Thành công', 'Cập nhật thành công!', 'success').then(() => {
+                                location.reload();
+                            });
                         } else {
                             toastr.error('Có lỗi xảy ra: ' + (response.message || 'Không xác định'));
                         }
@@ -671,8 +660,9 @@
                         contentType: 'application/json',
                         success: function(response) {
                             if (response.success) {
-                                alert('Cập nhật thành công!');
-                                location.reload();
+                                Swal.fire('Thành công', 'Cập nhật thành công!', 'success').then(() => {
+                                    location.reload();
+                                });
                             } else {
                                 toastr.error('Bạn chưa sửa giá và số lượng => ' + (response.message || 'Không xác định'));
                             }
@@ -702,12 +692,12 @@
                     $select.append('<option value="' + data[i][value] + '">' + data[i][text] + '</option>');
                 }
             }
-            
+
             // Hàm tạo QR code
             function generateQRCode(id) {
                 // Xóa QR code cũ nếu có
                 $("#qrCodePreview").empty();
-                
+
                 // Tạo QR code mới
                 new QRCode(document.getElementById("qrCodePreview"), {
                     text: `${window.location.origin}/SanPham/Details/${id}`, // URL sản phẩm
@@ -730,6 +720,7 @@
                 }
 
                 var id = $(this).closest('tr').data('id');
+                $('#productDetailModal').data('current-spct-id', id); // Lưu ID vào modal
                 // Lấy dữ liệu combobox từ ViewBag (render ra JS object ở view)
                 var thuongHieus = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.ThuongHieus));
                 var chatLieus = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.ChatLieus));
@@ -757,14 +748,18 @@
                     $("#productDetailModal select[name='ChatLieuId']").val(data.chatLieuId);
                     $("#productDetailModal select[name='DeGiayId']").val(data.deGiayId);
                     $("#productDetailModal select[name='KichThuocId']").val(data.kichThuocId);
-                    $("#productDetailModal select[name='MauSacId']").val(data.mauSacId).trigger('change');
+                    $("#productDetailModal select[name='MauSacId']").val(data.mauSacId);
                     $("#productDetailModal input[name='SoLuong']").val(data.soLuong);
-                    // $("#productDetailModal input[name='SoLuongHangTra']").val(data.soLuongHangTra);
                     $("#productDetailModal input[name='GiaBan']").val(Number(data.giaBan).toLocaleString('vi-VN'));
-                    // QR code
+
+                    // Trigger change event để cập nhật màu preview
+                    $("#productDetailModal select[name='MauSacId']").trigger('change');
+
+                    // Generate product QR code
                     generateQRCode(data.id);
                     // Ảnh sản phẩm
                     renderProductImages(data.images);
+
                     $('#productDetailModal').modal('show');
                 });
             });
@@ -884,11 +879,57 @@
                 modal.show();
             });
 
-            // Khi chọn màu sắc thì đổi màu preview
+            // Khởi tạo object để lưu thông tin mã màu và tên màu
+            var mauSacHexMap = {};
+
+            // Lấy dữ liệu màu từ ViewBag.MauSacs (dữ liệu dạng { id: "tenMau" })
+            var mauSacs = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.MauSacs));
+            if (mauSacs) {
+                // Chuyển đổi dữ liệu màu sắc thành object dạng { id: { hex: "hexCode", name: "tenMau" } }
+                Object.keys(mauSacs).forEach(function(key) {
+                    mauSacHexMap[key] = {
+                        hex: "", // Mã màu sẽ được cập nhật sau
+                        name: mauSacs[key], // Tên màu lấy từ ViewBag.MauSacs
+                    };
+                });
+            }
+
+            // Lấy mã màu (hex code) từ ViewBag.AllColors hoặc API
+            var allColorsData = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.AllColors));
+            if (allColorsData) {
+                allColorsData.forEach(function(color) {
+                    if (color.Id && color.MaMau && mauSacHexMap[color.Id]) {
+                        mauSacHexMap[color.Id].hex = color.MaMau; // Cập nhật mã màu
+                    }
+                });
+            } else {
+                // Nếu ViewBag.AllColors không tồn tại, gọi API để lấy mã màu (nếu có)
+                // $.get('/SanPham/GetMauSacHex', function(hexData) {
+                //     Object.keys(hexData).forEach(function(key) {
+                //         if (mauSacHexMap[key]) {
+                //             mauSacHexMap[key].hex = hexData[key];
+                //         }
+                //     });
+                // });
+            }
+
+            // Xử lý sự kiện khi chọn màu từ dropdown
             $("#productDetailModal select[name='MauSacId']").on('change', function() {
-                var color = $(this).find('option:selected').text();
-                $('#colorPreview').css('background', color);
+                var selectedColorId = $(this).val();
+                var colorPreview = $('#productDetailModal #colorPreview');
+
+                if (mauSacHexMap[selectedColorId]) {
+                    // Cập nhật màu nền cho ô preview
+                    colorPreview.css('background-color', mauSacHexMap[selectedColorId].hex);
+                    // Hiển thị tên màu trong ô preview
+                    colorPreview.text(mauSacHexMap[selectedColorId].name);
+                } else {
+                    // Xóa màu nền và tên màu nếu không có lựa chọn hợp lệ
+                    colorPreview.css('background-color', '');
+                    colorPreview.text('');
+                }
             });
+
 
             // Hàm mở modal thêm thương hiệu
             function openAddThuongHieuModal() {
@@ -922,6 +963,32 @@
                 });
             }
 
+            // Hàm mở modal thêm màu sắc
+            function openAddMauSacModal() {
+                $.get('/MauSac/Create', function(html) {
+                    $('#modalAddMauSacContent').html(html);
+                    $('#modalAddMauSac').modal('show');
+
+                    // Khởi tạo color picker sau khi nội dung được tải
+                    $('#modalAddMauSacContent #createColorPicker').minicolors({
+                        control: 'hue',
+                        format: 'hex',
+                        theme: 'bootstrap',
+                        swatches: [],
+                        position: 'bottom left',
+                        change: function(hex) {
+                            $('#modalAddMauSacContent #create_MaMauSac').val(hex);
+                            $('#modalAddMauSacContent #createColorPreview').css('background-color', hex);
+                        }
+                    });
+
+                    // Set initial color
+                    let defaultHex = $('#modalAddMauSacContent #create_MaMauSac').val() || '#000000';
+                    $('#modalAddMauSacContent #create_MaMauSac').val(defaultHex);
+                    $('#modalAddMauSacContent #createColorPreview').css('background-color', defaultHex);
+                });
+            }
+
             // Xử lý sự kiện click cho các button +
             $(document).on('click', 'button[data-type]', function() {
                 var type = $(this).data('type');
@@ -939,40 +1006,9 @@
                         openAddKichThuocModal();
                         break;
                     case 'mausac':
-                        $('#modalAddMauSac').modal('show');
+                        openAddMauSacModal();
                         break;
                 }
-            });
-
-            // Handle color picker
-            if ($('#addColorPicker').length) {
-                $('#addColorPicker').on('input', function() {
-                    $('#addColorHex').val($(this).val());
-                });
-            }
-
-            // Xử lý lưu màu mới
-            $('#saveNewColor').on('click', function() {
-                const colorName = $('#addColorName').val();
-                const colorHex = $('#addColorHex').val();
-
-                if (!colorName || !colorHex) {
-                    toastr.error('Vui lòng nhập đầy đủ thông tin màu sắc!');
-                    return;
-                }
-
-                $.post('/SanPham/AddMauSac', {
-                    tenMauSac: colorName,
-                    maMau: colorHex
-                }, function(response) {
-                    if (response.success) {
-                        $('#modalAddMauSac').modal('hide');
-                        // Làm mới danh sách thả xuống màu sắc
-                        location.reload();
-                    } else {
-                        toastr.error('Có lỗi xảy ra: ' + response.message);
-                    }
-                });
             });
 
             // Xử lý việc gửi biểu mẫu cho các phương thức khác
@@ -1028,9 +1064,24 @@
                 });
             });
 
+            $(document).on('submit', '#formAddMauSac', function(e) {
+                e.preventDefault();
+                const formData = $(this).serialize();
+                $.post('/SanPham/AddMauSac', formData, function(response) {
+                    if (response.success) {
+                        $('#modalAddMauSac').modal('hide');
+                        // Reset form should be handled by the loaded partial view's script or reload
+                        location.reload();
+                    } else {
+                        toastr.error('Có lỗi xảy ra: ' + response.message);
+                    }
+                });
+            });
+
             $('#btnSaveProductDetail').on('click', function() {
                 // var spctId = $('#spctTable tr.table-info').data('id');
-                var spctId = $('.btn-view').data('id');
+                // var spctId = $('.btn-view').data('id');
+                var spctId = $('#productDetailModal').data('current-spct-id'); // Lấy ID đã lưu trên modal
                 var formData = {
                     Id: spctId,
                     TenSanPham: $("#productDetailModal input[name='TenSanPham']").val(),
@@ -1051,9 +1102,11 @@
                     contentType: 'application/json',
                     success: function(response) {
                         if (response.success) {
-                            alert('Cập nhật thành công!');
-                            location.reload();
+                            Swal.fire('Thành công', 'Cập nhật thành công!', 'success').then(() => {
+                                location.reload();
+                            });
                         } else {
+                            // toastr.error('Có lỗi xảy ra khi cập nhật!' + response.message);
                             toastr.error('Có lỗi xảy ra khi cập nhật!' + response.message);
                         }
                     },
@@ -1129,9 +1182,29 @@
         border-radius: 4px;
         box-shadow: 1px 2px 4px rgba(5,5,5,5.1);
     }
-    
-    #qrCodePreview img {
-        display: block;
-        margin: 0 auto;
+
+        #qrCodePreview img {
+            display: block;
+            margin: 0 auto;
+        }
+
+    /* Color picker styles */
+    .minicolors-theme-bootstrap .minicolors-input {
+        height: 38px;
+        padding: 6px 12px;
+        font-size: 14px;
+        line-height: 1.42857143;
+        color: #555;
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+        transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+    }
+
+    .minicolors-theme-bootstrap .minicolors-input:focus {
+        border-color: #66afe9;
+        outline: 0;
+        box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
     }
 </style>

@@ -83,22 +83,32 @@ namespace SneakFit.Application.Catalog.MauSac
         }
         public async Task<MauSacViewModels> Update(SuaMauSac request)
         {
-            var getid = _context.MauSac.Find(request.Id);
+            var getid = await _context.MauSac.FindAsync(request.Id);
             if (getid == null)
             {
-                throw new Exception($"Không tìm thấy id : {request.Id} của thương hiêu");
+                throw new Exception($"Không tìm thấy id: {request.Id} của màu sắc");
             }
-            // Kiểm tra xem tên chất liệu đã tồn tại chưa (trừ chính bản ghi hiện tại)
-            var existingChatLieu = await _context.MauSac
-                .FirstOrDefaultAsync(x => x.TenMauSac.ToLower() == request.TenMauSac.ToLower()
-                                        && x.Id != request.Id);
-            if (existingChatLieu != null)
+
+            // Kiểm tra xem tên màu sắc đã tồn tại chưa (trừ chính bản ghi hiện tại)
+            if (!string.IsNullOrEmpty(request.TenMauSac))
             {
-                throw new Exception("Tên màu sắc đã tồn tại!");
+                var existingColor = await _context.MauSac
+                    .FirstOrDefaultAsync(x => x.TenMauSac.ToLower() == request.TenMauSac.ToLower() && x.Id != request.Id);
+                if (existingColor != null)
+                {
+                    throw new Exception("Tên màu sắc đã tồn tại!");
+                }
+                getid.TenMauSac = request.TenMauSac;
             }
-            getid.TenMauSac = request.TenMauSac;
+
+            // Cập nhật mã màu nếu có thay đổi
+            if (!string.IsNullOrEmpty(request.MaMauSac) && request.MaMauSac != getid.MaMauSac)
+            {
+                getid.MaMauSac = request.MaMauSac;
+            }
+
             await _context.SaveChangesAsync();
-            return new MauSacViewModels()
+            return new MauSacViewModels
             {
                 Id = getid.Id,
                 TenMauSac = getid.TenMauSac,

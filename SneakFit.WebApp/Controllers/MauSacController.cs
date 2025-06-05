@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SneakFit.ApiIntegration.Services;
+using SneakFit.Data.Entities;
 using SneakFit.ViewModels.Catalog.MauSac;
 
 namespace SneakFit.Admin.Controllers
@@ -66,7 +67,8 @@ namespace SneakFit.Admin.Controllers
             var editModel = new SuaMauSac
             {
                 Id = chatLieu.Id,
-                TenMauSac = chatLieu.TenMauSac
+                TenMauSac = chatLieu.TenMauSac,
+                MaMauSac = chatLieu.MaMauSac
             };
             return PartialView("Edit", editModel);
         }

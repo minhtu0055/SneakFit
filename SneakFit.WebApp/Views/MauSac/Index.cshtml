@@ -114,9 +114,14 @@
             border: 1px solid #ddd;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
+
+        .minicolors-swatch {
+            width: 100%;
+            height: 100%;
+        }
     </style>
     <script>
-        // Helper function to determine text color based on background
+        // Chức năng trợ giúp để xác định màu văn bản dựa trên nền
         function getContrastYIQ(hexcolor) {
             hexcolor = hexcolor.replace('#', '');
             if(hexcolor.length === 3) hexcolor = hexcolor[0]+hexcolor[0]+hexcolor[1]+hexcolor[1]+hexcolor[2]+hexcolor[2];
@@ -144,26 +149,32 @@
 
             // Khởi tạo MiniColors và cập nhật style khi modal thêm mới hiển thị
             $('#taoMauSacModal').on('shown.bs.modal', function () {
-                 $('#createModalContent').find('#createColorPicker').minicolors({
-                     control: 'hue',
-                     format: 'hex',
-                     theme: 'bootstrap',
-                     swatches: [],
-                     position: 'bottom left'
-                 });
-                 let defaultHex = $('#createModalContent').find('#create_MaMauSac').val() || '#000000';
-                  $('#createModalContent').find('#create_MaMauSac').css({
-                      'background': defaultHex,
-                      'color': getContrastYIQ(defaultHex)
-                  });
+                $('#createModalContent').find('#createColorPicker').minicolors({
+                    control: 'hue',
+                    format: 'hex',
+                    theme: 'bootstrap',
+                    swatches: [],
+                    position: 'bottom left'
+                });
+                let defaultHex = $('#createModalContent').find('#create_MaMauSac').val() || '#000000';
+                $('#createModalContent').find('#createColorPreview').css({
+                    'background': defaultHex
+                });
+                $('#createModalContent').find('#create_MaMauSac').css({
+                    'background': defaultHex,
+                    'color': getContrastYIQ(defaultHex)
+                });
             });
 
-            // Update hex input khi màu thay đổi trong modal thêm mới (sử dụng delegation)
+            // Update hex input và preview khi màu thay đổi trong modal thêm mới
             $(document).on('change', '#createModalContent #createColorPicker', function() {
                 let hex = $(this).val();
                 $('#createModalContent #create_MaMauSac').val(hex).css({
                     'background': hex,
                     'color': getContrastYIQ(hex)
+                });
+                $('#createModalContent #createColorPreview').css({
+                    'background': hex
                 });
             });
 
@@ -172,13 +183,13 @@
                 e.preventDefault();
                 var form = $(this);
                 var formData = form.serialize();
-                var url = form.attr('asp-action') ? '/' + form.attr('asp-controller') + '/' + form.attr('asp-action') : form.attr('action');
+                var url = '/MauSac/Create';
 
                 form.find('.text-danger').text(''); // Xóa thông báo lỗi cũ
 
                 $.ajax({
                     url: url,
-                    type: form.attr('method'),
+                    type: 'POST',
                     data: formData,
                     success: function (result) {
                         if (result.success) {
@@ -193,7 +204,7 @@
                                     if (result.errors.hasOwnProperty(key)) {
                                         var validationSpan = form.find('[data-valmsg-for="' + key + '"], [data-valmsg-for="' + key.charAt(0).toUpperCase() + key.slice(1) + '"]');
                                         if (validationSpan.length > 0) {
-                                             validationSpan.text(result.errors[key].join(' '));
+                                            validationSpan.text(result.errors[key].join(' '));
                                         } else {
                                             toastr.error(key + ': ' + result.errors[key].join(' '));
                                         }
@@ -205,14 +216,13 @@
                         }
                     },
                     error: function (err) {
-                         if (err.responseJSON && err.responseJSON.message) {
+                        if (err.responseJSON && err.responseJSON.message) {
                             toastr.error('Lỗi từ server: ' + err.responseJSON.message);
-                         } else if (err.responseText) {
-                             toastr.error('Lỗi AJAX: ' + err.responseText);
-                         } 
-                         else {
+                        } else if (err.responseText) {
+                            toastr.error('Lỗi AJAX: ' + err.responseText);
+                        } else {
                             toastr.error('Có lỗi xảy ra khi thêm mới');
-                         }
+                        }
                     }
                 });
             });
@@ -223,7 +233,7 @@
                 $('#editMauSacModal .text-danger').text(''); // Clear previous validation messages
 
                 $.ajax({
-                    url: '/MauSac/Edit/' + id, // Gọi action Edit (GET) của WebApp Controller
+                    url: '/MauSac/Edit/' + id,
                     type: 'GET',
                     success: function (result) {
                         $('#mausac-edit-modal-content').html(result);
@@ -235,42 +245,51 @@
             });
 
             // Khởi tạo MiniColors và cập nhật style khi modal chỉnh sửa hiển thị
-             $('#editMauSacModal').on('shown.bs.modal', function () {
-                 $('#mausac-edit-modal-content').find('#editColorPicker').minicolors({
-                     control: 'hue',
-                     format: 'hex',
-                     theme: 'bootstrap',
-                     swatches: [],
-                     position: 'bottom left'
-                 });
-                 let currentColor = $('#mausac-edit-modal-content').find('#edit_MaMauSac').val() || '#000000';
-                  $('#mausac-edit-modal-content').find('#edit_MaMauSac').css({
-                      'background': currentColor,
-                      'color': getContrastYIQ(currentColor)
-                  });
-             });
+            $('#editMauSacModal').on('shown.bs.modal', function () {
+                let currentColor = $('#mausac-edit-modal-content').find('#edit_MaMauSac').val() || '#000000';
+                $('#mausac-edit-modal-content').find('#editColorPicker').minicolors({
+                    control: 'hue',
+                    format: 'hex',
+                    theme: 'bootstrap',
+                    swatches: [],
+                    position: 'bottom left',
+                    value: currentColor // Ensure the color picker is initialized with the current color
+                });
+                // Explicitly set the color picker value to ensure it's not overwritten
+                $('#mausac-edit-modal-content').find('#editColorPicker').val(currentColor);
+                $('#mausac-edit-modal-content').find('#editColorPreview').css({
+                    'background': currentColor
+                });
+                $('#mausac-edit-modal-content').find('#edit_MaMauSac').css({
+                    'background': currentColor,
+                    'color': getContrastYIQ(currentColor)
+                });
+            });
 
-            // Update hex input khi màu thay đổi trong modal chỉnh sửa (sử dụng delegation)
+            // Update hex input và preview khi màu thay đổi trong modal chỉnh sửa
             $(document).on('change', '#mausac-edit-modal-content #editColorPicker', function() {
                 let hex = $(this).val();
                 $('#mausac-edit-modal-content #edit_MaMauSac').val(hex).css({
                     'background': hex,
                     'color': getContrastYIQ(hex)
                 });
+                $('#mausac-edit-modal-content #editColorPreview').css({
+                    'background': hex
+                });
             });
 
-            // Xử lý submit form edit bằng Ajax (sử dụng delegation)
+            // Xử lý submit form edit bằng Ajax
             $(document).on('submit', '#editColorForm', function (e) {
                 e.preventDefault();
                 var form = $(this);
                 var formData = form.serialize();
-                var url = form.attr('asp-action') ? '/' + form.attr('asp-controller') + '/' + form.attr('asp-action') : form.attr('action');
+                var url = '/MauSac/Edit';
 
                 form.find('.text-danger').text('');
 
                 $.ajax({
                     url: url,
-                    type: form.attr('method'),
+                    type: 'POST',
                     data: formData,
                     success: function (result) {
                         if (result.success) {
@@ -286,7 +305,7 @@
                                     if (result.errors.hasOwnProperty(key)) {
                                         var validationSpan = form.find('[data-valmsg-for="' + key + '"], [data-valmsg-for="' + key.charAt(0).toUpperCase() + key.slice(1) + '"]');
                                         if (validationSpan.length > 0) {
-                                             validationSpan.text(result.errors[key].join(' '));
+                                            validationSpan.text(result.errors[key].join(' '));
                                         } else {
                                             toastr.error(key + ': ' + result.errors[key].join(' '));
                                         }
@@ -298,14 +317,13 @@
                         }
                     },
                     error: function (err) {
-                         if (err.responseJSON && err.responseJSON.message) {
+                        if (err.responseJSON && err.responseJSON.message) {
                             toastr.error('Lỗi từ server: ' + err.responseJSON.message);
-                         } else if (err.responseText) {
-                             toastr.error('Lỗi AJAX: ' + err.responseText);
-                         } 
-                         else {
+                        } else if (err.responseText) {
+                            toastr.error('Lỗi AJAX: ' + err.responseText);
+                        } else {
                             toastr.error('Có lỗi xảy ra khi cập nhật');
-                         }
+                        }
                     }
                 });
             });

@@ -54,8 +54,8 @@ namespace SneakFit.BackEndAPI.Controllers
             return CreatedAtAction(nameof(GetById), new { id = sanPham.Id }, sanPham);
         }
 
-        [HttpPut("Edit/{id}")]
-        public async Task<IActionResult> Edit(Guid id, [FromForm] SuaSanPham request)
+        [HttpPost("Edit/{id}")]
+        public async Task<IActionResult> Edit(Guid id, [FromBody] SuaSanPham request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

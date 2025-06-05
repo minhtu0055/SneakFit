@@ -83,7 +83,7 @@ namespace SneakFit.ApiIntegration.Services
 
             var json = JsonConvert.SerializeObject(request);
             var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await client.PutAsync($"/api/SanPham/Update/{request.Id}", httpContent);
+            var response = await client.PostAsync($"/api/SanPham/Edit/{request.Id}", httpContent);
             var body = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)
                 return JsonConvert.DeserializeObject<SanPhamViewModels>(body);

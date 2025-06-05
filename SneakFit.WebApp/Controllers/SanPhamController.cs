@@ -133,7 +133,7 @@ namespace SneakFit.Admin.Controllers
         }
 
         // Xử lý cập nhật sản phẩm
-        [HttpPut]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(SuaSanPham request)
         {
