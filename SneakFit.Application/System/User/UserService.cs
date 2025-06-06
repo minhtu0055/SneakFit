@@ -13,6 +13,7 @@ using SneakFit.Application.Email;
 using SneakFit.Data.EF;
 using SneakFit.Data.Entities;
 using SneakFit.ViewModels.Common;
+using SneakFit.ViewModels.System.DiaChi;
 using SneakFit.ViewModels.System.User;
 
 namespace SneakFit.Application.System.User
@@ -25,7 +26,7 @@ namespace SneakFit.Application.System.User
         private readonly IConfiguration _config;
         private readonly SneakFitDbContext _context;
 
-        public UserService(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IConfiguration configuration, IEmailSender emailSender,SneakFitDbContext context)
+        public UserService(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IConfiguration configuration, IEmailSender emailSender, SneakFitDbContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -75,6 +76,10 @@ namespace SneakFit.Application.System.User
                 return new ApiErrorResult<UserViewModels>("User không tồn tại");
             }
             var roles = await _userManager.GetRolesAsync(user);
+
+            // Lấy địa chỉ mặc định
+            var diaChiMacDinh = await _context.DiaChi.FirstOrDefaultAsync(x => x.UserId == user.Id && x.Mac_Dinh == true);
+
             var userVm = new UserViewModels()
             {
                 Id = user.Id,
@@ -86,7 +91,19 @@ namespace SneakFit.Application.System.User
                 UrlHinhAnh = user.UrlHinhAnh,
                 SoDienThoai = user.PhoneNumber,
                 GioiTinh = user.GioiTinh,
-                Roles = roles
+                Roles = roles,
+                DiaChi = diaChiMacDinh != null ? new DiaChiViewModel
+                {
+                    TenDiaChi = diaChiMacDinh.TenDiaChi,
+                    TenThanhPho = diaChiMacDinh.TenThanhPho,
+                    TenHuyen = diaChiMacDinh.TenHuyen,
+                    TenXa = diaChiMacDinh.TenXa,
+                    SoDienThoai = diaChiMacDinh.SoDienThoai,
+                    TenNguoiNhan = diaChiMacDinh.TenNguoiNhan,
+                    MaTinh = diaChiMacDinh.MaTinh,
+                    MaHuyen = diaChiMacDinh.MaHuyen,
+                    MaXa = diaChiMacDinh.MaXa
+                } : null
             };
             return new ApiSuccessResult<UserViewModels>(userVm);
         }
@@ -164,6 +181,28 @@ namespace SneakFit.Application.System.User
             {
                 return new ApiErrorResult<bool>("Số điện thoại đã được sử dụng");
             }
+            // Xử lý upload hình ảnh nếu có
+            if (request.HinhAnh != null)
+            {
+                string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "users");
+
+                // Tạo thư mục nếu chưa tồn tại
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                // Tạo tên file duy nhất
+                string uniqueFileName = Guid.NewGuid().ToString() + "_" + request.HinhAnh.FileName;
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                // Lưu file vào thư mục
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await request.HinhAnh.CopyToAsync(fileStream);
+                }
+
+                // Cập nhật đường dẫn ảnh
+                request.UrlHinhAnh = "/uploads/users/" + uniqueFileName;
+            }
             var randomPassword = GenerateRandomPassword();
             user = new AppUser()
             {
@@ -174,6 +213,7 @@ namespace SneakFit.Application.System.User
                 PhoneNumber = request.SoDienThoai,
                 Email = request.Email,
                 TrangThai = request.TrangThai,
+                UrlHinhAnh = request.UrlHinhAnh
             };
             var result = await _userManager.CreateAsync(user, randomPassword);
             if (result.Succeeded)
@@ -189,19 +229,32 @@ namespace SneakFit.Application.System.User
                 // Thêm địa chỉ cho người dùng
                 if (request.DiaChi != null)
                 {
-                    // Địa chỉ đầu tiên sẽ là mặc định
-                    var diaChi = new Data.Entities.DiaChi
+                    try
                     {
-                        Id = Guid.NewGuid(),
-                        UserId = user.Id,
-                        TenDiaChi = request.DiaChi.TenDiaChi,
-                        TenThanhPho = request.DiaChi.TenThanhPho,
-                        TenHuyen = request.DiaChi.TenHuyen,
-                        TenXa = request.DiaChi.TenXa,
-                        Mac_Dinh = true // Địa chỉ đầu tiên luôn là mặc định
-                    };
-                    _context.DiaChi.Add(diaChi);
-                    await _context.SaveChangesAsync();
+                        var diaChi = new Data.Entities.DiaChi
+                        {
+                            Id = Guid.NewGuid(),
+                            UserId = user.Id,
+                            TenDiaChi = request.DiaChi.TenDiaChi,
+                            TenThanhPho = request.DiaChi.TenThanhPho,
+                            TenHuyen = request.DiaChi.TenHuyen,
+                            TenXa = request.DiaChi.TenXa,
+                            SoDienThoai = request.DiaChi.SoDienThoai,
+                            TenNguoiNhan = request.DiaChi.TenNguoiNhan,
+                            Mac_Dinh = true,
+                            MaTinh = request.DiaChi.MaTinh,
+                            MaHuyen = request.DiaChi.MaHuyen,
+                            MaXa = request.DiaChi.MaXa
+                        };
+                        _context.DiaChi.Add(diaChi);
+                        await _context.SaveChangesAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        // Nếu lỗi, xóa user vừa tạo để tránh user không có địa chỉ
+                        await _userManager.DeleteAsync(user);
+                        return new ApiErrorResult<bool>($"Lỗi lưu địa chỉ: {ex.Message}");
+                    }
                 }
                 // Gửi email thông báo mật khẩu
                 await _emailSender.SendEmailAsync(
@@ -261,12 +314,98 @@ namespace SneakFit.Application.System.User
             var user = await _userManager.FindByIdAsync(request.Id.ToString());
             if (user == null)
                 return new ApiErrorResult<bool>("Tài khoản không tồn tại");
+            if (request.HinhAnh != null)
+            {
+                string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "users");
+
+                // Tạo thư mục nếu chưa tồn tại
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                // Xóa ảnh cũ nếu có
+                if (!string.IsNullOrEmpty(user.UrlHinhAnh))
+                {
+                    string oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", user.UrlHinhAnh.TrimStart('/'));
+                    if (File.Exists(oldFilePath))
+                    {
+                        File.Delete(oldFilePath);
+                    }
+                }
+
+                // Tạo tên file duy nhất
+                string uniqueFileName = Guid.NewGuid().ToString() + "_" + request.HinhAnh.FileName;
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                // Lưu file vào thư mục
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await request.HinhAnh.CopyToAsync(fileStream);
+                }
+
+                // Cập nhật đường dẫn ảnh
+                request.UrlHinhAnh = "/uploads/users/" + uniqueFileName;
+            }
             user.Email = request.Email;
             user.NgaySinh = request.NgaySinh;
             user.HoVaTen = request.HoVaTen;
             user.GioiTinh = request.GioiTinh;
             user.PhoneNumber = request.SoDienThoai;
             user.TrangThai = request.TrangThai;
+            // Chỉ cập nhật UrlHinhAnh nếu có upload ảnh mới
+            if (request.HinhAnh != null)
+            {
+                user.UrlHinhAnh = request.UrlHinhAnh;
+            }
+
+            // Cập nhật địa chỉ
+            if (request.DiaChi != null)
+            {
+                try
+                {
+                    // Tìm địa chỉ hiện tại của user
+                    var currentAddress = await _context.DiaChi.FirstOrDefaultAsync(x => x.UserId == user.Id && x.Mac_Dinh == true);
+
+                    if (currentAddress != null)
+                    {
+                        // Cập nhật địa chỉ hiện tại
+                        currentAddress.TenDiaChi = request.DiaChi.TenDiaChi;
+                        currentAddress.TenThanhPho = request.DiaChi.TenThanhPho;
+                        currentAddress.TenHuyen = request.DiaChi.TenHuyen;
+                        currentAddress.TenXa = request.DiaChi.TenXa;
+                        currentAddress.SoDienThoai = request.DiaChi.SoDienThoai;
+                        currentAddress.TenNguoiNhan = request.DiaChi.TenNguoiNhan;
+                        currentAddress.MaTinh = request.DiaChi.MaTinh;
+                        currentAddress.MaHuyen = request.DiaChi.MaHuyen;
+                        currentAddress.MaXa = request.DiaChi.MaXa;
+                    }
+                    else
+                    {
+                        // Nếu chưa có địa chỉ, tạo mới
+                        var newAddress = new Data.Entities.DiaChi
+                        {
+                            Id = Guid.NewGuid(),
+                            UserId = user.Id,
+                            TenDiaChi = request.DiaChi.TenDiaChi,
+                            TenThanhPho = request.DiaChi.TenThanhPho,
+                            TenHuyen = request.DiaChi.TenHuyen,
+                            TenXa = request.DiaChi.TenXa,
+                            SoDienThoai = request.DiaChi.SoDienThoai,
+                            TenNguoiNhan = request.DiaChi.TenNguoiNhan,
+                            Mac_Dinh = true,
+                            MaTinh = request.DiaChi.MaTinh,
+                            MaHuyen = request.DiaChi.MaHuyen,
+                            MaXa = request.DiaChi.MaXa
+                        };
+                        _context.DiaChi.Add(newAddress);
+                    }
+                    await _context.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    return new ApiErrorResult<bool>($"Lỗi cập nhật địa chỉ: {ex.Message}");
+                }
+            }
+
             var result = await _userManager.UpdateAsync(user);
             if (result.Succeeded)
                 return new ApiSuccessResult<bool>();

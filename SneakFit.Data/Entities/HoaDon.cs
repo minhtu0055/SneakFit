@@ -10,6 +10,7 @@ namespace SneakFit.Data.Entities
     public class HoaDon
     {
         public Guid Id { get; set; }
+        public string MaHoaDon { get; set; }
         public DateTime NgayTao { get; set; }
         public decimal TongTien { get; set; }
         public TrangThaiHoaDon TrangThai { get; set; }

@@ -243,7 +243,7 @@ namespace SneakFit.Data.Migrations
                         {
                             Id = new Guid("69bd714f-9576-45ba-b5b7-f00649be00de"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "a90f90a8-4313-4ed3-8d62-8a6888016081",
+                            ConcurrencyStamp = "fcaa8c63-b4c0-4fd6-8196-7cd24b0fc140",
                             Email = "tupmph49568@gmail.com",
                             EmailConfirmed = true,
                             GioiTinh = false,
@@ -252,7 +252,7 @@ namespace SneakFit.Data.Migrations
                             NgaySinh = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NormalizedEmail = "tupmph49568@gmail.com",
                             NormalizedUserName = "Admin",
-                            PasswordHash = "AQAAAAIAAYagAAAAEKiB+rhhsCoLA5F0FKSGq2fDxBSqs5JI7uAj2DHh6x2fwUHAu7ZmpspId0hyU73kZA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEKH11e6kZ7bYCFVcY+ewY51/4Ngq2mIfE62yIJwzTekW6MbQ4h63d1/GXxHiIFSkzQ==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
                             TrangThai = true,
@@ -351,34 +351,37 @@ namespace SneakFit.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("MaHuyen")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MaTinh")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MaXa")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("Mac_Dinh")
                         .HasColumnType("bit");
 
                     b.Property<string>("SoDienThoai")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TenDiaChi")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("TenHuyen")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("TenNguoiNhan")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TenThanhPho")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("TenXa")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -499,6 +502,10 @@ namespace SneakFit.Data.Migrations
                     b.Property<string>("MaGiaoDich")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("MaHoaDon")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("MaVanDon")
                         .HasMaxLength(50)

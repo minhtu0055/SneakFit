@@ -32,7 +32,10 @@ namespace SneakFit.Application.System.DiaChi
                     TenThanhPho = x.TenThanhPho,
                     TenHuyen = x.TenHuyen,
                     TenXa = x.TenXa,
-                    MacDinh = x.Mac_Dinh
+                    MacDinh = x.Mac_Dinh,
+                    MaTinh = x.MaTinh,
+                    MaHuyen = x.MaHuyen,
+                    MaXa = x.MaXa
                 }).ToListAsync();
 
             return new ApiSuccessResult<List<DiaChiViewModel>>(diaChis);
@@ -50,7 +53,10 @@ namespace SneakFit.Application.System.DiaChi
                 TenThanhPho = request.TenThanhPho,
                 TenHuyen = request.TenHuyen,
                 TenXa = request.TenXa,
-                Mac_Dinh = request.MacDinh
+                Mac_Dinh = request.MacDinh,
+                MaTinh = request.MaTinh,
+                MaHuyen = request.MaHuyen,
+                MaXa = request.MaXa
             };
 
             // Nếu đây là địa chỉ mặc định, cập nhật các địa chỉ khác
@@ -118,7 +124,10 @@ namespace SneakFit.Application.System.DiaChi
                 TenThanhPho = diaChi.TenThanhPho,
                 TenHuyen = diaChi.TenHuyen,
                 TenXa = diaChi.TenXa,
-                MacDinh = diaChi.Mac_Dinh
+                MacDinh = diaChi.Mac_Dinh,
+                MaTinh = diaChi.MaTinh,
+                MaHuyen = diaChi.MaHuyen,
+                MaXa = diaChi.MaXa
             };
 
             return new ApiSuccessResult<DiaChiViewModel>(diaChiVm);
@@ -138,7 +147,9 @@ namespace SneakFit.Application.System.DiaChi
             diaChi.TenThanhPho = request.TenThanhPho;
             diaChi.TenHuyen = request.TenHuyen;
             diaChi.TenXa = request.TenXa;
-
+            diaChi.MaTinh = request.MaTinh;
+            diaChi.MaHuyen = request.MaHuyen;
+            diaChi.MaXa = request.MaXa;
             // Nếu đặt làm địa chỉ mặc định
             if (request.MacDinh && !diaChi.Mac_Dinh)
             {

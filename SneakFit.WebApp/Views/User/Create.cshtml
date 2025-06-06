@@ -1,16 +1,16 @@
-﻿@model SneakFit.ViewModels.System.User.RegisterRequest
+@model SneakFit.ViewModels.System.User.RegisterRequest
 
 <div class="container-fluid">
 	<h3 class="mt-4">Tạo mới khách hàng</h3>
 	<ol class="breadcrumb mb-4">
 		<li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
-		<li class="breadcrumb-item"><a asp-action="Index">Danh sách khách hàng</a></li>
+		<li class="breadcrumb-item"><a asp-action="Index">Danh sách nhân viên</a></li>
 		<li class="breadcrumb-item active">Tạo mới</li>
 	</ol>
 	<div class="card mb-4">
 		<div class="card-body">
 			<div class="col-md-12 mx-auto">
-				<form asp-action="Create" method="post" id="create-form" novalidate>
+				<form asp-action="Create" method="post" id="create-form" enctype="multipart/form-data" novalidate>
 					<div class="row">
 						<div class="col-md-2">
 							<div class="mb-3 row">
@@ -18,7 +18,7 @@
 									<label for="AnhDaiDien">
 										<img id="previewImage" src="~/assets/img/avatars/hinhanhnew.png" alt="Ảnh" class="img-thumbnail" style="width: 200px; height: 200px; object-fit: cover; border-radius: 20px; cursor: pointer;" onclick="document.getElementById('fileInput').click();" />
 									</label>
-									<input id="fileInput" asp-for="UrlHinhAnh" type="file" accept="image/*" class="form-control d-none" onchange="previewFile(this)" />
+									<input id="fileInput" asp-for="HinhAnh" type="file" accept="image/*" class="form-control d-none" onchange="previewFile(this)" />
 								</div>
 							</div>
 						</div>
@@ -73,8 +73,50 @@
 									</div>
 								</div>
 							</div>
+							<div class="mb-3 row">
+								<label asp-for="DiaChi.TenDiaChi" class="col-sm-2 col-form-label">Thôn/xã <span class="text-danger">*</span></label>
+								<div class="col-sm-10">
+									<div class="input-group has-validation">
+										<input asp-for="DiaChi.TenDiaChi" class="form-control" placeholder="Nhập địa chỉ chi tiết..." required />
+										<span class="invalid-feedback">Vui lòng nhập địa chỉ chi tiết</span>
+									</div>
+								</div>
+							</div>
+							<div class="mb-3 row">
+								<label asp-for="DiaChi.TenThanhPho" class="col-sm-2 col-form-label">Thành phố/Tỉnh <span class="text-danger">*</span></label>
+								<div class="col-sm-10">
+									<select id="province" class="form-select" required>
+										<option value="">Chọn Tỉnh/Thành phố</option>
+									</select>
+									<input type="hidden" asp-for="DiaChi.TenThanhPho" id="provinceName" />
+									<input type="hidden" asp-for="DiaChi.MaTinh" id="provinceCode" />
+									<span class="invalid-feedback">Vui lòng chọn tỉnh/thành phố</span>
+								</div>
+							</div>
+							<div class="mb-3 row">
+								<label asp-for="DiaChi.TenHuyen" class="col-sm-2 col-form-label">Quận/Huyện <span class="text-danger">*</span></label>
+								<div class="col-sm-10">
+									<select id="district" class="form-select" required disabled>
+										<option value="">Chọn Quận/Huyện</option>
+									</select>
+									<input type="hidden" asp-for="DiaChi.TenHuyen" id="districtName" />
+									<input type="hidden" asp-for="DiaChi.MaHuyen" id="districtCode" />
+									<span class="invalid-feedback">Vui lòng chọn quận/huyện</span>
+								</div>
+							</div>
+							<div class="mb-3 row">
+								<label asp-for="DiaChi.TenXa" class="col-sm-2 col-form-label">Phường/Xã <span class="text-danger">*</span></label>
+								<div class="col-sm-10">
+									<select id="ward" class="form-select" required disabled>
+										<option value="">Chọn Phường/Xã</option>
+									</select>
+									<input type="hidden" asp-for="DiaChi.TenXa" id="wardName" />
+									<input type="hidden" asp-for="DiaChi.MaXa" id="wardCode" />
+									<span class="invalid-feedback">Vui lòng chọn phường/xã</span>
+								</div>
+							</div>
 						</div>
-					</div>
+					</div>								
 					<div class="mb-3 row">
 						<div class="col-sm-9 offset-sm-9">
 							<button type="submit" class="btn btn-primary me-4">
@@ -95,7 +137,8 @@
 		await Html.RenderPartialAsync("_ValidationScriptsPartial");
 	}
 	<script>
-			function previewFile(input) {
+		// Hàm hiển thị ảnh preview
+		function previewFile(input) {
 			const file = input.files[0];
 			if (file) {
 				const reader = new FileReader();
@@ -105,53 +148,154 @@
 				reader.readAsDataURL(file);
 			}
 		}
-			const form = document.getElementById('create-form');
 
-			// Thêm sự kiện khi input thay đổi
-			form.querySelectorAll('input').forEach(input => {
-				input.addEventListener('input', function() {
-					if (this.value.trim() !== '') {
-						// Chỉ xóa class is-invalid, không thêm bất kỳ class nào khác
-						this.classList.remove('is-invalid');
-					}
-				});
-			});
-			// Validate khi submit form
-			form.addEventListener('submit', function(event) {
-				let isValid = true;
+		// Xử lý form validation
+		const form = document.getElementById('create-form');
 
-				// Kiểm tra từng input
-				form.querySelectorAll('input[required]').forEach(input => {
-					if (!input.value.trim()) {
-						input.classList.add('is-invalid');
-						isValid = false;
-					}
-				});
-				if (!isValid) {
-					event.preventDefault();
-					event.stopPropagation();
+		// Thêm sự kiện khi input thay đổi
+		form.querySelectorAll('input, select').forEach(input => {
+			input.addEventListener('input', function() {
+				if (this.value.trim() !== '') {
+					// Chỉ xóa class is-invalid, không thêm bất kỳ class nào khác
+					this.classList.remove('is-invalid');
 				}
 			});
-			 // Lấy TempData
-			var successMessage = '@TempData["SuccessMessage"]';
-			var errorMessage = '@TempData["ErrorMessage"]';
+		});
 
-			if (successMessage) {
-				toastr.success(successMessage);
-			}
+		// Validate khi submit form
+		form.addEventListener('submit', function(event) {
+			let isValid = true;
 
-			if (errorMessage) {
-				toastr.error(errorMessage);
-			}
-					function previewFile(input) {
-				const file = input.files[0];
-				if (file) {
-					const reader = new FileReader();
-					reader.onload = function(e) {
-						document.getElementById('previewImage').src = e.target.result;
-					}
-					reader.readAsDataURL(file);
+			// Kiểm tra từng input và select required
+			form.querySelectorAll('input[required], select[required]').forEach(input => {
+				if (!input.value.trim()) {
+					input.classList.add('is-invalid');
+					isValid = false;
 				}
+			});
+
+			if (!isValid) {
+				event.preventDefault();
+				event.stopPropagation();
 			}
+		});
+
+		// Lấy TempData
+		var successMessage = '@TempData["SuccessMessage"]';
+		var errorMessage = '@TempData["ErrorMessage"]';
+
+		if (successMessage) {
+			toastr.success(successMessage);
+		}
+
+		if (errorMessage) {
+			toastr.error(errorMessage);
+		}
+
+		// Xử lý load dữ liệu tỉnh/huyện/xã từ GHN API
+		$(document).ready(function() {
+			// Load tỉnh/thành phố
+			
+			$.ajax({
+				url: 'https://localhost:7277/api/ghn/provinces',  // Thêm BaseAddress vào
+				type: 'GET',			
+				success: function(response) {
+					debugger
+					const provinces = response.data;
+					let options = '<option value="">Chọn Tỉnh/Thành phố</option>';
+					provinces.forEach(function(province) {
+						options += `<option value="${province.ProvinceID}" data-name="${province.ProvinceName}">${province.ProvinceName}</option>`;
+					});
+					$('#province').html(options);
+				},
+				error: function(error) {
+					console.error('Lỗi khi tải danh sách tỉnh/thành phố:', error);
+					toastr.error('Không thể tải danh sách tỉnh/thành phố');
+				}
+			});
+
+			// Khi chọn tỉnh/thành phố
+			$('#province').change(function() {
+				const provinceId = $(this).val();
+				const provinceName = $(this).find('option:selected').data('name');
+				$('#provinceName').val(provinceName);
+				$('#provinceCode').val(provinceId);
+
+				// Reset quận/huyện và phường/xã
+				$('#district').html('<option value="">Chọn Quận/Huyện</option>');
+				$('#ward').html('<option value="">Chọn Phường/Xã</option>');
+				$('#districtName').val('');
+				$('#districtCode').val('');
+				$('#wardName').val('');
+				$('#wardCode').val('');
+
+				if (provinceId) {
+					$('#district').prop('disabled', false);
+					// Load quận/huyện
+					$.ajax({
+						url: 'https://localhost:7277/api/ghn/districts',  // Thêm BaseAddress vào
+						type: 'GET',
+						success: function(response) {
+							const districts = response.data.filter(d => d.ProvinceID == provinceId);
+							let options = '<option value="">Chọn Quận/Huyện</option>';
+							districts.forEach(function(district) {
+								options += `<option value="${district.DistrictID}" data-name="${district.DistrictName}">${district.DistrictName}</option>`;
+							});
+							$('#district').html(options);
+						},
+						error: function(error) {
+							console.error('Lỗi khi tải danh sách quận/huyện:', error);
+							toastr.error('Không thể tải danh sách quận/huyện');
+						}
+					});
+				} else {
+					$('#district').prop('disabled', true);
+					$('#ward').prop('disabled', true);
+				}
+			});
+
+			// Khi chọn quận/huyện
+			$('#district').change(function() {
+				const districtId = $(this).val();
+				const districtName = $(this).find('option:selected').data('name');
+				$('#districtName').val(districtName);
+				$('#districtCode').val(districtId);
+
+				// Reset phường/xã
+				$('#ward').html('<option value="">Chọn Phường/Xã</option>');
+				$('#wardName').val('');
+				$('#wardCode').val('');
+
+				if (districtId) {
+					$('#ward').prop('disabled', false);
+					// Load phường/xã
+					$.ajax({
+						url: `https://localhost:7277/api/ghn/wards/${districtId}`,  // Thêm BaseAddress vào
+						type: 'GET',
+						success: function(response) {
+							const wards = response.data;
+							let options = '<option value="">Chọn Phường/Xã</option>';
+							wards.forEach(function(ward) {
+								options += `<option value="${ward.WardCode}" data-name="${ward.WardName}">${ward.WardName}</option>`;
+							});
+							$('#ward').html(options);
+						},
+						error: function(error) {
+							console.error('Lỗi khi tải danh sách phường/xã:', error);
+							toastr.error('Không thể tải danh sách phường/xã');
+						}
+					});
+				} else {
+					$('#ward').prop('disabled', true);
+				}
+			});
+
+			// Khi chọn phường/xã
+			$('#ward').change(function() {
+				const wardName = $(this).find('option:selected').data('name');
+				$('#wardName').val(wardName);
+				$('#wardCode').val(wardName.split('/')[0]);
+			});
+		});
 	</script>
 }
