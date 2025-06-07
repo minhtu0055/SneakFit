@@ -330,11 +330,11 @@
                     <div class="row mb-2">
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Số Lượng đang bán :</label>
-                            <input type="number" class="form-control so-luong" name="SoLuong" min="0" required />
+                            <input type="number" class="form-control" name="SoLuong" min="0" required />
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Giá Bán :</label>
-                            <input type="text" class="form-control gia-ban" name="GiaBan" required />
+                            <input type="text" class="form-control" name="GiaBan" required />
                         </div>
                     </div>
                     <div class="row mb-2">
@@ -456,17 +456,17 @@
 
 <!-- Modal xem ảnh lớn -->
 <div class="modal fade" id="imageReviewModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-    <div class="modal-dialog modal-dialog-centered">
+  <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content" style="width: 550px; height: 450px;">
-            <div class="modal-header">
-                <h5 class="modal-title">Xem ảnh sản phẩm</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
-            </div>
-            <div class="modal-body text-center">
-                <img id="reviewImage" src="" style="width:450px; height:330px; border-radius:8px;" />
-            </div>
-        </div>
+      <div class="modal-header">
+        <h5 class="modal-title">Xem ảnh sản phẩm</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img id="reviewImage" src="" style="width:450px; height:330px; border-radius:8px;" />
+      </div>
     </div>
+  </div>
 </div>
 
 @section Scripts {
@@ -497,6 +497,8 @@
                     // Kiểm tra và cập nhật trạng thái của checkAll
                     updateCheckAllState();
                 }
+                $('#spctTable tbody tr').removeClass('table-info');
+                $(this).addClass('table-info');
             });
 
             // CheckAll: Chọn hoặc bỏ chọn tất cả
@@ -510,7 +512,6 @@
             $('#spctTable tbody').on('change', '.row-check', function() {
                 updateCheckAllState();
             });
-
             // Hàm kiểm tra và cập nhật trạng thái checkAll
             function updateCheckAllState() {
                 var allChecked = $('.row-check').length === $('.row-check:checked').length;
@@ -523,20 +524,12 @@
                     $('#checkAll').prop('checked', true);
                 }
             }
-
             // Chỉ cho nhập số và tự động format giá bán
             $(document).on('input', '.gia-ban', function() {
                 let value = $(this).val().replace(/\D/g, '');
                 if (value) {
                     value = parseInt(value, 10).toLocaleString('vi-VN');
-                    value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Thêm dấu chấm hàng nghìn
                 }
-                $(this).val(value);
-            });
-            // Chỉ cho nhập số lượng là số nguyên dương
-            $(document).on('input', '.so-luong', '.gia-ban', function() {
-                let value = $(this).val().replace(/[^0-9]/g, '');  // Loại bỏ ký tự không phải số
-                value = value.replace(/^0+/, ''); // Loại bỏ số 0 ở đầu
                 $(this).val(value);
             });
 
@@ -671,6 +664,15 @@
                             toastr.error('Có lỗi xảy ra khi gửi yêu cầu! Chi tiết: ' + xhr.responseText);
                         }
                     });
+                }
+            });
+
+            // Thêm xử lý format giá tiền khi nhập
+            $('.gia-ban').on('input', function() {
+                let value = $(this).val().replace(/[^0-9]/g, '');
+                if (value) {
+                    value = parseInt(value).toLocaleString('vi-VN');
+                    $(this).val(value);
                 }
             });
 
@@ -1010,7 +1012,6 @@
                         break;
                 }
             });
-
             // Xử lý việc gửi biểu mẫu cho các phương thức khác
             $(document).on('submit', '#formAddThuongHieu', function(e) {
                 e.preventDefault();
@@ -1118,6 +1119,22 @@
 
         });
 
+        // Chỉ cho nhập số và tự động format giá bán
+        $(document).on('input', '.gia-ban, .price-input', function() {
+            let value = $(this).val().replace(/[^0-9]/g, ''); // Loại bỏ ký tự không phải số
+            if (value) {
+                value = value.replace(/^0+/, ''); // Loại bỏ số 0 ở đầu
+                value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // Thêm dấu chấm hàng nghìn
+            }
+            $(this).val(value);
+        });
+
+        // Chỉ cho nhập số lượng là số nguyên dương
+        $(document).on('input', '.so-luong, .quantity-input', function() {
+            let value = $(this).val().replace(/[^0-9]/g, '');
+            value = value.replace(/^0+/, ''); // Loại bỏ số 0 ở đầu
+            $(this).val(value);
+        });
     </script>
 }
 
