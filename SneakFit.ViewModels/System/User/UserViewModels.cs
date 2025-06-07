@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SneakFit.ViewModels.System.DiaChi;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,5 +19,6 @@ namespace SneakFit.ViewModels.System.User
         public bool TrangThai { get; set; }
         public string Email { get; set; }
         public IList<string> Roles { get; set; }
+        public DiaChiViewModel? DiaChi { get; set; }
     }
 }

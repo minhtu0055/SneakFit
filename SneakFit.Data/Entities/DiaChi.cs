@@ -9,14 +9,17 @@ namespace SneakFit.Data.Entities
     public class DiaChi
     {
         public Guid Id { get; set; }
-        public string TenNguoiNhan { get; set; }
-        public string SoDienThoai { get; set; }
-        public string TenDiaChi { get; set; }
-        public string TenThanhPho { get; set; }
-        public string TenHuyen { get; set; }     
-        public string TenXa { get; set; }
+        public string? TenNguoiNhan { get; set; }
+        public string? SoDienThoai { get; set; }
+        public string? TenDiaChi { get; set; }
+        public string? TenThanhPho { get; set; }
+        public string? TenHuyen { get; set; }
+        public string? TenXa { get; set; }
+        public string? MaTinh { get; set; }
+        public string? MaHuyen { get; set; }
+        public string? MaXa { get; set; }
         public bool Mac_Dinh { get; set; }
         public Guid UserId { get; set; }
-        public AppUser User { get; set; }
+        public AppUser? User { get; set; }
     }
 }
