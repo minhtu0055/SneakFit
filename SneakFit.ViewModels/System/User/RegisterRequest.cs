@@ -19,7 +19,8 @@ namespace SneakFit.ViewModels.System.User
         public bool TrangThai { get; set; } = true;
         public List<string> Roles { get; set; }
         public string? UrlHinhAnh { get; set; }
+        public IFormFile? HinhAnh { get; set; }
         public string SoDienThoai { get; set; }
-        public DiaChiViewModel DiaChi { get; set; }
+        public DiaChiViewModel? DiaChi { get; set; }
     }
 }

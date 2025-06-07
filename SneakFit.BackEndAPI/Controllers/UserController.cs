@@ -34,7 +34,7 @@ namespace SneakFit.BackEndAPI.Controllers
         }
         [HttpPost("register")]
         [AllowAnonymous]
-        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+        public async Task<IActionResult> Register([FromForm] RegisterRequest request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var result = await _userService.Register(request);
@@ -57,7 +57,7 @@ namespace SneakFit.BackEndAPI.Controllers
             return Ok(users);
         }
         [HttpPut("{id}/trangthai")]
-        public async Task<IActionResult> TrangThai(Guid id, [FromBody]bool trangThai)
+        public async Task<IActionResult> TrangThai(Guid id, [FromBody] bool trangThai)
         {
             var result = await _userService.TrangThai(id, trangThai);
             if (!result)
@@ -77,7 +77,7 @@ namespace SneakFit.BackEndAPI.Controllers
             return Ok(result);
         }
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] UserUpdateRequest request)
+        public async Task<IActionResult> Update(Guid id, [FromForm] UserUpdateRequest request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
