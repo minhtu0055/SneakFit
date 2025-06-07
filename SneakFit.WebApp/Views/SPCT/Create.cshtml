@@ -163,6 +163,9 @@
 </div>
 
 @section Scripts {
+    <!-- Thêm thư viện color picker -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-minicolors/2.3.6/jquery.minicolors.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-minicolors/2.3.6/jquery.minicolors.min.js"></script>
     <style>
         .selected-item {
             position: relative;
@@ -489,7 +492,7 @@
 
                     row.append(`<td><input type="checkbox" class="product-checkbox row-check" /></td>`);
                     row.append(`<td class="stt">${item.stt}</td>`);
-                    row.append(`<td class="product-name">${item.tenSanPham} ( ${item.sizeName} - ${item.colorName} )</td>`);
+                    row.append(`<td class="product-name">${item.tenSanPham} [ ${item.sizeName} - ${item.colorName} ]</td>`);
                     row.append(`<td><input type="number" class="form-control quantity-input" min="1" value="1" style="width: 80px;" /></td>`);
                     row.append(`
                         <td>

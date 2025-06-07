@@ -1,5 +1,6 @@
 @model SneakFit.ViewModels.Catalog.SanPham.SuaSanPham
 <form asp-controller="SanPham" asp-action="Edit" id="editSanPhamForm" method="post">
+    @Html.AntiForgeryToken()
     <input type="hidden" asp-for="Id" />
     <div class="mb-3">
         <label asp-for="TenSanPham" class="form-label">Tên sản phẩm</label>
@@ -22,4 +23,4 @@
         <button type="submit" class="btn btn-primary">Lưu</button>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
     </div>
-</form> 
+</form>
