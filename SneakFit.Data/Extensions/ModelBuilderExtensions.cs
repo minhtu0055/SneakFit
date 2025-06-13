@@ -17,12 +17,12 @@ namespace SneakFit.Data.Extensions
                 new DanhMuc()
                 {
                     Id = new Guid("8f4d4a5e-2bfa-4e8c-9d2c-3f6a7e9b87cb"),
-                    TenDanhMuc = "Giày Chạy Bộ",
+                    TenDanhMuc = "Sneaker",
                 },
                  new DanhMuc()
                  {
                      Id = new Guid("8f8d4a6e-2bfa-4e8c-9d2c-3f6a7e9b87cb"),
-                     TenDanhMuc = "Giày Đá Bóng",
+                     TenDanhMuc = "SneakFit",
                  }
             );
             modelBuilder.Entity<ChatLieu>().HasData(
@@ -41,14 +41,14 @@ namespace SneakFit.Data.Extensions
                 new MauSac()
                 {
                     Id = new Guid("8f4d4a5e-2bfa-2e8c-9d2c-3f6a7e9b87cb"),
-                    TenMauSac = "Đen",
+                    TenMauSac = "Đỏ",
                     MaMauSac = "#FF0000",
 
                 },
                 new MauSac()
                 {
                     Id = new Guid("8f8d4a5e-2bfa-4e9c-9d2c-3f6a7e9b87cb"),
-                    TenMauSac = "Đỏ",
+                    TenMauSac = "Trắng",
                     MaMauSac = "#FFFFFF",
                 }
             );

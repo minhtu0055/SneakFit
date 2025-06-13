@@ -166,7 +166,7 @@ namespace SneakFit.Admin.Controllers
                 return View(request);
             }
         }
-        
+
         // Xử lý thêm mới nhiều sản phẩm chi tiết
         [HttpPost]
         public async Task<IActionResult> CreateMultiple([FromBody] List<SPCTViewModels> items)
@@ -176,7 +176,8 @@ namespace SneakFit.Admin.Controllers
 
             var errorList = new List<string>();
             var createdItems = new List<SPCTViewModels>(); // Lưu danh sách sản phẩm đã tạo
-            int resultCount = 0;
+            int resultCount = 0; // Đếm số sản phẩm chi tiết tạo thành công
+            int duplicateCount = 0; // Đếm số sản phẩm chi tiết bị trùng lặp
 
             foreach (var item in items)
             {
@@ -201,23 +202,43 @@ namespace SneakFit.Admin.Controllers
                 }
                 else
                 {
-                    errorList.Add($"[{item.MauSacId}-{item.KichThuocId}]: {result.Message}");
+                    // Kiểm tra nếu lỗi là do trùng lặp
+                    if (result.Message.ToLower().Contains("tồn tại") || result.Message.ToLower().Contains("already exists"))
+                    {
+                        duplicateCount++;
+                    }
+                    else
+                    {
+                        errorList.Add(result.Message); // Giữ lỗi khác (không phải trùng lặp)
+                    }
                 }
             }
 
-            // Luôn trả về success: true nếu có ít nhất một sản phẩm được tạo thành công
+            // Xử lý thông báo
             if (resultCount > 0)
             {
                 string message = $"Thêm mới {resultCount} sản phẩm chi tiết thành công.";
+                if (duplicateCount > 0)
+                {
+                    message += $"\n {duplicateCount} sản phẩm chi tiết đã tồn tại";
+                }
                 if (errorList.Count > 0)
                 {
-                    message += $"\nMột số sản phẩm bị lỗi: {string.Join("; ", errorList)}";
+                    message += $"\n {string.Join("; ", errorList)}";
                 }
-                return Json(new { success = true, message = message, data = createdItems });
+                return Json(new { success = true, message = message, data = createdItems, duplicateCount = duplicateCount });
             }
             else
             {
-                return Json(new { success = false, message = $"Không thể thêm sản phẩm chi tiết: {string.Join("; ", errorList)}" });
+                if (duplicateCount > 0)
+                {
+                    return Json(new { success = false, message = $"{duplicateCount} sản phẩm chi tiết đã tồn tại" });
+                }
+                else if (errorList.Count > 0)
+                {
+                    return Json(new { success = false, message = string.Join("; ", errorList) });
+                }
+                return Json(new { success = false, message = "Không thể thêm sản phẩm chi tiết" });
             }
         }
 

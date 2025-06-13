@@ -30,7 +30,15 @@ namespace SneakFit.ApiIntegration.Services
             if (!string.IsNullOrEmpty(sessions))
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
 
-            var response = await client.GetAsync($"/api/SanPham/paging?pageIndex={request.PageIndex}&pageSize={request.PageSize}&tuKhoa={request.Keyword}");
+            var url = $"/api/SanPham/paging?pageIndex={request.PageIndex}&pageSize={request.PageSize}";
+            if (!string.IsNullOrEmpty(request.Keyword))
+                url += $"&keyWord={Uri.EscapeDataString(request.Keyword)}"; // Đảm bảo truyền keyWord
+            if (request.DanhMucId.HasValue)
+                url += $"&danhMucId={request.DanhMucId.Value}";
+            if (request.TrangThai.HasValue)
+                url += $"&trangThai={request.TrangThai.Value}";
+
+            var response = await client.GetAsync(url);
             var body = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)
             {

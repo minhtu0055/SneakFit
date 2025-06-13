@@ -41,12 +41,13 @@ namespace SneakFit.Admin.Controllers
         }
 
         // Hiển thị danh sách sản phẩm với phân trang và tìm kiếm
-        public async Task<IActionResult> Index(string keyWord, Guid? danhMucId, int pageIndex = 1, int pageSize = 8)
+        public async Task<IActionResult> Index(string keyWord, Guid? danhMucId, bool? trangThai, int pageIndex = 1, int pageSize = 8)
         {
             var request = new SanPhamPagingRequest()
             {
                 Keyword = keyWord,
-                //DanhMucId = danhMucId,
+                DanhMucId = danhMucId,
+                TrangThai = trangThai,
                 PageIndex = pageIndex,
                 PageSize = pageSize
             };
@@ -55,6 +56,8 @@ namespace SneakFit.Admin.Controllers
             var danhmucs = await _danhMucApiClient.GetAll();
 
             ViewBag.Keyword = keyWord;
+            ViewBag.DanhMucId = danhMucId;
+            ViewBag.TrangThai = trangThai;
             ViewBag.DanhMucs = danhmucs.Select(x => new SelectListItem()
             {
                 Text = x.TenDanhMuc,
