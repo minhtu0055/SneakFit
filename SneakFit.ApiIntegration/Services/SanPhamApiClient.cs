@@ -30,7 +30,15 @@ namespace SneakFit.ApiIntegration.Services
             if (!string.IsNullOrEmpty(sessions))
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
 
-            var response = await client.GetAsync($"/api/SanPham/paging?pageIndex={request.PageIndex}&pageSize={request.PageSize}&tuKhoa={request.Keyword}");
+            var url = $"/api/SanPham/paging?pageIndex={request.PageIndex}&pageSize={request.PageSize}";
+            if (!string.IsNullOrEmpty(request.Keyword))
+                url += $"&keyWord={Uri.EscapeDataString(request.Keyword)}"; // Đảm bảo truyền keyWord
+            if (request.DanhMucId.HasValue)
+                url += $"&danhMucId={request.DanhMucId.Value}";
+            if (request.TrangThai.HasValue)
+                url += $"&trangThai={request.TrangThai.Value}";
+
+            var response = await client.GetAsync(url);
             var body = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)
             {
@@ -228,6 +236,34 @@ namespace SneakFit.ApiIntegration.Services
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
             var response = await client.DeleteAsync($"/api/SanPham/DeleteImage/{imageId}?sanPhamChiTietId={sanPhamChiTietId}");
             return response.IsSuccessStatusCode;
+        }
+
+        // THÊM TRIỂN KHAI PHƯƠNG THỨC NÀY cho sửa khuyến mại
+        public async Task<List<SPCTViewModels>> GetSPCTByListIds(List<Guid> ids)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var json = JsonConvert.SerializeObject(ids);
+            var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // Gửi yêu cầu POST đến API backend
+            var response = await client.PostAsync($"/api/SanPham/GetSPCTByListIds", httpContent);
+            var body = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonConvert.DeserializeObject<List<SPCTViewModels>>(body);
+                return result ?? new List<SPCTViewModels>();
+            }
+            else
+            {
+                // Xử lý lỗi nếu cuộc gọi API không thành công
+                throw new Exception($"Không thể lấy danh sách SPCT theo ID. Lỗi: {body}");
+            }
         }
 
     }

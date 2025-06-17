@@ -25,7 +25,7 @@ namespace SneakFit.Application.Catalog.SanPham
             _context = context;
             _httpContextAccessor = httpContextAccessor;
         }
-        
+
         // Lấy danh sách sản phẩm có phân trang
         public async Task<PagedResult<SanPhamViewModels>> GetAllPaging(SanPhamPagingRequest request)
         {
@@ -33,10 +33,20 @@ namespace SneakFit.Application.Catalog.SanPham
                 .Include(x => x.DanhMuc)
                 .Include(x => x.SanPhamChiTiet)
                 .AsQueryable();
+
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 query = query.Where(x => x.TenSanPham.Contains(request.Keyword));
             }
+            if (request.DanhMucId.HasValue)
+            {
+                query = query.Where(x => x.DanhMucId == request.DanhMucId.Value);
+            }
+            if (request.TrangThai.HasValue)
+            {
+                query = query.Where(x => x.TrangThai == request.TrangThai.Value);
+            }
+
             int totalRow = await query.CountAsync();
             var data = await query.Skip((request.PageIndex - 1) * request.PageSize)
                 .Take(request.PageSize)
@@ -50,14 +60,15 @@ namespace SneakFit.Application.Catalog.SanPham
                     TrangThai = x.TrangThai,
                     TongSoSanPham = x.SanPhamChiTiet.Where(spct => spct.TrangThai).Sum(spct => spct.SoLuong)
                 }).ToListAsync();
-            var PageResult = new PagedResult<SanPhamViewModels>()
+
+            var pageResult = new PagedResult<SanPhamViewModels>()
             {
                 TotalRecords = totalRow,
                 PageSize = request.PageSize,
                 PageIndex = request.PageIndex,
-                Items = data,
+                Items = data
             };
-            return PageResult;
+            return pageResult;
         }
 
         // Lấy danh sách tất cả sản phẩm
@@ -191,6 +202,12 @@ namespace SneakFit.Application.Catalog.SanPham
         {
             var query = _context.SanPhamChiTiet
                 .Include(x => x.SanPham)
+                .ThenInclude(s => s.DanhMuc) // Đảm bảo lấy thông tin DanhMuc từ SanPham
+                .Include(x => x.KichThuoc)
+                .Include(x => x.MauSac)
+                .Include(x => x.ChatLieu)
+                .Include(x => x.DeGiay)
+                .Include(x => x.ThuongHieu)
                 .Where(x => x.SanPham.TenSanPham == productName);
 
             var danhSachSPCT = await query
@@ -206,6 +223,17 @@ namespace SneakFit.Application.Catalog.SanPham
                     ChatLieuId = spct.ChatLieuId,
                     DeGiayId = spct.DeGiayId,
                     ThuongHieuId = spct.ThuongHieuId,
+
+                    // Ánh xạ các thuộc tính đang bị null
+                    TenSanPham = spct.SanPham.TenSanPham,
+                    MoTa = spct.SanPham.Mota,
+                    TenDanhMuc = spct.SanPham.DanhMuc.TenDanhMuc, // Lấy từ DanhMuc qua SanPham
+                    MaKichThuoc = spct.KichThuoc.MaKichThuoc.ToString(),
+                    TenMauSac = spct.MauSac.TenMauSac,
+                    TenChatLieu = spct.ChatLieu.TenChatLieu,
+                    TenDeGiay = spct.DeGiay.TenDeGiay,
+                    TenThuongHieu = spct.ThuongHieu.TenThuongHieu,
+
                     Images = spct.HinhAnhSanPham.Select(i => i.UrlHinhAnh).ToList(),
                 }).ToListAsync();
 
@@ -329,6 +357,92 @@ namespace SneakFit.Application.Catalog.SanPham
             _context.HinhAnhSanPham.Remove(image);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        ///Thêm cho phần eidt khuyến mại
+
+        // Phương thức mới: Lấy danh sách SPCT theo danh sách ID
+        public async Task<List<SPCTViewModels>> GetSPCTByListIds(List<Guid> ids)
+        {
+            var query = _context.SanPhamChiTiet
+                .Include(x => x.SanPham)
+                    .ThenInclude(s => s.DanhMuc)
+                .Include(x => x.KichThuoc)
+                .Include(x => x.MauSac)
+                .Include(x => x.ChatLieu)
+                .Include(x => x.DeGiay)
+                .Include(x => x.ThuongHieu)
+                .Include(x => x.HinhAnhSanPham) // Đảm bảo include hình ảnh nếu cần
+                .Where(x => ids.Contains(x.ID));
+
+            var danhSachSPCT = await query
+                .Select(spct => new SPCTViewModels
+                {
+                    Id = spct.ID,
+                    SanPhamId = spct.SanPhamId,
+                    SoLuong = spct.SoLuong,
+                    Gia = spct.Gia,
+                    TrangThai = spct.TrangThai,
+                    KichThuocId = spct.KichThuocId,
+                    MauSacId = spct.MauSacId,
+                    ChatLieuId = spct.ChatLieuId,
+                    DeGiayId = spct.DeGiayId,
+                    ThuongHieuId = spct.ThuongHieuId,
+                    TenSanPham = spct.SanPham.TenSanPham,
+                    MoTa = spct.SanPham.Mota,
+                    TenDanhMuc = spct.SanPham.DanhMuc.TenDanhMuc,
+                    MaKichThuoc = spct.KichThuoc.MaKichThuoc.ToString(),
+                    TenMauSac = spct.MauSac.TenMauSac,
+                    TenChatLieu = spct.ChatLieu.TenChatLieu,
+                    TenDeGiay = spct.DeGiay.TenDeGiay,
+                    TenThuongHieu = spct.ThuongHieu.TenThuongHieu,
+                    Images = spct.HinhAnhSanPham.Select(i => i.UrlHinhAnh).ToList(),
+                }).ToListAsync();
+
+            return danhSachSPCT;
+        }
+
+        ///Thêm cho phần eidt khuyến mại
+
+        // Phương thức mới: Lấy danh sách SPCT theo SanPhamId (cho nút 'Thêm' và dropdown)
+        public async Task<List<SPCTViewModels>> GetSPCTBySanPhamId(Guid sanPhamId)
+        {
+            var query = _context.SanPhamChiTiet
+                .Include(x => x.SanPham)
+                    .ThenInclude(s => s.DanhMuc)
+                .Include(x => x.KichThuoc)
+                .Include(x => x.MauSac)
+                .Include(x => x.ChatLieu)
+                .Include(x => x.DeGiay)
+                .Include(x => x.ThuongHieu)
+                .Include(x => x.HinhAnhSanPham) // Đảm bảo include hình ảnh nếu cần
+                .Where(x => x.SanPhamId == sanPhamId);
+
+            var danhSachSPCT = await query
+                .Select(spct => new SPCTViewModels
+                {
+                    Id = spct.ID,
+                    SanPhamId = spct.SanPhamId,
+                    SoLuong = spct.SoLuong,
+                    Gia = spct.Gia,
+                    TrangThai = spct.TrangThai,
+                    KichThuocId = spct.KichThuocId,
+                    MauSacId = spct.MauSacId,
+                    ChatLieuId = spct.ChatLieuId,
+                    DeGiayId = spct.DeGiayId,
+                    ThuongHieuId = spct.ThuongHieuId,
+                    TenSanPham = spct.SanPham.TenSanPham,
+                    MoTa = spct.SanPham.Mota,
+                    TenDanhMuc = spct.SanPham.DanhMuc.TenDanhMuc,
+                    MaKichThuoc = spct.KichThuoc.MaKichThuoc.ToString(),
+                    TenMauSac = spct.MauSac.TenMauSac,
+                    TenChatLieu = spct.ChatLieu.TenChatLieu,
+                    TenDeGiay = spct.DeGiay.TenDeGiay,
+                    TenThuongHieu = spct.ThuongHieu.TenThuongHieu,
+                    Images = spct.HinhAnhSanPham.Select(i => i.UrlHinhAnh).ToList(),
+                }).ToListAsync();
+
+            return danhSachSPCT;
         }
 
     }

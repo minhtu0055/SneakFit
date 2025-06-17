@@ -55,11 +55,11 @@
                                 <p class="form-control-static">
                                     @if (Model.LoaiGiamGia == LoaiGiamGia.PhamTram)
                                     {
-                                        <span class="badge bg-label-info">Giảm @Model.LoaiGiamGia%</span>
+                                        <span class="badge bg-label-info">Giảm @Model.GiaTriGiamGia%</span>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-label-primary">Giảm @Model.LoaiGiamGia.ToString("N0")đ</span>
+                                        <span class="badge bg-label-primary">Giảm @Model.GiaTriGiamGia.ToString("N0")đ</span>
                                     }
                                 </p>
                             </div>
@@ -104,31 +104,31 @@
                                 <th>GIÁ CUỐI</th>
                             </tr>
                         </thead>
-                      @*   <tbody class="table-border-bottom-0">
-                            @if (Model.Products != null && Model.Products.Any())
+                        <tbody class="table-border-bottom-0">
+                            @if (Model.SanPhams != null && Model.SanPhams.Any())
                             {
-                                foreach (var product in Model.Products)
+                                foreach (var sanPham in Model.SanPhams)
                                 {
-                                    var discountAmount = product.OriginalPrice - product.PromotionalPrice;
-                                    var discountPercent = (int)((discountAmount / product.OriginalPrice) * 100);
+                                    var discountAmount = sanPham.GiaGoc - sanPham.GiaKhuyenMai;
+                                    var discountPercent = (int)((discountAmount / sanPham.GiaGoc) * 100);
 
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                <img src="@(string.IsNullOrEmpty(product.ProductImage) ? "/images/no-image.png" : baseUrl + product.ProductImage)"
-                                                     class="rounded me-3" style="width: 40px; height: 40px; object-fit: cover;" />
+                                                @* <img src="@(string.IsNullOrEmpty(sanPham.ProductImage) ? "/images/no-image.png" : baseUrl + sanPham.ProductImage)" *@
+                                                @*      class="rounded me-3" style="width: 40px; height: 40px; object-fit: cover;" /> *@
                                                 <div>
-                                                    <strong>@product.ProductName</strong>
+                                                    <strong>@sanPham.TenSanPham</strong>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>@product.OriginalPrice.ToString("N0")đ</td>
+                                        <td>@sanPham.GiaGoc.ToString("N0")đ</td>
                                         <td>
                                             <span class="badge bg-label-danger">-@discountPercent%</span>
                                             <small class="text-muted">(-@discountAmount.ToString("N0")đ)</small>
                                         </td>
                                         <td>
-                                            <strong class="text-primary">@product.PromotionalPrice.ToString("N0")đ</strong>
+                                            <strong class="text-primary">@sanPham.GiaKhuyenMai.ToString("N0")đ</strong>
                                         </td>
                                     </tr>
                                 }
@@ -139,7 +139,7 @@
                                     <td colspan="4" class="text-center">Không có sản phẩm nào được áp dụng</td>
                                 </tr>
                             }
-                        </tbody> *@
+                        </tbody>
                     </table>
                 </div>
             </div>

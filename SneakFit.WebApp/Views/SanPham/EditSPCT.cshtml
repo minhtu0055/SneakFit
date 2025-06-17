@@ -173,7 +173,7 @@
                         <th style="width: 112px;">Số Lượng</th>
                         <th style="width: 120px;">Giá Bán</th>
                         <th style="width: 120px;">Trạng Thái</th>
-                        <th style="width: 1px">@* Hành động *@</th>
+                        <th style="width: 1px">@*Hành động *@</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -1134,6 +1134,46 @@
             let value = $(this).val().replace(/[^0-9]/g, '');
             value = value.replace(/^0+/, ''); // Loại bỏ số 0 ở đầu
             $(this).val(value);
+        });
+
+                $(document).ready(function () {
+            // --- PHÂN TRANG CHO BẢNG SẢN PHẨM CHI TIẾT ---
+            var $table = $('#spctTable');
+            var $rows = $table.find('tbody tr');
+            var rowsPerPage = 5;
+            var currentPage = 1;
+            var totalPages = Math.ceil($rows.length / rowsPerPage);
+
+            function renderTablePage(page) {
+                $rows.hide();
+                $rows.slice((page - 1) * rowsPerPage, page * rowsPerPage).show();
+                $('#spctPagination .page-link').removeClass('active');
+                $('#spctPagination .page-link[data-page="' + page + '"]').addClass('active');
+            }
+
+            function renderPagination() {
+                if (totalPages <= 1) {
+                    $('#spctPagination').remove();
+                    return;
+                }
+                var html = '';
+                for (var i = 1; i <= totalPages; i++) {
+                    html += '<li class="page-item"><a class="page-link' + (i === 1 ? ' active' : '') + '" href="#" data-page="' + i + '">' + i + '</a></li>';
+                }
+                $table.after('<nav><ul class="pagination justify-content-end mt-2" id="spctPagination">' + html + '</ul></nav>');
+            }
+
+            renderPagination();
+            renderTablePage(currentPage);
+
+            $(document).on('click', '#spctPagination .page-link', function (e) {
+                e.preventDefault();
+                var page = parseInt($(this).data('page'));
+                if (page !== currentPage) {
+                    currentPage = page;
+                    renderTablePage(currentPage);
+                }
+            });
         });
     </script>
 }
