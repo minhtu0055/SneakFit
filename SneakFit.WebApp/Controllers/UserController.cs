@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SneakFit.ApiIntegration.Services;
-using SneakFit.ViewModels.System.User;
 using SneakFit.ViewModels.Common;
-using Microsoft.AspNetCore.Authorization;
 using SneakFit.ViewModels.System.DiaChi;
+using SneakFit.ViewModels.System.User;
+using System.Security.Claims;
 
 namespace SneakFit.Admin.Controllers
 {
@@ -199,6 +200,35 @@ namespace SneakFit.Admin.Controllers
                 });
             }
             return roleAssignRequest;
+        }
+        [HttpGet]
+        public IActionResult DoiMatKhau()
+        {
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> DoiMatKhau(DoiMatKhauRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(request);
+            }
+
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var result = await _userApiClient.DoiMatKhau(Guid.Parse(userId), request);
+            if (result.IsSuccessed)
+            {
+                TempData["success"] = result.Message;
+                return RedirectToAction("DoiMatKhau", "User");
+            }
+
+            ModelState.AddModelError("", result.Message);
+            return View(request);
         }
     }
 }

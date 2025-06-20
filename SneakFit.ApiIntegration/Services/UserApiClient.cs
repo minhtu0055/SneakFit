@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Azure.Core;
+using Newtonsoft.Json;
 using SneakFit.ViewModels.Common;
 using SneakFit.ViewModels.System.User;
 using System.Net.Http.Headers;
@@ -220,6 +221,77 @@ namespace SneakFit.ApiIntegration.Services
                 return JsonConvert.DeserializeObject<ApiSuccessResult<bool>>(result);
 
             return JsonConvert.DeserializeObject<ApiErrorResult<bool>>(result);
+        }
+
+        public async Task<ApiResult<bool>> QuenMatKhau(QuenMatKhauRequest request)
+        {
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+
+                var json = JsonConvert.SerializeObject(request);
+                var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await client.PostAsync($"/api/user/quenMatKhau", httpContent);
+                var body = await response.Content.ReadAsStringAsync();
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = JsonConvert.DeserializeObject<ApiSuccessResult<bool>>(body);
+                    if (result != null)
+                        return result;
+
+                    return new ApiSuccessResult<bool>
+                    {
+                        IsSuccessed = true,
+                        Message = "Mật khẩu mới đã được gửi đến email của bạn. Vui lòng kiểm tra email và đăng nhập. Sau khi đăng nhập thành công, bạn nên đổi lại mật khẩu mới để đảm bảo tính bảo mật.",
+                        ResultObj = true
+                    };
+                }
+
+                return new ApiErrorResult<bool>("Có lỗi xảy ra khi xử lý yêu cầu. Vui lòng thử lại sau.");
+            }
+            catch (Exception ex)
+            {
+                return new ApiErrorResult<bool>($"Lỗi kết nối: {ex.Message}");
+            }
+        }
+
+        public async Task<ApiResult<bool>> DoiMatKhau(Guid id, DoiMatKhauRequest request)
+        {
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+                var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+                var json = JsonConvert.SerializeObject(request);
+                var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await client.PostAsync($"/api/user/doiMatKhau/{id}", httpContent);
+                var body = await response.Content.ReadAsStringAsync();
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = JsonConvert.DeserializeObject<ApiSuccessResult<bool>>(body);
+                    return result ?? new ApiSuccessResult<bool>
+                    {
+                        IsSuccessed = true,
+                        Message = "Đổi mật khẩu thành công",
+                        ResultObj = true
+                    };
+                }
+
+                var error = JsonConvert.DeserializeObject<ApiErrorResult<bool>>(body);
+                return error ?? new ApiErrorResult<bool>("Có lỗi xảy ra khi đổi mật khẩu");
+            }
+            catch (Exception ex)
+            {
+                return new ApiErrorResult<bool>($"Lỗi: {ex.Message}");
+            }
         }
     }
 }

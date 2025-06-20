@@ -166,9 +166,9 @@
                                     <div class="text-truncate" data-i18n="Account">Khách Hàng</div>
                                 </a>
                             </li>
-                            <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" && ViewContext.RouteData.Values["action"]?.ToString() == "ChangePassword" ? "active" : "") ">
-                                <a asp-action="ChangePassword" asp-controller="User" class="menu-link">
-                                    <div class="text-truncate" data-i18n="Notifications">ChangePassword</div>
+                            <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" && ViewContext.RouteData.Values["action"]?.ToString() == "DoiMatKhau" ? "active" : "") ">
+                                <a asp-action="DoiMatKhau" asp-controller="User" class="menu-link">
+                                    <div class="text-truncate" data-i18n="Notifications">Đổi Mật Khẩu</div>
                                 </a>
                             </li>
                         </ul>

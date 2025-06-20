@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SneakFit.ViewModels.Catalog.HoaDon
+namespace SneakFit.ViewModels.Catalog.HoaDonChiTiet
 {
-    public class PhanTrangHoaDon : PagingRequestBase
+    public class PhanTrangHoaDonChiTiet : PagingRequestBase
     {
         public string? Keyword { get; set; }
     }

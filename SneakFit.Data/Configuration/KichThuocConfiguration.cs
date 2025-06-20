@@ -14,7 +14,7 @@ namespace SneakFit.Data.Configuration
         public void Configure(EntityTypeBuilder<KichThuoc> builder)
         {
             builder.HasKey(k => k.Id);
-            builder.Property(k => k.MaKichThuoc).IsRequired();
+            builder.Property(k => k.MaKichThuoc);
         }
     }
 }

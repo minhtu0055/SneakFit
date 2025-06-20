@@ -14,14 +14,14 @@ namespace SneakFit.Data.Configuration
         public void Configure(EntityTypeBuilder<Voucher> builder)
         {
             builder.HasKey(x => x.Id);
-            builder.Property(x => x.MaVoucher).IsRequired().HasMaxLength(50);
-            builder.Property(x => x.GiaTriGiamGia).HasColumnType("decimal(18,2)").IsRequired();
-            builder.Property(x => x.DieuKienApDung).HasColumnType("decimal(18,2)").IsRequired();
-            builder.Property(x => x.SoLuong).IsRequired();
-            builder.Property(x => x.NgayTao).IsRequired();
-            builder.Property(x => x.ThoiGianBatDau).IsRequired();
-            builder.Property(x => x.ThoiGianKetThuc).IsRequired();
-            builder.Property(x => x.TrangThai).IsRequired();
+            builder.Property(x => x.MaVoucher).HasMaxLength(50);
+            builder.Property(x => x.GiaTriGiamGia).HasColumnType("decimal(18,2)");
+            builder.Property(x => x.DieuKienApDung).HasColumnType("decimal(18,2)");
+            builder.Property(x => x.SoLuong);
+            builder.Property(x => x.NgayTao);
+            builder.Property(x => x.ThoiGianBatDau);
+            builder.Property(x => x.ThoiGianKetThuc);
+            builder.Property(x => x.TrangThai);
         }
     }
 }
