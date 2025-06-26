@@ -39,6 +39,22 @@
         </div>
     </div>
 
+    @if (TempData["SuccessMsg"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMsg"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMsg"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMsg"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     <div class="table-responsive text-nowrap">
         <table class="table">
             <thead>
@@ -46,6 +62,7 @@
                     <th>MÃ VOUCHER</th>
                     <th>LOẠI GIẢM GIÁ</th>
                     <th>GIÁ TRỊ GIẢM</th>
+                    <th>loại Voucher</th>
                     <th>ĐIỀU KIỆN</th>
                     <th>SỐ LƯỢNG</th>
                     <th>THỜI GIAN BẮT ĐẦU</th>
@@ -68,6 +85,9 @@
                             </td>
                             <td>
                                 @(item.LoaiGiamGia == LoaiGiamGia.PhamTram ? item.GiaTriGiamGia + "%" : item.GiaTriGiamGia.ToString("N0") + " đ")
+                            </td>
+                            <td>
+                                @(item.loaiVoucher ==  LoaiVoucher.CongKhai ? "Công Khai" : "Riêng Tư")
                             </td>
                             <td>
                                 @item.DieuKienApDung.ToString("N0") đ
@@ -118,6 +138,24 @@
 
 @section Scripts {
     <script>
+        $(document).ready(function() {
+            // Auto-hide alerts after 4 seconds
+            setTimeout(function () {
+                $(".alert").fadeOut("slow");
+            }, 4000);
+
+            // Check for success/error messages in URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const successMsg = urlParams.get('successMsg');
+            const errorMsg = urlParams.get('errorMsg');
+
+            if (successMsg) {
+                toastr.success(successMsg);
+            }
+            if (errorMsg) {
+                toastr.error(errorMsg);
+            }
+        });
     </script>
 
     @functions {

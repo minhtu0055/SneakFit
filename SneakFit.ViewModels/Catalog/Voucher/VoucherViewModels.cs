@@ -13,6 +13,7 @@ namespace SneakFit.ViewModels.Catalog.Voucher
         public Guid Id { get; set; }
         public string MaVoucher { get; set; }
         public LoaiGiamGia LoaiGiamGia { get; set; }
+        public LoaiVoucher  loaiVoucher { get; set; }
         public decimal GiaTriGiamGia { get; set; }
         public decimal DieuKienApDung { get; set; }
         public int SoLuong { get; set; }

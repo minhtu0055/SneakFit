@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SneakFit.Application.Catalog.Voucher;
@@ -21,7 +22,7 @@ namespace SneakFit.BackEndAPI.Controllers
         }
 
         // API tạo voucher mới
-        [HttpPost("Create")]
+        [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateVoucher request)
         {
             if (request == null) return BadRequest("Invalid data.");
@@ -103,12 +104,57 @@ namespace SneakFit.BackEndAPI.Controllers
 
         // API sử dụng voucher
         [HttpPost("use-voucher/{code}")]
-        public async Task<IActionResult> UseVoucher(string code)
+        public async Task<IActionResult> UseVoucher(string code, [FromBody] UseVoucherRequest request)
         {
-            var result = await _voucherService.UseVoucher(code);
+            if (request == null || request.UserId == Guid.Empty)
+                return BadRequest("Thiếu thông tin người dùng.");
+
+            var result = await _voucherService.UseVoucher(code, request.UserId);
             if (result)
                 return Ok(new { message = "Sử dụng voucher thành công" });
-            return BadRequest("Voucher không hợp lệ hoặc đã hết hạn");
+
+            return BadRequest("Voucher không hợp lệ, đã hết hạn, hoặc bạn không đủ điều kiện sử dụng.");
+        }
+
+        // API lấy danh sách khách hàng cho voucher
+        [HttpGet("users")]
+        public async Task<IActionResult> GetUsersForVoucher([FromQuery] Guid? voucherId = null)
+        {
+            try
+            {
+                var result = await _voucherService.GetUsersForVoucher(voucherId);
+                if (result == null || !result.Any())
+                {
+                    return NotFound(new ApiErrorResult<List<VoucherUserViewModel>>("Không tìm thấy khách hàng nào"));
+                }
+                return Ok(new ApiSuccessResult<List<VoucherUserViewModel>>(result));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiErrorResult<List<VoucherUserViewModel>>(ex.Message));
+            }
+        }
+
+        // API lấy danh sách khách hàng cho voucher có phân trang
+        [HttpGet("users/paging")]
+        public async Task<IActionResult> GetUsersForVoucherPaging([FromQuery] GetVoucherUserPagingRequest request)
+        {
+                var result = await _voucherService.GetUsersForVoucherPaging(request);
+                return Ok(new ApiSuccessResult<PagedResult<VoucherUserViewModel>>(result));
+        }
+
+        [HttpGet("getnextcode")]
+        public async Task<IActionResult> GetNextCode()
+        {
+            try
+            {
+                var nextCode = await _voucherService.GetNextVoucherCode();
+                return Ok(nextCode);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiErrorResult<string>(ex.Message));
+            }
         }
     }
 }

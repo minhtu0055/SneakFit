@@ -4,8 +4,6 @@
     <div class="mb-3">
         <label asp-for="TenMauSac" class="form-label">Tên Màu Sắc</label>
         <input asp-for="TenMauSac" class="form-control" placeholder="Nhập tên màu sắc"
-               @* pattern="^[a-zA-ZÀ-ỹ\s]+$"  *@
-               @* oninput="validateColorInput(this)" *@
                maxlength="50"
                title="Vui lòng chỉ nhập chữ cái"></input>
         <span asp-validation-for="TenMauSac" class="text-danger"></span>

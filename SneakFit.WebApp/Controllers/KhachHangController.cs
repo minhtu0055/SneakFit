@@ -40,19 +40,38 @@ namespace SneakFit.Admin.Controllers
             return View();
         }
         [HttpPost]
-        public async Task<IActionResult> Create(RegisterRequest request)
+        public async Task<IActionResult> Create(RegisterRequest request, IFormFile imageFile)
         {
+            if (!ModelState.IsValid)
+            {
+                return View(request);
+            }
+
+            if (imageFile != null && imageFile.Length > 0)
+            {
+                // Xử lý upload file
+                var fileName = Path.GetFileName(imageFile.FileName);
+                var filePath = Path.Combine("wwwroot", "uploads", "users", fileName);
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await imageFile.CopyToAsync(stream);
+                }
+                request.UrlHinhAnh = "/uploads/users/" + fileName;
+            }
+
             request.Roles = new List<string> { "KHÁCH HÀNG" };
             var result = await _userApiClient.Register(request);
 
             if (result.IsSuccessed)
             {
-                TempData["success"] = "Thêm mới khách hàng thành công";
+                TempData["SuccessMessage"] = "Thêm mới khách hàng thành công";
                 return RedirectToAction("Index");
             }
 
             if (!string.IsNullOrEmpty(result.Message))
             {
+                ModelState.AddModelError("", result.Message);
                 TempData["ErrorMessage"] = result.Message;
             }
             return View(request);

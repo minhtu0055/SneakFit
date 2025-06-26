@@ -23,5 +23,18 @@ namespace SneakFit.Data.Configuration
             builder.Property(x => x.ThoiGianKetThuc).IsRequired();
             builder.Property(x => x.TrangThai).IsRequired();
         }
+        public class VoucherUserConfiguration : IEntityTypeConfiguration<VoucherUser>
+        {
+            public void Configure(EntityTypeBuilder<VoucherUser> builder)
+            {
+                builder.HasKey(x => x.Id);
+                builder.HasOne(x => x.Voucher)
+                    .WithMany(x => x.VoucherUsers)
+                    .HasForeignKey(x => x.VoucherId);
+                builder.HasOne(x => x.User)
+                    .WithMany()
+                    .HasForeignKey(x => x.UserId);
+            }
+        }
     }
 }

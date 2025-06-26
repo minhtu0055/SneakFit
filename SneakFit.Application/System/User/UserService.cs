@@ -119,6 +119,11 @@ namespace SneakFit.Application.System.User
                 }
                 query = query.Where(u => userIds.Contains(u.Id.ToString()));
             }
+            // 🆕 Lọc trạng thái nếu có truyền vào
+            if (request.TrangThai.HasValue)
+            {
+                query = query.Where(u => u.TrangThai == request.TrangThai.Value);
+            }
             // Paging
             int totalRow = await query.CountAsync();
 
@@ -198,6 +203,8 @@ namespace SneakFit.Application.System.User
                         TenThanhPho = request.DiaChi.TenThanhPho,
                         TenHuyen = request.DiaChi.TenHuyen,
                         TenXa = request.DiaChi.TenXa,
+                        SoDienThoai = request.DiaChi.SoDienThoai,
+                        TenNguoiNhan = request.DiaChi.TenNguoiNhan,
                         Mac_Dinh = true // Địa chỉ đầu tiên luôn là mặc định
                     };
                     _context.DiaChi.Add(diaChi);
