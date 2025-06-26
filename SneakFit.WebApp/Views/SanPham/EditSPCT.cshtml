@@ -163,7 +163,7 @@
                 <button class="btn btn-primary" id="updateAll">Chỉnh số lượng và giá chung</button>
                 <button class="btn btn-primary" style="margin-left: 5px" id="updateSelected">Update sản phẩm</button>
             </div>
-            <table class="table table-hover align-middle" id="spctTable">
+            <table class="table table-hover align-middle" id="spctTable" style="border-radius: 8px; overflow: hidden; ">
                 <thead class="table">
                     <tr style="background-color: #696CFF; ">
                         <th style="width: 30px; color: white;"><input type="checkbox" id="checkAll" /></th>
@@ -172,7 +172,7 @@
                         <th style="min-width: 250px; color: white;">Tên Sản Phẩm</th>
                         <th style="width: 112px; color: white;">Số Lượng</th>
                         <th style="width: 120px; color: white;">Giá Bán</th>
-                        <th style="width: 120px; color: white;">Trạng Thái</th>
+                        <th style="width: 122px; color: white;">Trạng Thái</th>
                         <th style="width: 1px">@* Hành động *@</th>
                     </tr>
                 </thead>
@@ -567,25 +567,39 @@
                 // Tạo mảng chứa dữ liệu cần cập nhật
                 var updates = [];
                 selectedRows.each(function() {
+                    // var row = $(this);
+                    // var updateData = {
+                    //     id: row.data('id')
+                    // };
+
+                    // // Chỉ thêm giá nếu người dùng đã nhập
+                    // if (price) {
+                    //     updateData.gia = parseInt(price);
+                    //     // Format và cập nhật giá trên giao diện
+                    //     let formattedPrice = parseInt(price).toLocaleString('vi-VN');
+                    //     row.find('.gia-ban').val(formattedPrice);
+                    // }
+
+                    // // Chỉ thêm số lượng nếu người dùng đã nhập
+                    // if (quantity) {
+                    //     updateData.soLuong = parseInt(quantity);
+                    //     // Cập nhật số lượng trên giao diện
+                    //     row.find('.so-luong').val(quantity);
+                    // }
+
+                    // updates.push(updateData);
                     var row = $(this);
+                    var soLuongMoi = quantity ? parseInt(quantity) : parseInt(row.find('.so-luong').val());
+                    var giaMoi = price ? parseInt(price) : parseInt(row.find('.gia-ban').val().replace(/[.,]/g, ''));
+
+                    var trangThaiSP = soLuongMoi === 0 ? false : true;
+
                     var updateData = {
-                        id: row.data('id')
+                        id: row.data('id'),
+                        gia: giaMoi,
+                        soLuong: soLuongMoi,
+                        trangThai: trangThaiSP
                     };
-
-                    // Chỉ thêm giá nếu người dùng đã nhập
-                    if (price) {
-                        updateData.gia = parseInt(price);
-                        // Format và cập nhật giá trên giao diện
-                        let formattedPrice = parseInt(price).toLocaleString('vi-VN');
-                        row.find('.gia-ban').val(formattedPrice);
-                    }
-
-                    // Chỉ thêm số lượng nếu người dùng đã nhập
-                    if (quantity) {
-                        updateData.soLuong = parseInt(quantity);
-                        // Cập nhật số lượng trên giao diện
-                        row.find('.so-luong').val(quantity);
-                    }
 
                     updates.push(updateData);
                 });
@@ -631,11 +645,14 @@
                     // Xử lý giá trị giá bán - loại bỏ dấu phẩy và chấm
                     var giaBan = parseInt(giaBanInput.replace(/[.,]/g, '')) || 0;
 
+                    var trangThaiSP = soLuong === 0 ? false : true;
+
                     if (soLuong >= 0 && giaBan > 0) {
                         updates.push({
                             id: row.data('id'),
                             soLuong: soLuong,
-                            gia: giaBan
+                            gia: giaBan,
+                            trangThai: trangThaiSP
                         });
                     }
                 });
@@ -1115,9 +1132,22 @@
         // Chỉ cho nhập số lượng là số nguyên dương
         $(document).on('input', '.so-luong, .quantity-input', function() {
             let value = $(this).val().replace(/[^0-9]/g, '');
-            value = value.replace(/^0+/, ''); // Loại bỏ số 0 ở đầu
+            // value = value.replace(/^0+/, ''); // Loại bỏ số 0 ở đầu
             $(this).val(value);
         });
+
+        // Tự động set trạng thái khi số lượng về 0
+        $(document).on('input', '.so-luong', function () {
+            let row = $(this).closest('tr');
+            let soLuong = parseInt($(this).val()) || 0;
+            let $badge = row.find('span.badge');
+            if (soLuong === 0) {
+                $badge.removeClass('bg-success').addClass('bg-danger').text('Ngừng kinh doanh');
+            } else {
+                $badge.removeClass('bg-danger').addClass('bg-success').text('Đang kinh doanh');
+            }
+        });
+
         
         // PHÂN TRANG CHO BẢNG SẢN PHẨM CHI TIẾT
         $(document).ready(function () {

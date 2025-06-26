@@ -187,7 +187,16 @@ namespace SneakFit.Admin.Controllers
 
         // Hiển thị form chỉnh sửa chi tiết sản phẩm (SPCT)
         [HttpGet]
-        public async Task<IActionResult> EditSPCT(Guid id) 
+        public async Task<IActionResult> EditSPCT(Guid id, 
+                                                  string TuKhoa,
+                                                  Guid? ChatLieuId,
+                                                  Guid? ThuongHieuId,
+                                                  Guid? DeGiayId,
+                                                  Guid? KichThuocId,
+                                                  Guid? MauSacId,
+                                                  string TrangThai,
+                                                  int? GiaTu,
+                                                  int? GiaDen) 
         {
             var sanPham = await _sanPhamApiClient.GetById(id);
             if (sanPham == null) return NotFound();
@@ -207,7 +216,31 @@ namespace SneakFit.Admin.Controllers
             ViewBag.KichThuocs = kichThuocs.ToDictionary(x => x.Id, x => x.MaKichThuoc.ToString());
             ViewBag.MauSacs = mauSacs.ToDictionary(x => x.Id, x => x.TenMauSac);
 
+            // Lấy danh sách SPCT
             var danhSachSPCT = await _sanPhamApiClient.GetSPCTByProductName(sanPham.TenSanPham);
+
+            // Bộ lọc 
+            if (!string.IsNullOrEmpty(TuKhoa))
+                danhSachSPCT = danhSachSPCT.Where(x => x.TenSanPham != null && x.TenSanPham.Contains(TuKhoa, StringComparison.OrdinalIgnoreCase)).ToList();
+            if (ChatLieuId.HasValue)
+                danhSachSPCT = danhSachSPCT.Where(x => x.ChatLieuId == ChatLieuId.Value).ToList();
+            if (ThuongHieuId.HasValue)
+                danhSachSPCT = danhSachSPCT.Where(x => x.ThuongHieuId == ThuongHieuId.Value).ToList();
+            if (DeGiayId.HasValue)
+                danhSachSPCT = danhSachSPCT.Where(x => x.DeGiayId == DeGiayId.Value).ToList();
+            if (KichThuocId.HasValue)
+                danhSachSPCT = danhSachSPCT.Where(x => x.KichThuocId == KichThuocId.Value).ToList();
+            if (MauSacId.HasValue)
+                danhSachSPCT = danhSachSPCT.Where(x => x.MauSacId == MauSacId.Value).ToList();
+            if (!string.IsNullOrEmpty(TrangThai))
+            {
+                bool trangThai = TrangThai == "true";
+                danhSachSPCT = danhSachSPCT.Where(x => x.TrangThai == trangThai).ToList();
+            }
+            if (GiaTu.HasValue)
+                danhSachSPCT = danhSachSPCT.Where(x => x.Gia >= GiaTu.Value).ToList();
+            if (GiaDen.HasValue)
+                danhSachSPCT = danhSachSPCT.Where(x => x.Gia <= GiaDen.Value).ToList();
 
             var model = new SuaSPCT
             {

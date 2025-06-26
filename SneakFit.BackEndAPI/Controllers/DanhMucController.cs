@@ -10,7 +10,7 @@ namespace SneakFit.BackEndAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class DanhMucController : ControllerBase
     {
         private readonly IDanhMucService _danhMucService;

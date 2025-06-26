@@ -172,7 +172,7 @@ namespace SneakFit.Admin.Controllers
         public async Task<IActionResult> CreateMultiple([FromBody] List<SPCTViewModels> items)
         {
             if (items == null || !items.Any())
-                return Json(new { success = false, message = "Dữ liệu không hợp lệ hoặc chưa chọn màu/kích thước" });
+                return Json(new { success = false, message = "Dữ liệu không hợp lệ hoặc chưa chọn màu/kích thước!" });
 
             var errorList = new List<string>();
             var createdItems = new List<SPCTViewModels>(); // Lưu danh sách sản phẩm đã tạo
@@ -220,7 +220,7 @@ namespace SneakFit.Admin.Controllers
                 string message = $"Thêm mới {resultCount} sản phẩm chi tiết thành công.";
                 if (duplicateCount > 0)
                 {
-                    message += $"\n {duplicateCount} sản phẩm chi tiết đã tồn tại";
+                    message += $"\n {duplicateCount} sản phẩm chi tiết đã tồn tại.";
                 }
                 if (errorList.Count > 0)
                 {
@@ -232,13 +232,13 @@ namespace SneakFit.Admin.Controllers
             {
                 if (duplicateCount > 0)
                 {
-                    return Json(new { success = false, message = $"{duplicateCount} sản phẩm chi tiết đã tồn tại" });
+                    return Json(new { success = false, message = $"{duplicateCount} sản phẩm chi tiết đã tồn tại." });
                 }
                 else if (errorList.Count > 0)
                 {
                     return Json(new { success = false, message = string.Join("; ", errorList) });
                 }
-                return Json(new { success = false, message = "Không thể thêm sản phẩm chi tiết" });
+                return Json(new { success = false, message = "Không thể thêm sản phẩm chi tiết!" });
             }
         }
 

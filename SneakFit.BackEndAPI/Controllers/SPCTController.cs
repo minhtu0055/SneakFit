@@ -14,7 +14,7 @@ namespace SneakFit.BackEndAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class SPCTController : ControllerBase
     {
         private readonly ISanPhamChiTetService _sanPhamChiTetService;

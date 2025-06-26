@@ -14,7 +14,7 @@
             </h4>
         </div>
         <div>
-            <a asp-action="Index" class="btn btn-secondary">
+            <a asp-action="Index" asp-controller="SanPham" class="btn btn-secondary"> @* Thêm asp-controller="SanPham" để trả về SanPham/index *@
                 <i class="bx bx-arrow-back me-1"></i> Quay lại
             </a>
         </div>
@@ -1003,8 +1003,158 @@
 
 
         // Khi bấm Hoàn tất, Sửa giá, Sửa số lượng
+        // $('#btnHoanTat').on('click', async function(e) {
+        //     e.preventDefault();
+        //     // Kiểm tra các trường bắt buộc
+        //     const sanPhamId = $('select[name="SanPhamId"]').val();
+        //     const thuongHieuId = $('select[name="ThuongHieuId"]').val();
+        //     const chatLieuId = $('select[name="ChatLieuId"]').val();
+        //     const deGiayId = $('select[name="DeGiayId"]').val();
+        //     if (!sanPhamId || !thuongHieuId || !chatLieuId || !deGiayId) {
+        //         Swal.fire('Lỗi', 'Vui lòng chọn đầy đủ thông tin sản phẩm chi tiết', 'error');
+        //         return;
+        //     }
+        //     if (selectedColors.length === 0 || selectedSizes.length === 0) {
+        //         Swal.fire('Lỗi', 'Vui lòng chọn ít nhất một màu sắc và một kích thước', 'error');
+        //         return;
+        //     }
+
+        //     let trs = $('#productDetailList tr');
+        //     if (trs.length === 0) {
+        //         Swal.fire('Lỗi', 'Chưa có sản phẩm chi tiết nào!', 'error');
+        //         return;
+        //     }
+
+        //     // Tạo mảng dữ liệu JSON
+        //     let items = [];
+        //     let hasError = false;
+        //     trs.each(function() {
+        //         let $tr = $(this);
+        //         let spctName = `${$tr.data('sanpham-name') || 'Không xác định'} (${$tr.data('mausac-name') || 'Không xác định'}, ${$tr.data('kichthuoc-name') || 'Không xác định'})`;
+        //         let item = {
+        //             SanPhamId: $tr.data('sanpham-id') || sanPhamId,
+        //             ThuongHieuId: $tr.data('thuonghieu-id') || thuongHieuId,
+        //             ChatLieuId: $tr.data('chatlieu-id') || chatLieuId,
+        //             DeGiayId: $tr.data('degiay-id') || deGiayId,
+        //             MauSacId: $tr.data('mausac-id'),
+        //             KichThuocId: $tr.data('kichthuoc-id'),
+        //             SoLuong: parseInt($tr.find('.quantity-input').val()) || 0,
+        //             Gia: parseInt($tr.find('.price-input').val().replace(/\./g, '')) || 0,
+        //             TrangThai: $('#trangThaiSelect').val() === "true",
+        //             SanPhamName: $tr.data('sanpham-name') || 'Không xác định',
+        //             MauSacName: $tr.data('mausac-name') || 'Không xác định',
+        //             KichThuocName: $tr.data('kichthuoc-name') || 'Không xác định',
+        //             SpctName: spctName
+        //         };
+
+        //         if (!item.MauSacId || !item.KichThuocId) {
+        //             Swal.fire('Lỗi', `Lỗi thêm màu sắc và kích thước cho SPCT ${spctName}`, 'error');
+        //             hasError = true;
+        //             return false;
+        //         }
+        //         if (isNaN(item.Gia) || isNaN(item.SoLuong)) {
+        //             Swal.fire('Lỗi', `Lỗi thêm giá và số lượng cho SPCT ${spctName}`, 'error');
+        //             hasError = true;
+        //             return false;
+        //         }
+        //         items.push(item);
+        //     });
+
+        //     if (hasError) return;
+
+        //     try {
+        //         // Hiển thị loading
+        //         Swal.fire({
+        //             title: 'Đang xử lý...',
+        //             text: 'Vui lòng đợi trong giây lát',
+        //             allowOutsideClick: false,
+        //             didOpen: () => {
+        //                 Swal.showLoading();
+        //             }
+        //         });
+
+        //         // Gửi yêu cầu tạo SPCT
+        //         let response = await $.ajax({
+        //             url: '/SPCT/CreateMultiple',
+        //             type: 'POST',
+        //             contentType: 'application/json',
+        //             data: JSON.stringify(items)
+        //         });
+
+        //         if (!response.success) {
+        //             throw new Error(response.message || 'Có lỗi khi tạo sản phẩm chi tiết');
+        //         }
+
+        //         // Upload ảnh cho từng SPCT
+        //         let uploadErrors = [];
+        //         for (let i = 0; i < items.length; i++) {
+        //             const item = items[i];
+        //             const colorGroupKey = `${item.SanPhamId}-${item.MauSacId}`;
+        //             const files = spctImages[colorGroupKey] || [];
+
+        //             if (files.length > 0) {
+        //                 const sanPhamChiTietId = response.data[i]?.id;
+        //                 if (!sanPhamChiTietId) {
+        //                     uploadErrors.push(`Lỗi không tìm thấy SPCT ${item.SpctName} để upload ảnh`);
+        //                     continue;
+        //                 }
+
+        //                 const uploadData = new FormData();
+        //                 uploadData.append('sanPhamChiTietId', sanPhamChiTietId);
+        //                 files.forEach(file => {
+        //                     uploadData.append('files', file);
+        //                 });
+
+        //                 try {
+        //                     const uploadResponse = await $.ajax({
+        //                         url: '/SPCT/UploadImages',
+        //                         type: 'POST',
+        //                         data: uploadData,
+        //                         processData: false,
+        //                         contentType: false
+        //                     });
+
+        //                     if (!uploadResponse.success) {
+        //                         uploadErrors.push(`Lỗi upload ảnh cho SPCT ${item.SpctName}`);
+        //                     }
+        //                 } catch (uploadError) {
+        //                     uploadErrors.push(`Lỗi upload ảnh cho SPCT ${item.SpctName}`);
+        //                 }
+        //             }
+        //         }
+
+        //         // Hiển thị kết quả
+        //         let message = response.message || 'Tạo mới sản phẩm chi tiết thành công!';
+        //         if (uploadErrors.length > 0) {
+        //             message += `\nLỗi upload ảnh: ${uploadErrors.join('; ')}`;
+        //             Swal.fire('Cảnh báo', message, 'warning').then(() => {
+        //                 window.location.href = '/SanPham/Index';
+        //             });
+        //         } else {
+        //             Swal.fire('Thành công', message, 'success').then(() => {
+        //                 window.location.href = '/SanPham/Index';
+        //             });
+        //         }
+        //     } catch (error) {
+        //         console.error('Lỗi khi tạo SPCT:', error);
+        //         let errorMsg = 'Có lỗi khi tạo sản phẩm chi tiết!';
+        //         if (error.responseJSON && error.responseJSON.message) {
+        //             // Kiểm tra nếu lỗi liên quan đến trùng lặp
+        //             if (error.responseJSON.message.toLowerCase().includes('tồn tại') ||
+        //                 error.responseJSON.message.toLowerCase().includes('already exists')) {
+        //                 errorMsg = 'Sản phẩm chi tiết này đã tồn tại';
+        //             } else {
+        //                 errorMsg = error.responseJSON.message; // Giữ lỗi chi tiết nếu không phải trùng lặp
+        //             }
+        //         } else if (error.message) {
+        //             errorMsg = error.message; // Gán thông báo lỗi cơ bản nếu không có dữ liệu JSON từ server
+        //         }
+        //         Swal.fire('Lỗi', errorMsg, 'error');
+        //     }
+        // });
         $('#btnHoanTat').on('click', async function(e) {
             e.preventDefault();
+
             // Kiểm tra các trường bắt buộc
             const sanPhamId = $('select[name="SanPhamId"]').val();
             const thuongHieuId = $('select[name="ThuongHieuId"]').val();
@@ -1027,10 +1177,8 @@
 
             // Tạo mảng dữ liệu JSON
             let items = [];
-            let hasError = false;
-            trs.each(function() {
+            trs.each(function(rowIndex) {
                 let $tr = $(this);
-                let spctName = `${$tr.data('sanpham-name') || 'Không xác định'} (${$tr.data('mausac-name') || 'Không xác định'}, ${$tr.data('kichthuoc-name') || 'Không xác định'})`;
                 let item = {
                     SanPhamId: $tr.data('sanpham-id') || sanPhamId,
                     ThuongHieuId: $tr.data('thuonghieu-id') || thuongHieuId,
@@ -1040,27 +1188,19 @@
                     KichThuocId: $tr.data('kichthuoc-id'),
                     SoLuong: parseInt($tr.find('.quantity-input').val()) || 0,
                     Gia: parseInt($tr.find('.price-input').val().replace(/\./g, '')) || 0,
-                    TrangThai: $('#trangThaiSelect').val() === "true",
-                    SanPhamName: $tr.data('sanpham-name') || 'Không xác định',
-                    MauSacName: $tr.data('mausac-name') || 'Không xác định',
-                    KichThuocName: $tr.data('kichthuoc-name') || 'Không xác định',
-                    SpctName: spctName
+                    TrangThai: $('#trangThaiSelect').val() === "true"
                 };
 
                 if (!item.MauSacId || !item.KichThuocId) {
-                    Swal.fire('Lỗi', `Lỗi thêm màu sắc và kích thước cho SPCT ${spctName}`, 'error');
-                    hasError = true;
-                    return false;
+                    Swal.fire('Lỗi', `Lỗi thêm màu sắc và kích thước dòng ${rowIndex + 1}`, 'error');
+                    return;
                 }
                 if (isNaN(item.Gia) || isNaN(item.SoLuong)) {
-                    Swal.fire('Lỗi', `Lỗi thêm giá và số lượng cho SPCT ${spctName}`, 'error');
-                    hasError = true;
-                    return false;
+                    Swal.fire('Lỗi', `Lỗi thêm giá và số lượng dòng ${rowIndex + 1}`, 'error');
+                    return;
                 }
                 items.push(item);
             });
-
-            if (hasError) return;
 
             try {
                 // Hiển thị loading
@@ -1082,20 +1222,22 @@
                 });
 
                 if (!response.success) {
-                    throw new Error(response.message || 'Có lỗi khi tạo sản phẩm chi tiết');
+                    throw new Error(response.message || 'Có lỗi khi tạo sản phẩm chi tiết!');
                 }
 
-                // Upload ảnh cho từng SPCT
-                let uploadErrors = [];
+                // Upload ảnh với kiểm tra lỗi duy nhất
+                let hasError = false;
+
                 for (let i = 0; i < items.length; i++) {
                     const item = items[i];
                     const colorGroupKey = `${item.SanPhamId}-${item.MauSacId}`;
                     const files = spctImages[colorGroupKey] || [];
 
-                    if (files.length > 0) {
+                    if (files.length > 0 && !hasError) {
                         const sanPhamChiTietId = response.data[i]?.id;
                         if (!sanPhamChiTietId) {
-                            uploadErrors.push(`Lỗi không tìm thấy SPCT ${item.SpctName} để upload ảnh`);
+                            console.error('Lỗi upload ảnh cho SPCT: Không tìm thấy ID sản phẩm chi tiết');
+                            hasError = true;
                             continue;
                         }
 
@@ -1115,39 +1257,32 @@
                             });
 
                             if (!uploadResponse.success) {
-                                uploadErrors.push(`Lỗi upload ảnh cho SPCT ${item.SpctName}`);
+                                console.error('Lỗi upload ảnh cho SPCT: Upload không thành công');
+                                hasError = true;
                             }
                         } catch (uploadError) {
-                            uploadErrors.push(`Lỗi upload ảnh cho SPCT ${item.SpctName}`);
+                            console.error('Lỗi upload ảnh cho SPCT: Lỗi kết nối hoặc server');
+                            hasError = true;
                         }
                     }
                 }
 
                 // Hiển thị kết quả
                 let message = response.message || 'Tạo mới sản phẩm chi tiết thành công!';
-                if (uploadErrors.length > 0) {
-                    message += `\nLỗi upload ảnh: ${uploadErrors.join('; ')}`;
+                if (hasError) {
                     Swal.fire('Cảnh báo', message, 'warning').then(() => {
-                        window.location.href = '/SanPham/Index';
+                        window.location.href = '/SPCT/Index';
                     });
                 } else {
                     Swal.fire('Thành công', message, 'success').then(() => {
-                        window.location.href = '/SanPham/Index';
+                        window.location.href = '/SPCT/Index';
                     });
                 }
             } catch (error) {
-                console.error('Lỗi khi tạo SPCT:', error);
+                console.error('Lỗi:', error);
                 let errorMsg = 'Có lỗi khi tạo sản phẩm chi tiết!';
                 if (error.responseJSON && error.responseJSON.message) {
-                    // Kiểm tra nếu lỗi liên quan đến trùng lặp
-                    if (error.responseJSON.message.toLowerCase().includes('tồn tại') ||
-                        error.responseJSON.message.toLowerCase().includes('already exists')) {
-                        errorMsg = 'Sản phẩm chi tiết này đã tồn tại';
-                    } else {
-                        errorMsg = error.responseJSON.message; // Giữ lỗi chi tiết nếu không phải trùng lặp
-                    }
-                } else if (error.message) {
-                    errorMsg = error.message; // Gán thông báo lỗi cơ bản nếu không có dữ liệu JSON từ server
+                    errorMsg = error.responseJSON.message;
                 }
                 Swal.fire('Lỗi', errorMsg, 'error');
             }

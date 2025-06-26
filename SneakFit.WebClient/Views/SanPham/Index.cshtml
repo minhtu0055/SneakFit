@@ -1,0 +1,441 @@
+@model SneakFit.ViewModels.Catalog.SanPhamChiTiet.DanhMucSPCTViewModel
+@using System.Linq
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<main class="main">
+    <!-- Page Title -->
+    <div class="page-title light-background">
+        <div class="container d-lg-flex justify-content-between align-items-center">
+            <h1 class="mb-2 mb-lg-0">Category</h1>
+            <nav class="breadcrumbs">
+                <ol>
+                    <li><a href="index.html">Home</a></li>
+                    <li class="current">Category</li>
+                </ol>
+            </nav>
+        </div>
+    </div><!-- End Page Title -->
+
+    <div class="container">
+        <div class="row">
+
+            <div class="col-lg-4 sidebar">
+
+                <div class="widgets-container" style="border-radius: 8px">
+
+                    <!-- Product Categories Widget -->
+                    <ul class="category-tree list-unstyled mb-0">
+                        @foreach (var cat in Model.DanhMucs)
+                        {
+                            <li class="category-item">
+                                <a href="@Url.Action("Index", "SanPham", new { categoryId = cat.Id })" class="category-link">
+                                    @cat.TenDanhMuc
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                    <!--/Product Categories Widget -->
+
+                    <!-- Pricing Range Widget -->
+                    <div class="pricing-range-widget widget-item">
+
+                        <h3 class="widget-title">Price Range</h3>
+
+                        <div class="price-range-container">
+                            <div class="current-range mb-3">
+                                <span class="min-price">$0</span>
+                                <span class="max-price float-end">$1000</span>
+                            </div>
+
+                            <div class="range-slider">
+                                <div class="slider-track"></div>
+                                <div class="slider-progress"></div>
+                                <input type="range" class="min-range" min="0" max="1000" value="0" step="10">
+                                <input type="range" class="max-range" min="0" max="1000" value="500" step="10">
+                            </div>
+
+                            <div class="price-inputs mt-3">
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" class="form-control min-price-input" placeholder="Min" min="0" max="1000" value="0" step="10">
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text">$</span>
+                                            <input type="number" class="form-control max-price-input" placeholder="Max" min="0" max="1000" value="500" step="10">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="filter-actions mt-3">
+                                <button type="button" class="btn btn-sm btn-primary w-100">Apply Filter</button>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!--/Pricing Range Widget -->
+
+                    <!-- Color Filter Widget -->
+                    <div class="color-options mb-4">
+                        @foreach (var color in Model.MauSacs)
+                        {
+                            <span class="color-circle"
+                                  title="@color.TenMauSac"
+                                  data-color="@color.MaMauSac"
+                                  data-id="@color.Id"
+                                  style="background:@color.MaMauSac"></span>
+                        }
+                    </div>
+                    <!--/Color Filter Widget -->
+
+                    <!-- Brand Filter Widget -->
+                    <div class="brand-list">
+                        @foreach (var brand in Model.ThuongHieus)
+                        {
+                            <div class="brand-item">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="brand@brand.Id" value="@brand.Id">
+                                    <label class="form-check-label" for="brand@brand.Id">
+                                        @brand.TenThuongHieu
+                                    </label>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <!--/Brand Filter Widget -->
+
+                </div>
+
+            </div>
+
+
+            <div class="col-lg-8">
+
+                <!-- Category Header Section -->
+                <section id="category-header" class="category-header section">
+
+                    <div class="container" data-aos="fade-up">
+
+                        <!-- Filter and Sort Options -->
+                        <div class="filter-container mb-4" data-aos="fade-up" data-aos-delay="100">
+                            <div class="row g-3">
+                                <div class="col-12 col-md-6 col-lg-4">
+                                    <div class="filter-item search-form">
+                                        <label for="productSearch" class="form-label">Search Products</label>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="productSearch" placeholder="Search for products..." aria-label="Search for products">
+                                            <button class="btn search-btn" type="button">
+                                                <i class="bi bi-search"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-6 col-lg-2">
+                                    <div class="filter-item">
+                                        <label for="priceRange" class="form-label">Price Range</label>
+                                        <select class="form-select" id="priceRange">
+                                            <option selected="">All Prices</option>
+                                            <option>Under $25</option>
+                                            <option>$25 to $50</option>
+                                            <option>$50 to $100</option>
+                                            <option>$100 to $200</option>
+                                            <option>$200 &amp; Above</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-6 col-lg-2">
+                                    <div class="filter-item">
+                                        <label for="sortBy" class="form-label">Sort By</label>
+                                        <select class="form-select" id="sortBy">
+                                            <option selected="">Featured</option>
+                                            <option>Price: Low to High</option>
+                                            <option>Price: High to Low</option>
+                                            <option>Customer Rating</option>
+                                            <option>Newest Arrivals</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-6 col-lg-4">
+                                    <div class="filter-item">
+                                        <label class="form-label">View</label>
+                                        <div class="d-flex align-items-center">
+                                            <div class="view-options me-3">
+                                                <button type="button" class="btn view-btn active" data-view="grid" aria-label="Grid view">
+                                                    <i class="bi bi-grid-3x3-gap-fill"></i>
+                                                </button>
+                                                <button type="button" class="btn view-btn" data-view="list" aria-label="List view">
+                                                    <i class="bi bi-list-ul"></i>
+                                                </button>
+                                            </div>
+                                            <div class="items-per-page">
+                                                <select class="form-select" id="itemsPerPage" aria-label="Items per page">
+                                                    <option value="12">12 per page</option>
+                                                    <option value="24">24 per page</option>
+                                                    <option value="48">48 per page</option>
+                                                    <option value="96">96 per page</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mt-3">
+                                <div class="col-12" data-aos="fade-up" data-aos-delay="200">
+                                    <div class="active-filters">
+                                        <span class="active-filter-label">Active Filters:</span>
+                                        <div class="filter-tags">
+                                            <span class="filter-tag">
+                                                Electronics <button class="filter-remove"><i class="bi bi-x"></i></button>
+                                            </span>
+                                            <span class="filter-tag">
+                                                $50 to $100 <button class="filter-remove"><i class="bi bi-x"></i></button>
+                                            </span>
+                                            <button class="clear-all-btn">Clear All</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </section>
+                <!-- /Category Header Section -->
+                <!-- Category Product List Section -->
+                <section id="category-product-list" class="category-product-list section">
+                    <div class="container" data-aos="fade-up" data-aos-delay="100">
+                        <div class="row gy-4">
+                            @if (Model.SanPhams != null && Model.SanPhams.Items.Any())
+                            {
+                                foreach (var item in Model.SanPhams.Items)
+                                {
+                                    var listGia = Model.AllSpct
+                                    .Where(x => x.SanPhamId == item.Id && x.Gia > 0)
+                                    .Select(x => x.Gia)
+                                    .ToList();
+
+                                    <div class="col-lg-6">
+                                        <div class="product-box" style="height: 550px">
+                                            <div class="product-thumb" style="padding-bottom: 0px">
+                                                <div class="img" style="height: 404px">
+                                                    <img src="@($"{Configuration["BaseAddress"]}{item.ImageDaiDien}")"
+                                                         alt="Product Image" style="width: 404px; object-fit: cover;" />
+                                                </div>
+                                                <div class="product-overlay">
+                                                    <div class="product-quick-actions">
+                                                        <button type="button" class="quick-action-btn"><i class="bi bi-heart"></i></button>
+                                                        <button type="button" class="quick-action-btn"><i class="bi bi-arrow-repeat"></i></button>
+                                                        <button type="button" class="quick-action-btn"
+                                                                onclick="window.location.href='@Url.Action("Details", "SanPham", new { id = item.Id })'">
+                                                            <i class="bi bi-eye"></i>
+                                                        </button>
+                                                    </div>
+                                                    <div class="add-to-cart-container">
+                                                        <button type="button" class="add-to-cart-btn">Add to Cart</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            @* <div class="product-content">
+                                                <div class="product-details">
+                                                    <h3 class="product-title">@item.TenSanPham</h3>
+                                                    <div class="product-price">
+                                                        <span>@item.TenDanhMuc</span>
+                                                    </div>
+                                                </div>
+                                            </div> *@
+                                            <div class="product-content">
+                                                <div class="product-details d-flex justify-content-between">
+                                                    <h2 class="product-title mb-0" style="font-weight: bold">@item.TenSanPham</h2>
+                                                    <h4 class="product-category mb-0 ms-2" style="font-size:1rem; font-weight:600; color:#1766b3;">
+                                                        @item.TenDanhMuc
+                                                    </h4>
+                                                </div>
+                                                <div class="product-price mt-2" style="font-size:1.13rem; font-weight:600; color:#e53935;">
+                                                    @if (listGia.Any())
+                                                    {
+                                                        <span>@listGia.Min().ToString("N0") đ</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>Liên hệ</span>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="col-12">
+                                    <p>Không có sản phẩm nào để hiển thị 😢</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </section>
+                <!-- Pagination -->
+                <section id="category-pagination" class="category-pagination section" style="padding: 10px 0 50px 0">
+                    <div class="container">
+                        <nav class="d-flex justify-content-center" aria-label="Page navigation">
+                            @if (Model.SanPhamChiTiets != null && Model.SanPhamChiTiets.PageCount > 1)
+                            {
+                                <ul>
+                                    @for (int i = 1; i <= Model.SanPhamChiTiets.PageCount; i++)
+                                    {
+                                        <li>
+                                            <a href="@Url.Action("Index", new { pageIndex = i })" class="@(i == Model.SanPhamChiTiets.PageIndex ? "active" : "")">@i</a>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                        </nav>
+                    </div>
+                </section>
+            </div>
+
+        </div>
+    </div>
+
+</main>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-color/2.1.2/jquery.color.min.js"></script>
+    
+    <script>
+        $(function () {
+            // Dùng jQuery-color để chuẩn hóa và animate nếu muốn
+            $('.color-circle').each(function () {
+                var color = $(this).data('color');
+                // Nếu màu chưa đúng định dạng hex, convert ở backend trước khi truyền ra
+                $(this).css('background-color', $.Color(color));
+            });
+
+            // Chọn màu khi click
+            $('.color-circle').click(function () {
+                $('.color-circle').removeClass('selected');
+                $(this).addClass('selected');
+                // Gửi filter nếu muốn hoặc lấy $(this).data('id') để lọc
+            });
+
+            
+        });
+
+    </script>
+}
+
+<style>
+    /* Danh mục (Category) */
+    .category-tree {
+        margin-bottom: 28px;
+        padding: 0;
+    }
+
+    .category-item {
+        margin-bottom: 6px;
+    }
+
+    .category-link {
+        display: block;
+        color: #333;
+        font-weight: 500;
+        padding: 8px 10px;
+        border-radius: 10px;
+        transition: background 0.18s, color 0.18s;
+        text-decoration: none;
+    }
+
+        .category-link:hover, .category-link.active {
+            background: #e3edfa;
+            color: #1976d2;
+        }
+
+    /* Giá */
+    .pricing-range-widget {
+        margin-bottom: 28px;
+    }
+
+    .widget-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1766b3;
+        margin-bottom: 14px;
+    }
+
+    .price-range-container {
+        padding-bottom: 10px;
+    }
+
+    .current-range {
+        font-weight: 500;
+        color: #1976d2;
+    }
+
+    .range-slider {
+        margin: 8px 0 12px 0;
+    }
+
+    input[type="range"].min-range,
+    input[type="range"].max-range {
+        width: 100%;
+        margin-top: 2px;
+        accent-color: #1976d2;
+    }
+
+    /* Color Filter */
+    .color-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 8px;
+        margin-bottom: 24px;
+    }
+
+    .color-circle {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 2px solid #e0e0e0;
+        display: inline-block;
+        cursor: pointer;
+        transition: border 0.2s, box-shadow 0.2s;
+        box-shadow: 0 1px 6px 0 rgba(100,100,100,0.07);
+    }
+
+        .color-circle.selected,
+        .color-circle:hover {
+            border: 2.5px solid #1976d2;
+            box-shadow: 0 2px 8px 0 rgba(25,118,210,0.13);
+        }
+
+    /* Brand Filter */
+    .brand-list {
+        margin-bottom: 0;
+    }
+
+    .brand-item {
+        margin-bottom: 7px;
+    }
+
+    .form-check-input[type="checkbox"] {
+        accent-color: #1976d2;
+    }
+
+    .form-check-label {
+        font-size: 1rem;
+        color: #333;
+        margin-left: 5px;
+    }
+</style>
