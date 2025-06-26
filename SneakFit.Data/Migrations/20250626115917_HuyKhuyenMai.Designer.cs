@@ -12,8 +12,8 @@ using SneakFit.Data.EF;
 namespace SneakFit.Data.Migrations
 {
     [DbContext(typeof(SneakFitDbContext))]
-    [Migration("20250608093925_PhanTrang")]
-    partial class PhanTrang
+    [Migration("20250626115917_HuyKhuyenMai")]
+    partial class HuyKhuyenMai
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -246,7 +246,7 @@ namespace SneakFit.Data.Migrations
                         {
                             Id = new Guid("69bd714f-9576-45ba-b5b7-f00649be00de"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "fc9fb97d-2c56-4823-99ca-677268c597b1",
+                            ConcurrencyStamp = "27029a82-b658-4f62-9f82-ca0385761fc6",
                             Email = "tupmph49568@gmail.com",
                             EmailConfirmed = true,
                             GioiTinh = false,
@@ -255,7 +255,7 @@ namespace SneakFit.Data.Migrations
                             NgaySinh = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NormalizedEmail = "tupmph49568@gmail.com",
                             NormalizedUserName = "Admin",
-                            PasswordHash = "AQAAAAIAAYagAAAAEGfheh9Ti2cqAro5nzcAUEm/rDE39z5p0Pz0EeBaqDlH8xezUhvoVQdS55c3KXjYYw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEAMmIj6dcd4yFpBhB00v0dOSpU2sUmdBXHC82ZQsFVdD7V6bWhPtENa9EWEvqpOU/A==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
                             TrangThai = true,
@@ -598,6 +598,9 @@ namespace SneakFit.Data.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<DateTime?>("NgaySuaDoi")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("NgayTao")
                         .HasColumnType("datetime2");
 
@@ -627,6 +630,9 @@ namespace SneakFit.Data.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("KhuyenMaiId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SPCTId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("SanPhamId")

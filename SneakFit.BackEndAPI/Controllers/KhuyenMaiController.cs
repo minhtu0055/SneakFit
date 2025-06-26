@@ -47,6 +47,7 @@ namespace SneakFit.BackEndAPI.Controllers
         [HttpPut("Edit/{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] SuaKhuyenMai request)
         {
+           
             if (!ModelState.IsValid)
                 return BadRequest(new ApiErrorResult<KhuyenMaiViewModels>());
             request.Id = id;

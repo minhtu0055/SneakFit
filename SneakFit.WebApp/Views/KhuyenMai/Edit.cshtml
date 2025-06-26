@@ -12,8 +12,20 @@
     <div class="card mb-4">
         <div class="card-body">
             <div class="col-md-8 mx-auto">
+                @if (ViewBag.ModelErrors != null)
+                {
+                    <div class="alert alert-danger">
+                        <ul>
+                            @foreach (var err in ViewBag.ModelErrors)
+                            {
+                                <li>@err</li>
+                            }
+                        </ul>
+                    </div>
+                }
                 <form asp-action="Edit" method="post" id="edit-form">
                     <input type="hidden" asp-for="Id" />
+                    <div id="hiddenInputsContainer"></div>
                     <div class="mb-3 row">
                         <label asp-for="TenKhuyenMai" class="col-sm-3 col-form-label">Tên khuyến mãi</label>
                         <div class="col-sm-9">
@@ -40,7 +52,7 @@
                         <label asp-for="GiaTriGiamGia" class="col-sm-3 col-form-label">Giá trị giảm</label>
                         <div class="col-sm-9">
                             <div class="input-group">
-                                <input asp-for="GiaTriGiamGia" type="number" min="0" step="1" class="form-control gia-tri-giam-input" placeholder="Nhập giá trị giảm..." />
+                                <input asp-for="GiaTriGiamGia" type="number" min="0" step="0.01" class="form-control gia-tri-giam-input" placeholder="Nhập giá trị giảm..." />
                                 <span class="input-group-text discount-unit">VNĐ</span>
                             </div>
                             <span class="text-danger"></span>
@@ -73,7 +85,7 @@
                             <span class="text-danger"></span>
                         </div>
                     </div>
-                    <input type="hidden" name="SanPhamIds" id="sanPhamChiTietIdsInput" />
+                  @*  <input type="hidden" name="SanPhamIds" id="sanPhamChiTietIdsInput" />*@
 
                     <!-- Phần Chi tiết sản phẩm -->
                     <div class="section-block mb-4" style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
@@ -118,18 +130,25 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/additional-methods.min.js"></script>
 
     <script>
+
+        let allProductDetails = [];
+        let currentPage = 1;
+        const pageSize = 5; // Số sản phẩm chi tiết trên 1 trang, bạn có thể đổi số này
+
         $(document).ready(function () {
             let selectedSpctIds = []; // Mảng lưu các ID sản phẩm chi tiết được chọn
+            let appliedSpctIds = [];  // Mảng lưu các ID SPCT đã áp dụng khuyến mại
+            let spctPrices = {}; // key: spctId, value: giá bán
 
             // KHỞI TẠO DỮ LIỆU SẢN PHẨM ĐÃ CHỌN KHI TẢI TRANG
-            // Lấy dữ liệu sản phẩm chi tiết từ Model được truyền từ Controller
             var initialSelectedProducts = @Html.Raw(Json.Serialize(Model.SelectedProductDetails));
             if (initialSelectedProducts && initialSelectedProducts.length > 0) {
-                renderProductDetailsTable(initialSelectedProducts, true); // Gọi hàm render bảng với dữ liệu ban đầu, tham số true để không reset selectedSpctIds
+                appliedSpctIds = initialSelectedProducts.map(x => x.id); // Lưu lại các SPCT đã áp dụng khuyến mại
+                renderProductDetailsTable(initialSelectedProducts, true);
                 initialSelectedProducts.forEach(function(item) {
-                    selectedSpctIds.push(item.id); // Thêm ID của sản phẩm đã chọn vào mảng
+                    selectedSpctIds.push(item.id);
                 });
-                $('#sanPhamChiTietIdsInput').val(selectedSpctIds.join(',')); // Cập nhật input hidden
+                updateHiddenInputs();
 
                 // Đánh dấu các checkbox sau khi render xong bảng
                 $('.product-checkbox').each(function () {
@@ -154,30 +173,36 @@
             capNhatLoaiGiamGia();
 
             // Xử lý checkbox "Chọn tất cả"
-            $('#checkAllProducts').on('change', function () {
-                $('.product-checkbox').prop('checked', $(this).prop('checked'));
-                selectedSpctIds = []; // Reset mảng khi chọn/bỏ chọn tất cả
-                if ($(this).prop('checked')) {
-                    $('.product-checkbox').each(function () {
-                        selectedSpctIds.push($(this).data('id'));
-                    });
-                }
-                $('#sanPhamChiTietIdsInput').val(selectedSpctIds.join(','));
-            });
+                    $('#checkAllProducts').on('change', function () {
+            if ($(this).prop('checked')) {
+                // Lấy tất cả id của allProductDetails (tất cả các trang)
+                selectedSpctIds = allProductDetails.map(x => x.id);
+            } else {
+                selectedSpctIds = [];
+            }
+            // Render lại bảng để cập nhật trạng thái checkbox trên trang hiện tại
+            renderProductDetailsTable(allProductDetails, currentPage);
+            updateHiddenInputs();
+        });
 
             // Xử lý checkbox từng sản phẩm
-            $('#productDetailList tbody').on('change', '.product-checkbox', function () {
-                let spctId = $(this).data('id');
-                if ($(this).is(':checked')) {
-                    if (!selectedSpctIds.includes(spctId)) {
-                        selectedSpctIds.push(spctId);
-                    }
-                } else {
-                    selectedSpctIds = selectedSpctIds.filter(id => id !== spctId);
-                    $('#checkAllProducts').prop('checked', false); // Bỏ chọn "Chọn tất cả" nếu một sản phẩm bị bỏ chọn
+                          $('#productDetailList tbody').on('change', '.product-checkbox', function () {
+            let spctId = $(this).data('id');
+            if ($(this).is(':checked')) {
+                if (!selectedSpctIds.includes(spctId)) {
+                    selectedSpctIds.push(spctId);
                 }
-                $('#sanPhamChiTietIdsInput').val(selectedSpctIds.join(','));
-            });
+            } else {
+                selectedSpctIds = selectedSpctIds.filter(id => id !== spctId);
+            }
+
+            // Kiểm tra nếu tất cả checkbox của trang hiện tại đều được chọn thì check "Chọn tất cả", ngược lại bỏ check
+            let pageData = allProductDetails.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+            let allChecked = pageData.every(item => selectedSpctIds.includes(item.id));
+            $('#checkAllProducts').prop('checked', allChecked);
+
+            updateHiddenInputs();
+        });
 
             // Validate form
             $("#edit-form").validate({
@@ -185,10 +210,10 @@
                     TenKhuyenMai: { required: true, minlength: 3 },
                     MoTa: { required: true },
                     LoaiGiamGia: { required: true },
-                    GiaTriGiamGia: { required: true, min: 0, number: true },
+                   GiaTriGiamGia: { required: true, min: 0, number: true, maxDiscountPercent: true, maxDiscountAmount: true },
                     ThoiGianBatDau: { required: true },
                     ThoiGianKetThuc: { required: true, greaterThan: "#ThoiGianBatDau" },
-                    SanPhamChiTietIds: { required: true, minlength: 1 }
+                    SanPhamIds: { required: true, minlength: 1 }
                 },
                 messages: {
                     TenKhuyenMai: {
@@ -213,7 +238,7 @@
                         required: "Vui lòng chọn ngày kết thúc.",
                         greaterThan: "Ngày kết thúc phải sau ngày bắt đầu."
                     },
-                    SanPhamChiTietIds: {
+                    SanPhamIds: {
                         required: "Vui lòng chọn ít nhất một sản phẩm áp dụng.",
                         minlength: "Vui lòng chọn ít nhất một sản phẩm áp dụng."
                     }
@@ -222,7 +247,7 @@
                     if (element.parent('.input-group').length) {
                         error.insertAfter(element.parent('.input-group'));
                         error.addClass('d-block mt-1');
-                    } else if (element.attr("name") == "SanPhamChiTietIds") {
+                    } else if (element.attr("name") == "SanPhamIds") {
                         error.insertAfter("#productDetailList");
                         error.addClass('d-block text-danger mt-1');
                     } else {
@@ -244,13 +269,14 @@
 
             // Fetch product details from API
             function fetchProductDetailsByProductName(productName) {
+                appliedSpctIds = []; // Reset khi chọn sản phẩm khác
                 $.ajax({
                     url: '/SanPham/GetSPCTByProductName',
                     type: 'GET',
                     data: { productName: productName },
                     success: function (response) {
                         if (response && response.length > 0) {
-                            renderProductDetailsTable(response, false); // Tham số false để reset selectedSpctIds khi chọn sản phẩm mới
+                            renderProductDetailsTable(response, 1);
                         } else {
                             $('#productDetailList tbody').empty();
                             toastr.warning('Không tìm thấy thông tin chi tiết sản phẩm cho tên này');
@@ -264,32 +290,77 @@
             }
 
             // Render product details table
-            // isInitialLoad: true nếu là lần đầu tiên render khi tải trang, false nếu là do người dùng chọn sản phẩm từ dropdown
-            function renderProductDetailsTable(data, isInitialLoad) {
-                let tbody = $('#productDetailList tbody');
-                tbody.empty();
+                         function renderProductDetailsTable(data, page = 1) {
+                             currentPage = page;
+            let tbody = $('#productDetailList tbody');
+            tbody.empty();
 
-                if (!isInitialLoad) { // Nếu không phải lần tải ban đầu, thì reset selectedSpctIds và checkbox "Chọn tất cả"
-                    selectedSpctIds = [];
-                    $('#checkAllProducts').prop('checked', false);
-                }
+            // Lưu toàn bộ data vào biến toàn cục để dùng cho phân trang
+            allProductDetails = data;
 
-                data.forEach((item, idx) => {
-                    let row = `<tr>
-                        <td><input type="checkbox" class="product-checkbox" data-id="${item.id}" /></td>
-                        <td>${idx + 1}</td>
-                        <td>${item.tenSanPham}</td>
-                        <td>${item.soLuong}</td>
-                        <td>${item.gia ? item.gia.toLocaleString('vi-VN') : 'N/A'} VNĐ</td>
-                        <td>
-                            <span class="badge ${item.trangThai ? 'bg-success' : 'bg-danger'}">
-                                ${item.trangThai ? 'Đang kinh doanh' : 'Ngừng kinh doanh'}
-                            </span>
-                        </td>
-                    </tr>`;
-                    tbody.append(row);
-                });
+            // Tính toán phân trang
+            let start = (page - 1) * pageSize;
+            let end = start + pageSize;
+            let pageData = data.slice(start, end);
+
+            spctPrices = {}; // reset
+            pageData.forEach((item, idx) => {
+                spctPrices[item.id] = item.gia; // Lưu giá bán
+                // Nếu bạn có biến selectedSpctIds để lưu các id đã tick, hãy giữ lại trạng thái tick:
+                let checked = selectedSpctIds && selectedSpctIds.includes(item.id) ? 'checked' : '';
+                let row = `<tr>
+                    <td><input type="checkbox" class="product-checkbox" data-id="${item.id}" ${checked} /></td>
+                    <td>${start + idx + 1}</td>
+                    <td>${item.tenSanPham}</td>
+                    <td>${item.soLuong}</td>
+                    <td>${item.gia ? item.gia.toLocaleString('vi-VN') : 'N/A'} VNĐ</td>
+                    <td>${item.trangThai ? 'Đang kinh doanh' : 'Ngừng kinh doanh'}</td>
+                </tr>`;
+                tbody.append(row);
+            });
+
+                    // Đánh dấu lại các checkbox đã chọn
+        $('.product-checkbox').each(function () {
+            if (selectedSpctIds.includes($(this).data('id'))) {
+                $(this).prop('checked', true);
             }
+        });
+
+        // Kiểm tra nếu tất cả sản phẩm đã chọn thì check "Chọn tất cả", ngược lại bỏ check
+        if ($('.product-checkbox').length > 0 && $('.product-checkbox:checked').length === $('.product-checkbox').length) {
+            $('#checkAllProducts').prop('checked', true);
+        } else {
+            $('#checkAllProducts').prop('checked', false);
+        }
+
+            renderPagination(data.length, page);
+        }
+
+                function renderPagination(totalItems, currentPage) {
+            let totalPages = Math.ceil(totalItems / pageSize);
+            let paginationHtml = '';
+
+            if (totalPages > 1) {
+                paginationHtml += '<nav><ul class="pagination justify-content-center">';
+                for (let i = 1; i <= totalPages; i++) {
+                    paginationHtml += `<li class="page-item${i === currentPage ? ' active' : ''}">
+                        <a class="page-link" href="#" data-page="${i}">${i}</a>
+                    </li>`;
+                }
+                paginationHtml += '</ul></nav>';
+            }
+
+            // XÓA PHÂN TRANG CŨ TRƯỚC KHI THÊM MỚI
+            $('#productDetailList').nextAll('nav').remove();
+            $('#productDetailList').after(paginationHtml);
+
+            // Gắn sự kiện click
+            $('.page-link').off('click').on('click', function (e) {
+                e.preventDefault();
+                let page = parseInt($(this).data('page'));
+                renderProductDetailsTable(allProductDetails, page);
+            });
+        }
 
             // Xử lý khi nhập giá trị giảm
             $(document).on('input', '.gia-tri-giam-input', function () {
@@ -300,6 +371,50 @@
                     value = 0;
                 }
                 $(this).val(value);
+            });
+
+            function updateHiddenInputs() {
+                $('#hiddenInputsContainer').empty();
+                selectedSpctIds.forEach(function(id) {
+                    $('#hiddenInputsContainer').append('<input type="hidden" name="SanPhamIds" value="' + id + '" />');
+                });
+            }
+
+                    // Validate giảm theo phần trăm
+        $.validator.addMethod("maxDiscountPercent", function (value, element) {
+            var loaiGiamGia = $("#LoaiGiamGia").val();
+            if (loaiGiamGia == "@((int)LoaiGiamGia.PhamTram)") {
+                return parseFloat(value) <= 100;
+            }
+            return true;
+        }, "Giá trị giảm theo phần trăm không được vượt quá 100%");
+
+        // Validate giảm theo số tiền
+        $.validator.addMethod("maxDiscountAmount", function (value, element) {
+            var loaiGiamGia = $("#LoaiGiamGia").val();
+            if (loaiGiamGia == "@((int)LoaiGiamGia.SoTien)") {
+                // Lấy các SPCT đã chọn từ các input hidden
+                let ids = [];
+                $("input[name='SanPhamIds']").each(function() {
+                    if ($(this).val()) ids.push($(this).val());
+                });
+                if (ids.length === 0) return true;
+                let minPrice = Math.min(...ids.map(id => spctPrices[id] || Infinity));
+                return parseFloat(value) <= minPrice;
+            }
+            return true;
+        }, "Giá trị giảm không được vượt quá giá bán của sản phẩm áp dụng!");
+
+
+        //Gọi lại validate khi thay đổi
+            $('#GiaTriGiamGia').on('input', function() {
+            $(this).valid();
+            });
+            $("#LoaiGiamGia, #sanPhamSelect, #productDetailList").on('change', function() {
+                $("#GiaTriGiamGia").valid();
+            });
+            $('#productDetailList tbody').on('change', '.product-checkbox', function () {
+                $("#GiaTriGiamGia").valid();
             });
         });
     </script>

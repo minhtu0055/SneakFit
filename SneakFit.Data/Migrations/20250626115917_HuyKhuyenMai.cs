@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SneakFit.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class PhanTrang : Migration
+    public partial class HuyKhuyenMai : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -61,7 +61,8 @@ namespace SneakFit.Data.Migrations
                     ThoiGianKetThuc = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LoaiGiamGia = table.Column<int>(type: "int", nullable: false),
                     GiaTriGiamGia = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    TrangThai = table.Column<int>(type: "int", nullable: false)
+                    TrangThai = table.Column<int>(type: "int", nullable: false),
+                    NgaySuaDoi = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -354,7 +355,8 @@ namespace SneakFit.Data.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     KhuyenMaiId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    SanPhamId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    SanPhamId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SPCTId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -575,7 +577,7 @@ namespace SneakFit.Data.Migrations
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "GioiTinh", "HoVaTen", "LockoutEnabled", "LockoutEnd", "NgaySinh", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TrangThai", "TwoFactorEnabled", "UrlHinhAnh", "UserName" },
-                values: new object[] { new Guid("69bd714f-9576-45ba-b5b7-f00649be00de"), 0, "fc9fb97d-2c56-4823-99ca-677268c597b1", "tupmph49568@gmail.com", true, false, "Phí Minh Tú", false, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "tupmph49568@gmail.com", "Admin", "AQAAAAIAAYagAAAAEGfheh9Ti2cqAro5nzcAUEm/rDE39z5p0Pz0EeBaqDlH8xezUhvoVQdS55c3KXjYYw==", null, false, "", true, false, null, "Admin" });
+                values: new object[] { new Guid("69bd714f-9576-45ba-b5b7-f00649be00de"), 0, "27029a82-b658-4f62-9f82-ca0385761fc6", "tupmph49568@gmail.com", true, false, "Phí Minh Tú", false, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "tupmph49568@gmail.com", "Admin", "AQAAAAIAAYagAAAAEAMmIj6dcd4yFpBhB00v0dOSpU2sUmdBXHC82ZQsFVdD7V6bWhPtENa9EWEvqpOU/A==", null, false, "", true, false, null, "Admin" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_DiaChi_UserId",

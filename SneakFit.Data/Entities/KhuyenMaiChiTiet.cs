@@ -13,5 +13,11 @@ namespace SneakFit.Data.Entities
         public KhuyenMai KhuyenMai { get; set; }
         public Guid SanPhamId { get; set; }
         public SanPham SanPham { get; set; }
+
+        //thêm dong này
+        public Guid SPCTId { get; set; }
+
+        // public Guid SanPhamChiTietId { get; set; } // Thêm dòng này
+        //public SanPhamChiTiet SanPhamChiTiet { get; set; } // Thêm dòng này
     }
 }

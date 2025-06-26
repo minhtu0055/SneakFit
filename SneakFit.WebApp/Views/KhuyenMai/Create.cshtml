@@ -76,7 +76,8 @@
                             <span class="text-danger"></span>
                         </div>
                     </div>
-                    <input type="hidden" name="SanPhamIds" id="sanPhamChiTietIdsInput" />
+                   @* <input type="hidden" name="SanPhamIds" id="sanPhamChiTietIdsInput" />*@
+                    <div id="hiddenInputsContainer"></div>
 
                     <!-- Phần Chi tiết sản phẩm -->
                     <div class="section-block mb-4" style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
@@ -122,8 +123,21 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/additional-methods.min.js"></script>
 
     <script>
+
+        let allProductDetails = [];
+        let currentPage = 1;
+        const pageSize = 5; // Số sản phẩm chi tiết trên 1 trang, bạn có thể đổi số này
         $(document).ready(function () {
             let selectedSpctIds = []; // Mảng mới để lưu các ID của sản phẩm chi tiết được chọn
+            let spctPrices = {}; // key: spctId, value: giá bán
+
+                function updateHiddenInputs() {
+            $('#hiddenInputsContainer').empty();
+            selectedSpctIds.forEach(function(id) {
+                $('#hiddenInputsContainer').append('<input type="hidden" name="SanPhamIds" value="' + id + '" />');
+            });
+        }
+
 
             function capNhatLoaiGiamGia() {
                 var loaiGiamGia = $("#LoaiGiamGia").val();
@@ -134,43 +148,46 @@
             capNhatLoaiGiamGia();
 
             // Xử lý sự kiện khi checkbox "Chọn tất cả" thay đổi
-            $('#checkAllProducts').on('change', function () {
-                $('.product-checkbox').prop('checked', $(this).prop('checked'));
-                selectedSpctIds = []; // Xóa tất cả các ID cũ
-                if ($(this).prop('checked')) {
-                    $('.product-checkbox').each(function () {
-                        selectedSpctIds.push($(this).data('id'));
-                    });
-                }
-                console.log('Sản phẩm chi tiết đã chọn (tất cả):', selectedSpctIds);
-                $('#sanPhamChiTietIdsInput').val(selectedSpctIds.join(',')); // Cập nhật trường ẩn
-            });
+                    $('#checkAllProducts').on('change', function () {
+            if ($(this).prop('checked')) {
+                // Lấy tất cả id của allProductDetails
+                selectedSpctIds = allProductDetails.map(x => x.id);
+            } else {
+                selectedSpctIds = [];
+            }
+            // Render lại bảng để cập nhật trạng thái checkbox trên trang hiện tại
+            renderProductDetailsTable(allProductDetails, currentPage);
+            updateHiddenInputs();
+        });
 
             // Xử lý sự kiện khi checkbox của từng sản phẩm thay đổi
-            $('#productDetailList tbody').on('change', '.product-checkbox', function () {
-                let spctId = $(this).data('id');
-                if ($(this).is(':checked')) {
-                    if (!selectedSpctIds.includes(spctId)) {
-                        selectedSpctIds.push(spctId);
-                    }
-                } else {
-                    selectedSpctIds = selectedSpctIds.filter(id => id !== spctId);
-                    // Nếu có bất kỳ checkbox nào không được chọn, bỏ chọn "Chọn tất cả"
-                    $('#checkAllProducts').prop('checked', false);
+                    $('#productDetailList tbody').on('change', '.product-checkbox', function () {
+            let spctId = $(this).data('id');
+            if ($(this).is(':checked')) {
+                if (!selectedSpctIds.includes(spctId)) {
+                    selectedSpctIds.push(spctId);
                 }
-                console.log('Sản phẩm chi tiết đã chọn (từng cái):', selectedSpctIds);
-                $('#sanPhamChiTietIdsInput').val(selectedSpctIds.join(',')); // Cập nhật trường ẩn
-            });
+            } else {
+                selectedSpctIds = selectedSpctIds.filter(id => id !== spctId);
+            }
+
+            // Kiểm tra nếu tất cả checkbox của trang hiện tại đều được chọn thì check "Chọn tất cả", ngược lại bỏ check
+            let pageData = allProductDetails.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+            let allChecked = pageData.every(item => selectedSpctIds.includes(item.id));
+            $('#checkAllProducts').prop('checked', allChecked);
+
+            updateHiddenInputs();
+        });
 
             $("#create-form").validate({
                 rules: {
                     TenKhuyenMai: { required: true, minlength: 3 },
                     MoTa: { required: true },
                     LoaiGiamGia: { required: true },
-                    GiaTriGiamGia: { required: true, min: 0, number: true },
+                    GiaTriGiamGia: { required: true, min: 0, number: true, maxDiscountPercent: true, maxDiscountAmount: true },
                     ThoiGianBatDau: { required: true },
                     ThoiGianKetThuc: { required: true, greaterThan: "#ThoiGianBatDau" },
-                    SanPhamChiTietIds: { required: true, minlength: 1 } // Đã sửa tên trường
+                    SanPhamIds: { required: true, minlength: 1 } // Đã sửa tên trường
                 },
                 messages: {
                     TenKhuyenMai: {
@@ -195,7 +212,7 @@
                         required: "Vui lòng chọn ngày kết thúc.",
                         greaterThan: "Ngày kết thúc phải sau ngày bắt đầu."
                     },
-                    SanPhamChiTietIds: { // Đã sửa tên trường
+                    SanPhamIds: { // Đã sửa tên trường
                         required: "Vui lòng chọn ít nhất một sản phẩm áp dụng.",
                         minlength: "Vui lòng chọn ít nhất một sản phẩm áp dụng."
                     }
@@ -250,7 +267,7 @@
                     data: { productName: productName }, // Đã sửa tên tham số
                     success: function (response) {
                         if (response && response.length > 0) {
-                            renderProductDetailsTable(response);
+                            renderProductDetailsTable(response, 1);
                         } else {
                             $('#productDetailList tbody').empty();
                             toastr.warning('Không tìm thấy thông tin chi tiết sản phẩm cho tên này');
@@ -264,39 +281,81 @@
             }
 
             // Generate product details row
-            function renderProductDetailsTable(data) {
-                let tbody = $('#productDetailList tbody');
-                tbody.empty();
-                selectedSpctIds = []; // Reset mảng khi bảng được render lại
-                $('#checkAllProducts').prop('checked', false); // Bỏ tích "Chọn tất cả"
+                          function renderProductDetailsTable(data, page = 1) {
+                              currentPage = page;
+            let tbody = $('#productDetailList tbody');
+            tbody.empty();
 
-                data.forEach((item, idx) => {
-                    let row = `<tr>
-                        <td><input type="checkbox" class="product-checkbox" data-id="${item.id}" /></td>
-                        <td>${idx + 1}</td>
-                        <td>${item.tenSanPham}</td>
-                        <td>${item.soLuong}</td>
-                        <td>${item.gia ? item.gia.toLocaleString('vi-VN') : 'N/A'} VNĐ</td>
-                        <td>${item.trangThai ? 'Đang kinh doanh' : 'Ngừng kinh doanh'}</td>
-                    </tr>`;
-                    tbody.append(row);
-                });
+            // Lưu toàn bộ data vào biến toàn cục để dùng cho phân trang
+            allProductDetails = data;
+
+            // Tính toán phân trang
+            let start = (page - 1) * pageSize;
+            let end = start + pageSize;
+            let pageData = data.slice(start, end);
+
+            spctPrices = {}; // reset
+            pageData.forEach((item, idx) => {
+                spctPrices[item.id] = item.gia; // Lưu giá bán
+                // Nếu bạn có biến selectedSpctIds để lưu các id đã tick, hãy giữ lại trạng thái tick:
+                let checked = selectedSpctIds && selectedSpctIds.includes(item.id) ? 'checked' : '';
+                let row = `<tr>
+                    <td><input type="checkbox" class="product-checkbox" data-id="${item.id}" ${checked} /></td>
+                    <td>${start + idx + 1}</td>
+                    <td>${item.tenSanPham}</td>
+                    <td>${item.soLuong}</td>
+                    <td>${item.gia ? item.gia.toLocaleString('vi-VN') : 'N/A'} VNĐ</td>
+                    <td>${item.trangThai ? 'Đang kinh doanh' : 'Ngừng kinh doanh'}</td>
+                </tr>`;
+                tbody.append(row);
+            });
+
+            renderPagination(data.length, page);
+        }
+
+
+                  function renderPagination(totalItems, currentPage) {
+            let totalPages = Math.ceil(totalItems / pageSize);
+            let paginationHtml = '';
+
+            if (totalPages > 1) {
+                paginationHtml += '<nav><ul class="pagination justify-content-center">';
+                for (let i = 1; i <= totalPages; i++) {
+                    paginationHtml += `<li class="page-item${i === currentPage ? ' active' : ''}">
+                        <a class="page-link" href="#" data-page="${i}">${i}</a>
+                    </li>`;
+                }
+                paginationHtml += '</ul></nav>';
             }
 
-            // Format giá tiền khi nhập
-            $(document).on('input', '.price-input', function () {
-                let value = $(this).val().replace(/\D/g, '');
-                if (value) {
-                    value = parseInt(value).toLocaleString('vi-VN');
-                }
-                $(this).val(value);
-            });
-        });
+            // XÓA PHÂN TRANG CŨ TRƯỚC KHI THÊM MỚI
+            $('#productDetailList').nextAll('nav').remove();
+            $('#productDetailList').after(paginationHtml);
 
-        function openAddSanPhamModal() {
-            alert('Chức năng thêm sản phẩm mới sẽ được tích hợp tại đây!');
-            // Thêm logic gọi API hoặc modal sau
+            // Gắn sự kiện click
+            $('.page-link').off('click').on('click', function (e) {
+                e.preventDefault();
+                let page = parseInt($(this).data('page'));
+                renderProductDetailsTable(allProductDetails, page);
+            });
         }
+
+
+
+                // Format giá tiền khi nhập
+                $(document).on('input', '.price-input', function () {
+                    let value = $(this).val().replace(/\D/g, '');
+                    if (value) {
+                        value = parseInt(value).toLocaleString('vi-VN');
+                    }
+                    $(this).val(value);
+                });
+            });
+
+            function openAddSanPhamModal() {
+                alert('Chức năng thêm sản phẩm mới sẽ được tích hợp tại đây!');
+                // Thêm logic gọi API hoặc modal sau
+            }
 
         // Xử lý khi nhập vào trường Giá trị giảm để chỉ cho phép số nguyên dương
         $(document).on('input', '.gia-tri-giam-input', function () {
@@ -310,5 +369,44 @@
             }
             $(this).val(value);
         });
+
+
+                    // Validate giảm theo phần trăm
+        $.validator.addMethod("maxDiscountPercent", function (value, element) {
+            var loaiGiamGia = $("#LoaiGiamGia").val();
+            if (loaiGiamGia == "@((int)LoaiGiamGia.PhamTram)") {
+                return parseFloat(value) <= 100;
+            }
+            return true;
+        }, "Giá trị giảm theo phần trăm không được vượt quá 100%");
+
+        // Validate giảm theo số tiền
+        $.validator.addMethod("maxDiscountAmount", function (value, element) {
+            var loaiGiamGia = $("#LoaiGiamGia").val();
+            if (loaiGiamGia == "@((int)LoaiGiamGia.SoTien)") {
+                // Lấy các SPCT đã chọn từ các input hidden
+                let ids = [];
+                $("input[name='SanPhamIds']").each(function() {
+                    if ($(this).val()) ids.push($(this).val());
+                });
+                if (ids.length === 0) return true;
+                let minPrice = Math.min(...ids.map(id => spctPrices[id] || Infinity));
+                return parseFloat(value) <= minPrice;
+            }
+            return true;
+        }, "Giá trị giảm không được vượt quá giá bán của sản phẩm áp dụng!");
+
+
+        //Gọi lại validate khi thay đổi
+            $('#GiaTriGiamGia').on('input', function() {
+            $(this).valid();
+            });
+            $("#LoaiGiamGia, #sanPhamSelect, #productDetailList").on('change', function() {
+                $("#GiaTriGiamGia").valid();
+            });
+            $('#productDetailList tbody').on('change', '.product-checkbox', function () {
+                $("#GiaTriGiamGia").valid();
+            });
+
     </script>
 }

@@ -99,6 +99,27 @@ namespace SneakFit.Admin.Controllers
             if (result == null)
                 return NotFound();
 
+            // Lấy danh sách các SPCT đã áp dụng khuyến mại (giả sử là các SPCT có SPCTId nằm trong SanPhamIds)
+            var appliedSpctIds = result.SanPhams?.Select(p => p.SPCTId).ToList() ?? new List<Guid>();
+
+            var selectedProductDetails = result.SanPhamChiTiets?
+                .Where(x => appliedSpctIds.Contains(x.SPCTId)) // chỉ lấy các SPCT đã áp dụng khuyến mại
+                .Select(x => new SPCTViewModels
+                {
+                    Id = x.SPCTId,
+                    TenSanPham = result.SanPhams.FirstOrDefault(sp => sp.SanPhamId == x.SanPhamId)?.TenSanPham ?? "",
+                    Gia = x.Gia,
+                    SoLuong = x.SoLuong,
+                    NgayTao = x.NgayTao,
+                    MauSacId = x.MauSacId,
+                    KichThuocId = x.KichThuocId,
+                    ChatLieuId = x.ChatLieuId,
+                    DeGiayId = x.DeGiayId,
+                    ThuongHieuId = x.ThuongHieuId,
+                    SanPhamId = x.SanPhamId,
+                    TrangThai = x.TrangThai
+                }).ToList() ?? new List<SPCTViewModels>();
+
             var request = new SuaKhuyenMai()
             {
                 Id = result.Id,
@@ -109,49 +130,55 @@ namespace SneakFit.Admin.Controllers
                 ThoiGianBatDau = result.ThoiGianBatDau,
                 ThoiGianKetThuc = result.ThoiGianKetThuc,
                 TrangThai = result.TrangThai,
-                // Lấy SanPhamIds từ kết quả API. result.SanPhams có thể là một danh sách các đối tượng, mỗi đối tượng có một SanPhamId.
-                SanPhamIds = result.SanPhams?.Select(p => p.SanPhamId).ToList() ?? new List<Guid>()
+                SanPhamIds = result.SanPhams?.Select(p => p.SPCTId).ToList() ?? new List<Guid>(),
+                SelectedProductDetails = selectedProductDetails
             };
 
-            // KHAI BÁO BIẾN sanPhams Ở ĐÂY ĐỂ CÓ THỂ SỬ DỤNG TRONG TOÀN BỘ PHƯƠNG THỨC
-            var sanPhams = await _sanPhamApiClient.GetAll(); // GỌI API MỘT LẦN để lấy danh sách sản phẩm cha cho dropdown
-
-            List<SPCTViewModels> selectedProductDetails = new List<SPCTViewModels>();
-            if (request.SanPhamIds != null && request.SanPhamIds.Any())
-            {
-                // SỬ DỤNG PHƯƠNG THỨC ĐÃ CÓ SẴN TRONG SERVICE CỦA BẠN ĐỂ LẤY CHI TIẾT SP
-                selectedProductDetails = await _sanPhamApiClient.GetSPCTByListIds(request.SanPhamIds);
-            }
-            request.SelectedProductDetails = selectedProductDetails; // Gán danh sách chi tiết sản phẩm đã chọn vào ViewModel
-
-            // KHẮC PHỤC VẤN ĐỀ COMBOBOX "Tên sản phẩm"
-            // Lấy ID sản phẩm cha của các SPCT đã chọn
-            // Giả định: tất cả SPCT trong khuyến mãi thuộc về cùng một sản phẩm cha
+            var sanPhams = await _sanPhamApiClient.GetAll();
             Guid? selectedParentProductId = null;
             if (request.SelectedProductDetails != null && request.SelectedProductDetails.Any())
             {
                 selectedParentProductId = request.SelectedProductDetails.FirstOrDefault()?.SanPhamId;
             }
-
-            // Cập nhật ViewBag.SanPhams với selectedValue để combobox tự động chọn
             ViewBag.SanPhams = new SelectList(sanPhams, "Id", "TenSanPham", selectedParentProductId);
 
-
-            ViewBag.LoaiGiamGia = new List<SelectListItem>()
-            {
-                new SelectListItem("Giảm theo phần trăm", LoaiGiamGia.PhamTram.ToString("d"), result.LoaiGiamGia == LoaiGiamGia.PhamTram),
-                new SelectListItem("Giảm theo số tiền", LoaiGiamGia.SoTien.ToString("d"), result.LoaiGiamGia == LoaiGiamGia.SoTien)
-            };
+            ViewBag.LoaiGiamGia = new List<SelectListItem>
+    {
+        new SelectListItem("Giảm theo phần trăm", LoaiGiamGia.PhamTram.ToString("d"), result.LoaiGiamGia == LoaiGiamGia.PhamTram),
+        new SelectListItem("Giảm theo số tiền", LoaiGiamGia.SoTien.ToString("d"), result.LoaiGiamGia == LoaiGiamGia.SoTien)
+    };
             return View(request);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Edit(SuaKhuyenMai request)
         {
+            
             if (!ModelState.IsValid)
             {
+                // Thêm dòng này để xem lỗi gì
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                // Có thể log ra console hoặc gán vào ViewBag để hiển thị trên view
+                ViewBag.ModelErrors = errors;
                 var sanPhams = await _sanPhamApiClient.GetAll();
-                ViewBag.SanPhams = new SelectList(sanPhams, "Id", "TenSanPham");
+                if (request.SanPhamIds != null && request.SanPhamIds.Any())
+                {
+                    request.SelectedProductDetails = await _sanPhamApiClient.GetSPCTByListIds(request.SanPhamIds);
+                }
+                else
+                {
+                    request.SelectedProductDetails = new List<SPCTViewModels>();
+                }
+
+                // Lấy sản phẩm cha đã chọn (nếu có)
+                Guid? selectedParentProductId = null;
+                if (request.SelectedProductDetails != null && request.SelectedProductDetails.Any())
+                {
+                    selectedParentProductId = request.SelectedProductDetails.FirstOrDefault()?.SanPhamId;
+                }
+                ViewBag.SanPhams = new SelectList(sanPhams, "Id", "TenSanPham", selectedParentProductId);
+
                 ViewBag.LoaiGiamGia = new List<SelectListItem>
                 {
                     new SelectListItem("Giảm theo phần trăm", LoaiGiamGia.PhamTram.ToString("d"), request.LoaiGiamGia == LoaiGiamGia.PhamTram),
@@ -169,8 +196,24 @@ namespace SneakFit.Admin.Controllers
             catch (Exception ex)
             {
                 ModelState.AddModelError("", ex.Message);
+                ViewBag.ModelErrors = new List<string> { ex.Message };
                 var sanPhams = await _sanPhamApiClient.GetAll();
-                ViewBag.SanPhams = new SelectList(sanPhams, "Id", "TenSanPham");
+                if (request.SanPhamIds != null && request.SanPhamIds.Any())
+                {
+                    request.SelectedProductDetails = await _sanPhamApiClient.GetSPCTByListIds(request.SanPhamIds);
+                }
+                else
+                {
+                    request.SelectedProductDetails = new List<SPCTViewModels>();
+                }
+                // Lấy sản phẩm cha đã chọn (nếu có)
+                Guid? selectedParentProductId = null;
+                if (request.SelectedProductDetails != null && request.SelectedProductDetails.Any())
+                {
+                    selectedParentProductId = request.SelectedProductDetails.FirstOrDefault()?.SanPhamId;
+                }
+                ViewBag.SanPhams = new SelectList(sanPhams, "Id", "TenSanPham", selectedParentProductId);
+
                 ViewBag.LoaiGiamGia = new List<SelectListItem>
                 {
                     new SelectListItem("Giảm theo phần trăm", LoaiGiamGia.PhamTram.ToString("d"), request.LoaiGiamGia == LoaiGiamGia.PhamTram),
