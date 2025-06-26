@@ -8,7 +8,7 @@ namespace SneakFit.BackEndAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class KichThuocController : ControllerBase
     {
         private readonly IKichThuocService _kichThuocService;

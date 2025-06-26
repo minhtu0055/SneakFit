@@ -25,7 +25,7 @@ namespace SneakFit.Application.Catalog.SanPham
             _context = context;
             _httpContextAccessor = httpContextAccessor;
         }
-        
+
         // Lấy danh sách sản phẩm có phân trang
         public async Task<PagedResult<SanPhamViewModels>> GetAllPaging(SanPhamPagingRequest request)
         {
@@ -33,10 +33,20 @@ namespace SneakFit.Application.Catalog.SanPham
                 .Include(x => x.DanhMuc)
                 .Include(x => x.SanPhamChiTiet)
                 .AsQueryable();
+
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 query = query.Where(x => x.TenSanPham.Contains(request.Keyword));
             }
+            if (request.DanhMucId.HasValue)
+            {
+                query = query.Where(x => x.DanhMucId == request.DanhMucId.Value);
+            }
+            if (request.TrangThai.HasValue)
+            {
+                query = query.Where(x => x.TrangThai == request.TrangThai.Value);
+            }
+
             int totalRow = await query.CountAsync();
             var data = await query.Skip((request.PageIndex - 1) * request.PageSize)
                 .Take(request.PageSize)
@@ -50,14 +60,15 @@ namespace SneakFit.Application.Catalog.SanPham
                     TrangThai = x.TrangThai,
                     TongSoSanPham = x.SanPhamChiTiet.Where(spct => spct.TrangThai).Sum(spct => spct.SoLuong)
                 }).ToListAsync();
-            var PageResult = new PagedResult<SanPhamViewModels>()
+
+            var pageResult = new PagedResult<SanPhamViewModels>()
             {
                 TotalRecords = totalRow,
                 PageSize = request.PageSize,
                 PageIndex = request.PageIndex,
-                Items = data,
+                Items = data
             };
-            return PageResult;
+            return pageResult;
         }
 
         // Lấy danh sách tất cả sản phẩm
@@ -179,8 +190,17 @@ namespace SneakFit.Application.Catalog.SanPham
                 var spct = await _context.SanPhamChiTiet.FirstOrDefaultAsync(x => x.ID == update.Id);
                 if (spct != null)
                 {
-                    if (update.SoLuong > 0) spct.SoLuong = update.SoLuong;
+                    // Luôn cập nhật số lượng kể cả = 0
+                    if (update.SoLuong >= 0) spct.SoLuong = update.SoLuong;
+
+                    // Luôn cập nhật giá nếu > 0 
                     if (update.Gia > 0) spct.Gia = update.Gia;
+
+                    // Auto trạng thái theo số lượng
+                    if (update.SoLuong == 0)
+                        spct.TrangThai = false;
+                    else if (update.SoLuong > 0 && !spct.TrangThai)
+                        spct.TrangThai = true;
                 }
             }
             return await _context.SaveChangesAsync() > 0;
@@ -268,9 +288,9 @@ namespace SneakFit.Application.Catalog.SanPham
             spct.DeGiayId = model.DeGiayId;
             spct.KichThuocId = model.KichThuocId;
             spct.MauSacId = model.MauSacId;
-            spct.TrangThai = model.TrangThai;
             spct.SoLuong = model.SoLuong;
             spct.Gia = model.GiaBan;
+            spct.TrangThai = model.SoLuong > 0;
 
             await _context.SaveChangesAsync();
             return true;

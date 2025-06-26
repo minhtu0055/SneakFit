@@ -30,7 +30,15 @@ namespace SneakFit.ApiIntegration.Services
             if (!string.IsNullOrEmpty(sessions))
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
 
-            var response = await client.GetAsync($"/api/SanPham/paging?pageIndex={request.PageIndex}&pageSize={request.PageSize}&tuKhoa={request.Keyword}");
+            var url = $"/api/SanPham/paging?pageIndex={request.PageIndex}&pageSize={request.PageSize}";
+            if (!string.IsNullOrEmpty(request.Keyword))
+                url += $"&keyWord={Uri.EscapeDataString(request.Keyword)}"; // Đảm bảo truyền keyWord
+            if (request.DanhMucId.HasValue)
+                url += $"&danhMucId={request.DanhMucId.Value}";
+            if (request.TrangThai.HasValue)
+                url += $"&trangThai={request.TrangThai.Value}";
+
+            var response = await client.GetAsync(url);
             var body = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)
             {
@@ -153,12 +161,29 @@ namespace SneakFit.ApiIntegration.Services
             return false;
         }
 
+        //public async Task<List<SPCTViewModels>> GetSPCTByProductName(string productName)
+        //{
+        //    var client = _httpClientFactory.CreateClient();
+        //    client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+        //    var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+        //    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+        //    var response = await client.GetAsync($"/api/SanPham/GetSPCTByProductName/{Uri.EscapeDataString(productName)}");
+        //    var body = await response.Content.ReadAsStringAsync();
+        //    if (response.IsSuccessStatusCode)
+        //    {
+        //        var result = JsonConvert.DeserializeObject<List<SPCTViewModels>>(body);
+        //        return result ?? new List<SPCTViewModels>();
+        //    }
+        //    throw new Exception("Không thể lấy danh sách SPCT theo tên sản phẩm");
+        //}
         public async Task<List<SPCTViewModels>> GetSPCTByProductName(string productName)
         {
             var client = _httpClientFactory.CreateClient();
             client.BaseAddress = new Uri(_configuration["BaseAddress"]);
             var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
             var response = await client.GetAsync($"/api/SanPham/GetSPCTByProductName/{Uri.EscapeDataString(productName)}");
             var body = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)
@@ -168,6 +193,7 @@ namespace SneakFit.ApiIntegration.Services
             }
             throw new Exception("Không thể lấy danh sách SPCT theo tên sản phẩm");
         }
+
 
         public async Task<SPCTDetailViewModel> GetSPCTDetail(Guid spctId)
         {

@@ -6,4 +6,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SneakFit.ApiIntegration\SneakFit.ApiIntegration.csproj" />
+    <ProjectReference Include="..\SneakFit.ViewModels\SneakFit.ViewModels.csproj" />
+  </ItemGroup>
+
 </Project>
