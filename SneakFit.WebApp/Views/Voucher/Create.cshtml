@@ -45,11 +45,15 @@
                     </div>
 
                     <div class="mb-3 row">
-                        <label asp-for="GiaTriGiamGia" class="col-sm-3 col-form-label">Giá trị giảm giá <span class="text-danger">*</span></label>
+                        <label asp-for="GiaTriGiamGia" class="col-sm-3 col-form-label">
+                            Giá trị giảm giá <span class="text-danger">*</span>
+                        </label>
                         <div class="col-sm-9">
                             <div class="input-group">
                                 <input asp-for="GiaTriGiamGia" class="form-control" type="number" step="0.01" />
-                                <span class="input-group-text">@(Model?.LoaiGiamGia == LoaiGiamGia.PhamTram ? "%" : "VNĐ")</span>
+                                <span class="input-group-text">
+                                    @(Model?.LoaiGiamGia == LoaiGiamGia.PhamTram ? "%" : "VNĐ")
+                                </span>
                             </div>
                             <span asp-validation-for="GiaTriGiamGia" class="text-danger"></span>
                         </div>
@@ -120,7 +124,9 @@
                                 <table class="table table-bordered">
                                     <thead>
                                         <tr style="background-color: mediumpurple; color: white;">
-                                            <th><input type="checkbox" id="selectAll" /></th>
+                                            <th>
+                                                @* <input type="checkbox" id="selectAll" /> *@
+                                            </th>
                                             <th>Họ và tên</th>
                                             <th>Email</th>
                                             <th>Số điện thoại</th>

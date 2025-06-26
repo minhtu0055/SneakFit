@@ -539,13 +539,13 @@ namespace SneakFit.Application.Catalog.Voucher
 
             // Lấy danh sách userId đã thuộc về voucher (nếu có voucherId)
             List<Guid> existingUserIds = new List<Guid>();
-            if (request.VoucherId != null && request.VoucherId != Guid.Empty)
-            {
-                existingUserIds = await _context.VoucherUser
-                    .Where(vu => vu.VoucherId == request.VoucherId)
-                    .Select(vu => vu.UserId)
-                    .ToListAsync();
-            }
+            //if (request.VoucherId != null && request.VoucherId != Guid.Empty)
+            //{
+            //    existingUserIds = await _context.VoucherUser
+            //        .Where(vu => vu.VoucherId == request.VoucherId)
+            //        .Select(vu => vu.UserId)
+            //        .ToListAsync();
+            //}
 
             // Tính toán tổng số bản ghi
             int totalRow = await query.CountAsync();
