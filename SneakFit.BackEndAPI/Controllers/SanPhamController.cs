@@ -141,5 +141,24 @@ namespace SneakFit.BackEndAPI.Controllers
                 return Ok(new { success = true });
             return BadRequest(new { success = false, message = "Xóa ảnh thất bại" });
         }
+
+        [HttpPost("GetSPCTByListIds")] // ĐÂY LÀ ENDPOINT BẠN CẦN THÊM
+        public async Task<IActionResult> GetSPCTByListIds([FromBody] List<Guid> ids)
+        {
+            if (ids == null || !ids.Any())
+            {
+                return BadRequest("Danh sách ID sản phẩm chi tiết không được trống.");
+            }
+
+            try
+            {
+                var result = await _sanPhamService.GetSPCTByListIds(ids);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }

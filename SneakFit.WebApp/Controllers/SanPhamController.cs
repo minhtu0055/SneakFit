@@ -326,5 +326,19 @@ namespace SneakFit.Admin.Controllers
             return Json(new { success = false, message = "Xóa ảnh thất bại" });
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetSPCTByProductName(string productName)
+        {
+            try
+            {
+                var result = await _sanPhamApiClient.GetSPCTByProductName(productName);
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
     }
 }

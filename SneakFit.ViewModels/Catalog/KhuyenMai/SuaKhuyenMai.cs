@@ -1,4 +1,5 @@
 ﻿using SneakFit.Data.Enums;
+using SneakFit.ViewModels.Catalog.SanPhamChiTiet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,5 +20,7 @@ namespace SneakFit.ViewModels.Catalog.KhuyenMai
         public decimal GiaTriGiamGia { get; set; }
         public TrangThaiGiamGia TrangThai { get; set; }
         public List<Guid> SanPhamIds { get; set; }
+
+        public List<SPCTViewModels> ? SelectedProductDetails { get; set; }
     }
 }

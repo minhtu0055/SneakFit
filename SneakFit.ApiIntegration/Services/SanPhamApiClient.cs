@@ -256,5 +256,33 @@ namespace SneakFit.ApiIntegration.Services
             return response.IsSuccessStatusCode;
         }
 
+        // THÊM TRIỂN KHAI PHƯƠNG THỨC NÀY cho sửa khuyến mại
+        public async Task<List<SPCTViewModels>> GetSPCTByListIds(List<Guid> ids)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var json = JsonConvert.SerializeObject(ids);
+            var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // Gửi yêu cầu POST đến API backend
+            var response = await client.PostAsync($"/api/SanPham/GetSPCTByListIds", httpContent);
+            var body = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonConvert.DeserializeObject<List<SPCTViewModels>>(body);
+                return result ?? new List<SPCTViewModels>();
+            }
+            else
+            {
+                // Xử lý lỗi nếu cuộc gọi API không thành công
+                throw new Exception($"Không thể lấy danh sách SPCT theo ID. Lỗi: {body}");
+            }
+        }
+
     }
 }
