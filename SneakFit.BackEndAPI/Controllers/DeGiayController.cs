@@ -7,7 +7,7 @@ namespace SneakFit.BackEndAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class DeGiayController : ControllerBase
     {
         private readonly IDeGiayService _deGiayService;

@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using SneakFit.ViewModels.Catalog.SanPhamChiTiet;
 using SneakFit.ViewModels.Common;
 using System.Net.Http.Headers;
@@ -21,28 +22,43 @@ namespace SneakFit.ApiIntegration.Services
 
         public async Task<PagedResult<SPCTViewModels>> GetAllPaging(PhanTrangSPCT request)
         {
-            var client = _httpClientFactory.CreateClient();
-            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
-            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
-            if (!string.IsNullOrEmpty(sessions))
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+                var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
 
-            var response = await client.GetAsync($"/api/spct/paging?pageIndex={request.PageIndex}&pageSize={request.PageSize}&tuKhoa={request.TuKhoa}");
-            var body = await response.Content.ReadAsStringAsync();
-            if (response.IsSuccessStatusCode)
-            {
-                var settings = new JsonSerializerSettings
+                var response = await client.GetAsync($"/api/spct/paging?pageIndex={request.PageIndex}" +
+                    $"&pageSize={request.PageSize}" +
+                    $"&tuKhoa={request.TuKhoa}" +
+                    $"&danhMucId={request.DanhMucId}" +
+                    $"&giaThapNhat={request.GiaThapNhat}" +
+                    $"&giaCaoNhat={request.GiaCaoNhat}" +
+                    $"&locTrangThai={request.LocTrangthai}" +
+                    $"&trangThai={request.TrangThai}"
+                );
+                var body = await response.Content.ReadAsStringAsync();
+                if (response.IsSuccessStatusCode)
                 {
-                    NullValueHandling = NullValueHandling.Ignore,
-                    MissingMemberHandling = MissingMemberHandling.Ignore
-                };
-                var apiResult = JsonConvert.DeserializeObject<ApiSuccessResult<PagedResult<SPCTViewModels>>>(body, settings);
-                var pagedResult = apiResult?.ResultObj ?? new PagedResult<SPCTViewModels>();
-                pagedResult.Items = pagedResult.Items ?? new List<SPCTViewModels>();
-                return pagedResult;
+                    var settings = new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore,
+                        MissingMemberHandling = MissingMemberHandling.Ignore
+                    };
+                    var apiResult = JsonConvert.DeserializeObject<ApiSuccessResult<PagedResult<SPCTViewModels>>>(body, settings);
+                    var pagedResult = apiResult?.ResultObj ?? new PagedResult<SPCTViewModels>();
+                    pagedResult.Items = pagedResult.Items ?? new List<SPCTViewModels>();
+                    return pagedResult;
+                }
+                throw new Exception("Không thể lấy danh sách sản phẩm chi tiết phân trang");
             }
-            throw new Exception("Không thể lấy danh sách sản phẩm chi tiết");
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi khi lấy danh sách sản phẩm chi tiết phân trang: {ex.Message}");
+            }
         }
+
 
         public async Task<SPCTViewModels> GetById(Guid id)
         {

@@ -187,17 +187,16 @@ namespace SneakFit.Admin.Controllers
 
         // Hiển thị form chỉnh sửa chi tiết sản phẩm (SPCT)
         [HttpGet]
-        public async Task<IActionResult> EditSPCT(
-            Guid id,
-            string TuKhoa,
-            Guid? ChatLieuId,
-            Guid? ThuongHieuId,
-            Guid? DeGiayId,
-            Guid? KichThuocId,
-            Guid? MauSacId,
-            string TrangThai,
-            int? GiaTu,
-            int? GiaDen)
+        public async Task<IActionResult> EditSPCT(Guid id, 
+                                                  string TuKhoa,
+                                                  Guid? ChatLieuId,
+                                                  Guid? ThuongHieuId,
+                                                  Guid? DeGiayId,
+                                                  Guid? KichThuocId,
+                                                  Guid? MauSacId,
+                                                  string TrangThai,
+                                                  int? GiaTu,
+                                                  int? GiaDen) 
         {
             var sanPham = await _sanPhamApiClient.GetById(id);
             if (sanPham == null) return NotFound();
@@ -217,10 +216,10 @@ namespace SneakFit.Admin.Controllers
             ViewBag.KichThuocs = kichThuocs.ToDictionary(x => x.Id, x => x.MaKichThuoc.ToString());
             ViewBag.MauSacs = mauSacs.ToDictionary(x => x.Id, x => x.TenMauSac);
 
-            // Lấy danh sách SPCT theo tên sản phẩm (giữ lại)
+            // Lấy danh sách SPCT
             var danhSachSPCT = await _sanPhamApiClient.GetSPCTByProductName(sanPham.TenSanPham);
 
-            // --- BẮT ĐẦU: Lọc dữ liệu theo filter ---
+            // Bộ lọc 
             if (!string.IsNullOrEmpty(TuKhoa))
                 danhSachSPCT = danhSachSPCT.Where(x => x.TenSanPham != null && x.TenSanPham.Contains(TuKhoa, StringComparison.OrdinalIgnoreCase)).ToList();
             if (ChatLieuId.HasValue)
@@ -242,7 +241,6 @@ namespace SneakFit.Admin.Controllers
                 danhSachSPCT = danhSachSPCT.Where(x => x.Gia >= GiaTu.Value).ToList();
             if (GiaDen.HasValue)
                 danhSachSPCT = danhSachSPCT.Where(x => x.Gia <= GiaDen.Value).ToList();
-            // --- KẾT THÚC: Lọc dữ liệu theo filter ---
 
             var model = new SuaSPCT
             {

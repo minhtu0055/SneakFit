@@ -190,8 +190,17 @@ namespace SneakFit.Application.Catalog.SanPham
                 var spct = await _context.SanPhamChiTiet.FirstOrDefaultAsync(x => x.ID == update.Id);
                 if (spct != null)
                 {
-                    if (update.SoLuong > 0) spct.SoLuong = update.SoLuong;
+                    // Luôn cập nhật số lượng kể cả = 0
+                    if (update.SoLuong >= 0) spct.SoLuong = update.SoLuong;
+
+                    // Luôn cập nhật giá nếu > 0 
                     if (update.Gia > 0) spct.Gia = update.Gia;
+
+                    // Auto trạng thái theo số lượng
+                    if (update.SoLuong == 0)
+                        spct.TrangThai = false;
+                    else if (update.SoLuong > 0 && !spct.TrangThai)
+                        spct.TrangThai = true;
                 }
             }
             return await _context.SaveChangesAsync() > 0;
@@ -296,9 +305,9 @@ namespace SneakFit.Application.Catalog.SanPham
             spct.DeGiayId = model.DeGiayId;
             spct.KichThuocId = model.KichThuocId;
             spct.MauSacId = model.MauSacId;
-            spct.TrangThai = model.TrangThai;
             spct.SoLuong = model.SoLuong;
             spct.Gia = model.GiaBan;
+            spct.TrangThai = model.SoLuong > 0;
 
             await _context.SaveChangesAsync();
             return true;
