@@ -365,6 +365,60 @@ namespace SneakFit.Admin.Controllers
             return Json(new { success = false, message = $"Upload thất bại: {string.Join("; ", errors)}" });
         }
 
-        
+        // Action để lấy dữ liệu SPCT cho modal bán hàng
+        [HttpGet]
+        public async Task<IActionResult> GetSPCTForModal(string tuKhoa = "", int pageIndex = 1, int pageSize = 10)
+        {
+            try
+            {
+                var request = new PhanTrangSPCT()
+                {
+                    TuKhoa = tuKhoa,
+                    PageIndex = pageIndex,
+                    PageSize = pageSize
+                };
+                
+                var data = await _spctApiClient.GetAllPaging(request);
+                
+                // Load các dữ liệu cần thiết để map tên
+                var mauSacs = await _mauSacApiClient.GetAll();
+                var kichThuocs = await _kichThuocApiClient.GetAll();
+                var sanPhams = await _sanPhamApiClient.GetAll();
+                
+                var mauSacsDict = mauSacs.ToDictionary(x => x.Id, x => x.TenMauSac);
+                var kichThuocsDict = kichThuocs.ToDictionary(x => x.Id, x => x.MaKichThuoc.ToString());
+                var sanPhamsDict = sanPhams.ToDictionary(x => x.Id, x => x.TenSanPham);
+                
+                // Map thêm thông tin tên cho mỗi sản phẩm
+                var result = new
+                {
+                    Items = data.Items.Select(sp => new
+                    {
+                        sp.Id,
+                        sp.SanPhamId,
+                        sp.MauSacId,
+                        sp.KichThuocId,
+                        sp.SoLuong,
+                        sp.Gia,
+                        sp.TrangThai,
+                        TenSanPham = sanPhamsDict.ContainsKey(sp.SanPhamId) ? sanPhamsDict[sp.SanPhamId] : "N/A",
+                        TenMauSac = mauSacsDict.ContainsKey(sp.MauSacId) ? mauSacsDict[sp.MauSacId] : "N/A",
+                        TenKichThuoc = kichThuocsDict.ContainsKey(sp.KichThuocId) ? kichThuocsDict[sp.KichThuocId] : "N/A",
+                        Images = sp.Images ?? new List<string>()
+                    }),
+                    PageIndex = data.PageIndex,
+                    PageSize = data.PageSize,
+                    TotalRecords = data.TotalRecords,
+                    PageCount = data.PageCount
+                };
+                
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi lấy dữ liệu SPCT cho modal");
+                return Json(new { success = false, message = "Có lỗi xảy ra khi tải dữ liệu" });
+            }
+        }
     }
 }
