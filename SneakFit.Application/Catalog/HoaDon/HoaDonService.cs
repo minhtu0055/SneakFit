@@ -29,12 +29,20 @@ namespace SneakFit.Application.Catalog.HoaDon
                 .Include(h => h.User)
                 .Include(h => h.Voucher)
                 .AsQueryable();
-
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 query = query.Where(h => h.HoTen.Contains(request.Keyword) || h.MaGiaoDich.Contains(request.Keyword));
             }
-
+            // Lọc theo trạng thái
+            if (request.Trangthaihoadon.HasValue)
+            {
+                query = query.Where(x => x.TrangThai == request.Trangthaihoadon.Value);
+            }
+            // Lọc theo ngày tạo trong khoảng thời gian từ ngày đến ngày
+            if (request.NgayBatDau.HasValue && request.NgayKetThuc.HasValue)
+            {
+                query = query.Where(h => h.NgayTao >= request.NgayBatDau.Value && h.NgayTao <= request.NgayKetThuc.Value);
+            }
             int totalRow = await query.CountAsync();
             var data = await query
                 .Skip((request.PageIndex - 1) * request.PageSize)
@@ -76,9 +84,7 @@ namespace SneakFit.Application.Catalog.HoaDon
                 .Include(h => h.User)
                 .Include(h => h.Voucher)
                 .FirstOrDefaultAsync(h => h.Id == id);
-
             if (hoaDon == null) return null;
-
             return new HoaDonViewModel
             {
                 Id = hoaDon.Id,
@@ -155,6 +161,18 @@ namespace SneakFit.Application.Catalog.HoaDon
 
             await _context.SaveChangesAsync();
             return await GetById(hoaDon.Id);
+        }
+
+        public async Task<Dictionary<TrangThaiHoaDon, int>> GetCountByStatusAsync()
+        {
+            // Lấy toàn bộ hóa đơn, group by trạng thái, đếm từng loại
+            var counts = await _context.HoaDon
+                .GroupBy(h => h.TrangThai)
+                .Select(g => new { TrangThai = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            // Đưa về Dictionary cho dễ dùng
+            return counts.ToDictionary(x => x.TrangThai, x => x.Count);
         }
     }
 }

@@ -13,7 +13,7 @@ namespace SneakFit.Application.Catalog.HoaDonChiTiet
     public interface IHoaDonChiTietService
     {
         Task<PagedResult<HoaDonChiTietViewModel>> GetAllPaging(PhanTrangHoaDonChiTiet request);
-        Task<HoaDonChiTietViewModel> GetById(Guid id);
+        Task<List<HoaDonChiTietViewModel>> GetById(Guid id);
         Task<HoaDonChiTietViewModel> Create(ThemHoaDonChiTiet request);
         Task<HoaDonChiTietViewModel> Edit(SuaHoaDonChiTiet request);
     }

@@ -54,6 +54,11 @@ namespace SneakFit.BackEndAPI.Controllers
                 return NotFound();
             return Ok(updatedHoaDon);
         }
-
+        [HttpGet("count-by-status")]
+        public async Task<IActionResult> GetCountByStatusAsync()
+        {
+            var result = await _hoaDonService.GetCountByStatusAsync();
+            return Ok(result);
+        }
     }
 }

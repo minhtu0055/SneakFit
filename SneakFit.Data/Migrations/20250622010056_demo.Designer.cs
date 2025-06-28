@@ -12,8 +12,8 @@ using SneakFit.Data.EF;
 namespace SneakFit.Data.Migrations
 {
     [DbContext(typeof(SneakFitDbContext))]
-    [Migration("20250619153500_sssasssss")]
-    partial class sssasssss
+    [Migration("20250622010056_demo")]
+    partial class demo
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -246,7 +246,7 @@ namespace SneakFit.Data.Migrations
                         {
                             Id = new Guid("69bd714f-9576-45ba-b5b7-f00649be00de"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "3d412fd2-44a6-42a0-832d-ba731af27bfc",
+                            ConcurrencyStamp = "36eb9d85-c028-40be-8ed7-d44dd56dabb0",
                             Email = "tupmph49568@gmail.com",
                             EmailConfirmed = true,
                             GioiTinh = false,
@@ -255,7 +255,7 @@ namespace SneakFit.Data.Migrations
                             NgaySinh = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NormalizedEmail = "tupmph49568@gmail.com",
                             NormalizedUserName = "Admin",
-                            PasswordHash = "AQAAAAIAAYagAAAAEKssxIuQ69CS1+oTX+MpC4sJH1pqhsDwIc1xC5SmogV4eO08eTGq2C4uNbPC+tg4+g==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEHlvkgnlIpO224ZS78GnCpRqpdTzwoWGJYChrZGRgqHlN7UCeHs8nDPxINIvsgoC9g==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
                             TrangThai = true,

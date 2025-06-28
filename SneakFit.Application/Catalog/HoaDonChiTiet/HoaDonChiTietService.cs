@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SneakFit.Data.EF;
+using SneakFit.Data.Entities;
 using SneakFit.ViewModels.Catalog.HoaDonChiTiet;
 using SneakFit.ViewModels.Common;
 using System;
@@ -18,7 +19,6 @@ namespace SneakFit.Application.Catalog.HoaDonChiTiet
         {
             _context = context;
         }
-
         public async Task<PagedResult<HoaDonChiTietViewModel>> GetAllPaging(PhanTrangHoaDonChiTiet request)
         {
             var query = _context.HoaDonChiTiet
@@ -41,7 +41,6 @@ namespace SneakFit.Application.Catalog.HoaDonChiTiet
                     SoLuong = x.SoLuong,
                     GiaBan = x.GiaBan
                 }).ToListAsync();
-
             var pagedResult = new PagedResult<HoaDonChiTietViewModel>()
             {
                 TotalRecords = totalRow,
@@ -52,21 +51,21 @@ namespace SneakFit.Application.Catalog.HoaDonChiTiet
             return pagedResult;
         }
 
-        public async Task<HoaDonChiTietViewModel> GetById(Guid id)
+        public async Task<List<HoaDonChiTietViewModel>> GetById(Guid id)
         {
-            var hoaDonChiTiet = await _context.HoaDonChiTiet
+            var chiTiets = await _context.HoaDonChiTiet
+                .Where(x => x.HoaDonId == id)
                 .Include(h => h.HoaDon)
                 .Include(h => h.SanPhamChiTiet)
-                .FirstOrDefaultAsync(x => x.Id == id);
+                .ToListAsync();
 
-            if (hoaDonChiTiet == null) return null;
-
-            return new HoaDonChiTietViewModel()
+            return chiTiets.Select(hoaDonChiTiet => new HoaDonChiTietViewModel()
             {
                 Id = hoaDonChiTiet.Id,
                 SoLuong = hoaDonChiTiet.SoLuong,
                 GiaBan = hoaDonChiTiet.GiaBan
-            };
+                // Thêm các trường khác nếu cần
+            }).ToList();
         }
 
         public async Task<HoaDonChiTietViewModel> Create(ThemHoaDonChiTiet request)
@@ -79,23 +78,29 @@ namespace SneakFit.Application.Catalog.HoaDonChiTiet
                 HoaDonId = request.HoaDonId,
                 SanPhamChiTietId = request.SanPhamChiTietId
             };
-
             _context.HoaDonChiTiet.Add(hoaDonChiTiet);
             await _context.SaveChangesAsync();
-
-            return await GetById(hoaDonChiTiet.Id);
+            return new HoaDonChiTietViewModel
+            {
+                Id = hoaDonChiTiet.Id,
+                SoLuong = hoaDonChiTiet.SoLuong,
+                GiaBan = hoaDonChiTiet.GiaBan,
+            };
         }
 
         public async Task<HoaDonChiTietViewModel> Edit(SuaHoaDonChiTiet request)
         {
             var hoaDonChiTiet = await _context.HoaDonChiTiet.FindAsync(request.Id);
             if (hoaDonChiTiet == null) return null;
-
             hoaDonChiTiet.SoLuong = request.SoLuong;
             hoaDonChiTiet.GiaBan = request.GiaBan;
-
             await _context.SaveChangesAsync();
-            return await GetById(hoaDonChiTiet.Id);
+            return new HoaDonChiTietViewModel
+            {
+                Id = hoaDonChiTiet.Id,
+                SoLuong = hoaDonChiTiet.SoLuong,
+                GiaBan = hoaDonChiTiet.GiaBan,
+            };
         }
     }
 }

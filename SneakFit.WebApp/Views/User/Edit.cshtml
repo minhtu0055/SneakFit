@@ -136,9 +136,6 @@
 	</div>
 </div>
 @section Scripts {
-	@{
-		await Html.RenderPartialAsync("_ValidationScriptsPartial");
-	}
 	<script>
 		var selectedProvince = '@Model.DiaChi?.MaTinh';
 		var selectedDistrict = '@Model.DiaChi?.MaHuyen';

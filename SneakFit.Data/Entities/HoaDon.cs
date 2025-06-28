@@ -20,9 +20,7 @@ namespace SneakFit.Data.Entities
         public string? Email { get; set; }
         public string? HoTen { get; set; }
         public string? GhiChu { get; set; }
-
         public PhuongThucThanhToan PhuongThucThanhToan { get; set; }
-
         public LoaiHoaDon LoaiHoaDon { get; set; }
         public DateTime? NgayThanhToan { get; set; }
         public string? MaGiaoDich { get; set; }
@@ -30,9 +28,9 @@ namespace SneakFit.Data.Entities
         public string? DonViVanChuyen { get; set; }
         public string? MaVanDon { get; set; }
         public TrangThaiThanhToan TrangThaiThanhToan { get; set; }
-
         public Guid? VoucherId { get; set; }
         public Voucher Voucher { get; set; }
         public List<HoaDonChiTiet> HoaDonChiTiet { get; set; }
+        public List<LichSuHoaDon> LichSuHoaDon { get; set; }
     }
 }
