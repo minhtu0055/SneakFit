@@ -223,7 +223,6 @@
 </div>
 
 @section Scripts {
-    @* @{await Html.RenderPartialAsync("_ValidationScriptsPartial");} *@
     <script>
         var existingUserIds = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.ExistingUserIds ?? new List<Guid>()));
         var selectedUserIds = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SelectedUserIds ?? new List<Guid>()));
