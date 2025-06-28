@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SneakFit.Application.Email;
 using SneakFit.Data.EF;
 using SneakFit.Data.Entities;
 using SneakFit.Data.Enums;
@@ -15,9 +16,11 @@ namespace SneakFit.Application.Catalog.Voucher
     public class VoucherService : IVoucherService
     {
         public readonly SneakFitDbContext _context;
-        public VoucherService(SneakFitDbContext context)
+        private readonly IEmailSender _emailSender;
+        public VoucherService(SneakFitDbContext context, IEmailSender emailSender)
         {
             _context = context;
+            _emailSender = emailSender;
         }
 
         // Hàm kiểm tra và cập nhật trạng thái voucher
@@ -33,11 +36,23 @@ namespace SneakFit.Application.Catalog.Voucher
 
         public async Task<VoucherViewModels> Create(CreateVoucher request)
         {
+            //Tự động tạo mã 
+            string newCode = await GetNextVoucherCode();
+
             // Kiểm tra mã voucher trùng lặp
             var existingVoucher = await _context.Voucher.FirstOrDefaultAsync(x => x.MaVoucher == request.MaVoucher);
             if (existingVoucher != null)
             {
                 throw new Exception($"Mã voucher '{request.MaVoucher}' đã tồn tại trong hệ thống.");
+            }
+
+            // Kiểm tra nếu là voucher riêng tư thì phải có người dùng được chọn
+            if (request.LoaiVoucher == LoaiVoucher.RiengTu)
+            {
+                if (request.SelectedUserIds == null || !request.SelectedUserIds.Any())
+                {
+                    throw new Exception("Voucher riêng tư phải có ít nhất một người dùng được chọn.");
+                }
             }
 
             var vc = new SneakFit.Data.Entities.Voucher()
@@ -51,11 +66,72 @@ namespace SneakFit.Application.Catalog.Voucher
                 NgayTao = DateTime.Now,
                 ThoiGianBatDau = request.ThoiGianBatDau,
                 ThoiGianKetThuc = request.ThoiGianKetThuc,
-                TrangThai = GetVoucherStatus(request.ThoiGianBatDau, request.ThoiGianKetThuc)
+                TrangThai = GetVoucherStatus(request.ThoiGianBatDau, request.ThoiGianKetThuc),
+                loaiVoucher = request.LoaiVoucher,
             };
             _context.Voucher.Add(vc);
+
+            // Chỉ xử lý SelectedUserIds nếu là voucher riêng tư
+            if (request.LoaiVoucher == LoaiVoucher.RiengTu && request.SelectedUserIds != null && request.SelectedUserIds.Any())
+            {
+                var voucherUsers = request.SelectedUserIds.Select(userId => new VoucherUser
+                {
+                    Id = Guid.NewGuid(),
+                    VoucherId = vc.Id,
+                    UserId = userId
+                }).ToList();
+
+                _context.VoucherUser.AddRange(voucherUsers);
+
+                // Lấy thông tin người dùng để gửi email
+                var users = await _context.Users
+                    .Where(u => request.SelectedUserIds.Contains(u.Id))
+                    .ToListAsync();
+
+                // Gửi email cho từng người dùng
+                foreach (var user in users)
+                {
+                    var emailBody = $@"
+                        <h2>Xin chào {user.HoVaTen},</h2>
+                        <p>Bạn đã nhận được một voucher mới từ SneakFit:</p>
+                        <ul>
+                            <li><strong>Mã voucher:</strong> {vc.MaVoucher}</li>
+                            <li><strong>Loại giảm giá:</strong> {(vc.LoaiGiamGia == LoaiGiamGia.PhamTram ? "Giảm theo phần trăm" : "Giảm theo số tiền")}</li>
+                            <li><strong>Giá trị giảm giá:</strong> {vc.GiaTriGiamGia}{(vc.LoaiGiamGia == LoaiGiamGia.PhamTram ? "%" : " VNĐ")}</li>
+                            <li><strong>Điều kiện áp dụng:</strong> {vc.DieuKienApDung:N0} VNĐ</li>
+                            <li><strong>Thời gian sử dụng:</strong> từ {vc.ThoiGianBatDau:dd/MM/yyyy HH:mm} đến {vc.ThoiGianKetThuc:dd/MM/yyyy HH:mm}</li>
+                        </ul>
+                        <p>Vui lòng sử dụng mã voucher này khi thanh toán đơn hàng của bạn.</p>
+                        <p>Trân trọng,<br>SneakFit Team</p>";
+
+                    await _emailSender.SendEmailAsync(
+                        user.Email,
+                        $"Voucher mới từ SneakFit - {vc.MaVoucher}",
+                        emailBody
+                    );
+                }
+            }
+
             await _context.SaveChangesAsync();
             return await GetById(vc.Id);
+        }
+
+        public async Task<string> GetNextVoucherCode()
+        {
+            var lastVoucher = await _context.Voucher
+                .OrderByDescending(v => v.NgayTao)
+                .FirstOrDefaultAsync();
+
+            string newCode = "VC001";
+            if (lastVoucher != null && lastVoucher.MaVoucher.StartsWith("VC"))
+            {
+                var numberPart = lastVoucher.MaVoucher.Substring(2);
+                if (int.TryParse(numberPart, out int num))
+                {
+                    newCode = $"VC{(num + 1):D3}";
+                }
+            }
+            return newCode;
         }
 
         public async Task<PagedResult<VoucherViewModels>> GetAllPaging(GetVoucherPagingRequest request)
@@ -89,6 +165,9 @@ namespace SneakFit.Application.Catalog.Voucher
             // Tính toán tổng số bản ghi
             int totalRow = await query.CountAsync();
 
+            // Sắp xếp theo ngày tạo từ mới đến cũ
+            query = query.OrderByDescending(x => x.NgayTao);
+
             // Lấy dữ liệu theo trang
             var data = await query.Skip((request.PageIndex - 1) * request.PageSize)
                 .Take(request.PageSize)
@@ -97,6 +176,7 @@ namespace SneakFit.Application.Catalog.Voucher
                     Id = x.Id,
                     MaVoucher = x.MaVoucher,
                     LoaiGiamGia = x.LoaiGiamGia,
+                    loaiVoucher = x.loaiVoucher,
                     GiaTriGiamGia = x.GiaTriGiamGia,
                     DieuKienApDung = x.DieuKienApDung,
                     SoLuong = x.SoLuong,
@@ -136,6 +216,7 @@ namespace SneakFit.Application.Catalog.Voucher
                 Id = voucher.Id,
                 MaVoucher = voucher.MaVoucher,
                 LoaiGiamGia = voucher.LoaiGiamGia,
+                loaiVoucher = voucher.loaiVoucher,
                 GiaTriGiamGia = voucher.GiaTriGiamGia,
                 DieuKienApDung = voucher.DieuKienApDung,
                 SoLuong = voucher.SoLuong,
@@ -164,6 +245,7 @@ namespace SneakFit.Application.Catalog.Voucher
                 Id = voucher.Id,
                 MaVoucher = voucher.MaVoucher,
                 LoaiGiamGia = voucher.LoaiGiamGia,
+                loaiVoucher = voucher.loaiVoucher,
                 GiaTriGiamGia = voucher.GiaTriGiamGia,
                 DieuKienApDung = voucher.DieuKienApDung,
                 SoLuong = voucher.SoLuong,
@@ -179,27 +261,158 @@ namespace SneakFit.Application.Catalog.Voucher
             var voucher = await _context.Voucher.FindAsync(request.Id);
             if (voucher == null) return null;
 
-            // Kiểm tra mã voucher trùng lặp (trừ voucher hiện tại)
-            var existingVoucher = await _context.Voucher.FirstOrDefaultAsync(x => x.MaVoucher == request.MaVoucher && x.Id != request.Id);
-            if (existingVoucher != null)
+            // Kiểm tra nếu đang cố gắng chuyển từ riêng tư sang công khai
+            if (voucher.loaiVoucher == LoaiVoucher.RiengTu && request.LoaiVoucher == LoaiVoucher.CongKhai)
             {
-                throw new Exception($"Mã voucher '{request.MaVoucher}' đã tồn tại trong hệ thống.");
+                throw new Exception("Không thể chuyển voucher riêng tư sang công khai.");
             }
 
-            voucher.MaVoucher = request.MaVoucher;
+            // Cập nhật thông tin voucher
             voucher.LoaiGiamGia = request.LoaiGiamGia;
             voucher.GiaTriGiamGia = request.GiaTriGiamGia;
             voucher.DieuKienApDung = request.DieuKienApDung;
             voucher.SoLuong = request.SoLuong;
             voucher.ThoiGianBatDau = request.ThoiGianBatDau;
             voucher.ThoiGianKetThuc = request.ThoiGianKetThuc;
-            
-            // Cập nhật trạng thái dựa trên thời gian
+            voucher.loaiVoucher = request.LoaiVoucher;
             voucher.TrangThai = GetVoucherStatus(request.ThoiGianBatDau, request.ThoiGianKetThuc);
 
-            _context.Voucher.Update(voucher);
+            // Xử lý khi chuyển từ voucher công khai sang riêng tư
+            if (voucher.loaiVoucher == LoaiVoucher.RiengTu && request.SelectedUserIds != null && request.SelectedUserIds.Any())
+            {
+                // Lấy danh sách khách hàng hiện tại của voucher
+                var existingVoucherUsers = await _context.VoucherUser
+                    .Where(vu => vu.VoucherId == voucher.Id)
+                    .Select(vu => vu.UserId)
+                    .ToListAsync();
+
+                // Xác định khách hàng mới và khách hàng cũ
+                var newUserIds = request.SelectedUserIds.Except(existingVoucherUsers).ToList();
+                var removedUserIds = existingVoucherUsers.Except(request.SelectedUserIds).ToList();
+
+                // Thêm khách hàng mới
+                foreach (var userId in newUserIds)
+                {
+                    var voucherUser = new VoucherUser
+                    {
+                        VoucherId = voucher.Id,
+                        UserId = userId
+                    };
+                    _context.VoucherUser.Add(voucherUser);
+
+                    // Gửi email thông báo cho khách hàng mới
+                    var user = await _context.Users.FindAsync(userId);
+                    if (user != null)
+                    {
+                        var emailBody = $@"
+                            <h2>Xin chào {user.HoVaTen},</h2>
+                            <p>Bạn đã nhận được một voucher mới từ SneakFit:</p>
+                            <ul>
+                                <li><strong>Mã voucher:</strong> {voucher.MaVoucher}</li>
+                                <li><strong>Loại giảm giá:</strong> {(voucher.LoaiGiamGia == LoaiGiamGia.PhamTram ? "Giảm theo phần trăm" : "Giảm theo số tiền")}</li>
+                                <li><strong>Giá trị giảm giá:</strong> {voucher.GiaTriGiamGia}{(voucher.LoaiGiamGia == LoaiGiamGia.PhamTram ? "%" : " VNĐ")}</li>
+                                <li><strong>Điều kiện áp dụng:</strong> {voucher.DieuKienApDung:N0} VNĐ</li>
+                                <li><strong>Thời gian sử dụng:</strong> từ {voucher.ThoiGianBatDau:dd/MM/yyyy HH:mm} đến {voucher.ThoiGianKetThuc:dd/MM/yyyy HH:mm}</li>
+                            </ul>
+                            <p>Vui lòng sử dụng mã voucher này khi thanh toán đơn hàng của bạn.</p>
+                            <p>Trân trọng,<br>SneakFit Team</p>";
+
+                        await _emailSender.SendEmailAsync(
+                            user.Email,
+                            $"Voucher mới từ SneakFit - {voucher.MaVoucher}",
+                            emailBody
+                        );
+                    }
+                }
+
+                //// Xóa khách hàng bị loại bỏ
+                //foreach (var userId in removedUserIds)
+                //{
+                //    var voucherUser = await _context.VoucherUser
+                //        .FirstOrDefaultAsync(vu => vu.VoucherId == voucher.Id && vu.UserId == userId);
+                //    if (voucherUser != null)
+                //    {
+                //        _context.VoucherUser.Remove(voucherUser);
+                //    }
+                //}
+
+                // Gửi email thông báo cập nhật cho khách hàng cũ
+                var existingUsers = await _context.Users
+                    .Where(u => existingVoucherUsers.Contains(u.Id))
+                    .ToListAsync();
+
+                foreach (var user in existingUsers)
+                {
+                    var emailBody = $@"
+                        <h2>Xin chào {user.HoVaTen},</h2>
+                        <p>Voucher của bạn đã được cập nhật với thông tin mới:</p>
+                        <ul>
+                            <li><strong>Mã voucher:</strong> {voucher.MaVoucher}</li>
+                            <li><strong>Loại giảm giá:</strong> {(voucher.LoaiGiamGia == LoaiGiamGia.PhamTram ? "Giảm theo phần trăm" : "Giảm theo số tiền")}</li>
+                            <li><strong>Giá trị giảm giá:</strong> {voucher.GiaTriGiamGia}{(voucher.LoaiGiamGia == LoaiGiamGia.PhamTram ? "%" : " VNĐ")}</li>
+                            <li><strong>Điều kiện áp dụng:</strong> {voucher.DieuKienApDung:N0} VNĐ</li>
+                            <li><strong>Thời gian sử dụng:</strong> từ {voucher.ThoiGianBatDau:dd/MM/yyyy HH:mm} đến {voucher.ThoiGianKetThuc:dd/MM/yyyy HH:mm}</li>
+                        </ul>
+                        <p>Vui lòng kiểm tra thông tin mới của voucher trước khi sử dụng.</p>
+                        <p>Trân trọng,<br>SneakFit Team</p>";
+
+                    await _emailSender.SendEmailAsync(
+                        user.Email,
+                        $"Cập nhật voucher SneakFit - {voucher.MaVoucher}",
+                        emailBody
+                    );
+                }
+            }
+            // Xử lý khi là voucher riêng tư và có thay đổi thông tin
+            else if (voucher.loaiVoucher == LoaiVoucher.RiengTu)
+            {
+                // Lấy danh sách khách hàng được gán voucher này
+                var voucherUsers = await _context.VoucherUser
+                    .Where(vu => vu.VoucherId == voucher.Id)
+                    .Include(vu => vu.User)
+                    .ToListAsync();
+
+                // Gửi email cho từng khách hàng
+                foreach (var voucherUser in voucherUsers)
+                {
+                    var user = voucherUser.User;
+                    var emailBody = $@"
+                        <h2>Xin chào {user.HoVaTen},</h2>
+                        <p>Voucher của bạn đã được cập nhật với thông tin mới:</p>
+                        <ul>
+                            <li><strong>Mã voucher:</strong> {voucher.MaVoucher}</li>
+                            <li><strong>Loại giảm giá:</strong> {(voucher.LoaiGiamGia == LoaiGiamGia.PhamTram ? "Giảm theo phần trăm" : "Giảm theo số tiền")}</li>
+                            <li><strong>Giá trị giảm giá:</strong> {voucher.GiaTriGiamGia}{(voucher.LoaiGiamGia == LoaiGiamGia.PhamTram ? "%" : " VNĐ")}</li>
+                            <li><strong>Điều kiện áp dụng:</strong> {voucher.DieuKienApDung:N0} VNĐ</li>
+                            <li><strong>Thời gian sử dụng:</strong> từ {voucher.ThoiGianBatDau:dd/MM/yyyy HH:mm} đến {voucher.ThoiGianKetThuc:dd/MM/yyyy HH:mm}</li>
+                        </ul>
+                        <p>Vui lòng kiểm tra thông tin mới của voucher trước khi sử dụng.</p>
+                        <p>Trân trọng,<br>SneakFit Team</p>";
+
+                    await _emailSender.SendEmailAsync(
+                        user.Email,
+                        $"Cập nhật voucher SneakFit - {voucher.MaVoucher}",
+                        emailBody
+                    );
+                }
+            }
+
             await _context.SaveChangesAsync();
-            return await GetById(voucher.Id);
+
+            return new VoucherViewModels()
+            {
+                Id = voucher.Id,
+                MaVoucher = voucher.MaVoucher,
+                LoaiGiamGia = voucher.LoaiGiamGia,
+                loaiVoucher = voucher.loaiVoucher,
+                GiaTriGiamGia = voucher.GiaTriGiamGia,
+                DieuKienApDung = voucher.DieuKienApDung,
+                SoLuong = voucher.SoLuong,
+                NgayTao = voucher.NgayTao,
+                ThoiGianBatDau = voucher.ThoiGianBatDau,
+                ThoiGianKetThuc = voucher.ThoiGianKetThuc,
+                TrangThai = voucher.TrangThai
+            };
         }
 
         public async Task<bool> UpdateTrangThai(Guid Id, TrangThaiGiamGia status)
@@ -216,12 +429,24 @@ namespace SneakFit.Application.Catalog.Voucher
             return false;
         }
 
-        public async Task<bool> UseVoucher(string code)
+        public async Task<bool> UseVoucher(string code, Guid userId)
         {
             var voucher = await _context.Voucher.FirstOrDefaultAsync(x => x.MaVoucher == code);
             if (voucher == null) return false;
 
-            // Cập nhật trạng thái trước khi kiểm tra
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null || user.TrangThai == false) return false; // Không hoạt động hoặc không tồn tại
+
+            // Nếu là voucher riêng tư → kiểm tra xem user có được gán không
+            if (voucher.loaiVoucher == LoaiVoucher.RiengTu)
+            {
+                var isAssigned = await _context.VoucherUser
+                    .AnyAsync(vu => vu.VoucherId == voucher.Id && vu.UserId == userId);
+
+                if (!isAssigned) return false; // Không có quyền sử dụng
+            }
+
+            // Cập nhật trạng thái voucher trước khi kiểm tra
             var newStatus = GetVoucherStatus(voucher.ThoiGianBatDau, voucher.ThoiGianKetThuc);
             if (voucher.TrangThai != newStatus)
             {
@@ -235,14 +460,131 @@ namespace SneakFit.Application.Catalog.Voucher
                 return false;
             }
 
+            // ✅ Giảm số lượng
             voucher.SoLuong--;
-            // Nếu hết số lượng thì cập nhật trạng thái
+
+            // ✅ Nếu hết số lượng thì cập nhật trạng thái
             if (voucher.SoLuong == 0)
             {
                 voucher.TrangThai = TrangThaiGiamGia.HetHan;
             }
+
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<List<VoucherUserViewModel>> GetUsersForVoucher(Guid? voucherId = null)
+        {
+            var query = _context.Users
+                .Where(u => u.TrangThai == true) // Chỉ lấy những khách hàng đang hoạt động
+                .Join(_context.UserRoles,
+                    user => user.Id,
+                    userRole => userRole.UserId,
+                    (user, userRole) => new { user, userRole })
+                .Join(_context.Roles,
+                    ur => ur.userRole.RoleId,
+                    role => role.Id,
+                    (ur, role) => new { ur.user, role })
+                .Where(x => x.role.Name.ToUpper() == "KHÁCH HÀNG"); // Chỉ lấy user có role là khách hàng
+
+            // Nếu có voucherId, lọc theo khách hàng của voucher đó
+            if (voucherId.HasValue)
+            {
+                var voucherUserIds = await _context.VoucherUser
+                    .Where(vu => vu.VoucherId == voucherId.Value)
+                    .Select(vu => vu.UserId)
+                    .ToListAsync();
+
+                query = query.Where(x =>
+                voucherUserIds.Contains(x.user.Id) &&
+                x.user.TrangThai == true); // ⚠️ Thêm điều kiện này lại
+            }
+
+            var users = await query
+                .Select(x => new VoucherUserViewModel
+                {
+                    Id = x.user.Id,
+                    UserName = x.user.UserName,
+                    HoVaTen = x.user.HoVaTen,
+                    Email = x.user.Email,
+                    SoDienThoai = x.user.PhoneNumber,
+                    TrangThai = x.user.TrangThai
+                })
+                .ToListAsync();
+
+            return users;
+        }
+
+        public async Task<PagedResult<VoucherUserViewModel>> GetUsersForVoucherPaging(GetVoucherUserPagingRequest request)
+        {
+            var query = _context.Users
+                .Where(u => u.TrangThai == true)
+                .Join(_context.UserRoles,
+                    user => user.Id,
+                    userRole => userRole.UserId,
+                    (user, userRole) => new { user, userRole })
+                .Join(_context.Roles,
+                    ur => ur.userRole.RoleId,
+                    role => role.Id,
+                    (ur, role) => new { ur.user, role })
+                .Where(x => x.role.Name.ToUpper() == "KHÁCH HÀNG" && x.user.TrangThai == true);
+
+            // Lọc theo từ khóa nếu có
+            if (!string.IsNullOrEmpty(request.Keyword))
+            {
+                query = query.Where(x => x.user.HoVaTen.Contains(request.Keyword) || 
+                                       x.user.Email.Contains(request.Keyword) || 
+                                       x.user.PhoneNumber.Contains(request.Keyword));
+            }
+
+            // Lấy danh sách userId đã thuộc về voucher (nếu có voucherId)
+            List<Guid> existingUserIds = new List<Guid>();
+            //if (request.VoucherId != null && request.VoucherId != Guid.Empty)
+            //{
+            //    existingUserIds = await _context.VoucherUser
+            //        .Where(vu => vu.VoucherId == request.VoucherId)
+            //        .Select(vu => vu.UserId)
+            //        .ToListAsync();
+            //}
+
+            // Tính toán tổng số bản ghi
+            int totalRow = await query.CountAsync();
+
+            // Lấy dữ liệu theo trang
+            var data = await query
+                .Skip((request.PageIndex - 1) * request.PageSize)
+                .Take(request.PageSize)
+                .Select(x => new VoucherUserViewModel
+                {
+                    Id = x.user.Id,
+                    UserName = x.user.UserName,
+                    HoVaTen = x.user.HoVaTen,
+                    Email = x.user.Email,
+                    SoDienThoai = x.user.PhoneNumber,
+                    TrangThai = x.user.TrangThai,
+                    IsExistingUser = false // tạm, sẽ cập nhật bên dưới
+                })
+                .ToListAsync();
+
+            // Cập nhật IsExistingUser cho từng user
+            foreach (var user in data)
+            {
+                if (existingUserIds.Contains(user.Id))
+                {
+                    user.IsExistingUser = true;
+                }
+            }
+
+            // Tạo đối tượng phân trang
+            var pagedResult = new PagedResult<VoucherUserViewModel>()
+            {
+                TotalRecords = totalRow,
+                PageIndex = request.PageIndex,
+                PageSize = request.PageSize,
+                Items = data
+            };
+
+            return pagedResult;
         }
     }
 }

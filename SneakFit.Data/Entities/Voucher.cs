@@ -18,7 +18,9 @@ namespace SneakFit.Data.Entities
         public DateTime NgayTao { get; set; }
         public DateTime ThoiGianBatDau { get; set; }
         public DateTime ThoiGianKetThuc { get; set; }
+        public LoaiVoucher loaiVoucher { get; set; }
         public TrangThaiGiamGia TrangThai { get; set; }
+        public List<VoucherUser> VoucherUsers { get; set; }
         public List<HoaDon> HoaDon { get; set; }
     }
 }

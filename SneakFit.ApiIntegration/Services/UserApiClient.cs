@@ -107,8 +107,12 @@ namespace SneakFit.ApiIntegration.Services
 
             client.BaseAddress = new Uri(_configuration["BaseAddress"]);
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
-            var response = await client.GetAsync($"/api/user/paging?pageIndex=" +
-                $"{request.PageIndex}&pageSize={request.PageSize}&tukhoa={request.TuKhoa}&role={request.Role}");
+            var url = $"/api/user/paging?pageIndex={request.PageIndex}&pageSize={request.PageSize}&role={request.Role}";
+            if (string.IsNullOrEmpty(request.TuKhoa))
+            {
+                url += $"&tukhoa ={ request.TuKhoa}";
+            }
+            var response = await client.GetAsync(url);
             var body = await response.Content.ReadAsStringAsync();
             var users = JsonConvert.DeserializeObject<ApiSuccessResult<PagedResult<UserViewModels>>>(body);
             return users;

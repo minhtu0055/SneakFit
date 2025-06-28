@@ -33,14 +33,18 @@ namespace SneakFit.ApiIntegration.Services
                 var json = JsonConvert.SerializeObject(request);
                 var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var response = await client.PostAsync("/api/voucher/create", httpContent);
+                var response = await client.PostAsync("api/voucher", httpContent);
                 var result = await response.Content.ReadAsStringAsync();
                 if (response.IsSuccessStatusCode)
                 {
                     var apiResult = JsonConvert.DeserializeObject<ApiSuccessResult<VoucherViewModels>>(result);
                     return apiResult.ResultObj;
                 }
-                throw new Exception("Không thể tạo voucher!");
+                else
+                {
+                    var apiErrorResult = JsonConvert.DeserializeObject<ApiErrorResult<VoucherViewModels>>(result);
+                    throw new Exception(apiErrorResult?.Message ?? "Không thể tạo voucher! Lỗi không xác định từ API.");
+                }
             }
             catch (Exception ex)
             {
@@ -199,7 +203,7 @@ namespace SneakFit.ApiIntegration.Services
             }
         }
 
-        public async Task<bool> UseVoucher(string code)
+        public async Task<bool> UseVoucher(string code, Guid userId)
         {
             try
             {
@@ -222,6 +226,94 @@ namespace SneakFit.ApiIntegration.Services
             catch (Exception ex)
             {
                 throw new Exception($"Lỗi khi sử dụng voucher: {ex.Message}");
+            }
+        }
+
+        public async Task<List<VoucherUserViewModel>> GetUsersForVoucher(Guid? voucherId = null)
+        {
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+                var sessions = _contextAccessor.HttpContext.Session.GetString("Token");
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+                var url = "/api/voucher/users";
+                if (voucherId.HasValue)
+                {
+                    url += $"?voucherId={voucherId.Value}";
+                }
+
+                var response = await client.GetAsync(url);
+                var body = await response.Content.ReadAsStringAsync();
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = JsonConvert.DeserializeObject<ApiSuccessResult<List<VoucherUserViewModel>>>(body);
+                    return result?.ResultObj ?? new List<VoucherUserViewModel>();
+                }
+
+                // Nếu response không thành công, vẫn trả về danh sách rỗng để tránh lỗi 500
+                return new List<VoucherUserViewModel>();
+            }
+            catch (Exception ex)
+            {
+                // Ghi log nếu cần, nhưng KHÔNG ném lỗi
+                Console.WriteLine($"Lỗi khi lấy danh sách khách hàng: {ex.Message}");
+                return new List<VoucherUserViewModel>();
+            }
+        }
+
+        public async Task<PagedResult<VoucherUserViewModel>> GetUsersForVoucherPaging(GetVoucherUserPagingRequest request)
+        {
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+                var sessions = _contextAccessor.HttpContext.Session.GetString("Token");
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+                var response = await client.GetAsync($"/api/voucher/users/paging?pageIndex={request.PageIndex}" +
+                    $"&pageSize={request.PageSize}" +
+                    $"&keyword={request.Keyword}");
+                var body = await response.Content.ReadAsStringAsync();
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = JsonConvert.DeserializeObject<ApiSuccessResult<PagedResult<VoucherUserViewModel>>>(body);
+                    return result.ResultObj;
+                }
+                throw new Exception("Không thể lấy danh sách khách hàng");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi khi lấy danh sách khách hàng: {ex.Message}");
+            }
+        }
+
+        public async Task<string> GetNextVoucherCode()
+        {
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+                var sessions = _contextAccessor.HttpContext.Session.GetString("Token");
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+                var response = await client.GetAsync("api/voucher/getnextcode");
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadAsStringAsync();
+                }
+                else
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    var apiErrorResult = JsonConvert.DeserializeObject<ApiErrorResult<string>>(errorContent);
+                    throw new Exception(apiErrorResult?.Message ?? "Không thể lấy mã voucher! Lỗi không xác định từ API.");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi khi lấy mã voucher tiếp theo: {ex.Message}");
             }
         }
     }

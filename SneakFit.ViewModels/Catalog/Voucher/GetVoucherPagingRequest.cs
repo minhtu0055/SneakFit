@@ -12,5 +12,8 @@ namespace SneakFit.ViewModels.Catalog.Voucher
     {
         public string? Keyword { get; set; }
         public TrangThaiGiamGia? Status { get; set; }
+
+        public string? SortBy { get; set; }  // VD: "NgayTao"
+        public bool IsDescending { get; set; } = true;
     }
 }
