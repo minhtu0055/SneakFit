@@ -14,7 +14,7 @@ namespace SneakFit.Data.Configuration
         public void Configure(EntityTypeBuilder<DanhMuc> builder)
         {
             builder.HasKey(dm => dm.Id);
-            builder.Property(dm => dm.TenDanhMuc).IsRequired().HasMaxLength(50);
+            builder.Property(dm => dm.TenDanhMuc).HasMaxLength(50);
         }
     }
 }

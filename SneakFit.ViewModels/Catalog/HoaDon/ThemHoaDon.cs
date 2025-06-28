@@ -25,6 +25,6 @@ namespace SneakFit.ViewModels.Catalog.HoaDon
         public string DonViVanChuyen { get; set; }
         public string MaVanDon { get; set; }
         public TrangThaiThanhToan TrangThaiThanhToan { get; set; }
-        public Guid VoucherID { get; set; }
+        public Guid? VoucherId { get; set; }
     }
 }

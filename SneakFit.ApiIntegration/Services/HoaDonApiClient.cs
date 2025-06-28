@@ -28,7 +28,8 @@ namespace SneakFit.ApiIntegration.Services
             if (!string.IsNullOrEmpty(sessions))
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
 
-            var response = await client.GetAsync($"/api/HoaDon?pageIndex={request.PageIndex}&pageSize={request.PageSize}&keyword={request.Keyword}");
+            var response = await client.GetAsync($"/api/HoaDon?pageIndex={request.PageIndex}&pageSize={request.PageSize}&keyword={request.Keyword}&trangthaihoadon={request.Trangthaihoadon}&ngayBatDau={request.NgayBatDau:yyyy-MM-dd}&ngayKetThuc={request.NgayKetThuc:yyyy-MM-dd}");
+
             var body = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)
             {
@@ -112,6 +113,28 @@ namespace SneakFit.ApiIntegration.Services
             }
 
             throw new Exception($"Không thể cập nhật trạng thái hóa đơn. Error: {result}");
+        }
+        public async Task<Dictionary<string, int>> GetCountByStatusAsync()
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var response = await client.GetAsync("/api/hoadon/count-by-status"); // Đảm bảo API của bạn trả về số lượng theo từng trạng thái
+            var body = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonConvert.DeserializeObject<Dictionary<string, int>>(body);
+                return result; // Trả về một dictionary với key là tên trạng thái, value là số lượng
+            }
+            else
+            {
+                throw new Exception($"Không thể lấy dữ liệu số lượng theo trạng thái: {body}");
+            }
         }
     }
 }
