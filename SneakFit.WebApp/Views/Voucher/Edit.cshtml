@@ -1,7 +1,10 @@
 ﻿@using SneakFit.ViewModels.Catalog.Voucher
 @using SneakFit.Data.Enums
+@using SneakFit.ViewModels.Common
+@using SneakFit.ViewModels.System.User
 @model UpdateVoucher
 @{
+    var khachHangs = ViewBag.KhachHangs as PagedResult<UserViewModels>;
     Layout = "~/Views/Shared/_Layout.cshtml";
     ViewData["Title"] = "Cập nhật Voucher";
 }
@@ -18,14 +21,16 @@
             <div class="col-md-8 mx-auto">
                 <form asp-action="Edit" method="post" id="edit-form" class="needs-validation" novalidate>
                     <input type="hidden" asp-for="Id" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                     <div class="mb-3 row">
                         <label asp-for="MaVoucher" class="col-sm-3 col-form-label">Mã voucher <span class="text-danger">*</span></label>
                         <div class="col-sm-9">
-                            <input asp-for="MaVoucher" class="form-control" placeholder="Nhập mã voucher..." />
-                            <div class="invalid-feedback">
-                                Vui lòng nhập mã voucher (3-20 ký tự, chỉ bao gồm chữ in hoa và số)
-                            </div>
+                            <input asp-for="MaVoucher" class="form-control"
+                                   value="@Model.MaVoucher"
+                                   placeholder="Mã sẽ là @Model.MaVoucher"
+                                   readonly />
+                            <span asp-validation-for="MaVoucher" class="text-danger"></span>
                         </div>
                     </div>
 
@@ -86,7 +91,7 @@
                             <div class="input-group has-validation">
                                 <input asp-for="ThoiGianBatDau" type="datetime-local" class="form-control" />
                                 <div class="invalid-feedback">
-                                    Vui lòng chọn thời gian bắt đầu hợp lệ
+                                    Vui lòng chọn thời gian bắt đầu
                                 </div>
                             </div>
                         </div>
@@ -95,19 +100,116 @@
                     <div class="mb-3 row">
                         <label asp-for="ThoiGianKetThuc" class="col-sm-3 col-form-label">Thời gian kết thúc <span class="text-danger">*</span></label>
                         <div class="col-sm-9">
-                            <div class="input-group has-validation">
-                                <input asp-for="ThoiGianKetThuc" type="datetime-local" class="form-control" />
-                                <div class="invalid-feedback">
-                                    Vui lòng chọn thời gian kết thúc hợp lệ
-                                </div>
+                            <input asp-for="ThoiGianKetThuc" type="datetime-local" class="form-control" />
+                            <div class="invalid-feedback">
+                                Vui lòng chọn thời gian kết thúc
                             </div>
                         </div>
                     </div>
 
                     <div class="mb-3 row">
-                        <div class="col-sm-9 offset-sm-8">
-                            <button type="submit" class="btn btn-primary me-4">
-                                <i class="bx bx-save me-1"></i> Cập nhật
+                        <label asp-for="LoaiVoucher" class="col-sm-3 col-form-label">Loại voucher <span class="text-danger">*</span></label>
+                        <div class="col-sm-9">
+                            <select asp-for="LoaiVoucher" class="form-select" onchange="toggleUserSelection()">
+                                @if (Model.LoaiVoucher == LoaiVoucher.RiengTu)
+                                {
+                                    <option value="@((int)LoaiVoucher.RiengTu)" selected>Riêng tư</option>
+                                    <option value="@((int)LoaiVoucher.CongKhai)" disabled>Công khai</option>
+                                }
+                                else
+                                {
+                                    <option value="@((int)LoaiVoucher.CongKhai)" selected>Công khai</option>
+                                    <option value="@((int)LoaiVoucher.RiengTu)">Riêng tư</option>
+                                }
+                            </select>
+                            <span asp-validation-for="LoaiVoucher" class="text-danger"></span>
+                            @if (Model.LoaiVoucher == LoaiVoucher.RiengTu)
+                            {
+                                <small class="text-muted">Không thể chuyển voucher riêng tư sang công khai</small>
+                            }
+                        </div>
+                    </div>
+
+                    <div id="userSelection" class="section-block mb-4" style="display: none; background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
+                        <div class="card-header">
+                            Danh sách khách hàng
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <div class="col-md-6 d-flex">
+                                    <input type="text" id="searchCustomer" class="form-control" placeholder="Tìm kiếm theo tên, email hoặc số điện thoại...">
+                                    <button class="btn btn-primary" type="button" id="btnSearchCustomer">
+                                        <i class="bx bx-search"></i> Tìm
+                                    </button>
+                                    @* Hidden SelectedUserIds to keep checked users after search *@
+                                    @foreach (var id in Model.SelectedUserIds ?? new List<Guid>())
+                                    {
+                                        <input type="hidden" name="SelectedUserIds" value="@id" />
+                                    }
+                                </div>
+                            </div>
+                            <div class="table-responsive" style=" border-radius: 8px">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr style ="background-color: mediumpurple; color: white;">
+                                            <th style="width: 50px;">
+                                                @* <input type="checkbox" id="selectAll" /> *@
+                                            </th>
+                                            <th>HỌ VÀ TÊN</th>
+                                            <th>EMAIL</th>
+                                            <th>SỐ ĐIỆN THOẠI</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody style="background-colo: white;">
+                                        @if (khachHangs != null && khachHangs.Items.Any())
+                                        {
+                                            foreach (var user in khachHangs.Items)
+                                            {
+                                                if (user.TrangThai)
+                                                {
+                                                    var isExistingUser = Model.SelectedUserIds != null && Model.SelectedUserIds.Contains(user.Id);
+                                                    <tr class="@(isExistingUser ? "table-primary" : "")">
+                                                        <td>
+                                                            <input type="checkbox"
+                                                                   class="user-checkbox"
+                                                                   name="SelectedUserIds"
+                                                                   value="@user.Id"
+                                                            @(isExistingUser ? "checked" : "")
+                                                            @(isExistingUser ? "disabled" : "") />
+                                                        </td>
+                                                        <td class="@(isExistingUser ? "fw-bold" : "")">@user.HoVaTen</td>
+                                                        <td class="@(isExistingUser ? "fw-bold" : "")">@user.Email</td>
+                                                        <td class="@(isExistingUser ? "fw-bold" : "")">@user.SoDienThoai</td>
+                                                    </tr>
+                                                }
+
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+        
+                            @if (khachHangs != null && khachHangs.PageCount > 1)
+                            {
+                                <div class="mt-2 d-flex justify-content-center">
+                                    <ul class="pagination">
+                                        @for (var i = 1; i <= khachHangs.PageCount; i++)
+                                        {
+                                            <li class="page-item @(i == khachHangs.PageIndex ? "active" : "")">
+                                                <a href="javascript:void(0)" class="page-link" onclick="searchCustomers(@i)">@i</a>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <small class="text-muted">* Khách hàng đã có trong voucher này sẽ được hiển thị bôi đậm và không thể bỏ chọn</small>
+                    <input type="hidden" id="SelectedUserIdsHidden" name="SelectedUserIdsHidden" />
+                    <div class="mb-3 row ">
+                        <div class="col-sm-12 text-end">
+                            <button type="submit" class="btn btn-primary me-2">
+                                <i class="bx bx-save me-1"></i> Cập Nhật
                             </button>
                             <a asp-action="Index" class="btn btn-secondary">
                                 <i class="bx bx-arrow-back me-1"></i> Quay lại
@@ -122,6 +224,8 @@
 
 @section Scripts {
     <script>
+        var existingUserIds = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.ExistingUserIds ?? new List<Guid>()));
+        var selectedUserIds = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SelectedUserIds ?? new List<Guid>()));
         $(document).ready(function () {
             // Hàm cập nhật đơn vị giảm giá và các thuộc tính của input giá trị giảm
             function capNhatLoaiGiamGia() {
@@ -152,184 +256,266 @@
             $("#LoaiGiamGia").change(capNhatLoaiGiamGia);
             capNhatLoaiGiamGia();
 
-            // Cấu hình validation cho form
-            $("#edit-form").validate({
-                errorElement: 'div',
-                errorClass: 'invalid-feedback',
-                validClass: 'valid-feedback',
-                
-                highlight: function(element, errorClass, validClass) {
-                    $(element).addClass('is-invalid').removeClass('is-valid');
-                    $(element).closest('.input-group').addClass('is-invalid');
-                },
-                
-                unhighlight: function(element, errorClass, validClass) {
-                    $(element).addClass('is-valid').removeClass('is-invalid');
-                    $(element).closest('.input-group').removeClass('is-invalid');
-                },
-                
-                errorPlacement: function(error, element) {
-                    if (element.closest('.input-group').length) {
-                        element.closest('.input-group').after(error);
-                    } else {
-                        element.after(error);
-                    }
-                },
 
-                rules: {
-                    MaVoucher: {
-                        required: true,
-                        minlength: 3,
-                        maxlength: 20,
-                        pattern: "^[A-Z0-9]+$"
-                    },
-                    LoaiGiamGia: {
-                        required: true
-                    },
-                    GiaTriGiamGia: {
-                        required: true,
-                        min: 0,
-                        max: function() {
-                            return $("#LoaiGiamGia").val() == "@((int)LoaiGiamGia.PhamTram)" ? 100 : 999999999;
-                        },
-                        validateDiscount: true
-                    },
-                    DieuKienApDung: {
-                        required: true,
-                        min: 0,
-                        step: 1000
-                    },
-                    SoLuong: {
-                        required: true,
-                        min: 1,
-                        digits: true
-                    },
-                    ThoiGianBatDau: {
-                        required: true,
-                        validateStartDate: true
-                    },
-                    ThoiGianKetThuc: {
-                        required: true,
-                        validateEndDate: true
-                    }
-                },
+            // Handle customer search
+            $("#btnSearchCustomer").click(function () {
+                searchCustomers();
+            });
 
-                messages: {
-                    MaVoucher: {
-                        required: "Vui lòng nhập mã voucher",
-                        minlength: "Mã voucher phải có ít nhất 3 ký tự",
-                        maxlength: "Mã voucher không được vượt quá 20 ký tự",
-                        pattern: "Mã voucher chỉ được chứa chữ in hoa và số"
-                    },
-                    LoaiGiamGia: {
-                        required: "Vui lòng chọn loại giảm giá"
-                    },
-                    GiaTriGiamGia: {
-                        required: "Vui lòng nhập giá trị giảm",
-                        min: "Giá trị giảm phải lớn hơn 0",
-                        max: "Giá trị giảm không được vượt quá 100%",
-                        validateDiscount: function() {
-                            return $("#LoaiGiamGia").val() == "@((int)LoaiGiamGia.PhamTram)" 
-                                ? "Giá trị giảm giá không được vượt quá 100%" 
-                                : "Giá trị giảm giá phải lớn hơn 0 VNĐ";
-                        }
-                    },
-                    DieuKienApDung: {
-                        required: "Vui lòng nhập điều kiện áp dụng",
-                        min: "Điều kiện áp dụng phải lớn hơn 0",
-                        step: "Điều kiện áp dụng phải là bội số của 1000"
-                    },
-                    SoLuong: {
-                        required: "Vui lòng nhập số lượng voucher",
-                        min: "Số lượng voucher phải lớn hơn 0",
-                        digits: "Số lượng phải là số nguyên"
-                    },
-                    ThoiGianBatDau: {
-                        required: "Vui lòng chọn thời gian bắt đầu",
-                        validateStartDate: "Thời gian bắt đầu phải sau thời điểm hiện tại"
-                    },
-                    ThoiGianKetThuc: {
-                        required: "Vui lòng chọn thời gian kết thúc",
-                        validateEndDate: "Thời gian kết thúc phải sau thời gian bắt đầu"
-                    }
-                },
+            $("#searchCustomer").keypress(function (e) {
+                if (e.which == 13) {
+                    searchCustomers();
+                }
+            });
+            // Tự động tìm kiếm khi người dùng thay đổi từ khóa
+            $("#searchCustomer").on('input', function () {
+                var keyword = $(this).val();
+                if (keyword.length === 0) {
+                    // Nếu xóa hết từ khóa, tải lại trang để hiển thị danh sách ban đầu
+                    window.location.reload();
+                }
+            });
 
-                // Hiển thị lỗi ngay khi người dùng nhập liệu
-                onkeyup: function(element) {
-                    $(element).valid();
-                },
-                onchange: function(element) {
-                    $(element).valid();
-                },
-                submitHandler: function (form) {
-                    var formData = $(form).serialize();
-                    $.ajax({
-                        url: '@Url.Action("Edit", "Voucher")',
-                        type: 'POST',
-                        data: formData,
-                        success: function (result) {
-                            if (result.success) {
-                                Swal.fire({
-                                    title: 'Thành công!',
-                                    text: 'Cập nhật voucher thành công',
-                                    icon: 'success'
-                                }).then(() => {
-                                    window.location.href = '@Url.Action("Index", "Voucher")';
-                                });
-                            } else {
-                                Swal.fire({
-                                    title: 'Lỗi!',
-                                    text: result.message || 'Có lỗi xảy ra khi cập nhật voucher',
-                                    icon: 'error'
-                                });
-                            }
-                        },
-                        error: function (xhr) {
-                            var errorMessage = 'Có lỗi xảy ra khi cập nhật voucher';
-                            if (xhr.responseJSON && xhr.responseJSON.message) {
-                                errorMessage = xhr.responseJSON.message;
-                            }
-                            Swal.fire({
-                                title: 'Lỗi!',
-                                text: errorMessage,
-                                icon: 'error'
+            // Hàm render lại bảng khách hàng và phân trang
+            function searchCustomers(pageIndex = 1) {
+                var keyword = $("#searchCustomer").val();
+                $.ajax({
+                    url: '/Voucher/GetUsersForVoucherPaging',
+                    type: 'GET',
+                    data: {
+                        keyword: keyword,
+                        pageIndex: pageIndex,
+                        pageSize: 10
+                    },
+                    success: function(response) {
+                        if(response.isSuccessed) {
+                            var customers = response.resultObj.items;
+                            var tbody = $("table tbody");
+                            tbody.empty();
+                            customers.forEach(function (customer) {
+                                var isExisting = existingUserIds.includes(customer.id);
+                                var isSelected = selectedUserIds.includes(customer.id);
+                                var rowClass = (isExisting || isSelected) ? 'table-primary' : '';
+                                var boldClass = (isExisting || isSelected) ? 'fw-bold' : '';
+                                var checkboxAttr = '';
+
+                                if (isExisting) {
+                                    checkboxAttr = 'checked disabled';
+                                } else if (isSelected) {
+                                    checkboxAttr = 'checked';
+                                }
+
+                                var row = `
+                                    <tr class="${rowClass}">
+                                        <td><input type="checkbox" class="user-checkbox" name="SelectedUserIds" value="${customer.id}" ${checkboxAttr} /></td>
+                                        <td class="${boldClass}">${customer.hoVaTen}</td>
+                                        <td class="${boldClass}">${customer.email}</td>
+                                        <td class="${boldClass}">${customer.soDienThoai}</td>
+                                    </tr>
+                                `;
+                                tbody.append(row);
                             });
+                            renderCustomerPagination(response.resultObj.pageIndex, response.resultObj.pageCount);
                         }
-                    });
+                    },
+                    error: function(error) {
+                        toastr.error("Có lỗi xảy ra khi tìm kiếm khách hàng");
+                    }
+                });
+            }
+            function renderCustomerPagination(currentPage, pageCount) {
+                var pagination = $("#customerPagination");
+                pagination.empty();
+                if (pageCount <= 1) return;
+                var html = '<ul class="pagination">';
+                for (let i = 1; i <= pageCount; i++) {
+                    html += `<li class="page-item ${i === Number(currentPage) ? 'active' : ''}">` +
+                        `<a href="javascript:void(0)" class="page-link" onclick="searchCustomers(${i})">${i}</a>` +
+                        `</li>`;
+                }
+                html += '</ul>';
+                pagination.html(html);
+            }
+            window.searchCustomers = searchCustomers;
+            window.renderCustomerPagination = renderCustomerPagination;
+            // Khi load trang, render luôn phân trang nếu có dữ liệu
+            $(function () {
+                var khachHangs = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.KhachHangs));
+                if (khachHangs && khachHangs.pageCount > 1) {
+                    renderCustomerPagination(khachHangs.pageIndex, khachHangs.pageCount);
+                }
+            });
+
+            // Kiểm tra loại voucher khi trang được tải
+            toggleUserSelection();
+
+            // Hàm kiểm tra và hiển thị/ẩn phần chọn khách hàng
+            function toggleUserSelection() {
+                var loaiVoucher = $("#LoaiVoucher").val();
+                if (loaiVoucher == "@((int)LoaiVoucher.RiengTu)") {
+                    $("#userSelection").show();
+                } else {
+                    $("#userSelection").hide();
+                }
+            }
+
+            // Thêm sự kiện change cho select loại voucher
+            $("#LoaiVoucher").change(toggleUserSelection);
+
+            function validateRequiredField(fieldId, fieldName) {
+                var value = $("#" + fieldId).val();
+                if (!value || value.trim() === "") {
+                    toastr.error(`Vui lòng nhập ${fieldName}`);
                     return false;
                 }
-            });
-
-            // Thêm phương thức validation tùy chỉnh
-            $.validator.addMethod("validateDiscount", function(value, element) {
-                var loaiGiamGia = $("#LoaiGiamGia").val();
-                var giaTri = parseFloat(value);
-                
-                if (isNaN(giaTri)) return false;
-                
-                if (loaiGiamGia == "@((int)LoaiGiamGia.PhamTram)") {
-                    return giaTri >= 0 && giaTri <= 100;
-                } else {
-                    return giaTri > 0;
-                }
-            });
-
-            $.validator.addMethod("validateStartDate", function (value, element) {
-                var startDate = new Date(value);
-                var now = new Date();
-                return startDate > now;
-            });
-
-            $.validator.addMethod("validateEndDate", function (value, element) {
-                var endDate = new Date(value);
-                var startDate = new Date($("#ThoiGianBatDau").val());
-                return endDate > startDate;
-            });
-
-            // Ẩn validation summary nếu không có lỗi
-            if (!$("#edit-form").valid()) {
-                $(".alert-danger").hide();
+                return true;
             }
+
+            function validateSoLuong() {
+                var soLuong = parseInt($("#SoLuong").val());
+                if (isNaN(soLuong) || soLuong <= 0) {
+                    toastr.error("Số lượng voucher phải lớn hơn 0");
+                    return false;
+                }
+                return true;
+            }
+
+            function validateGiaTriGiamGia() {
+                var loaiGiamGia = $("#LoaiGiamGia").val();
+                var giaTriGiamGia = parseFloat($("#GiaTriGiamGia").val());
+                var errorMsg = "";
+
+                if (!validateRequiredField("GiaTriGiamGia", "giá trị giảm giá")) {
+                    return false;
+                }
+
+                if (loaiGiamGia == "@((int)LoaiGiamGia.PhamTram)") {
+                    if (giaTriGiamGia < 0 || giaTriGiamGia > 100) {
+                        errorMsg = "Giá trị giảm giá phải từ 0% đến 100% đối với loại phần trăm";
+                    }
+                } else if (loaiGiamGia == "@((int)LoaiGiamGia.SoTien)") {
+                    if (giaTriGiamGia <= 0) {
+                        errorMsg = "Giá trị giảm giá phải lớn hơn 0 VNĐ đối với loại số tiền";
+                    }
+                }
+
+                if (errorMsg) {
+                    toastr.error(errorMsg);
+                    return false;
+                }
+                return true;
+            }
+
+            function validateThoiGianBatDau() {
+                if (!validateRequiredField("ThoiGianBatDau", "thời gian bắt đầu")) {
+                    return false;
+                }
+
+                var thoiGianBatDau = new Date($("#ThoiGianBatDau").val());
+                if (thoiGianBatDau <= new Date()) {
+                    toastr.error("Thời gian bắt đầu phải sau thời điểm hiện tại");
+                    return false;
+                }
+                return true;
+            }
+
+            function validateThoiGianKetThuc() {
+                if (!validateRequiredField("ThoiGianKetThuc", "thời gian kết thúc")) {
+                    return false;
+                }
+
+                var thoiGianBatDau = new Date($("#ThoiGianBatDau").val());
+                var thoiGianKetThuc = new Date($("#ThoiGianKetThuc").val());
+                if (thoiGianKetThuc <= thoiGianBatDau) {
+                    toastr.error("Thời gian kết thúc phải sau thời gian bắt đầu");
+                    return false;
+                }
+                return true;
+            }
+
+            function validateDieuKienApDung() {
+                var dieuKien = parseFloat($("#DieuKienApDung").val());
+                if (isNaN(dieuKien) || dieuKien <= 0) {
+                    toastr.error("Điều kiện áp dụng phải lớn hơn 0");
+                    return false;
+                }
+                return true;
+            }
+
+            function validateKhachHang() {
+                var loaiVoucher = "@Model.LoaiVoucher";
+                if (loaiVoucher == "@((int)LoaiVoucher.RiengTu)") {
+                    var selectedUsers = $(".user-checkbox:checked").length;
+                    if (selectedUsers === 0) {
+                        toastr.error("Vui lòng chọn ít nhất một khách hàng cho voucher riêng tư");
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            // Add event listeners for real-time validation
+            $("#SoLuong").on('input', validateSoLuong);
+            $("#GiaTriGiamGia").on('input', validateGiaTriGiamGia);
+            $("#LoaiGiamGia").change(validateGiaTriGiamGia);
+            $("#ThoiGianBatDau").change(validateThoiGianBatDau);
+            $("#ThoiGianKetThuc").change(validateThoiGianKetThuc);
+            $("#DieuKienApDung").on('input', validateDieuKienApDung);
+            $(".user-checkbox").change(validateKhachHang);
+
+            // Handle form submission
+            $("#edit-form").submit(function(e) {
+                e.preventDefault();
+                
+                // Validate all fields before submission
+                if (!validateSoLuong() ||
+                    !validateGiaTriGiamGia() || 
+                    !validateThoiGianBatDau() || 
+                    !validateThoiGianKetThuc() || 
+                    !validateDieuKienApDung() ||
+                    !validateKhachHang()) {
+                    return false;
+                }
+
+                var formData = $(this).serialize();
+                $.ajax({
+                    url: '@Url.Action("Edit", "Voucher")',
+                    type: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        if (response.success) {
+                            toastr.success("Cập nhật voucher thành công!");
+                            setTimeout(function() {
+                                window.location.href = '@Url.Action("Index", "Voucher")';
+                            }, 1500);
+                        } else {
+                            toastr.error(response.message || "Không thể cập nhật voucher. Vui lòng thử lại!");
+                        }
+                    },
+                    error: function(xhr) {
+                        var errorMessage = "Đã xảy ra lỗi khi cập nhật voucher. Vui lòng thử lại sau!";
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        toastr.error(errorMessage);
+                    }
+                });
+            });
+
+
+            // Cập nhật selectedUserIds khi check/uncheck khách hàng mới
+            $(document).on('change', '.user-checkbox:not(:disabled)', function () {
+                var userId = $(this).val();
+                if ($(this).is(':checked')) {
+                    if (!selectedUserIds.includes(userId)) selectedUserIds.push(userId);
+                } else {
+                    selectedUserIds = selectedUserIds.filter(id => id != userId);
+                }
+                $("#SelectedUserIdsHidden").val(selectedUserIds.join(','));
+            });
+            $("#edit-form").submit(function () {
+                $("#SelectedUserIdsHidden").val(selectedUserIds.join(','));
+            });
         });
     </script>
 } 

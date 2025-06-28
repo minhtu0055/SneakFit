@@ -22,5 +22,8 @@ namespace SneakFit.ApiIntegration.Services
         // Thêm các phương thức xử lý ảnh
         Task<bool> UploadImages(Guid sanPhamChiTietId, List<IFormFile> files);
         Task<bool> DeleteImage(Guid imageId, Guid sanPhamChiTietId);
+
+        // THÊM KHAI BÁO PHƯƠNG THỨC NÀY cho sửa khuyến mại
+        Task<List<SPCTViewModels>> GetSPCTByListIds(List<Guid> ids);
     }
 }

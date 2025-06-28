@@ -26,6 +26,7 @@ namespace SneakFit.ViewModels.Catalog.SanPhamChiTiet
         public string? TenDanhMuc { get; set; }
         public string? MaKichThuoc { get; set; }
         public string? TenMauSac { get; set; }
+        public string? MaMauSac { get; set; }
         public string? TenChatLieu { get; set; }
         public string? TenDeGiay { get; set; }
         public string? TenThuongHieu { get; set; }

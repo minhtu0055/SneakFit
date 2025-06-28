@@ -3,18 +3,20 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using SneakFit.ApiIntegration.Services;
 using SneakFit.Data.Enums;
 using SneakFit.ViewModels.Catalog.KhuyenMai;
+using SneakFit.ViewModels.Catalog.SanPhamChiTiet;
+using System.Threading.Tasks;
 
 namespace SneakFit.Admin.Controllers
 {
     public class KhuyenMaiController : BaseController
     {
         private readonly IKhuyenMaiApiClient _khuyenMaiApiClient;
-       // private readonly ISanPhamApiClient _sanPhamApiClient;
+        private readonly ISanPhamApiClient _sanPhamApiClient;
 
-        public KhuyenMaiController(IKhuyenMaiApiClient khuyenMaiApiClient /*, ISanPhamApiClient sanPhamApiClient*/)
+        public KhuyenMaiController(IKhuyenMaiApiClient khuyenMaiApiClient, ISanPhamApiClient sanPhamApiClient)
         {
             _khuyenMaiApiClient = khuyenMaiApiClient;
-           // _sanPhamApiClient = sanPhamApiClient;
+            _sanPhamApiClient = sanPhamApiClient;
         }
 
         public async Task<IActionResult> Index(string? keyword, TrangThaiGiamGia? trangThai, int pageIndex = 1, int pageSize = 10)
@@ -45,7 +47,9 @@ namespace SneakFit.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            //ViewBag.Products = products;
+            var sanPhams = await _sanPhamApiClient.GetAll();
+            ViewBag.SanPhams = new SelectList(sanPhams, "Id", "TenSanPham"); // Chuyển thành SelectList
+
             ViewBag.LoaiGiamGia = new List<SelectListItem>()
             {
                 new SelectListItem("Giảm theo phần trăm", ((int)LoaiGiamGia.PhamTram).ToString()),
@@ -59,18 +63,12 @@ namespace SneakFit.Admin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                //var products = await _productApiClient.GetAll();
-                // Đảm bảo danh sách hình ảnh không null
-                //foreach (var product in products)
-                //{
-                //    product.Images = product.Images ?? new List<string>();
-                //}
-                //ViewBag.Products = products;
-
+                var sanPhams = await _sanPhamApiClient.GetAll();
+                ViewBag.SanPhams = new SelectList(sanPhams, "Id", "TenSanPham");
                 ViewBag.LoaiGiamGia = new List<SelectListItem>()
                 {
                     new SelectListItem("Giảm theo phần trăm", ((int)LoaiGiamGia.PhamTram).ToString()),
-                new SelectListItem("Giảm theo số tiền", ((int)LoaiGiamGia.SoTien).ToString())
+                    new SelectListItem("Giảm theo số tiền", ((int)LoaiGiamGia.SoTien).ToString())
                 };
                 return View(request);
             }
@@ -83,6 +81,8 @@ namespace SneakFit.Admin.Controllers
             catch (Exception ex)
             {
                 ModelState.AddModelError("", ex.Message);
+                var sanPhams = await _sanPhamApiClient.GetAll();
+                ViewBag.SanPhams = new SelectList(sanPhams, "Id", "TenSanPham");
                 ViewBag.LoaiGiamGia = new List<SelectListItem>()
                 {
                     new SelectListItem("Giảm theo phần trăm", ((int)LoaiGiamGia.PhamTram).ToString()),
@@ -99,7 +99,28 @@ namespace SneakFit.Admin.Controllers
             if (result == null)
                 return NotFound();
 
-            var Request = new SuaKhuyenMai()
+            // Lấy danh sách các SPCT đã áp dụng khuyến mại (giả sử là các SPCT có SPCTId nằm trong SanPhamIds)
+            var appliedSpctIds = result.SanPhams?.Select(p => p.SPCTId).ToList() ?? new List<Guid>();
+
+            var selectedProductDetails = result.SanPhamChiTiets?
+                .Where(x => appliedSpctIds.Contains(x.SPCTId)) // chỉ lấy các SPCT đã áp dụng khuyến mại
+                .Select(x => new SPCTViewModels
+                {
+                    Id = x.SPCTId,
+                    TenSanPham = result.SanPhams.FirstOrDefault(sp => sp.SanPhamId == x.SanPhamId)?.TenSanPham ?? "",
+                    Gia = x.Gia,
+                    SoLuong = x.SoLuong,
+                    NgayTao = x.NgayTao,
+                    MauSacId = x.MauSacId,
+                    KichThuocId = x.KichThuocId,
+                    ChatLieuId = x.ChatLieuId,
+                    DeGiayId = x.DeGiayId,
+                    ThuongHieuId = x.ThuongHieuId,
+                    SanPhamId = x.SanPhamId,
+                    TrangThai = x.TrangThai
+                }).ToList() ?? new List<SPCTViewModels>();
+
+            var request = new SuaKhuyenMai()
             {
                 Id = result.Id,
                 TenKhuyenMai = result.TenKhuyenMai,
@@ -109,31 +130,56 @@ namespace SneakFit.Admin.Controllers
                 ThoiGianBatDau = result.ThoiGianBatDau,
                 ThoiGianKetThuc = result.ThoiGianKetThuc,
                 TrangThai = result.TrangThai,
-                //SanPhamIds = result.Products?.Select(p => p.ProductId).ToList() ?? new List<Guid>()
+                SanPhamIds = result.SanPhams?.Select(p => p.SPCTId).ToList() ?? new List<Guid>(),
+                SelectedProductDetails = selectedProductDetails
             };
 
-            //var products = await _productApiClient.GetAll();
-            // Đảm bảo danh sách hình ảnh không null
-            //foreach (var product in products)
-            //{
-            //    product.Images = product.Images ?? new List<string>();
-            //}
-            //ViewBag.Products = products;
-
-            ViewBag.LoaiGiamGia = new List<SelectListItem>()
+            var sanPhams = await _sanPhamApiClient.GetAll();
+            Guid? selectedParentProductId = null;
+            if (request.SelectedProductDetails != null && request.SelectedProductDetails.Any())
             {
-                new SelectListItem("Giảm theo phần trăm", LoaiGiamGia.PhamTram.ToString("d"), result.LoaiGiamGia == LoaiGiamGia.PhamTram),
-                new SelectListItem("Giảm theo số tiền", LoaiGiamGia.SoTien.ToString("d"), result.LoaiGiamGia == LoaiGiamGia.SoTien)
-            };
-            return View(Request);
+                selectedParentProductId = request.SelectedProductDetails.FirstOrDefault()?.SanPhamId;
+            }
+            ViewBag.SanPhams = new SelectList(sanPhams, "Id", "TenSanPham", selectedParentProductId);
+
+            ViewBag.LoaiGiamGia = new List<SelectListItem>
+    {
+        new SelectListItem("Giảm theo phần trăm", LoaiGiamGia.PhamTram.ToString("d"), result.LoaiGiamGia == LoaiGiamGia.PhamTram),
+        new SelectListItem("Giảm theo số tiền", LoaiGiamGia.SoTien.ToString("d"), result.LoaiGiamGia == LoaiGiamGia.SoTien)
+    };
+            return View(request);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Edit(SuaKhuyenMai request)
         {
+            
             if (!ModelState.IsValid)
             {
-                ViewBag.LoaiGiamGia = new List<SelectListItem>()
+                // Thêm dòng này để xem lỗi gì
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                // Có thể log ra console hoặc gán vào ViewBag để hiển thị trên view
+                ViewBag.ModelErrors = errors;
+                var sanPhams = await _sanPhamApiClient.GetAll();
+                if (request.SanPhamIds != null && request.SanPhamIds.Any())
+                {
+                    request.SelectedProductDetails = await _sanPhamApiClient.GetSPCTByListIds(request.SanPhamIds);
+                }
+                else
+                {
+                    request.SelectedProductDetails = new List<SPCTViewModels>();
+                }
+
+                // Lấy sản phẩm cha đã chọn (nếu có)
+                Guid? selectedParentProductId = null;
+                if (request.SelectedProductDetails != null && request.SelectedProductDetails.Any())
+                {
+                    selectedParentProductId = request.SelectedProductDetails.FirstOrDefault()?.SanPhamId;
+                }
+                ViewBag.SanPhams = new SelectList(sanPhams, "Id", "TenSanPham", selectedParentProductId);
+
+                ViewBag.LoaiGiamGia = new List<SelectListItem>
                 {
                     new SelectListItem("Giảm theo phần trăm", LoaiGiamGia.PhamTram.ToString("d"), request.LoaiGiamGia == LoaiGiamGia.PhamTram),
                     new SelectListItem("Giảm theo số tiền", LoaiGiamGia.SoTien.ToString("d"), request.LoaiGiamGia == LoaiGiamGia.SoTien)
@@ -150,7 +196,25 @@ namespace SneakFit.Admin.Controllers
             catch (Exception ex)
             {
                 ModelState.AddModelError("", ex.Message);
-                ViewBag.LoaiGiamGia = new List<SelectListItem>()
+                ViewBag.ModelErrors = new List<string> { ex.Message };
+                var sanPhams = await _sanPhamApiClient.GetAll();
+                if (request.SanPhamIds != null && request.SanPhamIds.Any())
+                {
+                    request.SelectedProductDetails = await _sanPhamApiClient.GetSPCTByListIds(request.SanPhamIds);
+                }
+                else
+                {
+                    request.SelectedProductDetails = new List<SPCTViewModels>();
+                }
+                // Lấy sản phẩm cha đã chọn (nếu có)
+                Guid? selectedParentProductId = null;
+                if (request.SelectedProductDetails != null && request.SelectedProductDetails.Any())
+                {
+                    selectedParentProductId = request.SelectedProductDetails.FirstOrDefault()?.SanPhamId;
+                }
+                ViewBag.SanPhams = new SelectList(sanPhams, "Id", "TenSanPham", selectedParentProductId);
+
+                ViewBag.LoaiGiamGia = new List<SelectListItem>
                 {
                     new SelectListItem("Giảm theo phần trăm", LoaiGiamGia.PhamTram.ToString("d"), request.LoaiGiamGia == LoaiGiamGia.PhamTram),
                     new SelectListItem("Giảm theo số tiền", LoaiGiamGia.SoTien.ToString("d"), request.LoaiGiamGia == LoaiGiamGia.SoTien)
@@ -191,7 +255,6 @@ namespace SneakFit.Admin.Controllers
             {
                 TempData["ErrorMsg"] = ex.Message;
             }
-
             return RedirectToAction("Index");
         }
     }

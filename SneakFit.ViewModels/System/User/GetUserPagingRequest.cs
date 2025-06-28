@@ -11,5 +11,6 @@ namespace SneakFit.ViewModels.System.User
     {
         public string? TuKhoa { get; set; }
         public string Role { get; set; }
+        public bool? TrangThai { get; set; }
     }
 }

@@ -15,5 +15,6 @@ namespace SneakFit.ViewModels.Catalog.SanPham
         public int TongSoSanPham { get; set; }
         public string TenDanhMuc { get; set; }
         public bool TrangThai { get; set; }
+        public string ImageDaiDien { get; set; }
     }
 }

@@ -137,6 +137,11 @@ namespace SneakFit.Application.System.User
                 }
                 query = query.Where(u => userIds.Contains(u.Id.ToString()));
             }
+            // 🆕 Lọc trạng thái nếu có truyền vào
+            if (request.TrangThai.HasValue)
+            {
+                query = query.Where(u => u.TrangThai == request.TrangThai.Value);
+            }
             // Paging
             int totalRow = await query.CountAsync();
 

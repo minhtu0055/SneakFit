@@ -14,7 +14,7 @@
             </h4>
         </div>
         <div>
-            <a asp-action="Index" class="btn btn-secondary">
+            <a asp-action="Index" asp-controller="SanPham" class="btn btn-secondary"> @* Thêm asp-controller="SanPham" để trả về SanPham/index *@
                 <i class="bx bx-arrow-back me-1"></i> Quay lại
             </a>
         </div>
@@ -136,24 +136,30 @@
                         <div class="table-responsive" style=" border-radius: 8px">
                             <table class="table table-hover">
                                 <thead>
-                                    <tr style="background-color: mediumpurple; color: white;">
+                                    <tr style="background-color: #696CFF; ">
                                         <th style="width: 30px">
                                             <input type="checkbox" id="checkAll" />
                                         </th>
-                                        <th style="width: 30px">STT</th>
-                                        <th>Tên Sản Phẩm</th>
-                                        <th style="width: 112px">Số Lượng</th>
-                                        <th style="width: 205px">Giá Bán</th>
-                                        <th style="width: 123px">Hành Động</th>
-                                        <th style="width: 185px">Upload Ảnh</th>
+                                        <th style="width: 30px; color: white;">STT</th>
+                                        <th style="color: white;">Tên Sản Phẩm</th>
+                                        <th style="width: 112px; color: white;">Số Lượng</th>
+                                        <th style="width: 205px; color: white;">Giá Bán</th>
+                                        <th style="width: 123px; color: white;">Hành Động</th>
+                                        <th style="width: 155px; text-align: center; color: white;">Upload Ảnh</th>
                                     </tr>
                                 </thead>
-                                <tbody id="productDetailList">
+                                <tbody id="productDetailList" style="background-color: cornsilk;">
                                     <!-- Dữ liệu sẽ được thêm vào đây bằng JavaScript -->
                                 </tbody>
                             </table>
+
+                            <!-- Phân trang -->
+                            <div id="productDetailPagination" class="mt-2"></div>
+
                         </div>
 
+                        @* Phân trang *@
+                        <div id="productDetailPagination" class="mt-2"></div>
                         @* @await Component.InvokeAsync("Pager", Model) *@
                     </div>
                 </form>
@@ -166,6 +172,7 @@
     <!-- Thêm thư viện color picker -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-minicolors/2.3.6/jquery.minicolors.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-minicolors/2.3.6/jquery.minicolors.min.js"></script>
+
     <style>
         .selected-item {
             position: relative;
@@ -237,6 +244,14 @@
         // CheckAll
         $('#checkAll').on('change', function() {
             $('.row-check').prop('checked', this.checked);
+        });
+        // Chọn dòng
+        $('#spctTable tbody tr').on('click', function(e) {
+            if (!$(e.target).is('input, button')) {
+                $(this).find('.row-check').prop('checked', true);
+                $('#spctTable tbody tr').removeClass('table-info');
+                $(this).addClass('table-info');
+            }
         });
 
         // Hàm mở modal thêm sản phẩm
@@ -405,19 +420,6 @@
                 $(this).css({'border':'2px solid #ddd','background':'white','color':'black'});
         });
 
-        // Chọn dòng
-        $('#spctTable tbody tr').on('click', function(e) {
-            if (!$(e.target).is('input, button')) {
-                $(this).find('.row-check').prop('checked', true);
-            }
-            $('#spctTable tbody tr').removeClass('table-info');
-            $(this).addClass('table-info');
-        });
-
-            // CheckAll
-        $('#checkAll').on('change', function() {
-            $('.row-check').prop('checked', this.checked);
-        });
 
         function generateProductDetails() {
             const tbody = $('#productDetailList');
@@ -528,9 +530,319 @@
                     tbody.append(row);
                 });
             }
+
+            // Phân trang
+            renderProductDetailPagination();
+        }
+        // Khi thay đổi các trường thông tin thì sẽ reload lại list danh sách SPCT new
+        $(document).ready(function() {
+            $('select[name="SanPhamId"], select[name="ThuongHieuId"], select[name="ChatLieuId"], select[name="DeGiayId"], #trangThaiSelect').on('change', function() {
+                if (selectedColors.length > 0 && selectedSizes.length > 0) {
+                    generateProductDetails();
+                }
+            });
+        });
+
+        // function generateProductDetails() {
+        //     const tbody = $('#productDetailList');
+        //     const tenSanPham = $('select[name="SanPhamId"] option:selected').text();
+        //     const sanPhamId = $('select[name="SanPhamId"]').val();
+        //     const thuongHieuId = $('select[name="ThuongHieuId"]').val();
+        //     const chatLieuId = $('select[name="ChatLieuId"]').val();
+        //     const deGiayId = $('select[name="DeGiayId"]').val();
+        //     const trangThai = $('#trangThaiSelect').val();
+
+        //     // Kiểm tra các trường bắt buộc
+        //     if (!sanPhamId || !thuongHieuId || !chatLieuId || !deGiayId) {
+        //         Swal.fire('Lỗi', 'Vui lòng chọn đầy đủ thông tin sản phẩm chi tiết', 'error');
+        //         return;
+        //     }
+
+        //     // Kiểm tra đã chọn màu sắc và kích thước
+        //     if (selectedColors.length === 0 || selectedSizes.length === 0) {
+        //         let msg = '';
+        //         if (selectedColors.length === 0 && selectedSizes.length === 0) msg = 'Vui lòng chọn ít nhất một màu sắc và một kích thước';
+        //         else if (selectedColors.length === 0) msg = 'Vui lòng chọn ít nhất một màu sắc';
+        //         else msg = 'Vui lòng chọn ít nhất một kích thước';
+        //         Swal.fire('Lỗi', msg, 'error');
+        //         return;
+        //     }
+
+        //     // Thu thập dữ liệu hiện có từ bảng
+        //     let existingData = [];
+        //     tbody.find('tr').each(function() {
+        //         const row = $(this);
+        //         existingData.push({
+        //             sanPhamId: row.data('sanpham-id'),
+        //             thuongHieuId: row.data('thuonghieu-id'),
+        //             chatLieuId: row.data('chatlieu-id'),
+        //             deGiayId: row.data('degiay-id'),
+        //             mauSacId: row.data('mausac-id'),
+        //             kichThuocId: row.data('kichthuoc-id'),
+        //             trangThai: row.data('trangthai'),
+        //             quantity: parseInt(row.find('.quantity-input').val()) || 1,
+        //             price: row.find('.price-input').val() || '1.000.000',
+        //             colorGroup: row.data('color-group')
+        //         });
+        //     });
+
+        //     // Tạo hoặc cập nhật SPCT
+        //     let allSPCTs = [];
+        //     selectedColors.forEach(color => {
+        //         selectedSizes.forEach(size => {
+        //             const spctKey = `${sanPhamId}-${color.id}-${size.id}`;
+        //             const existingItem = existingData.find(item =>
+        //                 item.sanPhamId == sanPhamId &&
+        //                 item.mauSacId == color.id &&
+        //                 item.kichThuocId == size.id
+        //             );
+
+        //             if (existingItem) {
+        //                 // Nếu đã tồn tại, tăng số lượng
+        //         existingItem.quantity += 1;
+        //                 allSPCTs.push({
+        //                     sanPhamId: sanPhamId,
+        //                     thuongHieuId: thuongHieuId,
+        //                     chatLieuId: chatLieuId,
+        //                     deGiayId: deGiayId,
+        //                     mauSacId: color.id,
+        //                     kichThuocId: size.id,
+        //                     tenSanPham: tenSanPham,
+        //                     sizeName: size.name,
+        //                     colorName: color.ten,
+        //                     trangThai: trangThai,
+        //                     colorGroup: `${sanPhamId}-${color.id}`,
+        //                     quantity: existingItem.quantity,
+        //                     price: existingItem.price
+        //                 });
+        //             } else {
+        //                 allSPCTs.push({
+        //                     sanPhamId: sanPhamId,
+        //                     thuongHieuId: thuongHieuId,
+        //                     chatLieuId: chatLieuId,
+        //                     deGiayId: deGiayId,
+        //                     mauSacId: color.id,
+        //                     kichThuocId: size.id,
+        //                     tenSanPham: tenSanPham,
+        //                     sizeName: size.name,
+        //                     colorName: color.ten,
+        //                     trangThai: trangThai,
+        //                     colorGroup: `${sanPhamId}-${color.id}`,
+        //                     quantity: 1,
+        //                     price: '1.000.000'
+        //                 });
+        //             }
+        //         });
+        //     });
+
+        //     // Nhóm theo màu sắc
+        //     let groupedByColor = {};
+        //     allSPCTs.forEach(spct => {
+        //         if (!groupedByColor[spct.colorGroup]) {
+        //             groupedByColor[spct.colorGroup] = [];
+        //         }
+        //         groupedByColor[spct.colorGroup].push(spct);
+        //     });
+
+        //     // Xóa bảng cũ
+        //     tbody.empty();
+
+        //     let stt = 1;
+        //     for (const colorGroup in groupedByColor) {
+        //         const items = groupedByColor[colorGroup];
+        //         items.forEach((item, index) => {
+        //             const isFirstInGroup = index === 0;
+        //             const groupSize = items.length;
+
+        //             let row = $('<tr>').attr({
+        //                 'data-sanpham-id': item.sanPhamId,
+        //                 'data-thuonghieu-id': item.thuongHieuId,
+        //                 'data-chatlieu-id': item.chatLieuId,
+        //                 'data-degiay-id': item.deGiayId,
+        //                 'data-mausac-id': item.mauSacId,
+        //                 'data-kichthuoc-id': item.kichThuocId,
+        //                 'data-trangthai': item.trangThai,
+        //                 'data-color-group': item.colorGroup
+        //             });
+
+        //             row.append(`<td><input type="checkbox" class="product-checkbox row-check" /></td>`);
+        //             row.append(`<td class="stt">${stt++}</td>`);
+        //             row.append(`<td class="product-name">${item.tenSanPham} [ ${item.sizeName} - ${item.colorName} ]</td>`);
+        //             row.append(`<td><input type="number" class="form-control quantity-input" min="1" value="${item.quantity}" style="width: 80px;" /></td>`);
+        //             row.append(`
+        //                 <td>
+        //                     <div class="input-group" style="width: 200px;">
+        //                         <input type="text" class="form-control price-input" value="${item.price}" />
+        //                         <span class="input-group-text">VNĐ</span>
+        //                     </div>
+        //                 </td>
+        //             `);
+        //             row.append(`
+        //                 <td style="text-align: center">
+        //                     <button type="button" class="btn btn-danger btn-sm delete-row">
+        //                         <i class="bx bx-trash"></i>
+        //                     </button>
+        //                 </td>
+        //             `);
+
+        //             // Chỉ thêm cột upload ảnh cho hàng đầu tiên trong mỗi nhóm màu
+        //             if (isFirstInGroup) {
+        //                 let uploadCell = $('<td>').addClass('spct-images-cell').attr('rowspan', groupSize).css({
+        //                     'vertical-align': 'middle',
+        //                     'text-align': 'center'
+        //                 });
+        //                 let imageContainer = $('<div>').addClass('image-preview-container d-flex flex-wrap gap-1 justify-content-center mt-2');
+        //                 uploadCell.append(imageContainer);
+        //                 uploadCell.append(`
+        //                     <button type="button" class="btn btn-light btn-sm upload-image" data-color-group-key="${item.colorGroup}">
+        //                         <i class="bx bx-upload"></i> Upload
+        //                     </button>
+        //                 `);
+        //                 row.append(uploadCell);
+
+        //                 // Khôi phục ảnh từ spctImages nếu có
+        //                 if (spctImages[item.colorGroup] && spctImages[item.colorGroup].length > 0) {
+        //                     let imgHtml = '';
+        //                     spctImages[item.colorGroup].forEach((file, idx) => {
+        //                         let url = URL.createObjectURL(file);
+        //                         imgHtml += `
+        //                             <div class="spct-thumb-wrapper d-inline-block position-relative me-1 mb-1" style="width:48px;height:48px;">
+        //                                 <img src="${url}" class="spct-thumb-img" data-idx="${idx}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;cursor:pointer;" />
+        //                                 <button type="button" class="btn btn-danger btn-sm spct-thumb-delete position-absolute top-0 end-0 d-none" data-idx="${idx}" style="z-index:2;padding:0.05px 0.05px;">
+        //                                     <i class="bx bx-trash"></i>
+        //                                 </button>
+        //                                 <button type="button" class="btn btn-light btn-sm spct-thumb-view position-absolute bottom-0 end-0 d-none" data-idx="${idx}" style="z-index:2;padding:0.05px 0.05px;">
+        //                                     <i class="bx bx-show"></i>
+        //                                 </button>
+        //                             </div>
+        //                         `;
+        //                     });
+        //                     imageContainer.html(imgHtml);
+        //                 }
+        //             }
+
+        //             tbody.append(row);
+        //         });
+        //     }
+
+        //     // Phân trang
+        //     renderProductDetailPagination();
+        // }
+
+        // Hàm cập nhật thông tin SPCT hiện có
+        function updateExistingProductDetails() {
+            const tbody = $('#productDetailList');
+            const tenSanPham = $('select[name="SanPhamId"] option:selected').text();
+            const sanPhamId = $('select[name="SanPhamId"]').val();
+            const thuongHieuId = $('select[name="ThuongHieuId"]').val();
+            const chatLieuId = $('select[name="ChatLieuId"]').val();
+            const deGiayId = $('select[name="DeGiayId"]').val();
+            const trangThai = $('#trangThaiSelect').val();
+
+            // Kiểm tra các trường bắt buộc
+            if (!sanPhamId || !thuongHieuId || !chatLieuId || !deGiayId) {
+                Swal.fire('Lỗi', 'Vui lòng chọn đầy đủ thông tin sản phẩm chi tiết', 'error');
+                return;
+            }
+
+            // Cập nhật thông tin cho từng hàng hiện có
+            tbody.find('tr').each(function() {
+                const row = $(this);
+                const mauSacId = row.data('mausac-id');
+                const kichThuocId = row.data('kichthuoc-id');
+
+                // Tìm thông tin màu sắc và kích thước từ selectedColors và selectedSizes
+                const colorInfo = selectedColors.find(c => c.id == mauSacId);
+                const sizeInfo = selectedSizes.find(s => s.id == kichThuocId);
+
+                if (colorInfo && sizeInfo) {
+                    // Cập nhật data attributes
+                    const oldColorGroup = row.data('color-group');
+                    const newColorGroup = `${sanPhamId}-${mauSacId}`;
+                    row.attr({
+                        'data-sanpham-id': sanPhamId,
+                        'data-thuonghieu-id': thuongHieuId,
+                        'data-chatlieu-id': chatLieuId,
+                        'data-degiay-id': deGiayId,
+                        'data-trangthai': trangThai,
+                        'data-color-group': newColorGroup
+                    });
+
+                    // Cập nhật tên sản phẩm hiển thị
+                    row.find('.product-name').text(`${tenSanPham} [ ${sizeInfo.name} - ${colorInfo.ten} ]`);
+
+                    // Cập nhật colorGroup cho upload button
+                    const uploadButton = row.find('.upload-image');
+                    if (uploadButton.length) {
+                        uploadButton.attr('data-color-group-key', newColorGroup);
+                    }
+
+                    // Xử lý ảnh trong spctImages
+                    const imageContainer = row.find('.image-preview-container');
+                    if (imageContainer.length) {
+                        // Nếu newColorGroup đã có ảnh, sử dụng ảnh đó
+                        if (spctImages[newColorGroup] && spctImages[newColorGroup].length > 0) {
+                            let imgHtml = '';
+                            spctImages[newColorGroup].forEach((file, idx) => {
+                                let url = URL.createObjectURL(file);
+                                imgHtml += `
+                                    <div class="spct-thumb-wrapper d-inline-block position-relative me-1 mb-1" style="width:48px;height:48px;">
+                                        <img src="${url}" class="spct-thumb-img" data-idx="${idx}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;cursor:pointer;" />
+                                        <button type="button" class="btn btn-danger btn-sm spct-thumb-delete position-absolute top-0 end-0 d-none" data-idx="${idx}" style="z-index:2;padding:0.05px 0.05px;">
+                                            <i class="bx bx-trash"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-light btn-sm spct-thumb-view position-absolute bottom-0 end-0 d-none" data-idx="${idx}" style="z-index:2;padding:0.05px 0.05px;">
+                                            <i class="bx bx-show"></i>
+                                        </button>
+                                    </div>
+                                `;
+                            });
+                            imageContainer.html(imgHtml);
+                        } else if (spctImages[oldColorGroup] && spctImages[oldColorGroup].length > 0) {
+                            // Sao chép ảnh từ oldColorGroup sang newColorGroup nếu newColorGroup chưa có ảnh
+                            spctImages[newColorGroup] = [...spctImages[oldColorGroup]]; // Sao chép ảnh, không xóa oldColorGroup
+                            let imgHtml = '';
+                            spctImages[newColorGroup].forEach((file, idx) => {
+                                let url = URL.createObjectURL(file);
+                                imgHtml += `
+                                    <div class="spct-thumb-wrapper d-inline-block position-relative me-1 mb-1" style="width:48px;height:48px;">
+                                        <img src="${url}" class="spct-thumb-img" data-idx="${idx}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;cursor:pointer;" />
+                                        <button type="type" class="btn btn-danger btn-sm spct-thumb-delete position-absolute top-0 end-0 d-none" data-idx="${idx}" style="z-index:2;padding:0.05px 0.05px;">
+                                            <i class="bx bx-trash"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-light btn-sm spct-thumb-view position-absolute bottom-0 end-0 d-none" data-idx="${idx}" style="z-index:2;padding:0.05px 0.05px;">
+                                            <i class="bx bx-show"></i>
+                                        </button>
+                                    </div>
+                                `;
+                            });
+                            imageContainer.html(imgHtml);
+                        } else {
+                            // Nếu không có ảnh, xóa imageContainer
+                            imageContainer.empty();
+                        }
+                    }
+                }
+            });
         }
 
-        // Xử lý xóa dòng
+        // Khi thay đổi các trường thông tin thì sẽ cập nhật thông tin SPCT hiện có
+        $(document).ready(function() {
+            $('select[name="SanPhamId"], select[name="ThuongHieuId"], select[name="ChatLieuId"], select[name="DeGiayId"], #trangThaiSelect').on('change', function() {
+                const tbody = $('#productDetailList');
+                const existingRows = tbody.find('tr');
+
+                // Nếu đã có SPCT trong bảng, cập nhật thông tin thay vì tạo mới
+                if (existingRows.length > 0 && selectedColors.length > 0 && selectedSizes.length > 0) {
+                    updateExistingProductDetails();
+                } else if (selectedColors.length > 0 && selectedSizes.length > 0) {
+                    // Nếu chưa có SPCT nào, tạo mới như bình thường
+                    generateProductDetails();
+                }
+            });
+        });
+
+        // Xử lý xóa dòng spct mới
         $(document).on('click', '.delete-row', function() {
             let row = $(this).closest('tr');
             let groupKey = row.data('color-group');
@@ -642,7 +954,6 @@
             let colorGroupKey = $('#modalUploadImage').data('colorGroupKey');
             spctImages[colorGroupKey].splice(idx, 1);
             renderSpctImagePreview(colorGroupKey);
-            $('#spctImageCount').text(`${spctImages[colorGroupKey].length} file(s)`);
         });
 
         // Lưu ảnh vào nhóm SPCT
@@ -675,9 +986,183 @@
             $('#modalUploadImage').modal('hide');
         });
 
+        // Xử lý xóa ảnh thumbnail
+        $(document).on('click', '.spct-thumb-delete', function(e) {
+            e.stopPropagation();
+            let idx = $(this).data('idx');
+            let colorGroupKey = $(this).closest('tr').data('color-group');
+            
+            // Xóa ảnh khỏi mảng spctImages
+            if (spctImages[colorGroupKey]) {
+                spctImages[colorGroupKey].splice(idx, 1);
+            }
+            
+            // Xóa thumbnail
+            $(this).closest('.spct-thumb-wrapper').remove();
+        });
+
+        // Xử lý xem preview ảnh
+        $(document).on('click', '.spct-thumb-view', function(e) {
+            e.stopPropagation();
+            let imgSrc = $(this).closest('.spct-thumb-wrapper').find('.spct-thumb-img').attr('src');
+            $('#previewLargeImg').attr('src', imgSrc);
+            $('#modalPreviewImage').modal('show');
+        });
+
+
         // Khi bấm Hoàn tất, Sửa giá, Sửa số lượng
+        // $('#btnHoanTat').on('click', async function(e) {
+        //     e.preventDefault();
+        //     // Kiểm tra các trường bắt buộc
+        //     const sanPhamId = $('select[name="SanPhamId"]').val();
+        //     const thuongHieuId = $('select[name="ThuongHieuId"]').val();
+        //     const chatLieuId = $('select[name="ChatLieuId"]').val();
+        //     const deGiayId = $('select[name="DeGiayId"]').val();
+        //     if (!sanPhamId || !thuongHieuId || !chatLieuId || !deGiayId) {
+        //         Swal.fire('Lỗi', 'Vui lòng chọn đầy đủ thông tin sản phẩm chi tiết', 'error');
+        //         return;
+        //     }
+        //     if (selectedColors.length === 0 || selectedSizes.length === 0) {
+        //         Swal.fire('Lỗi', 'Vui lòng chọn ít nhất một màu sắc và một kích thước', 'error');
+        //         return;
+        //     }
+
+        //     let trs = $('#productDetailList tr');
+        //     if (trs.length === 0) {
+        //         Swal.fire('Lỗi', 'Chưa có sản phẩm chi tiết nào!', 'error');
+        //         return;
+        //     }
+
+        //     // Tạo mảng dữ liệu JSON
+        //     let items = [];
+        //     let hasError = false;
+        //     trs.each(function() {
+        //         let $tr = $(this);
+        //         let spctName = `${$tr.data('sanpham-name') || 'Không xác định'} (${$tr.data('mausac-name') || 'Không xác định'}, ${$tr.data('kichthuoc-name') || 'Không xác định'})`;
+        //         let item = {
+        //             SanPhamId: $tr.data('sanpham-id') || sanPhamId,
+        //             ThuongHieuId: $tr.data('thuonghieu-id') || thuongHieuId,
+        //             ChatLieuId: $tr.data('chatlieu-id') || chatLieuId,
+        //             DeGiayId: $tr.data('degiay-id') || deGiayId,
+        //             MauSacId: $tr.data('mausac-id'),
+        //             KichThuocId: $tr.data('kichthuoc-id'),
+        //             SoLuong: parseInt($tr.find('.quantity-input').val()) || 0,
+        //             Gia: parseInt($tr.find('.price-input').val().replace(/\./g, '')) || 0,
+        //             TrangThai: $('#trangThaiSelect').val() === "true",
+        //             SanPhamName: $tr.data('sanpham-name') || 'Không xác định',
+        //             MauSacName: $tr.data('mausac-name') || 'Không xác định',
+        //             KichThuocName: $tr.data('kichthuoc-name') || 'Không xác định',
+        //             SpctName: spctName
+        //         };
+
+        //         if (!item.MauSacId || !item.KichThuocId) {
+        //             Swal.fire('Lỗi', `Lỗi thêm màu sắc và kích thước cho SPCT ${spctName}`, 'error');
+        //             hasError = true;
+        //             return false;
+        //         }
+        //         if (isNaN(item.Gia) || isNaN(item.SoLuong)) {
+        //             Swal.fire('Lỗi', `Lỗi thêm giá và số lượng cho SPCT ${spctName}`, 'error');
+        //             hasError = true;
+        //             return false;
+        //         }
+        //         items.push(item);
+        //     });
+
+        //     if (hasError) return;
+
+        //     try {
+        //         // Hiển thị loading
+        //         Swal.fire({
+        //             title: 'Đang xử lý...',
+        //             text: 'Vui lòng đợi trong giây lát',
+        //             allowOutsideClick: false,
+        //             didOpen: () => {
+        //                 Swal.showLoading();
+        //             }
+        //         });
+
+        //         // Gửi yêu cầu tạo SPCT
+        //         let response = await $.ajax({
+        //             url: '/SPCT/CreateMultiple',
+        //             type: 'POST',
+        //             contentType: 'application/json',
+        //             data: JSON.stringify(items)
+        //         });
+
+        //         if (!response.success) {
+        //             throw new Error(response.message || 'Có lỗi khi tạo sản phẩm chi tiết');
+        //         }
+
+        //         // Upload ảnh cho từng SPCT
+        //         let uploadErrors = [];
+        //         for (let i = 0; i < items.length; i++) {
+        //             const item = items[i];
+        //             const colorGroupKey = `${item.SanPhamId}-${item.MauSacId}`;
+        //             const files = spctImages[colorGroupKey] || [];
+
+        //             if (files.length > 0) {
+        //                 const sanPhamChiTietId = response.data[i]?.id;
+        //                 if (!sanPhamChiTietId) {
+        //                     uploadErrors.push(`Lỗi không tìm thấy SPCT ${item.SpctName} để upload ảnh`);
+        //                     continue;
+        //                 }
+
+        //                 const uploadData = new FormData();
+        //                 uploadData.append('sanPhamChiTietId', sanPhamChiTietId);
+        //                 files.forEach(file => {
+        //                     uploadData.append('files', file);
+        //                 });
+
+        //                 try {
+        //                     const uploadResponse = await $.ajax({
+        //                         url: '/SPCT/UploadImages',
+        //                         type: 'POST',
+        //                         data: uploadData,
+        //                         processData: false,
+        //                         contentType: false
+        //                     });
+
+        //                     if (!uploadResponse.success) {
+        //                         uploadErrors.push(`Lỗi upload ảnh cho SPCT ${item.SpctName}`);
+        //                     }
+        //                 } catch (uploadError) {
+        //                     uploadErrors.push(`Lỗi upload ảnh cho SPCT ${item.SpctName}`);
+        //                 }
+        //             }
+        //         }
+
+        //         // Hiển thị kết quả
+        //         let message = response.message || 'Tạo mới sản phẩm chi tiết thành công!';
+        //         if (uploadErrors.length > 0) {
+        //             message += `\nLỗi upload ảnh: ${uploadErrors.join('; ')}`;
+        //             Swal.fire('Cảnh báo', message, 'warning').then(() => {
+        //                 window.location.href = '/SanPham/Index';
+        //             });
+        //         } else {
+        //             Swal.fire('Thành công', message, 'success').then(() => {
+        //                 window.location.href = '/SanPham/Index';
+        //             });
+        //         }
+        //     } catch (error) {
+        //         console.error('Lỗi khi tạo SPCT:', error);
+        //         let errorMsg = 'Có lỗi khi tạo sản phẩm chi tiết!';
+        //         if (error.responseJSON && error.responseJSON.message) {
+        //             // Kiểm tra nếu lỗi liên quan đến trùng lặp
+        //             if (error.responseJSON.message.toLowerCase().includes('tồn tại') ||
+        //                 error.responseJSON.message.toLowerCase().includes('already exists')) {
+        //                 errorMsg = 'Sản phẩm chi tiết này đã tồn tại';
+        //             } else {
+        //                 errorMsg = error.responseJSON.message; // Giữ lỗi chi tiết nếu không phải trùng lặp
+        //             }
+        //         } else if (error.message) {
+        //             errorMsg = error.message; // Gán thông báo lỗi cơ bản nếu không có dữ liệu JSON từ server
+        //         }
+        //         Swal.fire('Lỗi', errorMsg, 'error');
+        //     }
+        // });
         $('#btnHoanTat').on('click', async function(e) {
             e.preventDefault();
+
             // Kiểm tra các trường bắt buộc
             const sanPhamId = $('select[name="SanPhamId"]').val();
             const thuongHieuId = $('select[name="ThuongHieuId"]').val();
@@ -745,23 +1230,22 @@
                 });
 
                 if (!response.success) {
-                    throw new Error(response.message || 'Có lỗi khi tạo sản phẩm chi tiết');
+                    throw new Error(response.message || 'Có lỗi khi tạo sản phẩm chi tiết!');
                 }
 
-                // Upload ảnh cho từng SPCT
-                let uploadPromises = [];
-                let uploadErrors = [];
-                
+                // Upload ảnh với kiểm tra lỗi duy nhất
+                let hasError = false;
+
                 for (let i = 0; i < items.length; i++) {
                     const item = items[i];
                     const colorGroupKey = `${item.SanPhamId}-${item.MauSacId}`;
                     const files = spctImages[colorGroupKey] || [];
-                    
-                    if (files.length > 0) {
+
+                    if (files.length > 0 && !hasError) {
                         const sanPhamChiTietId = response.data[i]?.id;
                         if (!sanPhamChiTietId) {
-                            console.error(`Không tìm thấy ID SPCT cho item ${i}:`, response.data[i]);
-                            uploadErrors.push(`Lỗi không tìm thấy ID sản phẩm chi tiết để upload ảnh dòng ${i + 1}`);
+                            console.error('Lỗi upload ảnh cho SPCT: Không tìm thấy ID sản phẩm chi tiết');
+                            hasError = true;
                             continue;
                         }
 
@@ -781,20 +1265,19 @@
                             });
 
                             if (!uploadResponse.success) {
-                                console.error(`Lỗi upload ảnh cho SPCT ${sanPhamChiTietId}:`, uploadResponse);
-                                uploadErrors.push(`Lỗi thêm ảnh dòng ${i + 1}`);
+                                console.error('Lỗi upload ảnh cho SPCT: Upload không thành công');
+                                hasError = true;
                             }
                         } catch (uploadError) {
-                            console.error(`Lỗi upload ảnh cho SPCT ${sanPhamChiTietId}:`, uploadError);
-                            uploadErrors.push(`Lỗi thêm ảnh dòng ${i + 1}`);
+                            console.error('Lỗi upload ảnh cho SPCT: Lỗi kết nối hoặc server');
+                            hasError = true;
                         }
                     }
                 }
 
                 // Hiển thị kết quả
                 let message = response.message || 'Tạo mới sản phẩm chi tiết thành công!';
-                if (uploadErrors.length > 0) {
-                    message += `\nLỗi upload ảnh: ${uploadErrors.join('; ')}`;
+                if (hasError) {
                     Swal.fire('Cảnh báo', message, 'warning').then(() => {
                         window.location.href = '/SPCT/Index';
                     });
@@ -811,11 +1294,6 @@
                 }
                 Swal.fire('Lỗi', errorMsg, 'error');
             }
-        });
-
-        // Xóa dòng sản phẩm chi tiết
-        $(document).on('click', '.delete-row', function() {
-            $(this).closest('tr').remove();
         });
 
         // Xử lý nút thêm kích thước mới
@@ -984,11 +1462,29 @@
                 Swal.fire('Lỗi', 'Chưa có sản phẩm chi tiết nào để sửa!', 'error');
                 return;
             }
-            // Lấy giá và số lượng đầu tiên để fill vào modal (nếu có)
-            let firstPrice = $('#productDetailList .price-input').first().val() || '';
-            let firstQuantity = $('#productDetailList .quantity-input').first().val() || '';
+
+            // Lấy danh sách các sản phẩm được chọn
+            let selectedRows = $('.row-check:checked').closest('tr');
+            let isAllChecked = $('#checkAll').is(':checked') || selectedRows.length === 0;
+
+            // Lấy giá và số lượng để fill vào modal
+            let firstPrice, firstQuantity;
+            if (isAllChecked) {
+                firstPrice = $('#productDetailList .price-input').first().val() || '';
+                firstQuantity = $('#productDetailList .quantity-input').first().val() || '';
+            } else {
+                firstPrice = selectedRows.find('.price-input').first().val() || '';
+                firstQuantity = selectedRows.find('.quantity-input').first().val() || '';
+            }
+
+            // Fill giá và số lượng vào modal
             $('#editAllPrice').val(formatMoney(firstPrice));
             $('#editAllQuantity').val(firstQuantity);
+
+            // Lưu trạng thái chọn vào modal
+            $('#modalEditPriceQuantity').data('isAllChecked', isAllChecked);
+            $('#modalEditPriceQuantity').data('selectedRows', selectedRows);
+
             $('#modalEditPriceQuantity').modal('show');
         });
         // Định dạng tiền khi nhập
@@ -1005,6 +1501,9 @@
         $('#btnApplyEditAll').on('click', function() {
             let price = $('#editAllPrice').val().replace(/\./g, '');
             let quantity = $('#editAllQuantity').val();
+            let isAllChecked = $('#modalEditPriceQuantity').data('isAllChecked');
+            let selectedRows = $('#modalEditPriceQuantity').data('selectedRows');
+
             if (!price || isNaN(price) || parseInt(price) <= 0) {
                 Swal.fire('Lỗi', 'Vui lòng nhập giá hợp lệ!', 'error');
                 return;
@@ -1013,14 +1512,25 @@
                 Swal.fire('Lỗi', 'Vui lòng nhập số lượng hợp lệ!', 'error');
                 return;
             }
-            // Cập nhật tất cả các input
-            $('#productDetailList .price-input').each(function() {
-                $(this).val(formatMoney(price));
-            });
-            $('#productDetailList .quantity-input').each(function() {
-                $(this).val(quantity);
-            });
+
+            if (isAllChecked) {
+                // Cập nhật tất cả sản phẩm
+                $('#productDetailList .price-input').each(function() {
+                    $(this).val(formatMoney(price));
+                });
+                $('#productDetailList .quantity-input').each(function() {
+                    $(this).val(quantity);
+                });
+            } else {
+                // Cập nhật chỉ các sản phẩm được chọn
+                selectedRows.each(function() {
+                    $(this).find('.price-input').val(formatMoney(price));
+                    $(this).find('.quantity-input').val(quantity);
+                });
+            }
+
             $('#modalEditPriceQuantity').modal('hide');
+            Swal.fire('Thành công', 'Cập nhật giá và số lượng thành công!', 'success');
         });
         // Khi submit form, chuyển giá về dạng số (bỏ dấu .)
         $(document).on('submit', '#create-form', function() {
@@ -1046,6 +1556,46 @@
             value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
             $(this).val(value);
         });
+
+        // PHÂN TRANG CHI TIẾT SẢN PHẨM 
+        function renderProductDetailPagination() {
+            var $rows = $('#productDetailList tr');
+            var rowsPerPage = 6;
+            var totalPages = Math.ceil($rows.length / rowsPerPage);
+            var currentPage = 1;
+
+            function showPage(page) {
+                $rows.hide();
+                $rows.slice((page - 1) * rowsPerPage, page * rowsPerPage).show();
+                $('#productDetailPagination .page-link').removeClass('active');
+                $('#productDetailPagination .page-link[data-page="' + page + '"]').addClass('active');
+            }
+
+            function renderPagination() {
+                if (totalPages <= 1) {
+                    $('#productDetailPagination').empty();
+                    return;
+                }
+                var html = '<nav><ul class="pagination justify-content-end">';
+                for (var i = 1; i <= totalPages; i++) {
+                    html += '<li class="page-item"><a class="page-link' + (i === 1 ? ' active' : '') + '" href="#" data-page="' + i + '">' + i + '</a></li>';
+                }
+                html += '</ul></nav>';
+                $('#productDetailPagination').html(html);
+            }
+
+            renderPagination();
+            showPage(currentPage);
+
+            $('#productDetailPagination').off('click').on('click', '.page-link', function (e) {
+                e.preventDefault();
+                var page = parseInt($(this).data('page'));
+                if (page !== currentPage) {
+                    currentPage = page;
+                    showPage(currentPage);
+                }
+            });
+        }
     </script>
 }
 
@@ -1263,7 +1813,6 @@
                         <i class="bx bx-plus"></i> Thêm ảnh
                     </label>
                     <input type="file" id="spctImageInput" multiple accept="image/*" class="d-none" />
-                    <span id="spctImageCount" class="ms-2"></span>
                 </div>
                 <div id="spctImagePreview" class="d-flex flex-wrap gap-2"></div>
             </div>
@@ -1279,8 +1828,11 @@
 <div class="modal fade" id="modalPreviewImage" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
             <div class="modal-body text-center">
-                <img id="previewLargeImg" src="" style="max-width:100%;max-height:70vh;border-radius:8px;" />
+                <img id="previewLargeImg" src="" style="max-width:100%; max-height:70vh; border-radius:8px;  padding-bottom: 24px;" />
             </div>
         </div>
     </div>

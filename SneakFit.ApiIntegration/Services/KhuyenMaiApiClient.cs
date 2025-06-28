@@ -131,7 +131,8 @@ namespace SneakFit.ApiIntegration.Services
                     return apiResult.ResultObj;
                 }
 
-                throw new Exception("Không thể cập nhật khuyến mại");
+                // Lấy lỗi chi tiết từ API và ném ra
+                throw new Exception(result);
             }
             catch (Exception ex)
             {

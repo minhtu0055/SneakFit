@@ -27,5 +27,8 @@ namespace SneakFit.Application.Catalog.SanPham
         // Thêm các phương thức xử lý ảnh
         Task<bool> UploadImages(UploadImageRequest request);
         Task<bool> DeleteImage(DeleteImageRequest request);
+
+        Task<List<SPCTViewModels>> GetSPCTByListIds(List<Guid> ids);
+        Task<List<SPCTViewModels>> GetSPCTBySanPhamId(Guid sanPhamId);
     }
 }
