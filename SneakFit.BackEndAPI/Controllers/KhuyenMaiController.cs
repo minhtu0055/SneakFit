@@ -40,19 +40,34 @@ namespace SneakFit.BackEndAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(new ApiErrorResult<KhuyenMaiViewModels>());
 
-            var result = await _khuyenMaiService.Create(request);
-            return CreatedAtAction(nameof(GetById), new { id = result.Id }, new ApiSuccessResult<KhuyenMaiViewModels>(result));
+            try
+            {
+                var result = await _khuyenMaiService.Create(request);
+                return CreatedAtAction(nameof(GetById), new { id = result.Id }, new ApiSuccessResult<KhuyenMaiViewModels>(result));
+            }
+            catch (Exception ex)
+            {
+                // Trả về message lỗi ngắn gọn
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPut("Edit/{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] SuaKhuyenMai request)
         {
-           
             if (!ModelState.IsValid)
                 return BadRequest(new ApiErrorResult<KhuyenMaiViewModels>());
             request.Id = id;
-            var result = await _khuyenMaiService.Update(request);
-            return Ok(new ApiSuccessResult<KhuyenMaiViewModels>(result));
+            try
+            {
+                var result = await _khuyenMaiService.Update(request);
+                return Ok(new ApiSuccessResult<KhuyenMaiViewModels>(result));
+            }
+            catch (Exception ex)
+            {
+                // Trả về message lỗi ngắn gọn
+                return BadRequest(new { message = ex.Message });
+            }
         }
         [HttpPatch("{id}/TrangThai")]
         public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] TrangThaiGiamGia trangThai)

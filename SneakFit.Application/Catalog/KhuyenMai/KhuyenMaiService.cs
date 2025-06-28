@@ -43,6 +43,29 @@ namespace SneakFit.Application.Catalog.KhuyenMai
             if (request.ThoiGianKetThuc <= request.ThoiGianBatDau)
                 throw new Exception("Ngày kết thúc phải sau ngày bắt đầu");
 
+
+            // KIỂM TRA TRÙNG SẢN PHẨM CHI TIẾT ĐANG CÓ KHUYẾN MẠI CÒN HIỆU LỰC
+            foreach (var spctId in request.SanPhamIds)
+            {
+                var kmcts = await _context.KhuyenMaiChiTiet
+                    .Where(x => x.SPCTId == spctId)
+                    .ToListAsync();
+
+                foreach (var kmct in kmcts)
+                {
+                    var km = await _context.KhuyenMai.FindAsync(kmct.KhuyenMaiId);
+                    if (km == null) continue;
+                    if (km.TrangThai == TrangThaiGiamGia.HetHan) continue;
+
+                    // Kiểm tra thời gian giao nhau
+                    bool isOverlap = !(request.ThoiGianKetThuc <= km.ThoiGianBatDau || request.ThoiGianBatDau >= km.ThoiGianKetThuc);
+                    if (isOverlap)
+                    {
+                        throw new Exception($"Sản phẩm chi tiết đã nằm trong khuyến mại '{km.TenKhuyenMai}' từ {km.ThoiGianBatDau:dd/MM/yyyy HH:mm} đến {km.ThoiGianKetThuc:dd/MM/yyyy HH:mm}!");
+                    }
+                }
+            }
+
             var khuyenMai = new Data.Entities.KhuyenMai()
             {
                 Id = Guid.NewGuid(),
@@ -283,6 +306,29 @@ namespace SneakFit.Application.Catalog.KhuyenMai
             }
             if (request.ThoiGianKetThuc <= request.ThoiGianBatDau)
                 throw new Exception("Ngày kết thúc phải sau ngày bắt đầu");
+
+            // KIỂM TRA TRÙNG SẢN PHẨM CHI TIẾT ĐANG CÓ KHUYẾN MẠI CÒN HIỆU LỰC (TRỪ CHÍNH KM ĐANG SỬA)
+            foreach (var spctId in request.SanPhamIds)
+            {
+                var kmcts = await _context.KhuyenMaiChiTiet
+                    .Where(x => x.SPCTId == spctId)
+                    .ToListAsync();
+
+                foreach (var kmct in kmcts)
+                {
+                    var km = await _context.KhuyenMai.FindAsync(kmct.KhuyenMaiId);
+                    if (km == null) continue;
+                    if (km.Id == request.Id) continue; // Bỏ qua chính khuyến mại đang sửa
+                    if (km.TrangThai == TrangThaiGiamGia.HetHan) continue;
+
+                    // Kiểm tra thời gian giao nhau
+                    bool isOverlap = !(request.ThoiGianKetThuc <= km.ThoiGianBatDau || request.ThoiGianBatDau >= km.ThoiGianKetThuc);
+                    if (isOverlap)
+                    {
+                        throw new Exception($"Sản phẩm chi tiết đã nằm trong khuyến mại '{km.TenKhuyenMai}' từ {km.ThoiGianBatDau:dd/MM/yyyy HH:mm} đến {km.ThoiGianKetThuc:dd/MM/yyyy HH:mm}!");
+                    }
+                }
+            }
 
             khuyenMai.TenKhuyenMai = request.TenKhuyenMai;
             khuyenMai.MoTa = request.MoTa;

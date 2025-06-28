@@ -12,8 +12,8 @@ using SneakFit.Data.EF;
 namespace SneakFit.Data.Migrations
 {
     [DbContext(typeof(SneakFitDbContext))]
-    [Migration("20250607134334_update1")]
-    partial class update1
+    [Migration("20250627033422_ThongKe")]
+    partial class ThongKe
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -246,7 +246,7 @@ namespace SneakFit.Data.Migrations
                         {
                             Id = new Guid("69bd714f-9576-45ba-b5b7-f00649be00de"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "48040758-b14e-4baf-a3b0-2423d387c371",
+                            ConcurrencyStamp = "d1c625e9-4e44-4dd6-9d63-0cd55d116f3e",
                             Email = "tupmph49568@gmail.com",
                             EmailConfirmed = true,
                             GioiTinh = false,
@@ -255,7 +255,7 @@ namespace SneakFit.Data.Migrations
                             NgaySinh = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NormalizedEmail = "tupmph49568@gmail.com",
                             NormalizedUserName = "Admin",
-                            PasswordHash = "AQAAAAIAAYagAAAAEJD/sFjx7n3q1dr9QJN2cv2yFOPgrPst1GRacmKX853aNMnZ9VN0huZaNS1E+vmyxA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEKzr1qnKoifcBCNlivs516l/BCi5+Ru8Gz1RAuD0Ep4Fby+a1PaEtV2sdpcsBnq0Sg==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
                             TrangThai = true,
@@ -311,12 +311,12 @@ namespace SneakFit.Data.Migrations
                         new
                         {
                             Id = new Guid("8f4d4a5e-2bfa-4e8c-9d2c-3f6a7e9b87cb"),
-                            TenDanhMuc = "Giày Chạy Bộ"
+                            TenDanhMuc = "Sneaker"
                         },
                         new
                         {
                             Id = new Guid("8f8d4a6e-2bfa-4e8c-9d2c-3f6a7e9b87cb"),
-                            TenDanhMuc = "Giày Đá Bóng"
+                            TenDanhMuc = "SneakFit"
                         });
                 });
 
@@ -598,6 +598,9 @@ namespace SneakFit.Data.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<DateTime?>("NgaySuaDoi")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("NgayTao")
                         .HasColumnType("datetime2");
 
@@ -627,6 +630,9 @@ namespace SneakFit.Data.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("KhuyenMaiId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SPCTId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("SanPhamId")
@@ -691,13 +697,13 @@ namespace SneakFit.Data.Migrations
                         {
                             Id = new Guid("8f4d4a5e-2bfa-2e8c-9d2c-3f6a7e9b87cb"),
                             MaMauSac = "#FF0000",
-                            TenMauSac = "Đen"
+                            TenMauSac = "Đỏ"
                         },
                         new
                         {
                             Id = new Guid("8f8d4a5e-2bfa-4e9c-9d2c-3f6a7e9b87cb"),
                             MaMauSac = "#FFFFFF",
-                            TenMauSac = "Đỏ"
+                            TenMauSac = "Trắng"
                         });
                 });
 
