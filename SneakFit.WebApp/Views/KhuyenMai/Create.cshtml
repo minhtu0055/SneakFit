@@ -18,14 +18,14 @@
                         <label asp-for="TenKhuyenMai" class="col-sm-3 col-form-label">Tên khuyến mại</label>
                         <div class="col-sm-9">
                             <input asp-for="TenKhuyenMai" class="form-control" placeholder="Nhập tên khuyến mãi..." />
-                            <span asp-validation-for="TenKhuyenMai" class="text-danger"></span>
+                            <span class="text-danger"></span>
                         </div>
                     </div>
                     <div class="mb-3 row">
                         <label asp-for="MoTa" class="col-sm-3 col-form-label">Mô tả</label>
                         <div class="col-sm-9">
                             <textarea asp-for="MoTa" rows="5" class="form-control" placeholder="Nhập mô tả khuyến mãi..."></textarea>
-                            <span asp-validation-for="MoTa" class="text-danger"></span>
+                            <span class="text-danger"></span>
                         </div>
                     </div>
                     <div class="mb-3 row">
@@ -33,56 +33,74 @@
                         <div class="col-sm-9">
                             <select asp-for="LoaiGiamGia" asp-items="@ViewBag.LoaiGiamGia" class="form-select">
                             </select>
-                            <span asp-validation-for="LoaiGiamGia" class="text-danger"></span>
+                            <span class="text-danger"></span>
                         </div>
                     </div>
-
                     <div class="mb-3 row">
                         <label asp-for="GiaTriGiamGia" class="col-sm-3 col-form-label">Giá trị giảm</label>
                         <div class="col-sm-9">
                             <div class="input-group">
-                                <input asp-for="GiaTriGiamGia" class="form-control" placeholder="Nhập giá trị giảm..." />
+                                <input asp-for="GiaTriGiamGia" type="number" min="0" step="1" class="form-control gia-tri-giam-input" placeholder="Nhập giá trị giảm..." />
                                 <span class="input-group-text discount-unit">VNĐ</span>
                             </div>
-                            <span asp-validation-for="GiaTriGiamGia" class="text-danger"></span>
+                            <span class="text-danger d-block mt-1"></span> @* <-- THÊM class "d-block" và "mt-1" *@
                         </div>
                     </div>
                     <div class="mb-3 row">
                         <label asp-for="ThoiGianBatDau" class="col-sm-3 col-form-label">Ngày bắt đầu</label>
                         <div class="col-sm-9">
                             <input asp-for="ThoiGianBatDau" type="datetime-local" class="form-control" />
-                            <span asp-validation-for="ThoiGianBatDau" class="text-danger"></span>
+                            <span class="text-danger"></span>
                         </div>
                     </div>
                     <div class="mb-3 row">
                         <label asp-for="ThoiGianKetThuc" class="col-sm-3 col-form-label">Ngày kết thúc</label>
                         <div class="col-sm-9">
                             <input asp-for="ThoiGianKetThuc" type="datetime-local" class="form-control" />
-                            <span asp-validation-for="ThoiGianKetThuc" class="text-danger"></span>
-                        </div>
-                    </div>                   
-                    <div class="mb-3 row">
-                        <label class="col-sm-3 col-form-label">Sản phẩm áp dụng</label>
-                        <div class="col-sm-9">
-                            <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
-                                <table class="table table-bordered">
-                                    <thead style="position: sticky; top: 0; background-color: white; z-index: 1;">
-                                        <tr>
-                                            <th>CHỌN</th>
-                                            <th>ẢNH</th>
-                                            <th>TÊN</th>
-                                            <th>GIÁ</th>
-                                            <th>DANH MỤC</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                       
-                                        
-                                    </tbody>
-                                </table>
-                            </div>
+                            <span class="text-danger"></span>
                         </div>
                     </div>
+
+                    <div class="mb-3 row">
+                        <label class="col-sm-3 col-form-label">Sản phẩm áp dụng</label>
+                        <div class="mb-3">
+                            <label class="form-label">Tên sản phẩm</label>
+                            <div class="input-group">
+                                <select id="sanPhamSelect" class="form-select" asp-items="@ViewBag.SanPhams" style="border-radius: 8px">
+                                    <option value="">-- Chọn sản phẩm --</option>
+                                </select>
+                                @* <button type="button" class="btn btn-primary ms-2" style="border-radius: 8px; width: 40px; height: 40px; padding: 0;" onclick="openAddSanPhamModal()"> *@
+                                @*     <i class="bx bx-plus"></i> *@
+                                @* </button> *@
+                            </div>  
+                            <span class="text-danger"></span>
+                        </div>
+                    </div>
+                   @* <input type="hidden" name="SanPhamIds" id="sanPhamChiTietIdsInput" />*@
+                    <div id="hiddenInputsContainer"></div>
+
+                    <!-- Phần Chi tiết sản phẩm -->
+                    <div class="section-block mb-4" style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
+                        <h5 class="mb-4" style="text-align: center;">CHI TIẾT SẢN PHẨM</h5>
+                        <div class="table-responsive" style="border-radius: 8px">
+                            <table class="table table-hover" id="productDetailList">
+                                <thead style="background-color: mediumpurple; color: white;">
+                                    <tr>
+                                        <th style="width: 30px;"><input type="checkbox" id="checkAllProducts" /></th>
+                                        <th style="width: 30px">STT</th>
+                                        <th>Tên sản phẩm</th>
+                                        <th style="width: 112px">Số lượng</th>
+                                        <th style="width: 205px">Giá bán</th>
+                                        <th style="width: 123px">Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Dữ liệu sẽ được thêm vào bằng JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
                     <div class="mb-3 row">
                         <div class="col-sm-9 offset-sm-8">
                             <button type="submit" class="btn btn-primary me-4">
@@ -98,69 +116,297 @@
         </div>
     </div>
 </div>
+
 @section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/additional-methods.min.js"></script>
+
     <script>
+
+        let allProductDetails = [];
+        let currentPage = 1;
+        const pageSize = 5; // Số sản phẩm chi tiết trên 1 trang, bạn có thể đổi số này
         $(document).ready(function () {
-            // Cập nhật đơn vị giảm giá khi thay đổi loại giảm giá
+            let selectedSpctIds = []; // Mảng mới để lưu các ID của sản phẩm chi tiết được chọn
+            let spctPrices = {}; // key: spctId, value: giá bán
+
+                function updateHiddenInputs() {
+            $('#hiddenInputsContainer').empty();
+            selectedSpctIds.forEach(function(id) {
+                $('#hiddenInputsContainer').append('<input type="hidden" name="SanPhamIds" value="' + id + '" />');
+            });
+        }
+
+
             function capNhatLoaiGiamGia() {
                 var loaiGiamGia = $("#LoaiGiamGia").val();
                 var unit = loaiGiamGia == "@((int)LoaiGiamGia.PhamTram)" ? "%" : "VNĐ";
                 $(".discount-unit").text(unit);
-            }           
+            }
             $("#LoaiGiamGia").change(capNhatLoaiGiamGia);
             capNhatLoaiGiamGia();
-            
-            // Validate form
+
+            // Xử lý sự kiện khi checkbox "Chọn tất cả" thay đổi
+                    $('#checkAllProducts').on('change', function () {
+            if ($(this).prop('checked')) {
+                // Lấy tất cả id của allProductDetails
+                selectedSpctIds = allProductDetails.map(x => x.id);
+            } else {
+                selectedSpctIds = [];
+            }
+            // Render lại bảng để cập nhật trạng thái checkbox trên trang hiện tại
+            renderProductDetailsTable(allProductDetails, currentPage);
+            updateHiddenInputs();
+        });
+
+            // Xử lý sự kiện khi checkbox của từng sản phẩm thay đổi
+                    $('#productDetailList tbody').on('change', '.product-checkbox', function () {
+            let spctId = $(this).data('id');
+            if ($(this).is(':checked')) {
+                if (!selectedSpctIds.includes(spctId)) {
+                    selectedSpctIds.push(spctId);
+                }
+            } else {
+                selectedSpctIds = selectedSpctIds.filter(id => id !== spctId);
+            }
+
+            // Kiểm tra nếu tất cả checkbox của trang hiện tại đều được chọn thì check "Chọn tất cả", ngược lại bỏ check
+            let pageData = allProductDetails.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+            let allChecked = pageData.every(item => selectedSpctIds.includes(item.id));
+            $('#checkAllProducts').prop('checked', allChecked);
+
+            updateHiddenInputs();
+        });
+
             $("#create-form").validate({
                 rules: {
-                    Name: {
-                        required: true,
-                        minlength: 3
-                    },
-                    StartDate: {
-                        required: true
-                    },
-                    EndDate: {
-                        required: true
-                    },
-                    DiscountValue: {
-                        required: true,
-                        min: 0
-                    },
-                    MinimumOrderValue: {
-                        required: true,
-                        min: 0
-                    },
-                    "ProductIds": {
-                        required: true,
-                        minlength: 1
-                    }
+                    TenKhuyenMai: { required: true, minlength: 3 },
+                    MoTa: { required: true },
+                    LoaiGiamGia: { required: true },
+                    GiaTriGiamGia: { required: true, min: 0, number: true, maxDiscountPercent: true, maxDiscountAmount: true },
+                    ThoiGianBatDau: { required: true },
+                    ThoiGianKetThuc: { required: true, greaterThan: "#ThoiGianBatDau" },
+                    SanPhamIds: { required: true, minlength: 1 } // Đã sửa tên trường
                 },
                 messages: {
-                    Name: {
-                        required: "Vui lòng nhập tên khuyến mãi",
-                        minlength: "Tên khuyến mãi phải có ít nhất 3 ký tự"
+                    TenKhuyenMai: {
+                        required: "Vui lòng điền tên khuyến mãi.",
+                        minlength: "Tên khuyến mãi phải có ít nhất 3 ký tự."
                     },
-                    StartDate: {
-                        required: "Vui lòng chọn ngày bắt đầu"
+                    MoTa: {
+                        required: "Vui lòng điền mô tả khuyến mãi."
                     },
-                    EndDate: {
-                        required: "Vui lòng chọn ngày kết thúc"
+                    LoaiGiamGia: {
+                        required: "Vui lòng chọn loại giảm giá."
                     },
-                    DiscountValue: {
-                        required: "Vui lòng nhập giá trị giảm",
-                        min: "Giá trị giảm phải lớn hơn 0"
+                    GiaTriGiamGia: {
+                        required: "Vui lòng điền giá trị giảm.",
+                        min: "Giá trị giảm phải lớn hơn hoặc bằng 0.",
+                        number: "Giá trị giảm phải là một số hợp lệ."
                     },
-                    MinimumOrderValue: {
-                        required: "Vui lòng nhập giá trị đơn tối thiểu",
-                        min: "Giá trị đơn tối thiểu phải lớn hơn 0"
+                    ThoiGianBatDau: {
+                        required: "Vui lòng chọn ngày bắt đầu."
                     },
-                    "ProductIds": {
-                        required: "Vui lòng chọn ít nhất một sản phẩm",
-                        minlength: "Vui lòng chọn ít nhất một sản phẩm"
+                    ThoiGianKetThuc: {
+                        required: "Vui lòng chọn ngày kết thúc.",
+                        greaterThan: "Ngày kết thúc phải sau ngày bắt đầu."
+                    },
+                    SanPhamIds: { // Đã sửa tên trường
+                        required: "Vui lòng chọn ít nhất một sản phẩm áp dụng.",
+                        minlength: "Vui lòng chọn ít nhất một sản phẩm áp dụng."
                     }
+                },
+                 submitHandler: function (form) {
+                    form.submit(); // Gửi form sau khi cập nhật
+                },
+                // THÊM (HOẶC SỬA) ĐOẠN SAU ĐÂY
+                errorPlacement: function (error, element) {
+                    if (element.parent('.input-group').length) {
+                        // Nếu phần tử đang được validate nằm trong một .input-group
+                        error.insertAfter(element.parent('.input-group')); // Chèn thông báo lỗi sau div .input-group
+                        error.addClass('d-block mt-1'); // Đảm bảo nó hiển thị là block và có margin top
+                    } else if (element.attr("name") == "SanPhamChiTietIds") { // Xử lý lỗi cho trường ẩn
+                        error.insertAfter("#productDetailList"); // Chèn lỗi sau bảng
+                        error.addClass('d-block text-danger mt-1');
+                    }
+                    else {
+                        // Mặc định cho các phần tử khác (chèn sau chính phần tử)
+                        error.insertAfter(element);
+                    }
+                },
+
+            });
+
+            $.validator.addMethod("greaterThan", function (value, element, param) {
+                var $min = $(param);
+                if (this.settings.onfocusout) {
+                    $min.off(".validate-greaterThan").on("blur.validate-greaterThan", function () {
+                        $(element).valid();
+                    });
+                }
+                return parseInt(value.replace(/[^0-9]/g, '')) > parseInt($min.val().replace(/[^0-9]/g, ''));
+            }, "");
+
+            // Xử lý khi chọn sản phẩm từ combobox
+            $('#sanPhamSelect').on('change', function () {
+                let productName = $(this).find('option:selected').text(); // Lấy tên sản phẩm từ option được chọn
+                if (productName && productName !== '-- Chọn sản phẩm --') { // Đảm bảo không gọi API khi chọn option mặc định
+                    fetchProductDetailsByProductName(productName);
+                } else {
+                    $('#productDetailList tbody').empty(); // Xóa bảng nếu chọn lại option mặc định
+                    toastr.info('Vui lòng chọn một sản phẩm.');
                 }
             });
+
+            // Fetch product details from API
+            function fetchProductDetailsByProductName(productName) {
+                $.ajax({
+                    url: '/SanPham/GetSPCTByProductName', // Đã sửa API call
+                    type: 'GET',
+                    data: { productName: productName }, // Đã sửa tên tham số
+                    success: function (response) {
+                        if (response && response.length > 0) {
+                            renderProductDetailsTable(response, 1);
+                        } else {
+                            $('#productDetailList tbody').empty();
+                            toastr.warning('Không tìm thấy thông tin chi tiết sản phẩm cho tên này');
+                        }
+                    },
+                    error: function (xhr) {
+                        console.error('Lỗi khi gọi API chi tiết sản phẩm:', xhr);
+                        toastr.error('Lỗi khi lấy thông tin chi tiết sản phẩm');
+                    }
+                });
+            }
+
+            // Generate product details row
+                          function renderProductDetailsTable(data, page = 1) {
+                              currentPage = page;
+            let tbody = $('#productDetailList tbody');
+            tbody.empty();
+
+            // Lưu toàn bộ data vào biến toàn cục để dùng cho phân trang
+            allProductDetails = data;
+
+            // Tính toán phân trang
+            let start = (page - 1) * pageSize;
+            let end = start + pageSize;
+            let pageData = data.slice(start, end);
+
+            spctPrices = {}; // reset
+            pageData.forEach((item, idx) => {
+                spctPrices[item.id] = item.gia; // Lưu giá bán
+                // Nếu bạn có biến selectedSpctIds để lưu các id đã tick, hãy giữ lại trạng thái tick:
+                let checked = selectedSpctIds && selectedSpctIds.includes(item.id) ? 'checked' : '';
+                let row = `<tr>
+                    <td><input type="checkbox" class="product-checkbox" data-id="${item.id}" ${checked} /></td>
+                    <td>${start + idx + 1}</td>
+                    <td>${item.tenSanPham}</td>
+                    <td>${item.soLuong}</td>
+                    <td>${item.gia ? item.gia.toLocaleString('vi-VN') : 'N/A'} VNĐ</td>
+                    <td>${item.trangThai ? 'Đang kinh doanh' : 'Ngừng kinh doanh'}</td>
+                </tr>`;
+                tbody.append(row);
+            });
+
+            renderPagination(data.length, page);
+        }
+
+
+                  function renderPagination(totalItems, currentPage) {
+            let totalPages = Math.ceil(totalItems / pageSize);
+            let paginationHtml = '';
+
+            if (totalPages > 1) {
+                paginationHtml += '<nav><ul class="pagination justify-content-center">';
+                for (let i = 1; i <= totalPages; i++) {
+                    paginationHtml += `<li class="page-item${i === currentPage ? ' active' : ''}">
+                        <a class="page-link" href="#" data-page="${i}">${i}</a>
+                    </li>`;
+                }
+                paginationHtml += '</ul></nav>';
+            }
+
+            // XÓA PHÂN TRANG CŨ TRƯỚC KHI THÊM MỚI
+            $('#productDetailList').nextAll('nav').remove();
+            $('#productDetailList').after(paginationHtml);
+
+            // Gắn sự kiện click
+            $('.page-link').off('click').on('click', function (e) {
+                e.preventDefault();
+                let page = parseInt($(this).data('page'));
+                renderProductDetailsTable(allProductDetails, page);
+            });
+        }
+
+
+
+                // Format giá tiền khi nhập
+                $(document).on('input', '.price-input', function () {
+                    let value = $(this).val().replace(/\D/g, '');
+                    if (value) {
+                        value = parseInt(value).toLocaleString('vi-VN');
+                    }
+                    $(this).val(value);
+                });
+            });
+
+            function openAddSanPhamModal() {
+                alert('Chức năng thêm sản phẩm mới sẽ được tích hợp tại đây!');
+                // Thêm logic gọi API hoặc modal sau
+            }
+
+        // Xử lý khi nhập vào trường Giá trị giảm để chỉ cho phép số nguyên dương
+        $(document).on('input', '.gia-tri-giam-input', function () {
+            let value = $(this).val();
+            // Loại bỏ tất cả các ký tự không phải số
+            value = value.replace(/[^0-9]/g, '');
+            // Chuyển đổi sang số nguyên và đảm bảo không âm
+            value = parseInt(value);
+            if (isNaN(value) || value < 0) {
+                value = 0; // Đặt về 0 nếu không hợp lệ hoặc âm
+            }
+            $(this).val(value);
         });
+
+
+                    // Validate giảm theo phần trăm
+        $.validator.addMethod("maxDiscountPercent", function (value, element) {
+            var loaiGiamGia = $("#LoaiGiamGia").val();
+            if (loaiGiamGia == "@((int)LoaiGiamGia.PhamTram)") {
+                return parseFloat(value) <= 100;
+            }
+            return true;
+        }, "Giá trị giảm theo phần trăm không được vượt quá 100%");
+
+        // Validate giảm theo số tiền
+        $.validator.addMethod("maxDiscountAmount", function (value, element) {
+            var loaiGiamGia = $("#LoaiGiamGia").val();
+            if (loaiGiamGia == "@((int)LoaiGiamGia.SoTien)") {
+                // Lấy các SPCT đã chọn từ các input hidden
+                let ids = [];
+                $("input[name='SanPhamIds']").each(function() {
+                    if ($(this).val()) ids.push($(this).val());
+                });
+                if (ids.length === 0) return true;
+                let minPrice = Math.min(...ids.map(id => spctPrices[id] || Infinity));
+                return parseFloat(value) <= minPrice;
+            }
+            return true;
+        }, "Giá trị giảm không được vượt quá giá bán của sản phẩm áp dụng!");
+
+
+        //Gọi lại validate khi thay đổi
+            $('#GiaTriGiamGia').on('input', function() {
+            $(this).valid();
+            });
+            $("#LoaiGiamGia, #sanPhamSelect, #productDetailList").on('change', function() {
+                $("#GiaTriGiamGia").valid();
+            });
+            $('#productDetailList tbody').on('change', '.product-checkbox', function () {
+                $("#GiaTriGiamGia").valid();
+            });
+
     </script>
 }

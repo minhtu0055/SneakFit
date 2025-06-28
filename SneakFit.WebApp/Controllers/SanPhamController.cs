@@ -41,12 +41,13 @@ namespace SneakFit.Admin.Controllers
         }
 
         // Hiển thị danh sách sản phẩm với phân trang và tìm kiếm
-        public async Task<IActionResult> Index(string keyWord, Guid? danhMucId, int pageIndex = 1, int pageSize = 8)
+        public async Task<IActionResult> Index(string keyWord, Guid? danhMucId, bool? trangThai, int pageIndex = 1, int pageSize = 8)
         {
             var request = new SanPhamPagingRequest()
             {
                 Keyword = keyWord,
-                //DanhMucId = danhMucId,
+                DanhMucId = danhMucId,
+                TrangThai = trangThai,
                 PageIndex = pageIndex,
                 PageSize = pageSize
             };
@@ -55,6 +56,8 @@ namespace SneakFit.Admin.Controllers
             var danhmucs = await _danhMucApiClient.GetAll();
 
             ViewBag.Keyword = keyWord;
+            ViewBag.DanhMucId = danhMucId;
+            ViewBag.TrangThai = trangThai;
             ViewBag.DanhMucs = danhmucs.Select(x => new SelectListItem()
             {
                 Text = x.TenDanhMuc,
@@ -133,7 +136,7 @@ namespace SneakFit.Admin.Controllers
         }
 
         // Xử lý cập nhật sản phẩm
-        [HttpPut]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(SuaSanPham request)
         {
@@ -184,7 +187,16 @@ namespace SneakFit.Admin.Controllers
 
         // Hiển thị form chỉnh sửa chi tiết sản phẩm (SPCT)
         [HttpGet]
-        public async Task<IActionResult> EditSPCT(Guid id) 
+        public async Task<IActionResult> EditSPCT(Guid id, 
+                                                  string TuKhoa,
+                                                  Guid? ChatLieuId,
+                                                  Guid? ThuongHieuId,
+                                                  Guid? DeGiayId,
+                                                  Guid? KichThuocId,
+                                                  Guid? MauSacId,
+                                                  string TrangThai,
+                                                  int? GiaTu,
+                                                  int? GiaDen) 
         {
             var sanPham = await _sanPhamApiClient.GetById(id);
             if (sanPham == null) return NotFound();
@@ -204,7 +216,31 @@ namespace SneakFit.Admin.Controllers
             ViewBag.KichThuocs = kichThuocs.ToDictionary(x => x.Id, x => x.MaKichThuoc.ToString());
             ViewBag.MauSacs = mauSacs.ToDictionary(x => x.Id, x => x.TenMauSac);
 
+            // Lấy danh sách SPCT
             var danhSachSPCT = await _sanPhamApiClient.GetSPCTByProductName(sanPham.TenSanPham);
+
+            // Bộ lọc 
+            if (!string.IsNullOrEmpty(TuKhoa))
+                danhSachSPCT = danhSachSPCT.Where(x => x.TenSanPham != null && x.TenSanPham.Contains(TuKhoa, StringComparison.OrdinalIgnoreCase)).ToList();
+            if (ChatLieuId.HasValue)
+                danhSachSPCT = danhSachSPCT.Where(x => x.ChatLieuId == ChatLieuId.Value).ToList();
+            if (ThuongHieuId.HasValue)
+                danhSachSPCT = danhSachSPCT.Where(x => x.ThuongHieuId == ThuongHieuId.Value).ToList();
+            if (DeGiayId.HasValue)
+                danhSachSPCT = danhSachSPCT.Where(x => x.DeGiayId == DeGiayId.Value).ToList();
+            if (KichThuocId.HasValue)
+                danhSachSPCT = danhSachSPCT.Where(x => x.KichThuocId == KichThuocId.Value).ToList();
+            if (MauSacId.HasValue)
+                danhSachSPCT = danhSachSPCT.Where(x => x.MauSacId == MauSacId.Value).ToList();
+            if (!string.IsNullOrEmpty(TrangThai))
+            {
+                bool trangThai = TrangThai == "true";
+                danhSachSPCT = danhSachSPCT.Where(x => x.TrangThai == trangThai).ToList();
+            }
+            if (GiaTu.HasValue)
+                danhSachSPCT = danhSachSPCT.Where(x => x.Gia >= GiaTu.Value).ToList();
+            if (GiaDen.HasValue)
+                danhSachSPCT = danhSachSPCT.Where(x => x.Gia <= GiaDen.Value).ToList();
 
             var model = new SuaSPCT
             {
@@ -288,6 +324,20 @@ namespace SneakFit.Admin.Controllers
                 return Json(new { success = true, images = spctDetail.Images });
             }
             return Json(new { success = false, message = "Xóa ảnh thất bại" });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetSPCTByProductName(string productName)
+        {
+            try
+            {
+                var result = await _sanPhamApiClient.GetSPCTByProductName(productName);
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
 
     }

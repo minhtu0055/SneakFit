@@ -42,8 +42,17 @@ builder.Services.AddScoped<IThuongHieuApiClient, ThuongHieuApiClient>();
 builder.Services.AddScoped<IDanhMucApiClient, DanhMucApiClient>();
 builder.Services.AddScoped<IVoucherApiClient, VoucherApiClient>();
 builder.Services.AddScoped<IHoaDonApiClient, HoaDonApiClient>();
+builder.Services.AddScoped<IGhnApiClient, GhnApiClient>();
 
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
 
 builder.Services.AddRazorPages();
 var app = builder.Build();
@@ -57,7 +66,8 @@ if (!app.Environment.IsDevelopment())
 }
 
 //app.UseHttpsRedirection();
-
+app.UseStaticFiles();
+app.UseCors("AllowAll");
 app.UseRouting();
 app.UseStaticFiles();
 

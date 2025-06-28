@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -6,23 +7,23 @@ using Microsoft.OpenApi.Models;
 using SneakFit.Application.Catalog.ChatLieu;
 using SneakFit.Application.Catalog.DanhMuc;
 using SneakFit.Application.Catalog.DeGiay;
+using SneakFit.Application.Catalog.GioHang;
+using SneakFit.Application.Catalog.HoaDon;
+using SneakFit.Application.Catalog.KhuyenMai;
 using SneakFit.Application.Catalog.KichThuoc;
 using SneakFit.Application.Catalog.MauSac;
 using SneakFit.Application.Catalog.SanPham;
 using SneakFit.Application.Catalog.SanPhamChiTiet;
-using SneakFit.Application.Catalog.KhuyenMai;
 using SneakFit.Application.Catalog.ThuongHieu;
 using SneakFit.Application.Catalog.Voucher;
+using SneakFit.Application.Email;
+using SneakFit.Application.GHN;
+using SneakFit.Application.System.DiaChi;
+using SneakFit.Application.System.Role;
+using SneakFit.Application.System.User;
 using SneakFit.Data.EF;
 using SneakFit.Data.Entities;
 using System.Text.Json.Serialization;
-using SneakFit.Application.System.User;
-using Microsoft.AspNetCore.DataProtection;
-using SneakFit.Application.System.Role;
-using SneakFit.Application.Catalog.GioHang;
-using SneakFit.Application.Email;
-using SneakFit.Application.System.DiaChi;
-using SneakFit.Application.Catalog.HoaDon;
 
 
 
@@ -85,8 +86,16 @@ builder.Services.AddScoped<IGioHangService, GioHangService>(); // khai báo dị
 builder.Services.AddScoped<IEmailSender, EmailSender>(); // khai báo dịch vụ
 builder.Services.AddScoped<IDiaChiService, DiaChiService>(); // khai báo dịch vụ
 builder.Services.AddScoped<IHoaDonService, HoaDonService>();// khai báo dịch vụ
-
-
+builder.Services.AddHttpClient<IGhnService, GhnService>();
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("https://localhost:7039") // URL của WebApp
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(x =>
 {       //Thêm bảo mật có JWT Cho swagger
@@ -151,7 +160,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseCors();
 app.UseStaticFiles();
 
 app.UseHttpsRedirection();

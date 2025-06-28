@@ -163,20 +163,20 @@
                 <button class="btn btn-primary" id="updateAll">Chỉnh số lượng và giá chung</button>
                 <button class="btn btn-primary" style="margin-left: 5px" id="updateSelected">Update sản phẩm</button>
             </div>
-            <table class="table table-hover align-middle" id="spctTable">
+            <table class="table table-hover align-middle" id="spctTable" style="border-radius: 8px; overflow: hidden; ">
                 <thead class="table">
-                    <tr style="background-color: mediumpurple; color: white;">
-                        <th style="width: 30px;"><input type="checkbox" id="checkAll" /></th>
-                        <th style="width: 30px;">STT</th>
-                        <th style="width: 100px;">Ảnh</th>
-                        <th style="min-width: 250px;">Tên Sản Phẩm</th>
-                        <th style="width: 112px;">Số Lượng</th>
-                        <th style="width: 120px;">Giá Bán</th>
-                        <th style="width: 120px;">Trạng Thái</th>
+                    <tr style="background-color: #696CFF; ">
+                        <th style="width: 30px; color: white;"><input type="checkbox" id="checkAll" /></th>
+                        <th style="width: 30px; color: white;">STT</th>
+                        <th style="width: 100px; color: white;">Ảnh</th>
+                        <th style="min-width: 250px; color: white;">Tên Sản Phẩm</th>
+                        <th style="width: 112px; color: white;">Số Lượng</th>
+                        <th style="width: 120px; color: white;">Giá Bán</th>
+                        <th style="width: 122px; color: white;">Trạng Thái</th>
                         <th style="width: 1px">@* Hành động *@</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody style="background-color: cornsilk; ">
                     @{
                         int stt = 1;
                         var sanPhams = ViewBag.SanPhams as Dictionary<Guid, string>;
@@ -224,7 +224,7 @@
                                     var kichThuoc = ViewBag.KichThuocs[item.KichThuocId];
                                     var mauSac = ViewBag.MauSacs[item.MauSacId];
                                 }
-                                @($"{tenSanPham} ( {kichThuoc} - {mauSac} )")
+                                @($"{tenSanPham} [ {kichThuoc} - {mauSac} ]")
                             </td>
                             <td style="width: 100px;">
                                 <input type="number" class="form-control so-luong" value="@item.SoLuong" min="0" style="width: 70px; padding: 2px 6px; font-size: 0.95em;" />
@@ -309,9 +309,7 @@
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Màu Sắc :</label>
                             <div class="input-group align-items-center">
-                                <select class="form-select" name="MauSacId" style="border-radius: 8px;" required>
-                                    <span class="input-group-text" id="colorPreview" style="width:40px;"></span>
-                                </select>
+                                <select class="form-select" name="MauSacId" style="border-radius: 8px;" required></select>
                                 <button type="button" class="btn btn-primary ms-2" style="border-radius: 8px; width: 40px; height: 40px; padding: 0;" data-type="mausac">
                                     <i class="bx bx-plus"></i>
                                 </button>
@@ -336,13 +334,9 @@
                         </div>
                     </div>
                     <div class="row mb-2">
-                        @* <div class="col-md-6">
-                            <label class="form-label fw-bold">Số Lượng Hàng Trả :</label>
-                            <input type="number" class="form-control" name="SoLuongHangTra" min="0" />
-                        </div> *@
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">QR Code :</label>
-                            <div id="qrCodePreview"></div>
+                            <label class="form-label fw-bold d-block">QR Code :</label>
+                            <div id="qrCodePreview" style="display: block; width: 120px; margin-top: 5px;"></div>
                         </div>
                     </div>
                     <div class="mb-2">
@@ -351,7 +345,7 @@
                             <!-- Ảnh sẽ được render ở đây bằng JS -->
                         </div>
                         <div class="text-center">
-                            <input type="file" id="uploadImageInput" accept="image/*" style="display:none;" multiple />
+                            <input type="file" id="uploadImageInput" accept="image" style="display:none;" multiple />
                             <button type="button" class="btn btn-outline-primary" id="btnUploadImage">+ Upload</button>
                         </div>
                     </div>
@@ -422,27 +416,10 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Thêm màu sắc mới</h5>
+                <h5 class="modal-title">Thêm màu sắc</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label">Chọn màu sắc</label><br />
-                    <input type="color" id="addColorPicker" class="form-control" style="width: 120px; display:inline-block;" />
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Mã màu</label>
-                    <input type="text" id="addColorHex" class="form-control" readonly style="width: 120px; background:#fff; color:#000; font-weight:bold; text-align:center;" />
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Tên màu sắc</label>
-                    <input type="text" id="addColorName" class="form-control" placeholder="Nhập tên màu sắc" />
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-primary" id="saveNewColor">Lưu</button>
-            </div>
+            <div class="modal-body" id="modalAddMauSacContent"></div>
         </div>
     </div>
 </div>
@@ -475,38 +452,74 @@
 
 <!-- Modal xem ảnh lớn -->
 <div class="modal fade" id="imageReviewModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-  <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="width: 550px; height: 450px;">
-      <div class="modal-header">
-        <h5 class="modal-title">Xem ảnh sản phẩm</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
-      </div>
-      <div class="modal-body text-center">
-        <img id="reviewImage" src="" style="width:450px; height:330px; border-radius:8px;" />
-      </div>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="reviewImage" src="" style="max-width:100%; max-height:70vh; border-radius:8px; padding-bottom: 24px"; />
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    <!-- Bootstrap Icons (dùng CDN để tránh lỗi) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Thêm thư viện color picker -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-minicolors/2.3.6/jquery.minicolors.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-minicolors/2.3.6/jquery.minicolors.min.js"></script>
+
     <script>
         $(document).ready(function() {
-            // Chọn dòng
-            $('#spctTable tbody tr').on('click', function(e) {
+            // Chọn dòng bằng double click
+            $('#spctTable tbody tr').on('dblclick', function(e) {
+                // Bỏ qua nếu click vào input hoặc button
                 if (!$(e.target).is('input, button')) {
-                    $(this).find('.row-check').prop('checked', true);
+                    var $row = $(this);
+                    var $checkbox = $row.find('.row-check');
+                    var isSelected = $checkbox.prop('checked');
+
+                    // Toggle checkbox
+                    $checkbox.prop('checked', !isSelected);
+
+                    // Toggle highlight cho dòng
+                    $row.toggleClass('table-info', !isSelected);
+
+                    // Kiểm tra và cập nhật trạng thái của checkAll
+                    updateCheckAllState();
                 }
                 $('#spctTable tbody tr').removeClass('table-info');
                 $(this).addClass('table-info');
             });
 
-            // CheckAll
+            // CheckAll: Chọn hoặc bỏ chọn tất cả
             $('#checkAll').on('change', function() {
-                $('.row-check').prop('checked', this.checked);
+                var isChecked = $(this).prop('checked');
+                $('.row-check').prop('checked', isChecked);
+                $('#spctTable tbody tr').toggleClass('table-info', isChecked);
             });
 
-            // Format giá bán khi nhập
+            // Thêm sự kiện change cho các checkbox .row-check
+            $('#spctTable tbody').on('change', '.row-check', function() {
+                updateCheckAllState();
+            });
+            // Hàm kiểm tra và cập nhật trạng thái checkAll
+            function updateCheckAllState() {
+                var allChecked = $('.row-check').length === $('.row-check:checked').length;
+
+                // Nếu không phải tất cả đều được chọn, bỏ tích checkAll
+                if (!allChecked) {
+                    $('#checkAll').prop('checked', false);
+                } else {
+                    // Nếu tất cả đều được chọn, check lại checkAll
+                    $('#checkAll').prop('checked', true);
+                }
+            }
+
+            // Chỉ cho nhập số và tự động format giá bán
             $(document).on('input', '.gia-ban', function() {
                 let value = $(this).val().replace(/\D/g, '');
                 if (value) {
@@ -517,6 +530,13 @@
 
             // Thay thế sự kiện #updateAll:
             $('#updateAll').off('click').on('click', function() {
+                // Kiểm tra xem có dòng nào được chọn không
+                var selectedRows = $('.row-check:checked').closest('tr');
+                if (selectedRows.length === 0) {
+                    toastr.error('Vui lòng chọn ít nhất một sản phẩm!');
+                    return;
+                }
+
                 // Lấy giá và số lượng đầu tiên để fill vào modal (nếu có)
                 let firstPrice = $('.gia-ban').first().val() || '';
                 let firstQuantity = $('.so-luong').first().val() || '';
@@ -525,28 +545,91 @@
                 $('#modalEditPriceQuantity').modal('show');
             });
 
-            // Xử lý khi bấm Áp dụng trong modal
+            // Xử lý khi bấm Áp dụng trong modal sửa giá và số lượng chung
             $('#btnApplyEditAll').off('click').on('click', function() {
-                let price = $('#editAllPrice').val().replace(/\./g, '');
-                let quantity = $('#editAllQuantity').val();
-                
-                if (!price || !quantity) {
-                    alert('Vui lòng nhập đầy đủ giá và số lượng!');
+
+                // Lấy các dòng được chọn
+                var selectedRows = $('.row-check:checked').closest('tr');
+                if (selectedRows.length === 0) {
+                    toastr.error('Vui lòng chọn ít nhất một sản phẩm!');
                     return;
                 }
 
-                // Format giá trước khi hiển thị
-                let formattedPrice = parseInt(price).toLocaleString('vi-VN');
-                $('.gia-ban').val(formattedPrice);
-                $('.so-luong').val(quantity);
-                $('#modalEditPriceQuantity').modal('hide');
+                let price = $('#editAllPrice').val().replace(/\./g, '');
+                let quantity = $('#editAllQuantity').val();
+
+                if (!price && !quantity) {
+                    toastr.error('Vui lòng nhập ít nhất một trong hai trường giá hoặc số lượng!');
+                    return;
+                }
+
+
+                // Tạo mảng chứa dữ liệu cần cập nhật
+                var updates = [];
+                selectedRows.each(function() {
+                    // var row = $(this);
+                    // var updateData = {
+                    //     id: row.data('id')
+                    // };
+
+                    // // Chỉ thêm giá nếu người dùng đã nhập
+                    // if (price) {
+                    //     updateData.gia = parseInt(price);
+                    //     // Format và cập nhật giá trên giao diện
+                    //     let formattedPrice = parseInt(price).toLocaleString('vi-VN');
+                    //     row.find('.gia-ban').val(formattedPrice);
+                    // }
+
+                    // // Chỉ thêm số lượng nếu người dùng đã nhập
+                    // if (quantity) {
+                    //     updateData.soLuong = parseInt(quantity);
+                    //     // Cập nhật số lượng trên giao diện
+                    //     row.find('.so-luong').val(quantity);
+                    // }
+
+                    // updates.push(updateData);
+                    var row = $(this);
+                    var soLuongMoi = quantity ? parseInt(quantity) : parseInt(row.find('.so-luong').val());
+                    var giaMoi = price ? parseInt(price) : parseInt(row.find('.gia-ban').val().replace(/[.,]/g, ''));
+
+                    var trangThaiSP = soLuongMoi === 0 ? false : true;
+
+                    var updateData = {
+                        id: row.data('id'),
+                        gia: giaMoi,
+                        soLuong: soLuongMoi,
+                        trangThai: trangThaiSP
+                    };
+
+                    updates.push(updateData);
+                });
+
+                // Gửi request cập nhật lên server
+                $.ajax({
+                    url: '/SanPham/UpdateSPCT',
+                    type: 'POST',
+                    data: JSON.stringify(updates),
+                    contentType: 'application/json',
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire('Thành công', 'Cập nhật thành công!', 'success').then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            toastr.error('Có lỗi xảy ra: ' + (response.message || 'Không xác định'));
+                        }
+                    },
+                    error: function(xhr) {
+                        toastr.error('Có lỗi xảy ra khi gửi yêu cầu! Chi tiết: ' + xhr.responseText);
+                    }
+                });
             });
 
             // Update selected
             $('#updateSelected').on('click', function() {
                 var selectedRows = $('.row-check:checked').closest('tr');
                 if (selectedRows.length === 0) {
-                    alert('Vui lòng chọn ít nhất một sản phẩm!');
+                    toastr.error('Vui lòng chọn ít nhất một sản phẩm!');
                     return;
                 }
 
@@ -562,11 +645,14 @@
                     // Xử lý giá trị giá bán - loại bỏ dấu phẩy và chấm
                     var giaBan = parseInt(giaBanInput.replace(/[.,]/g, '')) || 0;
 
+                    var trangThaiSP = soLuong === 0 ? false : true;
+
                     if (soLuong >= 0 && giaBan > 0) {
                         updates.push({
                             id: row.data('id'),
                             soLuong: soLuong,
-                            gia: giaBan
+                            gia: giaBan,
+                            trangThai: trangThaiSP
                         });
                     }
                 });
@@ -579,14 +665,15 @@
                         contentType: 'application/json',
                         success: function(response) {
                             if (response.success) {
-                                alert('Cập nhật thành công!');
-                                location.reload();
+                                Swal.fire('Thành công', 'Cập nhật thành công!', 'success').then(() => {
+                                    location.reload();
+                                });
                             } else {
-                                alert('Có lỗi xảy ra: ' + (response.message || 'Không xác định'));
+                                toastr.error('Bạn chưa sửa giá và số lượng => ' + (response.message || 'Không xác định'));
                             }
                         },
                         error: function(xhr) {
-                            alert('Có lỗi xảy ra khi gửi yêu cầu! Chi tiết: ' + xhr.responseText);
+                            toastr.error('Có lỗi xảy ra khi gửi yêu cầu! Chi tiết: ' + xhr.responseText);
                         }
                     });
                 }
@@ -620,9 +707,40 @@
                 }
             }
 
+            // Hàm tạo QR code
+            function generateQRCode(id) {
+                // Xóa QR code cũ nếu có
+                $("#qrCodePreview").empty();
+
+                // Tạo QR code mới
+                new QRCode(document.getElementById("qrCodePreview"), {
+                    text: `${window.location.origin}/SanPham/Details/${id}`, // URL sản phẩm
+                    width: 100,
+                    height: 100,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            }
+
             // Khi click 👁️
             $(document).on('click', '.btn-view', function() {
+                // Kiểm tra số checkbox được chọn
+                var checkedCount = $('.row-check:checked').length;
+                if (checkedCount >= 2) {
+                    Swal.fire('Lỗi', 'Không thể mở modal khi chọn 2 hoặc nhiều sản phẩm!', 'error');
+                    return;
+                }
+                // Kiểm tra nếu tất cả checkbox đều được chọn
+                var allChecked = $('.row-check').length === $('.row-check:checked').length;
+                if ($('#checkAll').is(':checked')) {
+                    // Nếu Check All đang được chọn, hiển thị thông báo lỗi và không mở modal
+                    Swal.fire('Lỗi', 'Không thể mở modal khi đang chọn tất cả sản phẩm!', 'error');
+                    return;
+                }
+
                 var id = $(this).closest('tr').data('id');
+                $('#productDetailModal').data('current-spct-id', id); // Lưu ID vào modal
                 // Lấy dữ liệu combobox từ ViewBag (render ra JS object ở view)
                 var thuongHieus = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.ThuongHieus));
                 var chatLieus = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.ChatLieus));
@@ -650,14 +768,18 @@
                     $("#productDetailModal select[name='ChatLieuId']").val(data.chatLieuId);
                     $("#productDetailModal select[name='DeGiayId']").val(data.deGiayId);
                     $("#productDetailModal select[name='KichThuocId']").val(data.kichThuocId);
-                    $("#productDetailModal select[name='MauSacId']").val(data.mauSacId).trigger('change');
+                    $("#productDetailModal select[name='MauSacId']").val(data.mauSacId);
                     $("#productDetailModal input[name='SoLuong']").val(data.soLuong);
-                    // $("#productDetailModal input[name='SoLuongHangTra']").val(data.soLuongHangTra);
                     $("#productDetailModal input[name='GiaBan']").val(Number(data.giaBan).toLocaleString('vi-VN'));
-                    // QR code
-                    $("#qrCodePreview").html('<img src="' + data.qrCodeUrl + '" style="width:100px;" />');
+
+                    // Trigger change event để cập nhật màu preview
+                    $("#productDetailModal select[name='MauSacId']").trigger('change');
+
+                    // Generate product QR code
+                    generateQRCode(data.id);
                     // Ảnh sản phẩm
                     renderProductImages(data.images);
+
                     $('#productDetailModal').modal('show');
                 });
             });
@@ -690,12 +812,13 @@
 
             $('#uploadImageInput').on('change', function() {
                 var files = this.files;
-                var spctId = $('#spctTable tr.table-info').data('id');
+                // var spctId = $('#spctTable tr.table-info').data('id');
+                var spctId = $('#productDetailModal').data('current-spct-id'); // Lấy ID từ modal
                 // Lấy số lượng ảnh hiện tại
                 $.get('/SanPham/GetSPCTDetail', { id: spctId }, function(data) {
                     var currentCount = data.images.length;
                     if (currentCount + files.length > 3) {
-                        alert('Mỗi sản phẩm chỉ được tối đa 3 ảnh!');
+                        toastr.error('Mỗi sản phẩm chỉ được tối đa 3 ảnh!');
                         return;
                     }
                     // Kiểm tra định dạng file
@@ -703,7 +826,7 @@
                     for (let i = 0; i < files.length; i++) {
                         let ext = files[i].name.split('.').pop().toLowerCase();
                         if (!allowedExtensions.includes(ext)) {
-                            alert('Chỉ cho phép upload các file ảnh: jpg, jpeg, png, gif, webp!');
+                            toastr.error('Chỉ cho phép upload các file ảnh: jpg, jpeg, png, gif, webp!');
                             return;
                         }
                     }
@@ -726,14 +849,14 @@
                                 // Sau khi upload thành công, lấy lại danh sách ảnh mới
                                 $.get('/SanPham/GetSPCTDetail', { id: spctId }, function(data) {
                                     renderProductImages(data.images);
-                                    @* location.reload(); *@
+                                    toastr.success('Upload ảnh thành công!');
                                 });
                             } else {
-                                alert('Upload ảnh thất bại: ' + (response.message || 'Không xác định'));
+                                toastr.error('Upload ảnh thất bại: ' + (response.message || 'Không xác định'));
                             }
                         },
                         error: function(xhr) {
-                            alert('Có lỗi khi upload ảnh: ' + xhr.responseText);
+                            toastr.error('Có lỗi khi upload ảnh: ' + xhr.responseText);
                         }
                     });
                 });
@@ -744,7 +867,8 @@
                 if (!confirm('Bạn có chắc muốn xóa ảnh này?')) return;
 
                 var imageId = $(this).data('id');
-                var spctId = $('#spctTable tr.table-info').data('id');
+                // var spctId = $('#spctTable tr.table-info').data('id');
+                var spctId = $('#productDetailModal').data('current-spct-id'); // Lấy ID từ modal
 
                 $.ajax({
                     url: '/SanPham/DeleteImage',
@@ -754,19 +878,15 @@
                         if(response.success) {
                             // Sau khi xóa thành công, lấy lại danh sách ảnh mới
                             $.get('/SanPham/GetSPCTDetail', { id: spctId }, function(data) {
+                                // toastr.success('Xóa ảnh thành công!'));
                                 renderProductImages(data.images);
-                                @* if (!data.images || data.images.length === 0) {
-                                    location.reload();
-                                } else {
-                                    renderProductImages(data.images);
-                                } *@
                             });
                         } else {
-                            alert('Xóa ảnh thất bại: ' + (response.message || 'Không xác định'));
+                            toastr.error('Xóa ảnh thất bại: ' + (response.message || 'Không xác định'));
                         }
                     },
                     error: function(xhr) {
-                        alert('Có lỗi khi xóa ảnh: ' + xhr.responseText);
+                        toastr.error('Có lỗi khi xóa ảnh: ' + xhr.responseText);
                     }
                 });
             });
@@ -783,11 +903,25 @@
                 modal.show();
             });
 
-            // Khi chọn màu sắc thì đổi màu preview
-            $("#productDetailModal select[name='MauSacId']").on('change', function() {
-                var color = $(this).find('option:selected').text();
-                $('#colorPreview').css('background', color);
-            });
+            // Hàm tính màu chữ tương phản
+            function getContrastYIQ(hexcolor) {
+                hexcolor = hexcolor.replace('#', '');
+                if(hexcolor.length === 3) hexcolor = hexcolor[0]+hexcolor[0]+hexcolor[1]+hexcolor[1]+hexcolor[2]+hexcolor[2];
+                var r = parseInt(hexcolor.substr(0,2),16);
+                var g = parseInt(hexcolor.substr(2,2),16);
+                var b = parseInt(hexcolor.substr(4,2),16);
+
+                // Tính toán độ sáng tương đối
+                var brightness = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+
+                // Tính toán độ tương phản với màu trắng và đen
+                var contrastWithWhite = Math.abs(brightness - 255);
+                var contrastWithBlack = brightness;
+
+                // Chọn màu có độ tương phản cao hơn
+                return (contrastWithWhite > contrastWithBlack) ? '#ffffff' : '#000000';
+            }
+
 
             // Hàm mở modal thêm thương hiệu
             function openAddThuongHieuModal() {
@@ -821,6 +955,41 @@
                 });
             }
 
+            // Hàm mở modal thêm màu sắc
+            function openAddMauSacModal() {
+                $.get('/MauSac/Create', function(html) {
+                    $('#modalAddMauSacContent').html(html);
+                    $('#modalAddMauSac').modal('show');
+
+                    // Set initial color
+                    let defaultHex = $('#modalAddMauSacContent #create_MaMauSac').val() || '#000000';
+
+                    // Khởi tạo color picker sau khi nội dung được tải
+                    $('#modalAddMauSacContent #createColorPicker').minicolors({
+                        control: 'hue',
+                        format: 'hex',
+                        theme: 'bootstrap',
+                        swatches: [],
+                        position: 'bottom left',
+                        change: function(hex) {
+                            $('#modalAddMauSacContent #create_MaMauSac').val(hex);
+                            $('#modalAddMauSacContent #createColorPreview').css('background-color', hex);
+                            $('#modalAddMauSacContent #create_MaMauSac').css({
+                                    'background-color': hex,
+                                    'color': getContrastYIQ(defaultHex)
+                            });
+                        }
+                    });
+
+                    $('#modalAddMauSacContent #create_MaMauSac').val(defaultHex);
+                    $('#modalAddMauSacContent #createColorPreview').css('background-color', defaultHex);
+                    $('#modalAddMauSacContent #create_MaMauSac').css({
+                            'background-color': defaultHex,
+                            'color': getContrastYIQ(defaultHex)
+                    });
+                });
+            }
+
             // Xử lý sự kiện click cho các button +
             $(document).on('click', 'button[data-type]', function() {
                 var type = $(this).data('type');
@@ -838,40 +1007,9 @@
                         openAddKichThuocModal();
                         break;
                     case 'mausac':
-                        $('#modalAddMauSac').modal('show');
+                        openAddMauSacModal();
                         break;
                 }
-            });
-
-            // Handle color picker
-            if ($('#addColorPicker').length) {
-                $('#addColorPicker').on('input', function() {
-                    $('#addColorHex').val($(this).val());
-                });
-            }
-
-            // Xử lý lưu màu mới
-            $('#saveNewColor').on('click', function() {
-                const colorName = $('#addColorName').val();
-                const colorHex = $('#addColorHex').val();
-                
-                if (!colorName || !colorHex) {
-                    alert('Vui lòng nhập đầy đủ thông tin màu sắc!');
-                    return;
-                }
-
-                $.post('/SanPham/AddMauSac', {
-                    tenMauSac: colorName,
-                    maMau: colorHex
-                }, function(response) {
-                    if (response.success) {
-                        $('#modalAddMauSac').modal('hide');
-                        // Làm mới danh sách thả xuống màu sắc
-                        location.reload();
-                    } else {
-                        alert('Có lỗi xảy ra: ' + response.message);
-                    }
-                });
             });
 
             // Xử lý việc gửi biểu mẫu cho các phương thức khác
@@ -883,7 +1021,7 @@
                         $('#modalAddThuongHieu').modal('hide');
                         location.reload();
                     } else {
-                        alert('Có lỗi xảy ra: ' + response.message);
+                        toastr.error('Có lỗi xảy ra: ' + response.message);
                     }
                 });
             });
@@ -896,7 +1034,7 @@
                         $('#modalAddChatLieu').modal('hide');
                         location.reload();
                     } else {
-                        alert('Có lỗi xảy ra: ' + response.message);
+                        toastr.error('Có lỗi xảy ra: ' + response.message);
                     }
                 });
             });
@@ -909,7 +1047,7 @@
                         $('#modalAddDeGiay').modal('hide');
                         location.reload();
                     } else {
-                        alert('Có lỗi xảy ra: ' + response.message);
+                        toastr.error('Có lỗi xảy ra: ' + response.message);
                     }
                 });
             });
@@ -922,13 +1060,29 @@
                         $('#modalAddKichThuoc').modal('hide');
                         location.reload();
                     } else {
-                        alert('Có lỗi xảy ra: ' + response.message);
+                        toastr.error('Có lỗi xảy ra: ' + response.message);
+                    }
+                });
+            });
+
+            $(document).on('submit', '#formAddMauSac', function(e) {
+                e.preventDefault();
+                const formData = $(this).serialize();
+                $.post('/SanPham/AddMauSac', formData, function(response) {
+                    if (response.success) {
+                        $('#modalAddMauSac').modal('hide');
+                        // Reset form should be handled by the loaded partial view's script or reload
+                        location.reload();
+                    } else {
+                        toastr.error('Có lỗi xảy ra: ' + response.message);
                     }
                 });
             });
 
             $('#btnSaveProductDetail').on('click', function() {
-                var spctId = $('#spctTable tr.table-info').data('id');
+                // var spctId = $('#spctTable tr.table-info').data('id');
+                // var spctId = $('.btn-view').data('id');
+                var spctId = $('#productDetailModal').data('current-spct-id'); // Lấy ID đã lưu trên modal
                 var formData = {
                     Id: spctId,
                     TenSanPham: $("#productDetailModal input[name='TenSanPham']").val(),
@@ -949,17 +1103,20 @@
                     contentType: 'application/json',
                     success: function(response) {
                         if (response.success) {
-                            alert('Cập nhật thành công!');
-                            location.reload();
+                            Swal.fire('Thành công', 'Cập nhật thành công!', 'success').then(() => {
+                                location.reload();
+                            });
                         } else {
-                            alert('Có lỗi xảy ra: ' + response.message);
+                            // toastr.error('Có lỗi xảy ra khi cập nhật!' + response.message);
+                            toastr.error('Có lỗi xảy ra khi cập nhật!' + response.message);
                         }
                     },
                     error: function() {
-                        alert('Có lỗi xảy ra khi gửi yêu cầu!');
+                        toastr.error('Có lỗi xảy ra khi gửi yêu cầu!');
                     }
                 });
             });
+
         });
 
         // Chỉ cho nhập số và tự động format giá bán
@@ -975,52 +1132,134 @@
         // Chỉ cho nhập số lượng là số nguyên dương
         $(document).on('input', '.so-luong, .quantity-input', function() {
             let value = $(this).val().replace(/[^0-9]/g, '');
-            value = value.replace(/^0+/, ''); // Loại bỏ số 0 ở đầu
+            // value = value.replace(/^0+/, ''); // Loại bỏ số 0 ở đầu
             $(this).val(value);
+        });
+
+        // Tự động set trạng thái khi số lượng về 0
+        $(document).on('input', '.so-luong', function () {
+            let row = $(this).closest('tr');
+            let soLuong = parseInt($(this).val()) || 0;
+            let $badge = row.find('span.badge');
+            if (soLuong === 0) {
+                $badge.removeClass('bg-success').addClass('bg-danger').text('Ngừng kinh doanh');
+            } else {
+                $badge.removeClass('bg-danger').addClass('bg-success').text('Đang kinh doanh');
+            }
+        });
+
+        
+        // PHÂN TRANG CHO BẢNG SẢN PHẨM CHI TIẾT
+        $(document).ready(function () {
+            var $table = $('#spctTable');
+            var $rows = $table.find('tbody tr');
+            var rowsPerPage = 5;
+            var currentPage = 1;
+            var totalPages = Math.ceil($rows.length / rowsPerPage);
+
+            function renderTablePage(page) {
+                $rows.hide();
+                $rows.slice((page - 1) * rowsPerPage, page * rowsPerPage).show();
+                $('#spctPagination .page-link').removeClass('active');
+                $('#spctPagination .page-link[data-page="' + page + '"]').addClass('active');
+            }
+
+            function renderPagination() {
+                if (totalPages <= 1) {
+                    $('#spctPagination').remove();
+                    return;
+                }
+                var html = '';
+                for (var i = 1; i <= totalPages; i++) {
+                    html += '<li class="page-item"><a class="page-link' + (i === 1 ? ' active' : '') + '" href="#" data-page="' + i + '">' + i + '</a></li>';
+                }
+                $table.after('<nav><ul class="pagination justify-content-end mt-2" id="spctPagination">' + html + '</ul></nav>');
+            }
+
+            renderPagination();
+            renderTablePage(currentPage);
+
+            $(document).on('click', '#spctPagination .page-link', function (e) {
+                e.preventDefault();
+                var page = parseInt($(this).data('page'));
+                if (page !== currentPage) {
+                    currentPage = page;
+                    renderTablePage(currentPage);
+                }
+            });
         });
     </script>
 }
 
 <style>
-.btn-circle {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: #6c63ff;
-    color: #fff;
-    font-size: 1.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 8px rgba(108,99,255,0.15);
-    border: none;
-    transition: background 0.2s;
-}
-.btn-circle:hover {
-    background: #554ee2;
-    color: #fff;
-}
-.btn-circle span {
-    font-weight: bold;
-    font-size: 1.5rem;
-    line-height: 1;
-}
-.product-image-wrapper {
-    position: relative;
-    cursor: pointer;
-}
-.product-image-wrapper .image-actions {
-    display: none !important;
-    background: rgba(0,0,0,0.4);
-    transition: 0.2s;
-}
-.product-image-wrapper:hover .image-actions {
-    display: flex !important;
-}
-.product-image-thumb {
-    transition: 0.2s;
-}
-.product-image-wrapper:hover .product-image-thumb {
-    filter: blur(1px) brightness(0.7);
-}
+    .btn-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #6c63ff;
+        color: #fff;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(108,99,255,0.15);
+        border: none;
+        transition: background 0.2s;
+    }
+
+        .btn-circle:hover {
+            background: #554ee2;
+            color: #fff;
+        }
+
+        .btn-circle span {
+            font-weight: bold;
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+
+    .product-image-wrapper {
+        position: relative;
+        cursor: pointer;
+    }
+
+        .product-image-wrapper .image-actions {
+            display: none !important;
+            background: rgba(0,0,0,0.4);
+            transition: 0.2s;
+        }
+
+        .product-image-wrapper:hover .image-actions {
+            display: flex !important;
+        }
+
+    .product-image-thumb {
+        transition: 0.2s;
+    }
+
+    .product-image-wrapper:hover .product-image-thumb {
+        filter: blur(1px) brightness(0.7);
+    }
+
+    .bi {
+        font-family: "Bootstrap Icons" !important;
+    }
+
+    #qrCodePreview {
+        display: inline-block;
+        padding: 10px;
+        background: white;
+        border-radius: 4px;
+        box-shadow: 1px 2px 4px rgba(5,5,5,5.1);
+    }
+
+        #qrCodePreview img {
+            display: block;
+            margin: 0 auto;
+        }
+
+    /* Đảm bảo SweetAlert2 luôn nổi trên modal */
+    .swal2-container {
+        z-index: 10000 !important;
+    }
 </style>

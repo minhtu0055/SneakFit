@@ -13,7 +13,7 @@ namespace SneakFit.BackEndAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class SanPhamController : ControllerBase
     {
         private readonly ISanPhamService _sanPhamService;
@@ -54,8 +54,8 @@ namespace SneakFit.BackEndAPI.Controllers
             return CreatedAtAction(nameof(GetById), new { id = sanPham.Id }, sanPham);
         }
 
-        [HttpPut("Edit/{id}")]
-        public async Task<IActionResult> Edit(Guid id, [FromForm] SuaSanPham request)
+        [HttpPost("Edit/{id}")]
+        public async Task<IActionResult> Edit(Guid id, [FromBody] SuaSanPham request)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -140,6 +140,25 @@ namespace SneakFit.BackEndAPI.Controllers
             if (result)
                 return Ok(new { success = true });
             return BadRequest(new { success = false, message = "Xóa ảnh thất bại" });
+        }
+
+        [HttpPost("GetSPCTByListIds")] // ĐÂY LÀ ENDPOINT BẠN CẦN THÊM
+        public async Task<IActionResult> GetSPCTByListIds([FromBody] List<Guid> ids)
+        {
+            if (ids == null || !ids.Any())
+            {
+                return BadRequest("Danh sách ID sản phẩm chi tiết không được trống.");
+            }
+
+            try
+            {
+                var result = await _sanPhamService.GetSPCTByListIds(ids);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

@@ -12,7 +12,7 @@ namespace SneakFit.BackEndAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class VoucherController : ControllerBase
     {
         private readonly IVoucherService _voucherService;

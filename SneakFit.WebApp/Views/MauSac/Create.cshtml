@@ -1,31 +1,25 @@
 @model SneakFit.ViewModels.Catalog.MauSac.ThemMauSac
 
-<form asp-controller="MauSac" asp-action="Create" id="createColorForm" method="post" data-confirm="Bạn có chắc chắn muốn làm điều đó không?">
+<form id="createColorForm" asp-action="Create" method="post">
     <div class="mb-3">
-        <label asp-for="TenMauSac" class="form-label">Tên Màu Sắc</label>
-        <input asp-for="TenMauSac" class="form-control" placeholder="Nhập tên màu sắc"
-               maxlength="50"
-               title="Vui lòng chỉ nhập chữ cái"></input>
-        <span asp-validation-for="TenMauSac" class="text-danger"></span>
-        <span id="colorValidationError" class="text-danger" style="display: none;">Vui lòng chỉ nhập chữ cái</span>
+        <label class="form-label">Tên màu sắc</label>
+        <input type="text" id="create_TenMauSac" name="TenMauSac" class="form-control" placeholder="Nhập tên màu sắc" maxlength="50" required />
+        <span data-valmsg-for="TenMauSac" class="text-danger"></span>
     </div>
-    <div class="text-end">
-        <button type="submit" class="btn btn-primary">Thêm</button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+    <div class="mb-3">
+        <label class="form-label">Chọn màu sắc</label>
+        <div class="d-flex align-items-center gap-2">
+            <input type="text" id="createColorPicker" class="form-control minicolors-input" style="width: 120px;" />
+            <div style="width: 40px; height: 40px; border: 1px solid #ddd; border-radius: 8px;" id="createColorPreview"></div>
+        </div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Mã màu</label>
+        <input type="text" id="create_MaMauSac" name="MaMauSac" class="form-control" style="width: 120px;  font-weight: bold;" readonly required value="#000000" />
+        <span data-valmsg-for="MaMauSac" class="text-danger"></span>
+    </div>
+    <div class="d-flex justify-content-end gap-2">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+        <button type="submit" class="btn btn-primary">Lưu</button>
     </div>
 </form>
-
-<script>
-function validateColorInput(input) {
-    // const pattern = /^[a-zA-ZÀ-ỹ\s]+$/;
-    // const errorSpan = document.getElementById('colorValidationError');
-    
-    // if (!pattern.test(input.value) && input.value !== '') {
-    //     errorSpan.style.display = 'block';
-    //     input.setCustomValidity('Vui lòng chỉ nhập chữ cái');
-    // } else {
-    //     errorSpan.style.display = 'none';
-    //     input.setCustomValidity('');
-    // }
-}
-</script>

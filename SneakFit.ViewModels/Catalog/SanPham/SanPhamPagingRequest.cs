@@ -10,5 +10,7 @@ namespace SneakFit.ViewModels.Catalog.SanPham
     public class SanPhamPagingRequest : PagingRequestBase
     {
         public string? Keyword { get; set; }
+        public Guid? DanhMucId { get; set; }
+        public bool? TrangThai { get; set; }
     }
 }

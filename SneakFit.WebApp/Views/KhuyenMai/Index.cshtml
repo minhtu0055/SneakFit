@@ -47,7 +47,7 @@
 					<th>GIẢM GIÁ</th>
 					<th class="text-center">SỐ SẢN PHẨM</th>
 					<th>TRẠNG THÁI</th>
-					<th></th>
+					<th>THAO TÁC</th>
 				</tr>
 			</thead>
 			<tbody class="table-border-bottom-0">
@@ -98,8 +98,8 @@
 									{
 										<form id="cancel-@item.Id" asp-action="UpdateStatus" asp-controller="KhuyenMai" method="post" style="display: inline;">
 											<input type="hidden" name="id" value="@item.Id" />
-											<button type="button" class="dropdown-item text-danger"
-													onclick="confirmCancel(@item.Id)">
+											<input type="hidden" name="trangThai" value="@TrangThaiGiamGia.HetHan" />
+											<button type="button" class="dropdown-item text-danger" onclick="confirmCancel(@item.Id)">
 												<i class="bx bx-x-circle me-1"></i> Hủy khuyến mại
 											</button>
 										</form>

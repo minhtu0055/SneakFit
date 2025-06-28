@@ -1,38 +1,26 @@
 @model SneakFit.ViewModels.Catalog.MauSac.SuaMauSac
 
-<form asp-controller="MauSac" asp-action="Edit" id="editColorForm" method="post">
-    <input type="hidden" asp-for="Id" />
+<form id="editColorForm" asp-action="Edit" method="post">
+    <input type="hidden" id="edit_Id" name="Id" value="@Model.Id" />
     <div class="mb-3">
-        <label asp-for="TenMauSac" class="form-label">Tên màu sắc</label>
-        <input asp-for="TenMauSac" class="form-control" placeholder="Nhập tên màu sắc"
-               pattern="^[a-zA-ZÀ-ỹ\s]+$" 
-               oninput="validateColorInput(this)"
-               maxlength="50"
-               title="Vui lòng chỉ nhập chữ cái" />
-        <span asp-validation-for="TenMauSac" class="text-danger"></span>
-        <span id="editColorValidationError" class="text-danger" style="display: none;">Vui lòng chỉ nhập chữ cái</span>
+        <label class="form-label">Tên màu sắc</label>
+        <input type="text" id="edit_TenMauSac" name="TenMauSac" class="form-control" placeholder="Nhập tên màu sắc" maxlength="50" value="@Model.TenMauSac" />
+        <span data-valmsg-for="TenMauSac" class="text-danger"></span>
     </div>
-    <div class="text-end">
-        <button type="submit" class="btn btn-primary">
-            <i class="bx bx-save me-1"></i> Lưu
-        </button>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-            <i class="bx bx-x me-1"></i> Hủy
-        </button>
+    <div class="mb-3">
+        <label class="form-label">Chọn màu sắc</label>
+        <div class="d-flex align-items-center gap-2">
+            <input type="text" id="editColorPicker" class="form-control minicolors-input" style="width: 120px;" value="@Model.MaMauSac" />
+            <div style="width: 40px; height: 40px; border: 1px solid #ddd; border-radius: 8px;" id="editColorPreview"></div>
+        </div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Mã màu</label>
+        <input type="text" id="edit_MaMauSac" name="MaMauSac" class="form-control" style="width: 120px;" readonly value="@Model.MaMauSac" />
+        <span data-valmsg-for="MaMauSac" class="text-danger"></span>
+    </div>
+    <div class="d-flex justify-content-end gap-2">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+        <button type="submit" class="btn btn-primary">Lưu</button>
     </div>
 </form>
-
-<script>
-function validateColorInput(input) {
-    const pattern = /^[a-zA-ZÀ-ỹ\s]+$/;
-    const errorSpan = document.getElementById('editColorValidationError');
-    
-    if (!pattern.test(input.value) && input.value !== '') {
-        errorSpan.style.display = 'block';
-        input.setCustomValidity('Vui lòng chỉ nhập chữ cái');
-    } else {
-        errorSpan.style.display = 'none';
-        input.setCustomValidity('');
-    }
-}
-</script>

@@ -10,7 +10,7 @@ namespace SneakFit.BackEndAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class KhuyenMaiController : ControllerBase
     {
         private readonly IKhuyenMaiService _khuyenMaiService;
@@ -47,6 +47,7 @@ namespace SneakFit.BackEndAPI.Controllers
         [HttpPut("Edit/{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] SuaKhuyenMai request)
         {
+           
             if (!ModelState.IsValid)
                 return BadRequest(new ApiErrorResult<KhuyenMaiViewModels>());
             request.Id = id;
