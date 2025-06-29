@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SneakFit.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class update1 : Migration
+    public partial class updatedb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -61,7 +61,8 @@ namespace SneakFit.Data.Migrations
                     ThoiGianKetThuc = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LoaiGiamGia = table.Column<int>(type: "int", nullable: false),
                     GiaTriGiamGia = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    TrangThai = table.Column<int>(type: "int", nullable: false)
+                    TrangThai = table.Column<int>(type: "int", nullable: false),
+                    NgaySuaDoi = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -354,7 +355,8 @@ namespace SneakFit.Data.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     KhuyenMaiId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    SanPhamId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    SanPhamId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SPCTId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -517,8 +519,8 @@ namespace SneakFit.Data.Migrations
                 columns: new[] { "Id", "TenDanhMuc" },
                 values: new object[,]
                 {
-                    { new Guid("8f4d4a5e-2bfa-4e8c-9d2c-3f6a7e9b87cb"), "Giày Chạy Bộ" },
-                    { new Guid("8f8d4a6e-2bfa-4e8c-9d2c-3f6a7e9b87cb"), "Giày Đá Bóng" }
+                    { new Guid("8f4d4a5e-2bfa-4e8c-9d2c-3f6a7e9b87cb"), "Sneaker" },
+                    { new Guid("8f8d4a6e-2bfa-4e8c-9d2c-3f6a7e9b87cb"), "SneakFit" }
                 });
 
             migrationBuilder.InsertData(
@@ -544,8 +546,8 @@ namespace SneakFit.Data.Migrations
                 columns: new[] { "Id", "MaMauSac", "TenMauSac" },
                 values: new object[,]
                 {
-                    { new Guid("8f4d4a5e-2bfa-2e8c-9d2c-3f6a7e9b87cb"), "#FF0000", "Đen" },
-                    { new Guid("8f8d4a5e-2bfa-4e9c-9d2c-3f6a7e9b87cb"), "#FFFFFF", "Đỏ" }
+                    { new Guid("8f4d4a5e-2bfa-2e8c-9d2c-3f6a7e9b87cb"), "#FF0000", "Đỏ" },
+                    { new Guid("8f8d4a5e-2bfa-4e9c-9d2c-3f6a7e9b87cb"), "#FFFFFF", "Trắng" }
                 });
 
             migrationBuilder.InsertData(
@@ -575,7 +577,7 @@ namespace SneakFit.Data.Migrations
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "GioiTinh", "HoVaTen", "LockoutEnabled", "LockoutEnd", "NgaySinh", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TrangThai", "TwoFactorEnabled", "UrlHinhAnh", "UserName" },
-                values: new object[] { new Guid("69bd714f-9576-45ba-b5b7-f00649be00de"), 0, "48040758-b14e-4baf-a3b0-2423d387c371", "tupmph49568@gmail.com", true, false, "Phí Minh Tú", false, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "tupmph49568@gmail.com", "Admin", "AQAAAAIAAYagAAAAEJD/sFjx7n3q1dr9QJN2cv2yFOPgrPst1GRacmKX853aNMnZ9VN0huZaNS1E+vmyxA==", null, false, "", true, false, null, "Admin" });
+                values: new object[] { new Guid("69bd714f-9576-45ba-b5b7-f00649be00de"), 0, "f03e12d8-5c74-4268-ad57-1e84631bfd33", "tupmph49568@gmail.com", true, false, "Phí Minh Tú", false, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "tupmph49568@gmail.com", "Admin", "AQAAAAIAAYagAAAAEJwU40FMspaEXz56BUp1cdzf2eADBXnV0kL+1bndTRS/lU+oCB54asmBl91L2cYU5g==", null, false, "", true, false, null, "Admin" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_DiaChi_UserId",

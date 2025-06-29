@@ -221,11 +221,6 @@
                             {
                                 foreach (var item in Model.SanPhams.Items)
                                 {
-                                    var listGia = Model.AllSpct
-                                    .Where(x => x.SanPhamId == item.Id && x.Gia > 0)
-                                    .Select(x => x.Gia)
-                                    .ToList();
-
                                     <div class="col-lg-6">
                                         <div class="product-box" style="height: 550px">
                                             <div class="product-thumb" style="padding-bottom: 0px">
@@ -262,7 +257,7 @@
                                                         @item.TenDanhMuc
                                                     </h4>
                                                 </div>
-                                                <div class="product-price mt-2" style="font-size:1.13rem; font-weight:600; color:#e53935;">
+                                                @* <div class="product-price mt-2" style="font-size:1.13rem; font-weight:600; color:#e53935;">
                                                     @if (listGia.Any())
                                                     {
                                                         <span>@listGia.Min().ToString("N0") đ</span>
@@ -271,7 +266,40 @@
                                                     {
                                                         <span>Liên hệ</span>
                                                     }
-                                                </div>
+                                                </div> *@
+                                                @{
+                                                    var listGia = Model.AllSpct
+                                                    .Where(x => x.SanPhamId == item.Id && x.Gia > 0)
+                                                    .ToList();
+                                                    var minGiaGoc = listGia.Any() ? listGia.Min(x => x.GiaGoc) : 0M;
+                                                    var minGiaKm = listGia.Any() ? listGia.Min(x => x.GiaKhuyenMai) : 0M;
+                                                    var maxPhanTramGiam = listGia.Any() ? listGia.Max(x => x.KhuyenMaiPhanTram) : 0M;
+                                                    var spctsCoKM = listGia.Where(x => x.KhuyenMaiPhanTram > 0 && x.GiaKhuyenMai < x.GiaGoc).ToList();
+
+                                                    // Nếu có khuyến mãi
+                                                    var minGiaGocCoKM = spctsCoKM.Any() ? spctsCoKM.Min(x => x.GiaGoc) : minGiaGoc;
+                                                    var minGiaKMCoKM = spctsCoKM.Any() ? spctsCoKM.Min(x => x.GiaKhuyenMai) : minGiaKm;
+                                                    var maxGiamCoKM = spctsCoKM.Any() ? spctsCoKM.Max(x => x.KhuyenMaiPhanTram) : 0M;
+                                                }
+                                                @if (listGia.Any())
+                                                {
+                                                    if (spctsCoKM.Any())
+                                                    {
+                                                        <div class="product-price mt-2 d-flex align-items-center gap-2">
+                                                            <span class="gia-goc" style="text-decoration:line-through; color:gray">@minGiaGocCoKM.ToString("N0") đ</span>
+                                                            <span class="gia-km" >@minGiaKMCoKM.ToString("N0") đ</span>
+                                                            <span class="giam-tag ms-2 text-danger">-@maxGiamCoKM%</span>
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span style="font-weight: 700; font-size: 1.1rem; color: var(--heading-color);">@minGiaGoc.ToString("N0") đ</span>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <span>Liên hệ</span>
+                                                }
                                             </div>
                                         </div>
                                     </div>
@@ -394,6 +422,19 @@
         margin-top: 2px;
         accent-color: #1976d2;
     }
+
+    .giam-tag {
+        display: inline-block;
+        background: #ffe4e0;
+        color: #e53935;
+        font-size: 0.97em;
+        font-weight: bold;
+        border-radius: 6px;
+        padding: 2px 8px;
+        margin-left: 8px;
+        vertical-align: middle;
+    }
+
 
     /* Color Filter */
     .color-options {

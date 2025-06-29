@@ -1,188 +1,126 @@
-﻿<main class="main">
+﻿@model List<SneakFit.WebClient.Models.GioHangItemViewModel>
+@inject IConfiguration Configuration
 
-    <!-- Page Title -->
+@{
+    var baseUrl = Configuration["BaseAddress"];
+}
+@{
+    // Tính toán tổng phụ, thuế, phí vận chuyển, tổng cuối
+    decimal subtotal = Model.Sum(x => x.ThanhTien);
+    decimal shipping = subtotal >= 300 ? 0 : 4.99m;
+    decimal tax = Math.Round(subtotal * 0.1m, 2);
+    decimal total = subtotal + shipping + tax;
+}
+
+<main class="main">
     <div class="page-title light-background">
         <div class="container d-lg-flex justify-content-between align-items-center">
             <h1 class="mb-2 mb-lg-0">Cart</h1>
             <nav class="breadcrumbs">
                 <ol>
-                    <li><a href="index.html">Home</a></li>
+                    <li><a href="/">Home</a></li>
                     <li class="current">Cart</li>
                 </ol>
             </nav>
         </div>
-    </div><!-- End Page Title -->
-    <!-- Cart Section -->
-    <section id="cart" class="cart section">
-
+    </div>
+    <section id="cartDetails" class="cart section">
         <div class="container" data-aos="fade-up" data-aos-delay="100">
-
             <div class="row g-4">
                 <div class="col-lg-8" data-aos="fade-up" data-aos-delay="200">
                     <div class="cart-items">
                         <div class="cart-header d-none d-lg-block">
                             <div class="row align-items-center gy-4">
-                                <div class="col-lg-6">
-                                    <h5>Product</h5>
-                                </div>
-                                <div class="col-lg-2 text-center">
-                                    <h5>Price</h5>
-                                </div>
-                                <div class="col-lg-2 text-center">
-                                    <h5>Quantity</h5>
-                                </div>
-                                <div class="col-lg-2 text-center">
-                                    <h5>Total</h5>
-                                </div>
+                                <div class="col-lg-6"><h5>Product</h5></div>
+                                <div class="col-lg-2 text-center"><h5>Price</h5></div>
+                                <div class="col-lg-2 text-center"><h5>Quantity</h5></div>
+                                <div class="col-lg-2 text-center"><h5>Total</h5></div>
                             </div>
                         </div>
 
-                        <!-- Cart Item 1 -->
-                        <div class="cart-item" data-aos="fade-up" data-aos-delay="100">
-                            <div class="row align-items-center gy-4">
-                                <div class="col-lg-6 col-12 mb-3 mb-lg-0">
-                                    <div class="product-info d-flex align-items-center">
-                                        <div class="product-image">
-                                            <img src="assets/img/product/product-2.webp" alt="Product" class="img-fluid" loading="lazy">
-                                        </div>
-                                        <div class="product-details">
-                                            <h6 class="product-title">Lorem ipsum dolor sit amet</h6>
-                                            <div class="product-meta">
-                                                <span class="product-color">Color: Black</span>
-                                                <span class="product-size">Size: M</span>
+                        @if (Model.Count == 0)
+                        {
+                            <div class="alert alert-info mt-3">Giỏ hàng của bạn đang trống.</div>
+                        }
+                        else
+                        {
+                            int idx = 0;
+                            foreach (var item in Model)
+                            {
+                                <div class="cart-item" data-aos="fade-up" data-aos-delay="@(100 + idx * 100)">
+                                    <div class="row align-items-center gy-4">
+                                        <div class="col-lg-6 col-12 mb-3 mb-lg-0">
+                                            <div class="product-info d-flex align-items-center">
+                                                <div class="product-image">
+                                                    <img src="@($"{Configuration["BaseAddress"]}{(string.IsNullOrEmpty(item.AnhSanPham) ? "/images/Default_Logo.png" : item.AnhSanPham)}")"
+                                                         alt="@item.TenSanPham"
+                                                         class="img-fluid" loading="lazy" style="max-width:75px; max-height:75px; border-radius: 12px" />
+                                                </div>
+                                                <div class="product-details ms-3">
+                                                    <h6 class="product-title">@item.TenSanPham</h6>
+                                                    <div class="product-meta">
+                                                        <span class="product-color">Color: @item.MauSac</span>
+                                                        <span class="product-size">Size: @item.KichThuoc</span>
+                                                    </div>
+                                                    <button class="remove-item btn btn-link text-danger p-0" type="button"
+                                                            data-id="@item.SanPhamChiTietId">
+                                                        <i class="bi bi-trash"></i> Remove
+                                                    </button>
+                                                </div>
                                             </div>
-                                            <button class="remove-item" type="button">
-                                                <i class="bi bi-trash"></i> Remove
-                                            </button>
                                         </div>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-lg-2 text-center">
-                                    <div class="price-tag">
-                                        <span class="current-price">$89.99</span>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-lg-2 text-center">
-                                    <div class="quantity-selector">
-                                        <button class="quantity-btn decrease">
-                                            <i class="bi bi-dash"></i>
-                                        </button>
-                                        <input type="number" class="quantity-input" value="1" min="1" max="10">
-                                        <button class="quantity-btn increase">
-                                            <i class="bi bi-plus"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-lg-2 text-center mt-3 mt-lg-0">
-                                    <div class="item-total">
-                                        <span>$89.99</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div><!-- End Cart Item -->
-                        <!-- Cart Item 2 -->
-                        <div class="cart-item" data-aos="fade-up" data-aos-delay="200">
-                            <div class="row align-items-center gy-4">
-                                <div class="col-lg-6 col-12 mb-3 mb-lg-0">
-                                    <div class="product-info d-flex align-items-center">
-                                        <div class="product-image">
-                                            <img src="assets/img/product/product-7.webp" alt="Product" class="img-fluid" loading="lazy">
-                                        </div>
-                                        <div class="product-details">
-                                            <h6 class="product-title">Consectetur adipiscing elit</h6>
-                                            <div class="product-meta">
-                                                <span class="product-color">Color: White</span>
-                                                <span class="product-size">Size: L</span>
+                                        <div class="col-12 col-lg-2 text-center">
+                                            <div class="price-tag">
+                                                @if (item.GiaKhuyenMai > 0 && item.GiaKhuyenMai < item.GiaGoc)
+                                                {
+                                                    <span class="current-price">@item.GiaKhuyenMai.ToString("N0")</span>
+                                                    <span class="original-price text-muted" style="text-decoration:line-through">@item.GiaGoc.ToString("N0")</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="current-price">@item.GiaGoc.ToString("N0")</span>
+                                                }
                                             </div>
-                                            <button class="remove-item" type="button">
-                                                <i class="bi bi-trash"></i> Remove
-                                            </button>
                                         </div>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-lg-2 text-center">
-                                    <div class="price-tag">
-                                        <span class="current-price">$64.99</span>
-                                        <span class="original-price">$79.99</span>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-lg-2 text-center">
-                                    <div class="quantity-selector">
-                                        <button class="quantity-btn decrease">
-                                            <i class="bi bi-dash"></i>
-                                        </button>
-                                        <input type="number" class="quantity-input" value="2" min="1" max="10">
-                                        <button class="quantity-btn increase">
-                                            <i class="bi bi-plus"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-lg-2 text-center mt-3 mt-lg-0">
-                                    <div class="item-total">
-                                        <span>$129.98</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div><!-- End Cart Item -->
-                        <!-- Cart Item 3 -->
-                        <div class="cart-item" data-aos="fade-up" data-aos-delay="300">
-                            <div class="row align-items-center gy-4">
-                                <div class="col-lg-6 col-12 mb-3 mb-lg-0">
-                                    <div class="product-info d-flex align-items-center">
-                                        <div class="product-image">
-                                            <img src="assets/img/product/product-10.webp" alt="Product" class="img-fluid" loading="lazy">
-                                        </div>
-                                        <div class="product-details">
-                                            <h6 class="product-title">Sed do eiusmod tempor</h6>
-                                            <div class="product-meta">
-                                                <span class="product-color">Color: Blue</span>
-                                                <span class="product-size">Size: S</span>
+                                        <div class="col-12 col-lg-2 text-center">
+                                            <div class="quantity-selector">
+                                                <button class="quantity-btn decrease" type="button" data-id="@item.SanPhamChiTietId">
+                                                    <i class="bi bi-dash"></i>
+                                                </button>
+                                                <input type="number" class="quantity-input" value="@item.SoLuong" min="1" max="99"
+                                                       data-id="@item.SanPhamChiTietId">
+                                                <button class="quantity-btn increase" type="button" data-id="@item.SanPhamChiTietId">
+                                                    <i class="bi bi-plus"></i>
+                                                </button>
                                             </div>
-                                            <button class="remove-item" type="button">
-                                                <i class="bi bi-trash"></i> Remove
-                                            </button>
+                                        </div>
+                                        <div class="col-12 col-lg-2 text-center mt-3 mt-lg-0">
+                                            <div class="item-total">
+                                                <span>@item.ThanhTien.ToString("N0")</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-12 col-lg-2 text-center">
-                                    <div class="price-tag">
-                                        <span class="current-price">$49.99</span>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-lg-2 text-center">
-                                    <div class="quantity-selector">
-                                        <button class="quantity-btn decrease">
-                                            <i class="bi bi-dash"></i>
-                                        </button>
-                                        <input type="number" class="quantity-input" value="1" min="1" max="10">
-                                        <button class="quantity-btn increase">
-                                            <i class="bi bi-plus"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-lg-2 text-center mt-3 mt-lg-0">
-                                    <div class="item-total">
-                                        <span>$49.99</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div><!-- End Cart Item -->
+                                idx++;
+                            }
+                        }
 
+                        <!-- Coupon/Action Bar -->
                         <div class="cart-actions">
                             <div class="row g-3">
                                 <div class="col-lg-6 col-md-6">
                                     <div class="coupon-form">
                                         <div class="input-group">
-                                            <input type="text" class="form-control" placeholder="Coupon code">
+                                            <input type="text" class="form-control" placeholder="Coupon code" id="couponCode">
                                             <button class="btn btn-accent" type="button">Apply</button>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-lg-6 col-md-6 text-md-end">
-                                    <button class="btn btn-outline-accent me-2">
+                                    <button class="btn btn-outline-accent me-2" type="button" onclick="location.reload();">
                                         <i class="bi bi-arrow-clockwise"></i> Update
                                     </button>
-                                    <button class="btn btn-outline-danger">
+                                    <button class="btn btn-outline-danger" type="button" id="clear-cart">
                                         <i class="bi bi-trash"></i> Clear
                                     </button>
                                 </div>
@@ -191,32 +129,33 @@
                     </div>
                 </div>
 
+                <!-- Order Summary -->
                 <div class="col-lg-4" data-aos="fade-up" data-aos-delay="300">
                     <div class="cart-summary">
                         <h4 class="summary-title">Order Summary</h4>
 
                         <div class="summary-item">
                             <span class="summary-label">Subtotal</span>
-                            <span class="summary-value">$269.96</span>
+                            <span class="summary-value">@subtotal.ToString("N0")</span>
                         </div>
 
                         <div class="summary-item shipping-item">
                             <span class="summary-label">Shipping</span>
                             <div class="shipping-options">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="shipping" id="standard" checked="">
+                                    <input class="form-check-input" type="radio" name="shipping" id="standard" checked />
                                     <label class="form-check-label" for="standard">
                                         Standard Delivery - $4.99
                                     </label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="shipping" id="express">
+                                    <input class="form-check-input" type="radio" name="shipping" id="express" />
                                     <label class="form-check-label" for="express">
                                         Express Delivery - $12.99
                                     </label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="shipping" id="free">
+                                    <input class="form-check-input" type="radio" name="shipping" id="free" />
                                     <label class="form-check-label" for="free">
                                         Free Shipping (Orders over $300)
                                     </label>
@@ -226,7 +165,7 @@
 
                         <div class="summary-item">
                             <span class="summary-label">Tax</span>
-                            <span class="summary-value">$27.00</span>
+                            <span class="summary-value">@tax.ToString("N0")</span>
                         </div>
 
                         <div class="summary-item discount">
@@ -236,17 +175,17 @@
 
                         <div class="summary-total">
                             <span class="summary-label">Total</span>
-                            <span class="summary-value">$301.95</span>
+                            <span class="summary-value">@total.ToString("N0")</span>
                         </div>
 
                         <div class="checkout-button">
-                            <a href="#" class="btn btn-accent w-100">
+                            <a href="@Url.Action("Checkout", "GioHang")" class="btn btn-accent w-100">
                                 Proceed to Checkout <i class="bi bi-arrow-right"></i>
                             </a>
                         </div>
 
                         <div class="continue-shopping">
-                            <a href="#" class="btn btn-link w-100">
+                            <a href="@Url.Action("Index", "SanPham")" class="btn btn-link w-100">
                                 <i class="bi bi-arrow-left"></i> Continue Shopping
                             </a>
                         </div>
@@ -263,10 +202,146 @@
                         </div>
                     </div>
                 </div>
+                <!-- End Order Summary -->
             </div>
-
         </div>
-
-    </section><!-- /Cart Section -->
-
+    </section>
 </main>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        let isProcessing = false;
+
+        function capNhatTongDonHang(subtotal) {
+            $('.summary-item').first().find('.summary-value').text(subtotal.toLocaleString());
+            var shipping = subtotal >= 300 ? 0 : 4.99;
+            var tax = Math.round(subtotal * 0.1, 2);
+            var total = subtotal + shipping + tax;
+            $('.summary-item').eq(2).find('.summary-value').text(tax.toLocaleString());
+            $('.summary-total .summary-value').text(total.toLocaleString());
+        }
+
+        function updateQuantity(productId, quantity, $input) {
+            if (isProcessing) return;
+            isProcessing = true;
+            $('.quantity-btn, .quantity-input').prop('disabled', true); // Disable tất cả nút và input luôn
+
+            $.ajax({
+                url: '/GioHang/CapNhatSoLuong',
+                type: 'POST',
+                data: {
+                    sanPhamChiTietId: productId,
+                    soLuong: quantity
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $input.val(response.soLuong);
+                        $input.closest('.cart-item').find('.item-total span').text(response.thanhTien.toLocaleString());
+                        capNhatTongDonHang(response.tongTien);
+                    } else {
+                        Swal.fire('Lỗi', response.message || 'Có lỗi!', 'error');
+                        $input.val($input.data('old') || 1);
+                    }
+                },
+                error: function() {
+                    Swal.fire('Lỗi', 'Có lỗi khi cập nhật số lượng!', 'error');
+                    $input.val($input.data('old') || 1);
+                },
+                complete: function() {
+                    isProcessing = false;
+                    $('.quantity-btn, .quantity-input').prop('disabled', false); // Bật lại các nút/input
+                }
+            });
+        }
+
+        $(function() {
+            // Sự kiện click +/-
+            $(document).on('click', '.increase, .decrease', function() {
+                if (isProcessing) return; // Đang xử lý thì không cho thao tác
+                let $input = $(this).siblings('.quantity-input');
+                let val = parseInt($input.val()) || 1;
+                let newVal = $(this).hasClass('increase') ? val + 1 : val - 1;
+                if (newVal < 1) newVal = 1;
+                if (newVal > 99) newVal = 99;
+                // Lưu số cũ để revert nếu lỗi
+                $input.data('old', val);
+                if (newVal !== val) {
+                    updateQuantity($input.data('id'), newVal, $input);
+                }
+            });
+
+            // Sự kiện nhập trực tiếp input
+            $(document).on('focus', '.quantity-input', function () {
+                $(this).data('old', parseInt($(this).val()) || 1);
+            });
+
+            // Sự kiện rời input
+            $(document).on('blur', '.quantity-input', function () {
+                if (isProcessing) return;
+                let $input = $(this);
+                let oldVal = $input.data('old') || 1;
+                let newVal = parseInt($input.val()) || 1;
+                if (newVal < 1) newVal = 1;
+                if (newVal > 99) newVal = 99;
+                if (newVal !== oldVal) {
+                    updateQuantity($input.data('id'), newVal, $input);
+                } else {
+                    $input.val(newVal); // fix cho các trường hợp nhập 0 hoặc xong lại nhảy về 1
+                }
+            });
+
+            // Nhấn Enter trên input cũng trigger blur (=> blur sẽ gửi AJAX nếu có thay đổi)
+            $(document).on('keydown', '.quantity-input', function(e) {
+                if (e.which === 13) {
+                    e.preventDefault();
+                    $(this).blur();
+                }
+            });
+
+            // Xóa sản phẩm
+            $(document).on('click', '.remove-item', function (e) {
+                e.preventDefault();
+                if (isProcessing) return;
+                var spctId = $(this).data('id');
+                Swal.fire({
+                    title: 'Xác nhận',
+                    text: 'Bạn có chắc muốn xóa sản phẩm này?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Xóa',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        isProcessing = true;
+                        $.post('/GioHang/XoaSanPham', { sanPhamChiTietId: spctId }, function (res) {
+                            window.location.reload();
+                        });
+                    }
+                });
+            });
+
+            // Xóa toàn bộ giỏ hàng
+            $(document).on('click', '#clear-cart', function (e) {
+                e.preventDefault();
+                if (isProcessing) return;
+                Swal.fire({
+                    title: 'Xác nhận',
+                    text: 'Bạn có chắc muốn xóa toàn bộ giỏ hàng?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Xóa hết',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        isProcessing = true;
+                        $.post('/GioHang/XoaTatCa', function () {
+                            window.location.reload();
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+}

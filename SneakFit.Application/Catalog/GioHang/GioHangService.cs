@@ -200,13 +200,81 @@ namespace SneakFit.Application.Catalog.GioHang
                 GioHangId = x.ghct.GioHangId,
                 SanPhamChiTietId = x.ghct.SanPhamChiTietId,
                 TenSanPham = x.sp.TenSanPham,
-                HinhAnh = _context.HinhAnhSanPham.FirstOrDefault(h => h.SanPhamChiTietId == x.sp.Id).UrlHinhAnh,
+                // Lấy 1 ảnh bất kỳ của SPCT, nếu không có trả về ảnh mặc định
+                HinhAnh = _context.HinhAnhSanPham
+                    .Where(h => h.SanPhamChiTietId == x.spct.ID)
+                    .Select(h => h.UrlHinhAnh)
+                    .FirstOrDefault() ?? "/images/Default_Logo.png",
                 MauSac = x.ms.TenMauSac,
                 KichThuoc = x.kt.MaKichThuoc,
                 DonGia = x.ghct.Gia,
                 SoLuong = x.ghct.SoLuong,
                 ThanhTien = x.ghct.Gia * x.ghct.SoLuong
             }).ToListAsync();
+        }
+        public async Task<ApiResult<bool>> CapNhatSoLuongAsync(CapNhatGioHang request)
+        {
+            // 1. Validate số lượng
+            if (request.SoLuong < 1)
+                return new ApiErrorResult<bool>("Số lượng phải lớn hơn 0");
+
+            if (request.SoLuong > 99)
+                return new ApiErrorResult<bool>("Số lượng không được vượt quá 99");
+
+            // 2. Lấy giỏ hàng của user
+            var gioHang = await _context.GioHang.FirstOrDefaultAsync(x => x.UserId == request.UserId);
+            if (gioHang == null)
+                return new ApiErrorResult<bool>("Không tìm thấy giỏ hàng của bạn");
+
+            // 3. Lấy chi tiết sản phẩm trong giỏ
+            var gioHangChiTiet = await _context.GioHangChiTiet
+                .FirstOrDefaultAsync(x => x.GioHangId == gioHang.Id && x.SanPhamChiTietId == request.SanPhamChiTietId);
+
+            if (gioHangChiTiet == null)
+                return new ApiErrorResult<bool>("Sản phẩm không tồn tại trong giỏ hàng");
+
+            // 4. Check số lượng tồn kho thực tế
+            var sanPhamChiTiet = await _context.SanPhamChiTiet.FindAsync(request.SanPhamChiTietId);
+            if (sanPhamChiTiet == null)
+                return new ApiErrorResult<bool>("Sản phẩm không tồn tại");
+
+            if (sanPhamChiTiet.SoLuong < request.SoLuong)
+                return new ApiErrorResult<bool>($"Số lượng trong kho chỉ còn {sanPhamChiTiet.SoLuong}. Bạn không thể tăng thêm!");
+
+            // 5. Lưu giá trị cũ để rollback nếu cần
+            var oldQuantity = gioHangChiTiet.SoLuong;
+            var oldPrice = gioHangChiTiet.Gia;
+
+            try
+            {
+                // 6. Cập nhật số lượng & giá (nếu giá thay đổi)
+                gioHangChiTiet.SoLuong = request.SoLuong;
+                gioHangChiTiet.Gia = sanPhamChiTiet.Gia; // Cập nhật giá hiện tại
+
+                // 7. Save changes với transaction
+                using var transaction = await _context.Database.BeginTransactionAsync();
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return new ApiSuccessResult<bool>(true);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                // Rollback values
+                gioHangChiTiet.SoLuong = oldQuantity;
+                gioHangChiTiet.Gia = oldPrice;
+
+                return new ApiErrorResult<bool>("Xung đột dữ liệu, vui lòng thử lại sau.");
+            }
+            catch (Exception ex)
+            {
+                // Rollback values
+                gioHangChiTiet.SoLuong = oldQuantity;
+                gioHangChiTiet.Gia = oldPrice;
+
+                return new ApiErrorResult<bool>($"Có lỗi xảy ra: {ex.Message}");
+            }
         }
     }
 }

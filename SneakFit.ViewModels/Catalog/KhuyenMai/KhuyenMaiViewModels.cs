@@ -22,6 +22,7 @@ namespace SneakFit.ViewModels.Catalog.KhuyenMai
         public TrangThaiGiamGia TrangThai { get; set; }
         public List<KhuyenMaiSanPhamViewModels> SanPhams { get; set; }
         // Thêm dòng này:
+        public Guid SanPhamChiTietId { get; set; }
         public List<KhuyenMaiSPCTViewModels> SanPhamChiTiets { get; set; }
     }
 }

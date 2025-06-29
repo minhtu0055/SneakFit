@@ -84,5 +84,15 @@ namespace SneakFit.BackEndAPI.Controllers
                 return BadRequest("Xóa giỏ hàng thất bại");
             return Ok(result);
         }
+
+        [HttpPost("cap-nhat-so-luong")]
+        public async Task<IActionResult> CapNhatSoLuong([FromBody] CapNhatGioHang request)
+        {
+            var result = await _gioHangService.CapNhatSoLuongAsync(request);
+            if (!result.IsSuccessed)
+                return BadRequest(result);
+
+            return Ok(result);
+        }
     }
 }
