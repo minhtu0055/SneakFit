@@ -18,6 +18,10 @@ builder.Services.AddScoped<IMauSacApiClient, MauSacApiClient>();
 builder.Services.AddScoped<IKichThuocApiClient, KichThuocApiClient>();
 builder.Services.AddScoped<ISanPhamApiClient, SanPhamApiClient>();
 builder.Services.AddScoped<IThuongHieuApiClient, ThuongHieuApiClient>();
+builder.Services.AddScoped<IDeGiayApiClient, DeGiayApiClient>();
+builder.Services.AddScoped<IChatLieuApiClient, ChatLieuApiClient>();
+builder.Services.AddScoped<IKhuyenMaiApiClient, KhuyenMaiApiClient>();
+builder.Services.AddScoped<IGioHangApiClient, GioHangApiClient>();
 
 builder.Services.AddSession(options =>
 {

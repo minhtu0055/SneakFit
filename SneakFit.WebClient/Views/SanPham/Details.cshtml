@@ -19,7 +19,7 @@
                 {
                     if (allImages.Count == 1)
                     {
-                        <img src="@(baseUrl + allImages.First())" alt="Ảnh sản phẩm" class="rounded" style="object-fit:cover; width:100%;max-height:400px;" onerror="this.src='/images/no-image.png'" />
+                        <img src="@(baseUrl + allImages.First())" alt="Ảnh sản phẩm" class="rounded" style="object-fit:cover; width:100%;max-height:400px;" onerror="this.src='/images/Default_Logo.png'" />
                     }
                     else
                     {
@@ -28,7 +28,7 @@
                                 @for (int i = 0; i < allImages.Count; i++)
                                 {
                                     <div class="carousel-item @(i == 0 ? "active" : "")">
-                                        <img src="@(baseUrl + allImages[i])" alt="Ảnh sản phẩm" class="d-block w-100 rounded" style="object-fit:cover; max-height:400px;" onerror="this.src='/images/no-image.png'" />
+                                        <img src="@(baseUrl + allImages[i])" alt="Ảnh sản phẩm" class="d-block w-100 rounded" style="object-fit:cover; max-height:400px;" onerror="this.src='/images/Default_Logo.png'" />
                                     </div>
                                 }
                             </div>
@@ -43,16 +43,22 @@
                 }
                 else
                 {
-                    <img src="/images/no-image.png" alt="No Image" class="rounded" style="object-fit:cover; width:100%;max-height:400px;" />
+                    <img src="/images/Default_Logo.png" alt="No Image" class="rounded" style="object-fit:cover; width:100%;max-height:400px;" />
                 }
             </div>
         </div>
         <!-- Thông tin sản phẩm -->
         <div class="col-lg-7 col-md-6">
             <h2 class="fw-bold mb-2">@Model.SanPham.TenSanPham</h2>
-            <h3 class="text-danger mb-3" id="giaSP" style="min-height: 35px;">
+            @* <h3 class="text-danger mb-3" id="giaSP" style="min-height: 35px;">
                 @Model.SanPhamChiTiets.FirstOrDefault()?.Gia.ToString("N0") đ
-            </h3>
+            </h3> *@
+            <!-- Giá sản phẩm -->
+            <div class="mb-3" id="giaSPBox" style="min-height: 38px;">
+                <span id="GiaApDungKhuyenMai" class="gia-km"></span>
+                <span id="GiaGoc" class="gia-goc"></span>
+                <span id="PhanTramGiamGia" class="giam-tag"></span>
+            </div>
             <!-- Màu sắc -->
             <div class="mb-2">
                 <b>Màu sắc:</b>
@@ -86,8 +92,9 @@
                         <button type="button"
                                 class="size-box"
                                 data-size-id="@size.Id"
-                        @(hasSPCT ? "" : "disabled")
-                                style="padding:8px 18px; border:2px solid #ddd; border-radius:7px; background:#fff; font-weight:500; font-size:15px; opacity:@(hasSPCT ? "1" : "0.5"); cursor:@(hasSPCT ? "pointer" : "not-allowed");">
+                                @(hasSPCT ? "" : "disabled")
+                                style="padding:8px 18px; border:2px solid #ddd; border-radius:7px; background:#fff; 
+                                       font-weight:500; font-size:15px; opacity:@(hasSPCT ? "1" : "0.5"); cursor:@(hasSPCT ? "pointer" : "not-allowed");">
                             @size.MaKichThuoc
                         </button>
                     }
@@ -102,10 +109,10 @@
                 <button type="button" id="btnPlus" class="btn-qty mx-2">+</button>
                 <span class="ms-2 text-muted" id="soLuongTon" style="font-weight: 500; min-width: 65px;"></span>
             </div>
-            <form action="@Url.Action("AddToCart", "Cart")" method="post" class="d-inline" id="cartForm" style="display: none;">
+            <form @* action="@Url.Action("AddToCart", "SanPham")" method="post" *@ class="d-inline" id="cartForm" style="display: none;">
                 <input type="hidden" name="id" id="selectedSpctId" value="" />
                 <input type="hidden" name="quantity" id="cartQuantityInput" value="1" />
-                <button type="submit" class="btn btn-primary">
+                <button type="button" id="btnAddToCart" class="btn btn-primary">
                     <i class="bi bi-cart-plus"></i> Thêm vào giỏ hàng
                 </button>
             </form>
@@ -126,6 +133,12 @@
     <script>
         let spctData = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SanPhamChiTiets));
         let selectedColorId = null, selectedSizeId = null;
+
+        // Khởi tạo khi trang load
+        $(document).ready(function () {
+            updateStatusShowHide();
+            updateUI();
+        });
 
         // Hàm tìm giá nhỏ nhất từ tất cả SPCT
         function getGiaThapNhat() {
@@ -159,17 +172,72 @@
                 spct = spctData.find(x => x.MauSacId == selectedColorId && x.KichThuocId == selectedSizeId);
             }
 
-            // Cập nhật giá
-            if (spct && spct.Gia) {
-                // Có SPCT cụ thể - hiển thị giá của SPCT đó
-                $('#giaSP').text(Number(spct.Gia).toLocaleString('vi-VN') + " đ");
-            } else {
-                // Chưa chọn đủ hoặc không có SPCT - hiển thị giá thấp nhất
-                let giaMin = getGiaThapNhat();
-                if (giaMin && giaMin > 0) {
-                    $('#giaSP').text(giaMin.toLocaleString('vi-VN') + " đ");
+            // // Cập nhật giá
+            // if (spct && spct.Gia) {
+            //     // Có SPCT cụ thể - hiển thị giá của SPCT đó
+            //     $('#giaSP').text(Number(spct.Gia).toLocaleString('vi-VN') + " đ");
+            // } else {
+            //     // Chưa chọn đủ hoặc không có SPCT - hiển thị giá thấp nhất
+            //     let giaMin = getGiaThapNhat();
+            //     if (giaMin && giaMin > 0) {
+            //         $('#giaSP').text(giaMin.toLocaleString('vi-VN') + " đ");
+            //     } else {
+            //         $('#giaSP').text("");
+            //     }
+            // }
+
+            // Update giá bán:
+            if (spct) {
+                // Hiển thị giá gốc nếu có KM
+                if (spct.GiaKhuyenMai && spct.KhuyenMaiPhanTram > 0 && spct.GiaKhuyenMai < spct.GiaGoc) {
+                    $('#GiaGoc').text(spct.GiaGoc.toLocaleString('vi-VN') + ' đ').show();
+                    $('#GiaApDungKhuyenMai').text(spct.GiaKhuyenMai.toLocaleString('vi-VN') + ' đ').show();
+                    $('#PhanTramGiamGia').text('-' + spct.KhuyenMaiPhanTram + '%').show();
                 } else {
-                    $('#giaSP').text("");
+                    $('#GiaGoc').hide();
+                    $('#PhanTramGiamGia').hide();
+                    $('#GiaApDungKhuyenMai').text(spct.GiaGoc.toLocaleString('vi-VN') + ' đ').show();
+                }
+            } else {
+                // Trường hợp chưa chọn đủ
+                
+                // Hiện giá KM thấp nhất và % giảm lớn nhất
+                let spctMinGia = null;
+                let minGiaKhuyenMai = Number.MAX_SAFE_INTEGER;
+                let maxPhanTramGiam = 0;
+                let minGiaGoc = 0;
+
+                spctData.forEach(x => {
+                    // Ưu tiên SPCT còn active, giá > 0
+                    if (x.TrangThai && Number(x.GiaGoc) > 0) {
+                        let giaKM = (x.KhuyenMaiPhanTram > 0 && x.GiaKhuyenMai < x.GiaGoc) ? x.GiaKhuyenMai : x.GiaGoc;
+                        if (giaKM < minGiaKhuyenMai) {
+                            minGiaKhuyenMai = giaKM;
+                            spctMinGia = x;
+                        }
+                        if (x.KhuyenMaiPhanTram > maxPhanTramGiam) {
+                            maxPhanTramGiam = x.KhuyenMaiPhanTram;
+                        }
+                    }
+                });
+
+                // Nếu tìm được SPCT hợp lệ
+                if (spctMinGia) {
+                    // Có KM
+                    if (spctMinGia.KhuyenMaiPhanTram > 0 && spctMinGia.GiaKhuyenMai < spctMinGia.GiaGoc) {
+                        $('#GiaGoc').text(spctMinGia.GiaGoc.toLocaleString('vi-VN') + ' đ').show();
+                        $('#GiaApDungKhuyenMai').text(spctMinGia.GiaKhuyenMai.toLocaleString('vi-VN') + ' đ').show();
+                        $('#PhanTramGiamGia').text('-' + spctMinGia.KhuyenMaiPhanTram + '%').show();
+                    } else {
+                        $('#GiaGoc').hide();
+                        $('#PhanTramGiamGia').hide();
+                        $('#GiaApDungKhuyenMai').text(spctMinGia.GiaGoc.toLocaleString('vi-VN') + ' đ').show();
+                    }
+                } else {
+                    // Không có SPCT nào active/giá > 0
+                    $('#GiaGoc').hide();
+                    $('#GiaApDungKhuyenMai').text('').hide();
+                    $('#PhanTramGiamGia').hide();
                 }
             }
 
@@ -290,10 +358,34 @@
             updateQuantityUI();
         });
 
-        // Khởi tạo khi trang load
-        $(document).ready(function () {
-            updateStatusShowHide();
-            updateUI();
+        $('#btnAddToCart').click(function () {
+            var spctId = $('#selectedSpctId').val();
+            var soLuong = parseInt($('#quantityInput').val()) || 1;
+            var max = parseInt($('#quantityInput').attr('max')) || 1;
+
+            if (soLuong > max) {
+                alert("Bạn đã đạt số lượng tối đa trong kho cho sản phẩm này!");
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("AddToCart", "SanPham")',
+                type: 'POST',
+                data: {
+                    sanPhamChiTietId: spctId,
+                    soLuong: soLuong
+                },
+                success: function (res) {
+                    if (res.success) {
+                        alert(res.message || 'Đã thêm vào giỏ hàng thành công!');
+                    } else {
+                        alert(res.message || 'Có lỗi xảy ra!');
+                    }
+                },
+                error: function () {
+                    alert('Lỗi hệ thống, vui lòng thử lại!');
+                }
+            });
         });
     </script>
 }
@@ -407,6 +499,44 @@
         pointer-events: none !important;
         filter: grayscale(0.2);
         border-color: #eee !important;
+    }
+
+    .product-price-row {
+        display: flex;
+        align-items: center; /* Canh giữa theo chiều dọc */
+        gap: 12px; /* Khoảng cách giữa các phần tử */
+    }
+
+    #giaSPBox {
+        display: flex;
+        align-items: center; /* Căn giữa theo chiều dọc */
+        gap: 12px; /* Khoảng cách giữa các phần tử */
+        min-height: 38px; /* Giữ chiều cao nhất quán nếu có/không có khuyến mãi */
+    }
+
+    .gia-goc {
+        text-decoration: line-through;
+        color: #888;
+        font-size: 1.2rem;
+    }
+
+    .gia-km {
+        color: #e53935;
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+
+    .giam-tag {
+        background: #ffeaea;
+        color: #d7263d;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        padding: 2px 10px;
+        margin-left: 4px;
+        display: flex;
+        align-items: center; /* Đảm bảo % cũng giữa hàng nếu có icon */
+        height: 28px; /* Giữ khung ổn định */
     }
 
     #soLuongTon {

@@ -31,6 +31,12 @@ namespace SneakFit.ViewModels.Catalog.SanPhamChiTiet
         public string? TenDeGiay { get; set; }
         public string? TenThuongHieu { get; set; }
 
+
+        public decimal GiaGoc { get; set; }
+        public decimal GiaKhuyenMai { get; set; }
+        public decimal KhuyenMaiPhanTram { get; set; }
+        public Guid? KhuyenMaiId { get; set; }
+
         public List<string>? Images { get; set; }
     }
 }

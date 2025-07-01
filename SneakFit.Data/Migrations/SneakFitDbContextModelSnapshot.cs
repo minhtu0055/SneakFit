@@ -308,12 +308,12 @@ namespace SneakFit.Data.Migrations
                         new
                         {
                             Id = new Guid("8f4d4a5e-2bfa-4e8c-9d2c-3f6a7e9b87cb"),
-                            TenDanhMuc = "Giày Chạy Bộ"
+                            TenDanhMuc = "Sneaker"
                         },
                         new
                         {
                             Id = new Guid("8f8d4a6e-2bfa-4e8c-9d2c-3f6a7e9b87cb"),
-                            TenDanhMuc = "Giày Đá Bóng"
+                            TenDanhMuc = "SneakFit"
                         });
                 });
 
@@ -590,6 +590,9 @@ namespace SneakFit.Data.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<DateTime?>("NgaySuaDoi")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("NgayTao")
                         .HasColumnType("datetime2");
 
@@ -619,6 +622,9 @@ namespace SneakFit.Data.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("KhuyenMaiId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("SPCTId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("SanPhamId")
@@ -683,13 +689,13 @@ namespace SneakFit.Data.Migrations
                         {
                             Id = new Guid("8f4d4a5e-2bfa-2e8c-9d2c-3f6a7e9b87cb"),
                             MaMauSac = "#FF0000",
-                            TenMauSac = "Đen"
+                            TenMauSac = "Đỏ"
                         },
                         new
                         {
                             Id = new Guid("8f8d4a5e-2bfa-4e9c-9d2c-3f6a7e9b87cb"),
                             MaMauSac = "#FFFFFF",
-                            TenMauSac = "Đỏ"
+                            TenMauSac = "Trắng"
                         });
                 });
 
