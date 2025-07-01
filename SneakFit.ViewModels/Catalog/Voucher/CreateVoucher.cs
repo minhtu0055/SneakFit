@@ -39,5 +39,11 @@ namespace SneakFit.ViewModels.Catalog.Voucher
         public DateTime ThoiGianKetThuc { get; set; }
 
         public TrangThaiGiamGia TrangThai { get; set; }
+
+
+        [Required(ErrorMessage = "Loại voucher không được để trống")]
+        public LoaiVoucher LoaiVoucher { get; set; }
+        
+        public List<Guid>? SelectedUserIds { get; set; } 
     }
 }

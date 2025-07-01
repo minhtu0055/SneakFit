@@ -243,7 +243,7 @@ namespace SneakFit.Data.Migrations
                         {
                             Id = new Guid("69bd714f-9576-45ba-b5b7-f00649be00de"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "fb1aba80-b655-436b-ab72-be79053103f9",
+                            ConcurrencyStamp = "36eb9d85-c028-40be-8ed7-d44dd56dabb0",
                             Email = "tupmph49568@gmail.com",
                             EmailConfirmed = true,
                             GioiTinh = false,
@@ -252,7 +252,7 @@ namespace SneakFit.Data.Migrations
                             NgaySinh = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NormalizedEmail = "tupmph49568@gmail.com",
                             NormalizedUserName = "Admin",
-                            PasswordHash = "AQAAAAIAAYagAAAAEMvPMPR0py/4r/WJIptqNt4BA1vH4iThXN0UypBQ2jU5YgPZDpzWPGbuaVZ/OO87/Q==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEHlvkgnlIpO224ZS78GnCpRqpdTzwoWGJYChrZGRgqHlN7UCeHs8nDPxINIvsgoC9g==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
                             TrangThai = true,
@@ -473,7 +473,6 @@ namespace SneakFit.Data.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("DiaChi")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -482,17 +481,14 @@ namespace SneakFit.Data.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("GhiChu")
-                        .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("HoTen")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -523,7 +519,6 @@ namespace SneakFit.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("SoDienThoai")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -539,14 +534,14 @@ namespace SneakFit.Data.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("VoucherID")
+                    b.Property<Guid?>("VoucherId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
                     b.HasIndex("UserId");
 
-                    b.HasIndex("VoucherID");
+                    b.HasIndex("VoucherId");
 
                     b.ToTable("HoaDon");
                 });
@@ -916,9 +911,7 @@ namespace SneakFit.Data.Migrations
 
                     b.HasOne("SneakFit.Data.Entities.Voucher", "Voucher")
                         .WithMany("HoaDon")
-                        .HasForeignKey("VoucherID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("VoucherId");
 
                     b.Navigation("User");
 

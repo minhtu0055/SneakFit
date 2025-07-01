@@ -24,7 +24,7 @@ namespace SneakFit.Data.EF
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server=LAPTOP-PH9VPOUT\\SQLEXPRESS;Database=SneakFit2;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true");       
+            optionsBuilder.UseSqlServer("Server=LAPTOP-P2ARI51J\\SQLEXPRESS;Database=SneakFit;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true");       
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -69,6 +69,7 @@ namespace SneakFit.Data.EF
         public DbSet<SanPhamChiTiet> SanPhamChiTiet { get; set; }
         public DbSet<ThuongHieu> ThuongHieu { get; set; }
         public DbSet<Voucher> Voucher { get; set; }
-        
+        public DbSet<VoucherUser> VoucherUser { get; set; }
+
     }
 }

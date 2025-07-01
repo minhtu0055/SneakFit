@@ -15,6 +15,6 @@ namespace SneakFit.Application.Catalog.HoaDon
         Task<HoaDonViewModel> GetById(Guid id);
         Task<HoaDonViewModel> Create(ThemHoaDon request);
         Task<HoaDonViewModel> Update(SuaHoaDon request);
-        Task<bool> UpdateStatus(Guid id, TrangThaiHoaDon trangThai);
+        Task<Dictionary<TrangThaiHoaDon, int>> GetCountByStatusAsync();
     }
 }

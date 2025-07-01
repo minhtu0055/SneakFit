@@ -1,4 +1,6 @@
-﻿using System;
+﻿using SneakFit.Data.Enums;
+using SneakFit.ViewModels.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,10 +8,11 @@ using System.Threading.Tasks;
 
 namespace SneakFit.ViewModels.Catalog.HoaDon
 {
-    public class PhanTrangHoaDon
+    public class PhanTrangHoaDon : PagingRequestBase
     {
-        public int PageIndex { get; set; } = 1;
-        public int PageSize { get; set; } = 10;
-        public string Keyword { get; set; } = ""; // Mặc định là chuỗi rỗng
+        public string? Keyword { get; set; }
+        public TrangThaiHoaDon? Trangthaihoadon { get; set; }
+        public DateTime? NgayBatDau { get; set; }  // Ngày bắt đầu
+        public DateTime? NgayKetThuc { get; set; }  // Ngày kết thúc
     }
 }

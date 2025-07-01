@@ -41,5 +41,14 @@ namespace SneakFit.ViewModels.Catalog.Voucher
         public DateTime ThoiGianKetThuc { get; set; }
 
         public TrangThaiGiamGia TrangThai { get; set; }
+
+        public LoaiVoucher LoaiVoucher { get; set; }
+
+        public List<Guid> SelectedUserIds { get; set; }
+        public string SelectedUserIdsHidden { get; set; }
+        public List<Guid> ParsedSelectedUserIds =>
+            !string.IsNullOrEmpty(SelectedUserIdsHidden)
+                ? SelectedUserIdsHidden.Split(',').Select(Guid.Parse).ToList()
+                : new List<Guid>();
     }
 }

@@ -1,7 +1,7 @@
 ﻿@model SneakFit.ViewModels.System.User.RegisterRequest
 
 <div class="container-fluid">
-	<h3 class="mt-4">Tạo mới khách hàng</h3>
+	<h3 class="mt-4">Tạo mới nhân viên</h3>
 	<ol class="breadcrumb mb-4">
 		<li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
 		<li class="breadcrumb-item"><a asp-action="Index">Danh sách nhân viên</a></li>
@@ -133,9 +133,6 @@
 	</div>
 </div>
 @section Scripts {
-	@{
-		await Html.RenderPartialAsync("_ValidationScriptsPartial");
-	}
 	<script>
 		// Hàm hiển thị ảnh preview
 		function previewFile(input) {

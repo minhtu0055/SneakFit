@@ -1,13 +1,13 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
-using SneakFit.ApiIntegration.Services;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
+using SneakFit.ApiIntegration.Services;
+using SneakFit.ViewModels.System.User;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using SneakFit.ViewModels.System.User;
 
 namespace SneakFit.Admin.Controllers
 {
@@ -70,6 +70,52 @@ namespace SneakFit.Admin.Controllers
             ClaimsPrincipal principal = new JwtSecurityTokenHandler().ValidateToken(jwtToken, validationParameters, out validatedToken);
 
             return principal;
+        }
+        [HttpGet]
+        public IActionResult QuenMatKhau()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> QuenMatKhau(QuenMatKhauRequest request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    TempData["error"] = "Vui lòng nhập email hợp lệ";
+                    return View(request);
+                }
+
+                if (string.IsNullOrEmpty(request?.Email))
+                {
+                    TempData["error"] = "Email không được để trống";
+                    return View(request);
+                }
+
+                var result = await _userApiClient.QuenMatKhau(request);
+
+                if (result == null)
+                {
+                    TempData["error"] = "Có lỗi xảy ra, vui lòng thử lại sau";
+                    return View(request);
+                }
+
+                if (result.IsSuccessed)
+                {
+                    TempData["success"] = result.Message ?? "Mật khẩu mới đã được gửi vào email của bạn";
+                    return RedirectToAction("Index", "Login");
+                }
+
+                TempData["error"] = result.Message ?? "Không thể gửi mật khẩu mới";
+                return View(request);
+            }
+            catch (Exception ex)
+            {
+                TempData["error"] = $"Lỗi: {ex.Message}";
+                return View(request);
+            }
         }
     }
 }

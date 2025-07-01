@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using SneakFit.ApiIntegration.Services;
-using SneakFit.ApiIntegration.Services.ThuongHieu;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,6 +41,7 @@ builder.Services.AddScoped<IThuongHieuApiClient, ThuongHieuApiClient>();
 builder.Services.AddScoped<IDanhMucApiClient, DanhMucApiClient>();
 builder.Services.AddScoped<IVoucherApiClient, VoucherApiClient>();
 builder.Services.AddScoped<IHoaDonApiClient, HoaDonApiClient>();
+builder.Services.AddScoped<IHoaDonChiTietApiClient, HoaDonChiTietApiClient>();
 builder.Services.AddScoped<IGhnApiClient, GhnApiClient>();
 
 builder.Services.AddCors(options =>

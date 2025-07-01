@@ -54,14 +54,11 @@ namespace SneakFit.BackEndAPI.Controllers
                 return NotFound();
             return Ok(updatedHoaDon);
         }
-
-        [HttpPut("{id}/status/{trangThai}")]
-        public async Task<IActionResult> UpdateStatus(Guid id, TrangThaiHoaDon trangThai)
+        [HttpGet("count-by-status")]
+        public async Task<IActionResult> GetCountByStatusAsync()
         {
-            var result = await _hoaDonService.UpdateStatus(id, trangThai);
-            if (!result)
-                return NotFound();
-            return NoContent();
+            var result = await _hoaDonService.GetCountByStatusAsync();
+            return Ok(result);
         }
     }
 }

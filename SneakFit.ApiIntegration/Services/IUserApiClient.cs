@@ -12,5 +12,7 @@ namespace SneakFit.ApiIntegration.Services
         Task<bool> TrangThai(Guid id, bool trangThai);
         Task<ApiResult<bool>> RoleAssign(Guid id, RoleAssignRequest request);
         Task<ApiResult<bool>> Update(UserUpdateRequest request);
+        Task<ApiResult<bool>> QuenMatKhau(QuenMatKhauRequest request);
+        Task<ApiResult<bool>> DoiMatKhau(Guid id, DoiMatKhauRequest request);
     }
 }

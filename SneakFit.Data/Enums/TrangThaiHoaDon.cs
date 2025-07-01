@@ -13,7 +13,8 @@ namespace SneakFit.Data.Enums
         ChoVanChuyen,
         DangVanChuyen,
         DaThanhToan,
-        HoanThanh,
-        DaHuy
+        ThanhCong,
+        DaHuy,
+        TraHang
     }
 }

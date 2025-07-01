@@ -1,0 +1,211 @@
+﻿@using SneakFit.Data.Enums
+@model SneakFit.ViewModels.Catalog.HoaDon.HoaDonViewModel
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="">
+    <h4 class="fw-bold py-3 mb-4">Chi tiết hóa đơn #@Model.Id</h4>
+    <!-- Status Timeline -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between position-relative">
+                @{
+                    var statuses = new[] { TrangThaiHoaDon.ChoXacNhan, TrangThaiHoaDon.DaXacNhan, TrangThaiHoaDon.ChoVanChuyen, TrangThaiHoaDon.DangVanChuyen, TrangThaiHoaDon.DaThanhToan, TrangThaiHoaDon.ThanhCong, TrangThaiHoaDon.DaHuy, TrangThaiHoaDon.TraHang };
+                    var currentIndex = Array.IndexOf(statuses, Model.TrangThai);
+                    
+                    for (int i = 0; i < statuses.Length; i++)
+                    {
+                        var status = statuses[i];
+                        var isActive = i <= currentIndex && Model.TrangThai != TrangThaiHoaDon.DaHuy;
+                        DateTime? statusDate = null;
+                        if (status == Model.TrangThai && Model.NgayTao != default(DateTime))
+                        {
+                            statusDate = Model.NgayTao;
+                        }                        
+                        <div class="text-center" style="width: 150px;">
+                            <div class="@(isActive ? "text-primary" : "text-muted")">
+                                <i class="bx @(status switch {
+                                    TrangThaiHoaDon.ChoXacNhan => "bx-time",
+                                    TrangThaiHoaDon.DaXacNhan => "bx-check-circle",
+                                    TrangThaiHoaDon.ChoVanChuyen => "bx-car",
+                                    TrangThaiHoaDon.DangVanChuyen => "bx-package",
+                                    TrangThaiHoaDon.DaThanhToan => "bx-package",
+                                    TrangThaiHoaDon.ThanhCong => "bx-package",
+                                    TrangThaiHoaDon.DaHuy => "bx-package",
+                                    TrangThaiHoaDon.TraHang => "bx-package",
+                                    _ => "bx-x"
+                                }) fs-3"></i>
+                            </div>
+                            <div class="mt-2 @(isActive ? "text-dark" : "text-muted")">@status</div>
+                            @if (statusDate.HasValue)
+                            {
+                                <small class="text-muted">@statusDate.Value.ToString("HH:mm dd-MM-yyyy")</small>
+                            }
+                        </div>
+
+                        @if (i < statuses.Length - 1)
+                        {
+                            <div class="flex-grow-1 position-relative">
+                                <div class="progress" style="height: 2px; margin-top: 25px;">
+                                    <div class="progress-bar @(isActive ? "bg-primary" : "bg-light")" 
+                                         role="progressbar" 
+                                         style="width: 100%"></div>
+                                </div>
+                            </div>
+                        }
+                    }
+                }
+            </div>
+
+            @if (Model.TrangThai != TrangThaiHoaDon.DaHuy && Model.TrangThai != TrangThaiHoaDon.ChoVanChuyen)
+            {
+                <div class=" mt-4">
+                    <form asp-action="UpdateStatus" method="post" class="d-inline-block">
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <input type="hidden" name="trahgtya8" value="@((TrangThaiHoaDon)(((int)Model.TrangThai) + 1))" />
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bx bx-right-arrow-alt me-1"></i>
+                            Xác nhận
+                        </button>
+                    </form>
+                    
+                    <button type="button" class="btn btn-danger ms-2" onclick="confirmCancel('@Model.Id')">
+                        <i class="bx bx-x-circle me-1"></i>
+                        Hủy
+                    </button>
+                </div>
+            }
+            @if (Model.TrangThai == TrangThaiHoaDon.DaHuy)
+            {
+                <div class="text-center mt-3">
+                    <span class="badge bg-danger">Đơn hàng đã bị hủy</span>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Order Information -->
+        <div class="col-xl-12">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Thông tin đơn hàng</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Trạng thái: </label>
+                            <p class="form-control-static">@Model.TrangThai</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tên khách hàng: </label>
+                            <p class="form-control-static">@Model.HoTen</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Loại: </label>
+                            <p class="form-control-static">@Model.LoaiHoaDon</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Số điện thoại: </label>
+                            <p class="form-control-static">@Model.SoDienThoai</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Phí vận chuyển: </label>
+                            <p class="form-control-static">@Model.PhiVanChuyen</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tổng tiền: </label>
+                            <p class="form-control-static">@Model.TongTien.ToString("N0") đ</p>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Địa chỉ: </label>
+                        <p class="form-control-static">@Model.DiaChi</p>
+                    </div>                   
+                </div>
+            </div>
+
+            <!-- Order Items -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Thông tin sản phẩm</h5>
+                </div>
+                <div class="table-responsive text-nowrap">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px">Ảnh</th>
+                                <th>Sản phẩm</th>
+                                <th>Số lượng</th>
+                                <th>Giá bán</th>
+                                <th>Tổng tiền</th>
+                                <th>Màu sắc</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.HoaDonChiTiet)
+                            {
+                                <tr>
+                                   @*  <td>
+                                        @if (item.IsCombo)
+                                        {
+                                            <img src="@(item.ComboImage ?? "/img/no-image.png")" 
+                                                 class="rounded" 
+                                                 style="width: 60px; height: 60px; object-fit: cover;" 
+                                                 alt="@item.ProductName" />
+                                        }
+                                        else
+                                        {
+                                            <img src="@(item.ProductImage ?? "/img/no-image.png")" 
+                                                 class="rounded" 
+                                                 style="width: 60px; height: 60px; object-fit: cover;" 
+                                                 alt="@item.ProductName" />
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            <span class="fw-semibold">@item.ProductName</span>
+                                        </div>
+                                    </td> *@
+                                    <td>@item.GiaBan.ToString("N0") đ</td>
+                                    <td>@item.SoLuong</td>
+                                    <td>@((item.GiaBan * item.SoLuong).ToString("N0")) đ</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="4" class="text-end fw-bold">Tổng cộng:</td>
+                                <td class="fw-bold">@Model.TongTien.ToString("N0") đ</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Show success/error messages
+        @if (TempData["success"] != null)
+        {
+            <text>
+            toastr.success('@TempData["success"]');
+            </text>
+        }
+        @if (TempData["error"] != null)
+        {
+            <text>
+            toastr.error('@TempData["error"]');
+            </text>
+        }
+    </script>
+}
+    
