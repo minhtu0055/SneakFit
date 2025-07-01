@@ -4,13 +4,6 @@
 @{
     var baseUrl = Configuration["BaseAddress"];
 }
-@{
-    // Tính toán tổng phụ, thuế, phí vận chuyển, tổng cuối
-    decimal subtotal = Model.Sum(x => x.ThanhTien);
-    decimal shipping = subtotal >= 300 ? 0 : 4.99m;
-    decimal tax = Math.Round(subtotal * 0.1m, 2);
-    decimal total = subtotal + shipping + tax;
-}
 
 <main class="main">
     <div class="page-title light-background">
@@ -31,10 +24,13 @@
                     <div class="cart-items">
                         <div class="cart-header d-none d-lg-block">
                             <div class="row align-items-center gy-4">
-                                <div class="col-lg-6"><h5>Product</h5></div>
+                                <div class="col-lg-1 text-center">
+                                    <input type="checkbox" id="select-all" title="Chọn tất cả" style="margin-left: 38.5px; " />
+                                </div>
+                                <div class="col-lg-5"><h5 style="margin-left: 25px; ">Product</h5></div>
                                 <div class="col-lg-2 text-center"><h5>Price</h5></div>
                                 <div class="col-lg-2 text-center"><h5>Quantity</h5></div>
-                                <div class="col-lg-2 text-center"><h5>Total</h5></div>
+                                <div class="col-lg-2 text-center"><h5 style="margin-right: 38.5px; ">Total</h5></div>
                             </div>
                         </div>
 
@@ -49,7 +45,10 @@
                             {
                                 <div class="cart-item" data-aos="fade-up" data-aos-delay="@(100 + idx * 100)">
                                     <div class="row align-items-center gy-4">
-                                        <div class="col-lg-6 col-12 mb-3 mb-lg-0">
+                                        <div class="col-lg-1 col-12 text-center mb-3 mb-lg-0">
+                                            <input type="checkbox" class="item-checkbox" data-id="@item.SanPhamChiTietId" data-price="@item.ThanhTien" />
+                                        </div>
+                                        <div class="col-lg-5 col-12 mb-3 mb-lg-0">
                                             <div class="product-info d-flex align-items-center">
                                                 <div class="product-image">
                                                     <img src="@($"{Configuration["BaseAddress"]}{(string.IsNullOrEmpty(item.AnhSanPham) ? "/images/Default_Logo.png" : item.AnhSanPham)}")"
@@ -63,7 +62,7 @@
                                                         <span class="product-size">Size: @item.KichThuoc</span>
                                                     </div>
                                                     <button class="remove-item btn btn-link text-danger p-0" type="button"
-                                                            data-id="@item.SanPhamChiTietId" style="text-decoration: none; ">
+                                                            data-id="@item.SanPhamChiTietId">
                                                         <i class="bi bi-trash"></i> Remove
                                                     </button>
                                                 </div>
@@ -89,7 +88,11 @@
                                                 </button>
                                                 <input type="number" class="quantity-input" value="@item.SoLuong" min="1" data-max="99"
                                                        data-id="@item.SanPhamChiTietId">
-                                                <button class="quantity-btn increase" type="button" data-id="@item.SanPhamChiTietId">
+                                                @* <button class="quantity-btn increase" type="button" data-id="@item.SanPhamChiTietId">
+                                                    <i class="bi bi-plus"></i>
+                                                </button> *@
+                                                <button class="quantity-btn increase" type="button" data-id="@item.SanPhamChiTietId"
+                                                @(item.SoLuong >= item.SoLuongTon ? "disabled title='Đã đạt số lượng tồn kho tối đa!'" : "")>
                                                     <i class="bi bi-plus"></i>
                                                 </button>
                                             </div>
@@ -106,7 +109,7 @@
                         }
 
                         <!-- Coupon/Action Bar -->
-                        <div class="cart-actions">
+                        <div class="cart-actions mt-3">
                             <div class="row g-3">
                                 <div class="col-lg-6 col-md-6">
                                     <div class="coupon-form">
@@ -120,8 +123,11 @@
                                     <button class="btn btn-outline-accent me-2" type="button" onclick="location.reload();">
                                         <i class="bi bi-arrow-clockwise"></i> Update
                                     </button>
+                                    <button class="btn btn-outline-danger me-2" type="button" id="delete-selected">
+                                        <i class="bi bi-trash"></i> Delete Selected
+                                    </button>
                                     <button class="btn btn-outline-danger" type="button" id="clear-cart">
-                                        <i class="bi bi-trash"></i> Clear
+                                        <i class="bi bi-trash"></i> Clear All
                                     </button>
                                 </div>
                             </div>
@@ -133,63 +139,28 @@
                 <div class="col-lg-4" data-aos="fade-up" data-aos-delay="300">
                     <div class="cart-summary">
                         <h4 class="summary-title">Order Summary</h4>
-
                         <div class="summary-item">
                             <span class="summary-label">Subtotal</span>
-                            <span class="summary-value">@subtotal.ToString("N0")</span>
+                            <span class="summary-value" id="subtotal">0 VNĐ</span>
                         </div>
-
-                        <div class="summary-item shipping-item">
-                            <span class="summary-label">Shipping</span>
-                            <div class="shipping-options">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="shipping" id="standard" checked />
-                                    <label class="form-check-label" for="standard">
-                                        Standard Delivery - $4.99
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="shipping" id="express" />
-                                    <label class="form-check-label" for="express">
-                                        Express Delivery - $12.99
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="shipping" id="free" />
-                                    <label class="form-check-label" for="free">
-                                        Free Shipping (Orders over $300)
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="summary-item">
-                            <span class="summary-label">Tax</span>
-                            <span class="summary-value">@tax.ToString("N0")</span>
+                            <span class="summary-label">Shipping</span>
+                            <span class="summary-value">35,000 VNĐ</span>
                         </div>
-
-                        <div class="summary-item discount">
-                            <span class="summary-label">Discount</span>
-                            <span class="summary-value">-$0.00</span>
-                        </div>
-
                         <div class="summary-total">
                             <span class="summary-label">Total</span>
-                            <span class="summary-value">@total.ToString("N0")</span>
+                            <span class="summary-value" id="total">35,000 VNĐ</span>
                         </div>
-
                         <div class="checkout-button">
                             <a href="@Url.Action("Checkout", "GioHang")" class="btn btn-accent w-100">
                                 Proceed to Checkout <i class="bi bi-arrow-right"></i>
                             </a>
                         </div>
-
                         <div class="continue-shopping">
                             <a href="@Url.Action("Index", "SanPham")" class="btn btn-link w-100">
                                 <i class="bi bi-arrow-left"></i> Continue Shopping
                             </a>
                         </div>
-
                         <div class="payment-methods">
                             <p class="payment-title">We Accept</p>
                             <div class="payment-icons">
@@ -202,7 +173,6 @@
                         </div>
                     </div>
                 </div>
-                <!-- End Order Summary -->
             </div>
         </div>
     </section>
@@ -215,14 +185,16 @@
         let isProcessing = false;
         let cartQuantities = {};
 
-        // Hàm cập nhật tổng đơn
-        function capNhatTongDonHang(subtotal) {
-            $('.summary-item').first().find('.summary-value').text(subtotal.toLocaleString());
-            var shipping = subtotal >= 300 ? 0 : 4.99;
-            var tax = Math.round(subtotal * 0.1, 2);
-            var total = subtotal + shipping + tax;
-            $('.summary-item').eq(2).find('.summary-value').text(tax.toLocaleString());
-            $('.summary-total .summary-value').text(total.toLocaleString());
+        // Hàm tính tổng tiền dựa trên các sản phẩm được chọn
+        function calculateTotals() {
+            let subtotal = 0;
+            $('.item-checkbox:checked').each(function () {
+                subtotal += parseFloat($(this).data('price')) || 0;
+            });
+            const shipping = 35000; // Giá vận chuyển cố định 35,000 VNĐ
+            const total = subtotal + shipping;
+            $('#subtotal').text(subtotal.toLocaleString() + ' VNĐ');
+            $('#total').text(total.toLocaleString() + ' VNĐ');
         }
 
         // Hàm enable/disable nút + -
@@ -231,14 +203,12 @@
             let $decrease = $input.siblings('.decrease');
             let $increase = $input.siblings('.increase');
 
-            // Disable - nếu số lượng <= 1
             if (qty <= 1) {
                 $decrease.prop('disabled', true).addClass('opacity-50').attr('title', 'Số lượng tối thiểu là 1!');
             } else {
                 $decrease.prop('disabled', false).removeClass('opacity-50').attr('title', '');
             }
 
-            // Disable + nếu số lượng >= max (tồn kho)
             if (qty >= maxQuantity) {
                 $increase.prop('disabled', true).addClass('opacity-50').attr('title', 'Đã đạt số lượng tồn kho tối đa!');
             } else {
@@ -262,15 +232,18 @@
                     if (response.success) {
                         $input.val(response.soLuong);
                         cartQuantities[productId] = response.soLuong;
-                        // cập nhật tồn kho mới nhất (nếu có)
-                        let maxQuantity = response.maxQuantity || 99;
-                        $input.data('max', maxQuantity);
+                        // let maxQuantity = response.maxQuantity || 99;
+                        // $input.data('max', maxQuantity);
+                        // buttonState($input, maxQuantity);
+                        const maxQuantity = response.maxQuantity || 99;
+        $input.data('max', maxQuantity);
 
-                        // Cập nhật trạng thái nút + -
-                        buttonState($input, maxQuantity);
-
+        // GỌI LẠI SAU KHI CẬP NHẬT max
+        buttonState($input, maxQuantity);
                         $input.closest('.cart-item').find('.item-total span').text(response.thanhTien.toLocaleString());
-                        capNhatTongDonHang(response.tongTien);
+                        // Cập nhật giá mới cho checkbox
+                        $input.closest('.cart-item').find('.item-checkbox').data('price', response.thanhTien);
+                        calculateTotals(); // Tính lại tổng khi số lượng thay đổi
                     } else {
                         Swal.fire('Lỗi', response.message || 'Có lỗi!', 'error');
                         $input.val($input.data('old') || 1);
@@ -292,7 +265,7 @@
         }
 
         $(function() {
-            // Khởi tạo số lượng & maxQuantity cho từng sản phẩm
+            // Khởi tạo số lượng & maxQuantity
             $('.quantity-input').each(function() {
                 let $input = $(this);
                 let id = $input.data('id');
@@ -321,18 +294,16 @@
                     cartQuantities[id] = newVal;
                     updateQuantity(id, newVal, $input);
                 }
-                // Cập nhật trạng thái nút ngay lập tức (UX mượt)
                 setTimeout(function() {
                     buttonState($input, maxQuantity);
                 }, 100);
             });
 
-            // Sự kiện nhập trực tiếp input
+            // Sự kiện nhập input số lượng
             $(document).on('focus', '.quantity-input', function () {
                 $(this).data('old', parseInt($(this).val()) || 1);
             });
 
-            // Sự kiện rời input
             $(document).on('blur', '.quantity-input', function () {
                 if (isProcessing) return;
                 let $input = $(this);
@@ -345,11 +316,11 @@
                     updateQuantity($input.data('id'), newVal, $input);
                 } else {
                     $input.val(newVal);
+                    buttonState($input, maxQuantity);
                 }
                 buttonState($input, maxQuantity);
             });
 
-            // Nhấn Enter trên input cũng trigger blur
             $(document).on('keydown', '.quantity-input', function(e) {
                 if (e.which === 13) {
                     e.preventDefault();
@@ -432,6 +403,72 @@
                     }
                 });
             });
+
+            // Checkbox: Chọn tất cả
+            $(document).on('change', '#select-all', function () {
+                var isChecked = $(this).is(':checked');
+                $('.item-checkbox').prop('checked', isChecked).trigger('change'); // Trigger change để tính tổng
+            });
+
+            // Checkbox: Cập nhật trạng thái "Chọn tất cả" và tính tổng khi thay đổi
+            $(document).on('change', '.item-checkbox', function () {
+                var allChecked = $('.item-checkbox').length === $('.item-checkbox:checked').length;
+                $('#select-all').prop('checked', allChecked);
+                calculateTotals(); // Tính lại tổng khi checkbox thay đổi
+            });
+
+            // Xóa các sản phẩm đã chọn
+            $(document).on('click', '#delete-selected', function (e) {
+                e.preventDefault();
+                if (isProcessing) return;
+
+                var selectedIds = [];
+                $('.item-checkbox:checked').each(function () {
+                    selectedIds.push($(this).data('id'));
+                });
+
+                if (selectedIds.length === 0) {
+                    Swal.fire('Thông báo', 'Vui lòng chọn ít nhất một sản phẩm để xóa!', 'info');
+                    return;
+                }
+
+                Swal.fire({
+                    title: 'Xác nhận',
+                    text: `Bạn có chắc muốn xóa ${selectedIds.length} sản phẩm đã chọn?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Xóa',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        isProcessing = true;
+                        $.ajax({
+                            url: '/GioHang/XoaNhieuSanPham',
+                            type: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify(selectedIds),
+                            success: function (res) {
+                                isProcessing = false;
+                                if (res.success) {
+                                    Swal.fire('Thành công', res.message, 'success').then(() => {
+                                        window.location.reload();
+                                    });
+                                } else {
+                                    Swal.fire('Lỗi', res.message, 'error');
+                                }
+                            },
+                            error: function (xhr) {
+                                isProcessing = false;
+                                var errorMsg = xhr.responseJSON?.message || 'Có lỗi khi xóa các sản phẩm!';
+                                Swal.fire('Lỗi', errorMsg, 'error');
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Khởi tạo tổng tiền khi trang tải
+            calculateTotals();
         });
     </script>
 }

@@ -125,14 +125,37 @@ namespace SneakFit.Application.Catalog.GioHang
             var gioHangChiTiet = await _context.GioHangChiTiet
                 .FirstOrDefaultAsync(x => x.GioHangId == gioHang.Id && x.SanPhamChiTietId == request.SanPhamChiTietId);
 
+            //if (gioHangChiTiet != null)
+            //{
+            //    // Nếu sản phẩm đã có trong giỏ hàng, cập nhật số lượng
+            //    gioHangChiTiet.SoLuong += request.SoLuong;
+            //}
+            //else
+            //{
+            //    // Nếu sản phẩm chưa có trong giỏ hàng, thêm mới
+            //    gioHangChiTiet = new Data.Entities.GioHangChiTiet()
+            //    {
+            //        Id = Guid.NewGuid(),
+            //        GioHangId = gioHang.Id,
+            //        SanPhamChiTietId = request.SanPhamChiTietId,
+            //        SoLuong = request.SoLuong,
+            //        Gia = sanPhamChiTiet.Gia
+            //    };
+            //    _context.GioHangChiTiet.Add(gioHangChiTiet);
+            //}
             if (gioHangChiTiet != null)
             {
-                // Nếu sản phẩm đã có trong giỏ hàng, cập nhật số lượng
-                gioHangChiTiet.SoLuong += request.SoLuong;
+                var tongSoLuongMoi = gioHangChiTiet.SoLuong + request.SoLuong;
+                if (tongSoLuongMoi > sanPhamChiTiet.SoLuong)
+                    throw new Exception($"Sản phẩm chỉ còn {sanPhamChiTiet.SoLuong - gioHangChiTiet.SoLuong} sản phẩm trong kho. Không thể thêm nhiều hơn!");
+
+                gioHangChiTiet.SoLuong = tongSoLuongMoi;
             }
             else
             {
-                // Nếu sản phẩm chưa có trong giỏ hàng, thêm mới
+                if (request.SoLuong > sanPhamChiTiet.SoLuong)
+                    throw new Exception($"Sản phẩm chỉ còn {sanPhamChiTiet.SoLuong} sản phẩm trong kho. Không thể thêm nhiều hơn!");
+
                 gioHangChiTiet = new Data.Entities.GioHangChiTiet()
                 {
                     Id = Guid.NewGuid(),

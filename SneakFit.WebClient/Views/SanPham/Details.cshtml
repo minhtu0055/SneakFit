@@ -358,9 +358,15 @@
             updateQuantityUI();
         });
 
-        $('#btnAddToCart').click(function() {
+        $('#btnAddToCart').click(function () {
             var spctId = $('#selectedSpctId').val();
-            var soLuong = $('#quantityInput').val();
+            var soLuong = parseInt($('#quantityInput').val()) || 1;
+            var max = parseInt($('#quantityInput').attr('max')) || 1;
+
+            if (soLuong > max) {
+                alert("Bạn đã đạt số lượng tối đa trong kho cho sản phẩm này!");
+                return;
+            }
 
             $.ajax({
                 url: '@Url.Action("AddToCart", "SanPham")',
@@ -369,23 +375,18 @@
                     sanPhamChiTietId: spctId,
                     soLuong: soLuong
                 },
-                success: function(res) {
+                success: function (res) {
                     if (res.success) {
-                        alert('Đã thêm vào giỏ hàng thành công!');
-                        // Optional: cập nhật cart counter
-                    } else if (res.requireLogin) {
-                        alert(res.message);
-                        window.location.href = '/Account/Login';
+                        alert(res.message || 'Đã thêm vào giỏ hàng thành công!');
                     } else {
-                        alert(res.message || 'Có lỗi xảy ra');
+                        alert(res.message || 'Có lỗi xảy ra!');
                     }
                 },
-                error: function() {
+                error: function () {
                     alert('Lỗi hệ thống, vui lòng thử lại!');
                 }
             });
         });
-
     </script>
 }
 

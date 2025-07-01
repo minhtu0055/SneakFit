@@ -142,27 +142,81 @@ namespace SneakFit.WebClient.Controllers
             return View(viewModel);
         }
 
+        //[HttpPost]
+        //public async Task<IActionResult> AddToCart(Guid sanPhamChiTietId, int soLuong = 1)
+        //{
+        //    // Nếu chưa login => giả lập userId tạm
+        //    var userIdStr = User?.Claims?.FirstOrDefault(x => x.Type == "UserId" || x.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        //    Guid userId;
+
+        //    if (string.IsNullOrEmpty(userIdStr))
+        //    {
+        //        // DEMO: Hardcode userId test nếu chưa làm login
+        //        userId = Guid.Parse("69BD714F-9576-45BA-B5B7-F00649BE00DE"); // Gán tạm
+        //                                                                     // Nếu muốn bắt buộc phải login thì return lỗi:
+        //                                                                     // return Json(new { success = false, requireLogin = true, message = "Bạn cần đăng nhập để mua hàng" });
+        //    }
+        //    else
+        //    {
+        //        userId = Guid.Parse(userIdStr);
+        //    }
+
+        //    try
+        //    {
+        //        var request = new ThemVaoGioHangRequest
+        //        {
+        //            UserId = userId,
+        //            SanPhamChiTietId = sanPhamChiTietId,
+        //            SoLuong = soLuong
+        //        };
+
+        //        var result = await _gioHangApiClient.ThemVaoGioHang(request);
+        //        return Json(new { success = true, message = "Đã thêm vào giỏ hàng!", cart = result });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Json(new { success = false, message = $"Có lỗi: {ex.Message}" });
+        //    }
+        //}
         [HttpPost]
         public async Task<IActionResult> AddToCart(Guid sanPhamChiTietId, int soLuong = 1)
         {
-            // Nếu chưa login => giả lập userId tạm
             var userIdStr = User?.Claims?.FirstOrDefault(x => x.Type == "UserId" || x.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            Guid userId;
-
-            if (string.IsNullOrEmpty(userIdStr))
-            {
-                // DEMO: Hardcode userId test nếu chưa làm login
-                userId = Guid.Parse("69BD714F-9576-45BA-B5B7-F00649BE00DE"); // Gán tạm
-                                                                             // Nếu muốn bắt buộc phải login thì return lỗi:
-                                                                             // return Json(new { success = false, requireLogin = true, message = "Bạn cần đăng nhập để mua hàng" });
-            }
-            else
-            {
-                userId = Guid.Parse(userIdStr);
-            }
+            Guid userId = string.IsNullOrEmpty(userIdStr)
+                ? Guid.Parse("69BD714F-9576-45BA-B5B7-F00649BE00DE")
+                : Guid.Parse(userIdStr);
 
             try
             {
+                // 1. Lấy chi tiết giỏ hàng hiện tại
+                var gioHang = await _gioHangApiClient.GetByUserId(userId);
+                //var item = gioHang?.GioHangChiTiets?.FirstOrDefault(x => x.SanPhamChiTietId == sanPhamChiTietId);
+                var item = gioHang?.GioHangChiTiets?.FirstOrDefault(x => x.SanPhamChiTietId.Equals(sanPhamChiTietId));
+
+
+                // 2. Lấy thông tin sản phẩm chi tiết
+                var spct = await _spctApiClient.GetById(sanPhamChiTietId);
+                if (spct == null || spct.SoLuong <= 0)
+                {
+                    return Json(new { success = false, message = "Sản phẩm đã hết hàng" });
+                }
+
+                // 3. Check nếu đã đạt max tồn kho
+                int soLuongTrongGio = item?.SoLuong ?? 0;
+                int soLuongConLai = spct.SoLuong - soLuongTrongGio;
+
+                if (soLuongConLai <= 0)
+                {
+                    return Json(new { success = false, message = $"Bạn đã thêm tối đa {spct.SoLuong} sản phẩm này vào giỏ hàng!" });
+                }
+
+                if (soLuong > soLuongConLai)
+                {
+                    return Json(new { success = false, message = $"Chỉ còn {soLuongConLai} sản phẩm có thể thêm vào giỏ hàng" });
+                }
+
+
+                // 5. Gọi API thêm vào giỏ hàng
                 var request = new ThemVaoGioHangRequest
                 {
                     UserId = userId,
@@ -178,65 +232,6 @@ namespace SneakFit.WebClient.Controllers
                 return Json(new { success = false, message = $"Có lỗi: {ex.Message}" });
             }
         }
-        //[HttpPost]
-        //public async Task<IActionResult> AddToCart(Guid sanPhamChiTietId, int soLuong = 1)
-        //{
-        //    // Lấy userId (demo/hardcode nếu chưa login)
-        //    var userIdStr = User?.Claims?.FirstOrDefault(x => x.Type == "UserId" || x.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        //    Guid userId = string.IsNullOrEmpty(userIdStr)
-        //        ? Guid.Parse("69BD714F-9576-45BA-B5B7-F00649BE00DE")
-        //        : Guid.Parse(userIdStr);
-
-        //    // Lấy session cart hiện tại
-        //    var cartJson = HttpContext.Session.GetString("GioHang");
-        //    var cart = string.IsNullOrEmpty(cartJson)
-        //        ? new List<GioHangItemViewModel>()
-        //        : JsonSerializer.Deserialize<List<GioHangItemViewModel>>(cartJson);
-
-        //    // Kiểm tra đã có SPCT này trong cart chưa
-        //    var item = cart.FirstOrDefault(x => x.SanPhamChiTietId == sanPhamChiTietId);
-
-        //    if (item != null)
-        //    {
-        //        item.SoLuong += soLuong;
-        //    }
-        //    else
-        //    {
-        //        // Lấy thông tin SPCT từ API
-        //        var spct = await _spctApiClient.GetById(sanPhamChiTietId);
-        //        if (spct == null)
-        //            return Json(new { success = false, message = "Không tìm thấy sản phẩm." });
-
-        //        // Nếu cần KM thì lấy luôn KM active (bổ sung nếu bạn muốn, có thể tái sử dụng code KM ở controller Index)
-        //        // var khuyenMais = ... (gọi API lấy KM)
-        //        // decimal giaKhuyenMai = ...;
-
-        //        cart.Add(new GioHangItemViewModel
-        //        {
-        //            SanPhamChiTietId = spct.Id,
-        //            TenSanPham = spct.TenSanPham,
-        //            AnhSanPham = spct.Images?.FirstOrDefault() ?? "/images/Default_Logo.png",
-        //            MauSac = spct.TenMauSac,
-        //            KichThuoc = spct.MaKichThuoc.ToString(),
-        //            GiaGoc = spct.Gia,
-        //            GiaKhuyenMai = spct.Gia, // hoặc giá KM nếu xử lý KM ở đây
-        //            SoLuong = soLuong
-        //        });
-        //    }
-
-        //    // Lưu lại vào session
-        //    HttpContext.Session.SetString("GioHang", JsonSerializer.Serialize(cart));
-
-        //    // Trả về cart mới (hoặc tổng số lượng tuỳ bạn)
-        //    return Json(new
-        //    {
-        //        success = true,
-        //        message = "Đã thêm vào giỏ hàng!",
-        //        cartCount = cart.Sum(x => x.SoLuong)
-        //    });
-        //}
-
-
 
         // Trang Details: fill full SPCT của sản phẩm để chọn màu/size
         public async Task<IActionResult> Details(Guid id)
