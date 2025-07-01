@@ -84,10 +84,10 @@
                                         </div>
                                         <div class="col-12 col-lg-2 text-center">
                                             <div class="quantity-selector">
-                                                <button class="quantity-btn decrease" type="button" data-id="@item.SanPhamChiTietId">
+                                                <button class="quantity-btn decrease" type="button" data-id="@item.SanPhamChiTietId" style="font-weight: bold">
                                                     <i class="bi bi-dash"></i>
                                                 </button>
-                                                <input type="number" class="quantity-input" value="@item.SoLuong" min="1" max="99"
+                                                <input type="number" class="quantity-input" value="@item.SoLuong" min="1" data-max="99"
                                                        data-id="@item.SanPhamChiTietId">
                                                 <button class="quantity-btn increase" type="button" data-id="@item.SanPhamChiTietId">
                                                     <i class="bi bi-plus"></i>
@@ -213,7 +213,9 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         let isProcessing = false;
+        let cartQuantities = {};
 
+        // Hàm cập nhật tổng đơn
         function capNhatTongDonHang(subtotal) {
             $('.summary-item').first().find('.summary-value').text(subtotal.toLocaleString());
             var shipping = subtotal >= 300 ? 0 : 4.99;
@@ -223,11 +225,32 @@
             $('.summary-total .summary-value').text(total.toLocaleString());
         }
 
+        // Hàm enable/disable nút + -
+        function buttonState($input, maxQuantity) {
+            let qty = parseInt($input.val()) || 1;
+            let $decrease = $input.siblings('.decrease');
+            let $increase = $input.siblings('.increase');
+
+            // Disable - nếu số lượng <= 1
+            if (qty <= 1) {
+                $decrease.prop('disabled', true).addClass('opacity-50').attr('title', 'Số lượng tối thiểu là 1!');
+            } else {
+                $decrease.prop('disabled', false).removeClass('opacity-50').attr('title', '');
+            }
+
+            // Disable + nếu số lượng >= max (tồn kho)
+            if (qty >= maxQuantity) {
+                $increase.prop('disabled', true).addClass('opacity-50').attr('title', 'Đã đạt số lượng tồn kho tối đa!');
+            } else {
+                $increase.prop('disabled', false).removeClass('opacity-50').attr('title', '');
+            }
+        }
+
+        // Hàm cập nhật số lượng (AJAX)
         function updateQuantity(productId, quantity, $input) {
             if (isProcessing) return;
             isProcessing = true;
-            $('.quantity-btn, .quantity-input').prop('disabled', true); // Disable tất cả nút và input luôn
-
+            $('.quantity-btn, .quantity-input').prop('disabled', true);
             $.ajax({
                 url: '/GioHang/CapNhatSoLuong',
                 type: 'POST',
@@ -238,38 +261,70 @@
                 success: function(response) {
                     if (response.success) {
                         $input.val(response.soLuong);
+                        cartQuantities[productId] = response.soLuong;
+                        // cập nhật tồn kho mới nhất (nếu có)
+                        let maxQuantity = response.maxQuantity || 99;
+                        $input.data('max', maxQuantity);
+
+                        // Cập nhật trạng thái nút + -
+                        buttonState($input, maxQuantity);
+
                         $input.closest('.cart-item').find('.item-total span').text(response.thanhTien.toLocaleString());
                         capNhatTongDonHang(response.tongTien);
                     } else {
                         Swal.fire('Lỗi', response.message || 'Có lỗi!', 'error');
                         $input.val($input.data('old') || 1);
+                        cartQuantities[productId] = $input.data('old') || 1;
+                        buttonState($input, $input.data('max') || 99);
                     }
                 },
                 error: function() {
                     Swal.fire('Lỗi', 'Có lỗi khi cập nhật số lượng!', 'error');
                     $input.val($input.data('old') || 1);
+                    cartQuantities[productId] = $input.data('old') || 1;
+                    buttonState($input, $input.data('max') || 99);
                 },
                 complete: function() {
                     isProcessing = false;
-                    $('.quantity-btn, .quantity-input').prop('disabled', false); // Bật lại các nút/input
+                    $('.quantity-btn, .quantity-input').prop('disabled', false);
                 }
             });
         }
 
         $(function() {
-            // Sự kiện click +/-
-            $(document).on('click', '.increase, .decrease', function() {
-                if (isProcessing) return; // Đang xử lý thì không cho thao tác
-                let $input = $(this).siblings('.quantity-input');
+            // Khởi tạo số lượng & maxQuantity cho từng sản phẩm
+            $('.quantity-input').each(function() {
+                let $input = $(this);
+                let id = $input.data('id');
                 let val = parseInt($input.val()) || 1;
+                let maxQuantity = parseInt($input.data('max')) || 99;
+                cartQuantities[id] = val;
+                buttonState($input, maxQuantity);
+            });
+
+            // Sự kiện click +/-
+            $(document).on('click', '.increase, .decrease', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (isProcessing) return;
+                let $input = $(this).siblings('.quantity-input');
+                let id = $input.data('id');
+                let maxQuantity = parseInt($input.data('max')) || 99;
+                let val = cartQuantities[id] !== undefined ? cartQuantities[id] : (parseInt($input.val()) || 1);
+                $input.data('old', val);
+
                 let newVal = $(this).hasClass('increase') ? val + 1 : val - 1;
                 if (newVal < 1) newVal = 1;
-                if (newVal > 99) newVal = 99;
-                // Lưu số cũ để revert nếu lỗi
-                $input.data('old', val);
+                if (newVal > maxQuantity) newVal = maxQuantity;
+
                 if (newVal !== val) {
-                    updateQuantity($input.data('id'), newVal, $input);
+                    cartQuantities[id] = newVal;
+                    updateQuantity(id, newVal, $input);
                 }
+                // Cập nhật trạng thái nút ngay lập tức (UX mượt)
+                setTimeout(function() {
+                    buttonState($input, maxQuantity);
+                }, 100);
             });
 
             // Sự kiện nhập trực tiếp input
@@ -283,16 +338,18 @@
                 let $input = $(this);
                 let oldVal = $input.data('old') || 1;
                 let newVal = parseInt($input.val()) || 1;
+                let maxQuantity = parseInt($input.data('max')) || 99;
                 if (newVal < 1) newVal = 1;
-                if (newVal > 99) newVal = 99;
+                if (newVal > maxQuantity) newVal = maxQuantity;
                 if (newVal !== oldVal) {
                     updateQuantity($input.data('id'), newVal, $input);
                 } else {
-                    $input.val(newVal); // fix cho các trường hợp nhập 0 hoặc xong lại nhảy về 1
+                    $input.val(newVal);
                 }
+                buttonState($input, maxQuantity);
             });
 
-            // Nhấn Enter trên input cũng trigger blur (=> blur sẽ gửi AJAX nếu có thay đổi)
+            // Nhấn Enter trên input cũng trigger blur
             $(document).on('keydown', '.quantity-input', function(e) {
                 if (e.which === 13) {
                     e.preventDefault();

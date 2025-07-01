@@ -175,12 +175,16 @@ namespace SneakFit.WebClient.Controllers
                 // Tổng tiền toàn bộ giỏ hàng
                 var tongTien = gioHang.GioHangChiTiets.Sum(sp => GetGiaKhuyenMai(sp) * sp.SoLuong);
 
+                var sanPhamChiTiet = await _spctApiClient.GetById(sanPhamChiTietId);
+                var maxQuantity = sanPhamChiTiet?.SoLuong ?? 99;
+
                 return Json(new
                 {
                     success = true,
                     soLuong = item.SoLuong, // Trả về số lượng thực tế từ DB
                     thanhTien = thanhTien,
-                    tongTien = tongTien
+                    tongTien = tongTien,
+                    maxQuantity = maxQuantity,
                 });
             }
             catch (Exception ex)
@@ -188,54 +192,7 @@ namespace SneakFit.WebClient.Controllers
                 return Json(new { success = false, message = "Có lỗi xảy ra: " + ex.Message });
             }
         }
-        //[HttpPost]
-        //public async Task<IActionResult> CapNhatSoLuong(Guid sanPhamChiTietId, int soLuong)
-        //{
-        //    // Cập nhật logic cart ở DB/session...
-        //    // Sau khi cập nhật xong:
-        //    var userIdStr = User?.Claims?.FirstOrDefault(x => x.Type == "UserId" || x.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        //    Guid userId = string.IsNullOrEmpty(userIdStr)
-        //        ? Guid.Parse("69BD714F-9576-45BA-B5B7-F00649BE00DE")
-        //        : Guid.Parse(userIdStr);
 
-        //    // Gọi API update số lượng vào DB
-        //    var request = new CapNhatGioHang
-        //    {
-        //        UserId = userId,
-        //        SanPhamChiTietId = sanPhamChiTietId,
-        //        SoLuong = soLuong
-        //    };
-        //    var result = await _gioHangApiClient.CapNhatSoLuong(request);
-
-        //    if (!result.IsSuccessed)
-        //        return Json(new { success = false, message = result.Message });
-
-        //    // Lấy lại cart mới nhất từ DB/session:
-        //    var gioHang = _gioHangApiClient.GetByUserId(userId).Result;
-        //    var item = gioHang?.GioHangChiTiets?.FirstOrDefault(x => x.SanPhamChiTietId == sanPhamChiTietId);
-
-        //    return Json(new
-        //    {
-        //        success = true,
-        //        soLuong = item?.SoLuong ?? soLuong, // confirm lại số lượng thực tế (đề phòng backend auto fix)
-        //        thanhTien = item?.ThanhTien ?? 0,
-        //        tongTien = gioHang?.GioHangChiTiets?.Sum(x => x.ThanhTien) ?? 0
-        //    });
-        //}
-
-
-        //[HttpPost]
-        //public IActionResult XoaSanPham(Guid sanPhamChiTietId)
-        //{
-        //    var gioHang = HttpContext.Session.GetObjectFromJson<List<GioHangItemViewModel>>("GioHang") ?? new List<GioHangItemViewModel>();
-        //    gioHang.RemoveAll(x => x.SanPhamChiTietId == sanPhamChiTietId);
-        //    HttpContext.Session.SetObjectAsJson("GioHang", gioHang);
-        //    return Json(new
-        //    {
-        //        success = true,
-        //        tongTien = gioHang.Sum(x => x.ThanhTien)
-        //    });
-        //}
         [HttpPost]
         public async Task<IActionResult> XoaSanPham(Guid sanPhamChiTietId)
         {
@@ -269,13 +226,6 @@ namespace SneakFit.WebClient.Controllers
             }
         }
 
-
-        //[HttpPost]
-        //public IActionResult XoaTatCa()
-        //{
-        //    HttpContext.Session.Remove("GioHang");
-        //    return RedirectToAction("Index");
-        //}
         [HttpPost]
         public async Task<IActionResult> XoaTatCa()
         {

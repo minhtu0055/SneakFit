@@ -19,7 +19,7 @@
                 {
                     if (allImages.Count == 1)
                     {
-                        <img src="@(baseUrl + allImages.First())" alt="Ảnh sản phẩm" class="rounded" style="object-fit:cover; width:100%;max-height:400px;" onerror="this.src='/images/no-image.png'" />
+                        <img src="@(baseUrl + allImages.First())" alt="Ảnh sản phẩm" class="rounded" style="object-fit:cover; width:100%;max-height:400px;" onerror="this.src='/images/Default_Logo.png'" />
                     }
                     else
                     {
@@ -28,7 +28,7 @@
                                 @for (int i = 0; i < allImages.Count; i++)
                                 {
                                     <div class="carousel-item @(i == 0 ? "active" : "")">
-                                        <img src="@(baseUrl + allImages[i])" alt="Ảnh sản phẩm" class="d-block w-100 rounded" style="object-fit:cover; max-height:400px;" onerror="this.src='/images/no-image.png'" />
+                                        <img src="@(baseUrl + allImages[i])" alt="Ảnh sản phẩm" class="d-block w-100 rounded" style="object-fit:cover; max-height:400px;" onerror="this.src='/images/Default_Logo.png'" />
                                     </div>
                                 }
                             </div>
@@ -43,7 +43,7 @@
                 }
                 else
                 {
-                    <img src="/images/no-image.png" alt="No Image" class="rounded" style="object-fit:cover; width:100%;max-height:400px;" />
+                    <img src="/images/Default_Logo.png" alt="No Image" class="rounded" style="object-fit:cover; width:100%;max-height:400px;" />
                 }
             </div>
         </div>
@@ -92,8 +92,9 @@
                         <button type="button"
                                 class="size-box"
                                 data-size-id="@size.Id"
-                        @(hasSPCT ? "" : "disabled")
-                                style="padding:8px 18px; border:2px solid #ddd; border-radius:7px; background:#fff; font-weight:500; font-size:15px; opacity:@(hasSPCT ? "1" : "0.5"); cursor:@(hasSPCT ? "pointer" : "not-allowed");">
+                                @(hasSPCT ? "" : "disabled")
+                                style="padding:8px 18px; border:2px solid #ddd; border-radius:7px; background:#fff; 
+                                       font-weight:500; font-size:15px; opacity:@(hasSPCT ? "1" : "0.5"); cursor:@(hasSPCT ? "pointer" : "not-allowed");">
                             @size.MaKichThuoc
                         </button>
                     }
