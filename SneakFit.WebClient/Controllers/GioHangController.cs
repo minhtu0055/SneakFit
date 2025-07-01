@@ -199,30 +199,29 @@ namespace SneakFit.WebClient.Controllers
             try
             {
                 var userId = GetUserId();
-
-                // Lấy giỏ hàng hiện tại
                 var gioHang = await _gioHangApiClient.GetByUserId(userId);
                 if (gioHang == null)
                 {
                     return Json(new { success = false, message = "Không tìm thấy giỏ hàng" });
                 }
 
-                // Tìm item cần xóa
                 var item = gioHang.GioHangChiTiets?.FirstOrDefault(x => x.SanPhamChiTietId == sanPhamChiTietId);
                 if (item == null)
                 {
                     return Json(new { success = false, message = "Không tìm thấy sản phẩm trong giỏ hàng" });
                 }
 
-                // Gọi API xóa sản phẩm (bạn cần implement method này trong IGioHangApiClient)
-                // var result = await _gioHangApiClient.XoaSanPham(item.Id);
+                var result = await _gioHangApiClient.XoaSanPhamKhoiGioHang(item.Id);
+                if (!result)
+                {
+                    return Json(new { success = false, message = "Không thể xóa sản phẩm khỏi giỏ hàng" });
+                }
 
-                // Tạm thời return success để test
-                return Json(new { success = true });
+                return Json(new { success = true, message = "Xóa sản phẩm thành công" });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = ex.Message });
+                return Json(new { success = false, message = $"Có lỗi xảy ra: {ex.Message}" });
             }
         }
 
@@ -232,16 +231,23 @@ namespace SneakFit.WebClient.Controllers
             try
             {
                 var userId = GetUserId();
+                var gioHang = await _gioHangApiClient.GetByUserId(userId);
+                if (gioHang == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy giỏ hàng" });
+                }
 
-                // Gọi API xóa toàn bộ giỏ hàng (bạn cần implement method này)
-                var result = await _gioHangApiClient.XoaGioHang(userId);
+                var result = await _gioHangApiClient.XoaGioHang(gioHang.Id);
+                if (!result)
+                {
+                    return Json(new { success = false, message = "Không thể xóa toàn bộ giỏ hàng" });
+                }
 
-                return RedirectToAction("Index");
+                return Json(new { success = true, message = "Xóa toàn bộ giỏ hàng thành công" });
             }
             catch (Exception ex)
             {
-                TempData["Error"] = "Có lỗi xảy ra: " + ex.Message;
-                return RedirectToAction("Index");
+                return Json(new { success = false, message = $"Có lỗi xảy ra: {ex.Message}" });
             }
         }
     }

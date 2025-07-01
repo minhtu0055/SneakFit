@@ -63,7 +63,7 @@
                                                         <span class="product-size">Size: @item.KichThuoc</span>
                                                     </div>
                                                     <button class="remove-item btn btn-link text-danger p-0" type="button"
-                                                            data-id="@item.SanPhamChiTietId">
+                                                            data-id="@item.SanPhamChiTietId" style="text-decoration: none; ">
                                                         <i class="bi bi-trash"></i> Remove
                                                     </button>
                                                 </div>
@@ -372,8 +372,25 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         isProcessing = true;
-                        $.post('/GioHang/XoaSanPham', { sanPhamChiTietId: spctId }, function (res) {
-                            window.location.reload();
+                        $.ajax({
+                            url: '/GioHang/XoaSanPham',
+                            type: 'POST',
+                            data: { sanPhamChiTietId: spctId },
+                            success: function (res) {
+                                isProcessing = false;
+                                if (res.success) {
+                                    Swal.fire('Thành công', res.message, 'success').then(() => {
+                                        window.location.reload();
+                                    });
+                                } else {
+                                    Swal.fire('Lỗi', res.message, 'error');
+                                }
+                            },
+                            error: function (xhr) {
+                                isProcessing = false;
+                                var errorMsg = xhr.responseJSON?.message || 'Có lỗi khi xóa sản phẩm!';
+                                Swal.fire('Lỗi', errorMsg, 'error');
+                            }
                         });
                     }
                 });
@@ -393,8 +410,24 @@
                 }).then((result) => {
                     if (result.isConfirmed) {
                         isProcessing = true;
-                        $.post('/GioHang/XoaTatCa', function () {
-                            window.location.reload();
+                        $.ajax({
+                            url: '/GioHang/XoaTatCa',
+                            type: 'POST',
+                            success: function (res) {
+                                isProcessing = false;
+                                if (res.success) {
+                                    Swal.fire('Thành công', res.message, 'success').then(() => {
+                                        window.location.reload();
+                                    });
+                                } else {
+                                    Swal.fire('Lỗi', res.message, 'error');
+                                }
+                            },
+                            error: function (xhr) {
+                                isProcessing = false;
+                                var errorMsg = xhr.responseJSON?.message || 'Có lỗi khi xóa giỏ hàng!';
+                                Swal.fire('Lỗi', errorMsg, 'error');
+                            }
                         });
                     }
                 });
