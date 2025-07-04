@@ -10,6 +10,9 @@ using SneakFit.Application.Catalog.DeGiay;
 using SneakFit.Application.Catalog.GioHang;
 using SneakFit.Application.Catalog.HoaDon;
 using SneakFit.Application.Catalog.HoaDonChiTiet;
+using SneakFit.Application.Catalog.HoaDonChiTietClientClient;
+using SneakFit.Application.Catalog.HoaDonChiTietClients;
+using SneakFit.Application.Catalog.HoaDonClient;
 using SneakFit.Application.Catalog.KhuyenMai;
 using SneakFit.Application.Catalog.KichThuoc;
 using SneakFit.Application.Catalog.MauSac;
@@ -88,6 +91,8 @@ builder.Services.AddScoped<IEmailSender, EmailSender>(); // khai báo dịch v�
 builder.Services.AddScoped<IDiaChiService, DiaChiService>(); // khai báo dịch vụ
 builder.Services.AddScoped<IHoaDonService, HoaDonService>();// khai báo dịch vụ
 builder.Services.AddScoped<IHoaDonChiTietService, HoaDonChiTietService>();// khai báo dịch vụ
+builder.Services.AddScoped<IHoaDonClientService, HoaDonClientService>();// khai báo dịch vụ
+builder.Services.AddScoped<IHoaDonChiTietClientService, HoaDonChiTietClientService>();// khai báo dịch vụ
 builder.Services.AddHttpClient<IGhnService, GhnService>();
 builder.Services.AddCors(options =>
 {

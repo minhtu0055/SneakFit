@@ -202,7 +202,7 @@ namespace SneakFit.Application.Catalog.GioHang
 
             var gioHangChiTiets = _context.GioHangChiTiet.Where(x => x.GioHangId == id);
             _context.GioHangChiTiet.RemoveRange(gioHangChiTiets);
-            _context.GioHang.Remove(gioHang);
+            //_context.GioHang.Remove(gioHang);
             await _context.SaveChangesAsync();
             return true;
         }

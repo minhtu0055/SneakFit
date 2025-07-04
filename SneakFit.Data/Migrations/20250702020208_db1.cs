@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SneakFit.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class demo : Migration
+    public partial class db1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -61,7 +61,8 @@ namespace SneakFit.Data.Migrations
                     ThoiGianKetThuc = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LoaiGiamGia = table.Column<int>(type: "int", nullable: false),
                     GiaTriGiamGia = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    TrangThai = table.Column<int>(type: "int", nullable: false)
+                    TrangThai = table.Column<int>(type: "int", nullable: false),
+                    NgaySuaDoi = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -232,6 +233,7 @@ namespace SneakFit.Data.Migrations
                     NgayTao = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ThoiGianBatDau = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ThoiGianKetThuc = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    loaiVoucher = table.Column<int>(type: "int", nullable: false),
                     TrangThai = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -348,12 +350,38 @@ namespace SneakFit.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "VoucherUser",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    VoucherId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_VoucherUser", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_VoucherUser_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_VoucherUser_Voucher_VoucherId",
+                        column: x => x.VoucherId,
+                        principalTable: "Voucher",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "KhuyenMaiChiTiet",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     KhuyenMaiId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    SanPhamId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    SanPhamId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    SPCTId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -424,6 +452,31 @@ namespace SneakFit.Data.Migrations
                         name: "FK_SanPhamChiTiet_ThuongHieu_ThuongHieuId",
                         column: x => x.ThuongHieuId,
                         principalTable: "ThuongHieu",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "LichSuHoaDon",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    HoaDonId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TrangThaiCu = table.Column<int>(type: "int", nullable: false),
+                    TrangThaiMoi = table.Column<int>(type: "int", nullable: false),
+                    NgayTao = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    NguoiTao = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NgayChinhSua = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    NguoiChinhSua = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_LichSuHoaDon", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_LichSuHoaDon_HoaDon_HoaDonId",
+                        column: x => x.HoaDonId,
+                        principalTable: "HoaDon",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -516,8 +569,8 @@ namespace SneakFit.Data.Migrations
                 columns: new[] { "Id", "TenDanhMuc" },
                 values: new object[,]
                 {
-                    { new Guid("8f4d4a5e-2bfa-4e8c-9d2c-3f6a7e9b87cb"), "Giày Chạy Bộ" },
-                    { new Guid("8f8d4a6e-2bfa-4e8c-9d2c-3f6a7e9b87cb"), "Giày Đá Bóng" }
+                    { new Guid("8f4d4a5e-2bfa-4e8c-9d2c-3f6a7e9b87cb"), "Sneaker" },
+                    { new Guid("8f8d4a6e-2bfa-4e8c-9d2c-3f6a7e9b87cb"), "SneakFit" }
                 });
 
             migrationBuilder.InsertData(
@@ -543,8 +596,8 @@ namespace SneakFit.Data.Migrations
                 columns: new[] { "Id", "MaMauSac", "TenMauSac" },
                 values: new object[,]
                 {
-                    { new Guid("8f4d4a5e-2bfa-2e8c-9d2c-3f6a7e9b87cb"), "#FF0000", "Đen" },
-                    { new Guid("8f8d4a5e-2bfa-4e9c-9d2c-3f6a7e9b87cb"), "#FFFFFF", "Đỏ" }
+                    { new Guid("8f4d4a5e-2bfa-2e8c-9d2c-3f6a7e9b87cb"), "#FF0000", "Đỏ" },
+                    { new Guid("8f8d4a5e-2bfa-4e9c-9d2c-3f6a7e9b87cb"), "#FFFFFF", "Trắng" }
                 });
 
             migrationBuilder.InsertData(
@@ -569,12 +622,22 @@ namespace SneakFit.Data.Migrations
             migrationBuilder.InsertData(
                 table: "UserRoles",
                 columns: new[] { "RoleId", "UserId" },
-                values: new object[] { new Guid("8d04dce2-969a-435d-bba4-df3f325983dc"), new Guid("69bd714f-9576-45ba-b5b7-f00649be00de") });
+                values: new object[,]
+                {
+                    { new Guid("8d04dce2-969a-435d-bba4-df3f325984dc"), new Guid("69bd712f-9576-45ba-b5b7-f00649be00de") },
+                    { new Guid("8d04dce2-969a-435d-bba4-df3f325983dc"), new Guid("69bd714f-9576-45ba-b5b7-f00649be00de") },
+                    { new Guid("8d04dce2-969a-435d-bba4-df3f325984dc"), new Guid("69bd714f-9576-45ba-b5b7-f01649be00de") }
+                });
 
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "GioiTinh", "HoVaTen", "LockoutEnabled", "LockoutEnd", "NgaySinh", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TrangThai", "TwoFactorEnabled", "UrlHinhAnh", "UserName" },
-                values: new object[] { new Guid("69bd714f-9576-45ba-b5b7-f00649be00de"), 0, "36eb9d85-c028-40be-8ed7-d44dd56dabb0", "tupmph49568@gmail.com", true, false, "Phí Minh Tú", false, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "tupmph49568@gmail.com", "Admin", "AQAAAAIAAYagAAAAEHlvkgnlIpO224ZS78GnCpRqpdTzwoWGJYChrZGRgqHlN7UCeHs8nDPxINIvsgoC9g==", null, false, "", true, false, null, "Admin" });
+                values: new object[,]
+                {
+                    { new Guid("69bd712f-9576-45ba-b5b7-f00649be00de"), 0, "8030548e-0785-4a40-976a-0a52cc80e150", "kiet@gmail.com", true, false, "Cu Em Kiệt", false, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "kiet@gmail.com", "nhanvien", "AQAAAAIAAYagAAAAEBsr8pztSluX+mguK8F06r8i0AByDsqRhj/O1ZUzxe7BSzcbwn3DD7hI3SjKF9JRjQ==", null, false, "", true, false, null, "nhanvien" },
+                    { new Guid("69bd714f-9576-45ba-b5b7-f00649be00de"), 0, "e248652e-11f5-445e-9cf2-d18899fa9642", "tupmph49568@gmail.com", true, false, "Phí Minh Tú", false, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "tupmph49568@gmail.com", "Admin", "AQAAAAIAAYagAAAAEInomlFp0aVWdIRiUzuY1uBxdgN/+2Ul0GfB1sYcGHDwgI/j1e75D6vyw1RgazG/BA==", null, false, "", true, false, null, "Admin" },
+                    { new Guid("69bd714f-9576-45ba-b5b7-f01649be00de"), 0, "dca7f486-1b6b-498a-9ba6-f133079efde9", "kiet@gmail.com", true, false, "Siu Nhân", false, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "kiet@gmail.com", "khachhang", "AQAAAAIAAYagAAAAEEXaF0biTDr617p24rTgyamvjofmgCFc9CLbSMqBfZrug4GJYAjGO1z6f+anWQ4whQ==", null, false, "", true, false, null, "khachhang" }
+                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_DiaChi_UserId",
@@ -633,6 +696,11 @@ namespace SneakFit.Data.Migrations
                 column: "SanPhamId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_LichSuHoaDon_HoaDonId",
+                table: "LichSuHoaDon",
+                column: "HoaDonId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_SanPham_DanhMucId",
                 table: "SanPham",
                 column: "DanhMucId");
@@ -666,6 +734,16 @@ namespace SneakFit.Data.Migrations
                 name: "IX_SanPhamChiTiet_ThuongHieuId",
                 table: "SanPhamChiTiet",
                 column: "ThuongHieuId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_VoucherUser_UserId",
+                table: "VoucherUser",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_VoucherUser_VoucherId",
+                table: "VoucherUser",
+                column: "VoucherId");
         }
 
         /// <inheritdoc />
@@ -687,6 +765,9 @@ namespace SneakFit.Data.Migrations
                 name: "KhuyenMaiChiTiet");
 
             migrationBuilder.DropTable(
+                name: "LichSuHoaDon");
+
+            migrationBuilder.DropTable(
                 name: "RoleClaims");
 
             migrationBuilder.DropTable(
@@ -705,10 +786,10 @@ namespace SneakFit.Data.Migrations
                 name: "UserTokens");
 
             migrationBuilder.DropTable(
-                name: "GioHang");
+                name: "VoucherUser");
 
             migrationBuilder.DropTable(
-                name: "HoaDon");
+                name: "GioHang");
 
             migrationBuilder.DropTable(
                 name: "SanPhamChiTiet");
@@ -717,10 +798,7 @@ namespace SneakFit.Data.Migrations
                 name: "KhuyenMai");
 
             migrationBuilder.DropTable(
-                name: "Users");
-
-            migrationBuilder.DropTable(
-                name: "Voucher");
+                name: "HoaDon");
 
             migrationBuilder.DropTable(
                 name: "ChatLieu");
@@ -739,6 +817,12 @@ namespace SneakFit.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "ThuongHieu");
+
+            migrationBuilder.DropTable(
+                name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "Voucher");
 
             migrationBuilder.DropTable(
                 name: "DanhMuc");

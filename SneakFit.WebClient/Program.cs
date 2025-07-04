@@ -1,5 +1,5 @@
 ﻿using SneakFit.ApiIntegration.Services;
-using SneakFit.ApiIntegration.Services.ThuongHieu;
+using SneakFit.Application.GHN;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,12 +22,25 @@ builder.Services.AddScoped<IDeGiayApiClient, DeGiayApiClient>();
 builder.Services.AddScoped<IChatLieuApiClient, ChatLieuApiClient>();
 builder.Services.AddScoped<IKhuyenMaiApiClient, KhuyenMaiApiClient>();
 builder.Services.AddScoped<IGioHangApiClient, GioHangApiClient>();
+builder.Services.AddScoped<IVoucherApiClient, VoucherApiClient>();
+builder.Services.AddScoped<IHoaDonClientApiClient, HoaDonClientApiClient>();
+builder.Services.AddScoped<IHoaDonChiTietClientApiClient, HoaDonChiTietClientApiClient>();
+builder.Services.AddScoped<IGhnApiClient, GhnApiClient>();
 
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("http://localhost:7211", "https://localhost:7211") // Cho phép frontend gọi
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
 
@@ -38,6 +51,8 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+app.UseCors();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

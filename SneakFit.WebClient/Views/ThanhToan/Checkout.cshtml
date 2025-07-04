@@ -1,0 +1,630 @@
+﻿@using SneakFit.WebClient.Models
+@model CheckoutViewModel
+@inject IConfiguration Configuration
+@{
+    var baseUrl = Configuration["BaseAddress"];
+    ViewData["Title"] = "Thanh Toán - Giao Diện Thanh Toán Tối Ưu";
+}
+
+<main class="main py-4 bg-light">
+    <div class="container">
+
+        <!-- Địa chỉ nhận hàng -->
+        <div class="section-box address-box mb-4">
+            <div class="address-details">
+                <h5><i class="bi bi-geo-alt-fill"></i> Địa chỉ nhận hàng</h5>
+                <div class="address-info">
+                    <div class="address-text">
+                        <p class="mb-1"><strong>@Model.HoTen</strong> <span class="text-muted">(@Model.SoDienThoai)</span></p>
+                        <p class="mb-0">@Model.DiaChi</p>
+                    </div>
+                    <div class="address-actions">
+                        <a href="#" id="btnChangeAddress" class="btn btn-change">Thay đổi</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Danh sách sản phẩm -->
+        <div class="section-box product-list mb-4" style="border-radius: 10px;">
+            <h5>Sản phẩm</h5>
+            @foreach (var item in Model.GioHangItems)
+            {
+                <div class="product-item d-flex align-items-center mb-3" style="border-radius: 10px;">
+                    <img src="@($"{baseUrl}{item.AnhSanPham}")" class="product-img" style="margin-left: 10px;" />
+                    <div class="product-info" style="align-items: center;">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <p class="mb-0 fw-semibold">
+                                @item.TenSanPham (Màu: @item.MauSac,Kích cỡ: @item.KichThuoc)
+                            </p>
+                            @if (item.PhanTramGiamGia > 0)
+                            {
+                                <span class="discount " style="font-size: 0.85rem; margin-bottom: 1.5px;">
+                                    Giảm @item.PhanTramGiamGia%
+                                </span>
+                            }
+                        </div>
+                        <small class="text-muted" style="font-weight: bold; font-size: 15px">Số lượng: @item.SoLuong</small>
+                    </div>
+                    <div class="product-price ms-auto" style="margin-right: 10px;">
+                        @if (item.GiaKhuyenMai < item.GiaGoc)
+                        {
+                            <span class="text-danger">@item.GiaKhuyenMai.ToString("N0") ₫</span>
+                            <br />
+                            <span class="text-muted text-decoration-line-through">@item.GiaGoc.ToString("N0") ₫</span>
+                        }
+                        else
+                        {
+                            <span>@item.GiaGoc.ToString("N0") ₫</span>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Phương thức vận chuyển -->
+        <div class="section-box shipping-method mb-4">
+            <h5>Phương thức vận chuyển</h5>
+            <div class="row g-2 mb-3">
+                <div class="col-md-4">
+                    <select id="province" class="form-select">
+                        <option selected>Chọn tỉnh / thành</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <select id="district" class="form-select">
+                        <option selected>Chọn quận / huyện</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <select id="ward" class="form-select">
+                        <option selected>Chọn phường / xã</option>
+                    </select>
+                </div>
+            </div>
+            <div class="shipping-info">Phí vận chuyển mặc định: <strong>35,000 ₫</strong></div>
+        </div>
+
+        <!-- Hình thức thanh toán -->
+        <div class="section-box payment-method mb-4">
+            <h5>Hình thức thanh toán</h5>
+            <div class="payment-options" style="align-items: center;">
+                <label class="payment-btn">
+                    <input type="radio" name="HinhThucThanhToan" id="cod" value="COD">
+                    <span>Thanh toán khi nhận hàng (COD)</span>
+                </label>
+                <label class="payment-btn">
+                    <input type="radio" name="HinhThucThanhToan" id="online" value="Online">
+                    <span>Thanh toán online</span>
+                </label>
+                <span id="paymentError" class="text-danger" style="display:none;">Vui lòng chọn một hình thức thanh toán.</span>
+            </div>
+        </div>
+
+        <!-- Tóm tắt đơn hàng -->
+        <div class="section-box order-summary">
+            <h5>Tóm tắt đơn hàng</h5>
+            <div class="summary-item">
+                <span>Tổng tiền hàng</span>
+                <span>@(Model.TongTienSanPham.ToString("N0")) ₫</span>
+            </div>
+            <div class="summary-item">
+                <span>Phí vận chuyển</span>
+                <span>35,000 ₫</span>
+            </div>
+            <hr />
+            <div class="summary-item fw-bold fs-5">
+                <span>Tổng thanh toán</span>
+                <span>@((Model.TongTienSanPham + 35000).ToString("N0")) ₫</span>
+            </div>
+
+            <!-- Hiển thị validation errors -->
+            @if (ViewData.ModelState.Count > 0 && !ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        @foreach (var modelState in ViewData.ModelState.Values)
+                        {
+                            foreach (var error in modelState.Errors)
+                            {
+                                <li>@error.ErrorMessage</li>
+                            }
+                        }
+                    </ul>
+                </div>
+            }
+
+            <form method="post" asp-action="Checkout" asp-controller="ThanhToan" id="checkoutForm">
+                <input type="hidden" asp-for="HoTen" value="@Model.HoTen" />
+                <input type="hidden" asp-for="SoDienThoai" value="@Model.SoDienThoai" />
+                <input type="hidden" asp-for="Email" value="@Model.Email" />
+                <input type="hidden" asp-for="DiaChi" value="@Model.DiaChi" />
+                <input type="hidden" asp-for="GhiChu" value="@Model.GhiChu ?? String.Empty" />
+                <input type="hidden" asp-for="PhiVanChuyen" value="@Model.PhiVanChuyen" />
+                <input type="hidden" asp-for="TongTienSanPham" value="@Model.TongTienSanPham" />
+                <input type="hidden" asp-for="DiaChiMoi" id="HiddenAddressInput" value="@Model.DiaChiMoi ?? String.Empty" />
+                <input type="hidden" asp-for="PhuongThucThanhToan" id="selectedPayment" value="@(Model.PhuongThucThanhToan?.ToString())" />
+                <button type="submit" class="btn btn-danger btn-checkout mt-3" id="submitBtn">Đặt hàng</button>
+            </form>
+        </div>
+
+    </div>
+</main>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        const baseUrl = '@baseUrl';
+
+        $(document).ready(function () {
+            // Load tỉnh/thành
+            $.get(`${baseUrl}/api/ghn/provinces`, function (data) {
+                const provinces = JSON.parse(data);
+                for (let p of provinces) {
+                    $('#province').append(`<option value="${p.ProvinceID}">${p.ProvinceName}</option>`);
+                }
+            });
+
+            // Khi chọn tỉnh => load quận
+            $('#province').on('change', function () {
+            const provinceId = $(this).val();
+                $('#district').html('<option>Chọn quận / huyện</option>');
+                $('#ward').html('<option>Chọn phường / xã</option>');
+                $.get(`${baseUrl}/api/ghn/districts?provinceId=${provinceId}`, function (data) {
+                    const districts = JSON.parse(data);
+                    for (let d of districts) {
+                        $('#district').append(`<option value="${d.DistrictID}">${d.DistrictName}</option>`);
+                    }
+                });
+            });
+
+            // Khi chọn quận => load phường
+            $('#district').on('change', function () {
+                const districtId = $(this).val();
+                $('#ward').html('<option>Chọn phường / xã</option>');
+                $.get(`${baseUrl}/api/ghn/wards/${districtId}`, function (data) {
+                    const wards = JSON.parse(data);
+                    for (let w of wards) {
+                        $('#ward').append(`<option value="${w.WardCode}">${w.WardName}</option>`);
+                    }
+                });
+            });
+
+            // Click "Thay đổi"
+            $('#btnChangeAddress').click(function (e) {
+                e.preventDefault();
+                $('#changeAddressModal').modal('show');
+            });
+
+            // GHN API tỉnh/thành
+            $.get("/api/ghn/provinces", function (data) {
+                const provinces = JSON.parse(data);
+                for (let p of provinces) {
+                    $('#modal-province').append(`<option value="${p.ProvinceID}">${p.ProvinceName}</option>`);
+                }
+            });
+
+            $('#modal-province').on('change', function () {
+                const id = $(this).val();
+                $('#modal-district').html('<option>Chọn quận / huyện</option>');
+                $('#modal-ward').html('<option>Chọn phường / xã</option>');
+                $.get(`/api/ghn/districts?provinceId=${id}`, function (data) {
+                    const dists = JSON.parse(data);
+                    for (let d of dists) {
+                        $('#modal-district').append(`<option value="${d.DistrictID}">${d.DistrictName}</option>`);
+                    }
+                });
+            });
+
+            $('#modal-district').on('change', function () {
+                const id = $(this).val();
+                $('#modal-ward').html('<option>Chọn phường / xã</option>');
+                $.get(`/api/ghn/wards/${id}`, function (data) {
+                    const wards = JSON.parse(data);
+                    for (let w of wards) {
+                        $('#modal-ward').append(`<option value="${w.WardCode}">${w.WardName}</option>`);
+                    }
+                });
+            });
+
+            // Khi bấm "Lưu địa chỉ"
+            $('#save-address').click(function () {
+                const province = $('#modal-province option:selected').text();
+                const district = $('#modal-district option:selected').text();
+                const ward = $('#modal-ward option:selected').text();
+                const detail = $('#modal-detail-address').val();
+
+                const fullAddress = `${detail}, ${ward}, ${district}, ${province}`;
+                $('.address-box p:last').text(fullAddress); // Cập nhật UI
+                $('#changeAddressModal').modal('hide');
+
+                // TODO: Gửi lên server (nếu cần lưu vào database hoặc session)
+                // Hoặc gán vào hidden input nếu muốn gửi khi submit form
+                if ($('#HiddenAddressInput').length === 0) {
+                    $('.cart-summary form').append(`<input type="hidden" name="DiaChiMoi" id="HiddenAddressInput" value="${fullAddress}" />`);
+                } else {
+                    $('#HiddenAddressInput').val(fullAddress);
+                }
+            });
+
+            // Xử lý radio thanh toán
+            let lastSelectedRadio = null;
+            $('.payment-btn input[type="radio"]').on('click', function () {
+                const $radio = $(this);
+                if ($radio.is(':checked') && lastSelectedRadio === $radio[0]) {
+                    // Nếu radio đang được chọn và được click lần nữa, bỏ chọn
+                    $radio.prop('checked', false);
+                    $('#selectedPayment').val('');
+                    lastSelectedRadio = null;
+                } else {
+                    // Chọn radio mới và cập nhật giá trị
+                    $('#selectedPayment').val($radio.val());
+                    lastSelectedRadio = $radio[0];
+                    $('#paymentError').hide();
+                }
+            });
+
+            // Kiểm tra khi submit
+            $('#checkoutForm').on('submit', function (e) {
+                if (!$('.payment-btn input[type="radio"]:checked').length) {
+                    e.preventDefault();
+                    $('#paymentError').show();
+                    return false;
+                }
+            });
+
+        });
+    </script>
+}
+
+<!-- Modal chọn địa chỉ GHN -->
+<div class="modal fade" id="changeAddressModal" tabindex="-1" aria-labelledby="changeAddressLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chọn địa chỉ giao hàng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Tỉnh / Thành</label>
+                        <select id="modal-province" class="form-select"></select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Quận / Huyện</label>
+                        <select id="modal-district" class="form-select"></select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Phường / Xã</label>
+                        <select id="modal-ward" class="form-select"></select>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <label class="form-label">Địa chỉ chi tiết</label>
+                    <input type="text" class="form-control" id="modal-detail-address" placeholder="Số nhà, tên đường..." />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="save-address" class="btn btn-primary">Lưu địa chỉ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    main.main {
+        padding: 20px 10px;
+        background-color: #F1F5F9;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    /* Section boxes */
+    .section-box {
+        background-color: #FFFFFF;
+        padding: 20px;
+        border: 1px solid #60A5FA;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        margin-bottom: 25px;
+        transition: all 0.3s ease;
+    }
+
+        .section-box:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Header titles */
+        .section-box h5 {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #1E3A8A;
+            font-size: 1.4rem;
+            border-bottom: 2px solid #60A5FA;
+            padding-bottom: 10px;
+        }
+
+            .section-box h5 i {
+                margin-right: 10px;
+                font-size: 1.5rem;
+                color: #1E3A8A;
+            }
+
+    /* Address section */
+    .address-box {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .address-details {
+        margin-bottom: 15px;
+    }
+
+    .address-info {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+    .address-text {
+        flex-grow: 1;
+        min-width: 0;
+    }
+
+    .address-details h5 {
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+        color: #1E3A8A;
+    }
+
+    .address-details p {
+        margin: 5px 0;
+        font-size: 1rem;
+        color: #4B5563;
+    }
+
+        .address-details p strong {
+            color: #1E3A8A;
+        }
+
+    .address-actions {
+        margin-left: 15px;
+    }
+
+    .btn-change {
+        min-width: 100px;
+        font-size: 0.95rem;
+        background: linear-gradient(90deg, #1E3A8A, #60A5FA);
+        color: #FFFFFF;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+        display: inline-block;
+    }
+
+        .btn-change:hover {
+            background: linear-gradient(90deg, #3B82F6, #163172);
+            transform: scale(1.05);
+            color: #FFFFFF;
+        }
+
+    /* Product list */
+    .product-list .product-item {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        padding: 15px 0;
+        border-bottom: 1px solid #E5E7EB;
+        transition: background 0.3s ease;
+    }
+
+        .product-list .product-item:hover {
+            background-color: #F1F5F9;
+        }
+
+    .product-img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #E5E7EB;
+        flex-shrink: 0;
+    }
+
+    .product-info {
+        flex: 1;
+        margin-left: 20px;
+        min-width: 0;
+    }
+
+        .product-info p {
+            margin: 0 0 5px 0;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #1E3A8A;
+        }
+
+    .product-price {
+        font-weight: 700;
+        color: #1E3A8A;
+        font-size: 1.1rem;
+        margin-left: auto;
+        flex-shrink: 0;
+    }
+
+    /* Discount */
+    .discount {
+        display: inline-block;
+        background: #ffe4e0;
+        color: #ef5854;
+        font-weight: bold;
+        border-radius: 6px;
+        padding: 2px 8px;
+        margin-left: 8px;
+        vertical-align: middle;
+    }
+
+    /* Shipping method */
+    .shipping-method select {
+        height: calc(2.5rem + 2px);
+        font-size: 1rem;
+        padding: 0 15px;
+        border: 1px solid #60A5FA;
+        border-radius: 5px;
+        color: #1E3A8A;
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .shipping-info {
+        margin-top: 15px;
+        font-size: 1rem;
+        color: #4B5563;
+    }
+
+        .shipping-info strong {
+            color: #1E3A8A;
+        }
+
+    /* Payment method */
+    .payment-method {
+        padding: 15px 20px;
+        border-radius: 8px;
+        border: 1px solid #60A5FA;
+    }
+
+    .payment-options {
+        margin-top: 15px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .payment-btn {
+        display: inline-block;
+    }
+
+        .payment-btn input[type="radio"] {
+            display: none;
+        }
+
+        .payment-btn span {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #F1F5F9;
+            border: 2px solid #60A5FA;
+            border-radius: 5px;
+            font-size: 1rem;
+            color: #1543c1;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .payment-btn input[type="radio"]:checked + span {
+            background-color: #1543c1;
+            color: #FFFFFF;
+            border-color: #1543c1;
+        }
+
+        .payment-btn span:hover {
+            background-color: #60A5FA;
+            color: #FFFFFF;
+        }
+
+    /* Order summary */
+    .order-summary {
+        padding: 20px;
+        background-color: #FFFFFF;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+        .order-summary h5 {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #60A5FA;
+            padding-bottom: 10px;
+            color: #1E3A8A;
+        }
+
+    .summary-item {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        font-size: 1.1rem;
+        color: #4B5563;
+    }
+
+        .summary-item span:last-child {
+            font-weight: 600;
+            color: #1E3A8A;
+        }
+
+        .summary-item.fw-bold {
+            font-size: 1.3rem;
+            color: #1E3A8A;
+        }
+
+    .btn-checkout {
+        width: 100%;
+        padding: 12px 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+        background: linear-gradient(90deg, #1E3A8A, #60A5FA);
+        color: #FFFFFF;
+        border: none;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-checkout:hover {
+            background: linear-gradient(90deg, #3B82F6, #163172);
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3);
+            transform: translateY(-2px);
+            color: #FFFFFF;
+        }
+
+    /* Modal styling */
+    .modal-header {
+        border-bottom: none;
+        background: #F1F5F9;
+        border-radius: 10px 10px 0 0;
+    }
+
+    .modal-title {
+        font-weight: 600;
+        font-size: 1.3rem;
+        color: #1E3A8A;
+    }
+
+    .modal-footer {
+        padding: 15px;
+        border-top: 1px solid #E5E7EB;
+    }
+
+        .modal-footer button {
+            min-width: 120px;
+            font-size: 1rem;
+            background: #60A5FA;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+            .modal-footer button:hover {
+                background: #3B82F6;
+                transform: scale(1.05);
+            }
+</style>

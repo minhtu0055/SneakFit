@@ -11,6 +11,7 @@
         public decimal GiaKhuyenMai { get; set; }
         public int PhanTramGiamGia { get; set; }
         public int SoLuong { get; set; }
+        public int? SoLuongTon { get; set; }
         public decimal ThanhTien => (GiaKhuyenMai > 0 && GiaKhuyenMai < GiaGoc ? GiaKhuyenMai : GiaGoc) * SoLuong;
     }
 }

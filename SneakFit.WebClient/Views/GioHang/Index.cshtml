@@ -25,7 +25,7 @@
                         <div class="cart-header d-none d-lg-block">
                             <div class="row align-items-center gy-4">
                                 <div class="col-lg-1 text-center">
-                                    <input type="checkbox" id="select-all" title="Chọn tất cả" style="margin-left: 38.5px; " />
+                                    <input type="checkbox" id="select-all" title="Chọn tất cả" style="margin-left: 38px; " />
                                 </div>
                                 <div class="col-lg-5"><h5 style="margin-left: 25px; ">Product</h5></div>
                                 <div class="col-lg-2 text-center"><h5>Price</h5></div>
@@ -62,7 +62,7 @@
                                                         <span class="product-size">Size: @item.KichThuoc</span>
                                                     </div>
                                                     <button class="remove-item btn btn-link text-danger p-0" type="button"
-                                                            data-id="@item.SanPhamChiTietId">
+                                                            data-id="@item.SanPhamChiTietId" style="text-decoration: none">
                                                         <i class="bi bi-trash"></i> Remove
                                                     </button>
                                                 </div>
@@ -92,7 +92,7 @@
                                                     <i class="bi bi-plus"></i>
                                                 </button> *@
                                                 <button class="quantity-btn increase" type="button" data-id="@item.SanPhamChiTietId"
-                                                @(item.SoLuong >= item.SoLuongTon ? "disabled title='Đã đạt số lượng tồn kho tối đa!'" : "")>
+                                                @(item.SoLuong >= item.SoLuongTon ? "disabled title='Đã đạt số lượng tồn kho tối đa!'" : "" ) >
                                                     <i class="bi bi-plus"></i>
                                                 </button>
                                             </div>
@@ -110,25 +110,28 @@
 
                         <!-- Coupon/Action Bar -->
                         <div class="cart-actions mt-3">
-                            <div class="row g-3">
+                            <div class="row g-3 align-items-center">
                                 <div class="col-lg-6 col-md-6">
                                     <div class="coupon-form">
                                         <div class="input-group">
-                                            <input type="text" class="form-control" placeholder="Coupon code" id="couponCode">
-                                            <button class="btn btn-accent" type="button">Apply</button>
+                                            <input type="text" class="form-control" placeholder="Nhập mã voucher" id="couponCode">
+                                            <button class="btn btn-accent" type="button" id="apply-coupon">Áp dụng</button>
                                         </div>
+                                        <div id="coupon-message" class="text-success mt-2" style="display: none;"></div>
                                     </div>
                                 </div>
                                 <div class="col-lg-6 col-md-6 text-md-end">
-                                    <button class="btn btn-outline-accent me-2" type="button" onclick="location.reload();">
-                                        <i class="bi bi-arrow-clockwise"></i> Update
-                                    </button>
-                                    <button class="btn btn-outline-danger me-2" type="button" id="delete-selected">
-                                        <i class="bi bi-trash"></i> Delete Selected
-                                    </button>
-                                    <button class="btn btn-outline-danger" type="button" id="clear-cart">
-                                        <i class="bi bi-trash"></i> Clear All
-                                    </button>
+                                    <div class="d-flex justify-content-md-end gap-2">
+                                        <button class="btn btn-outline-accent" type="button" onclick="location.reload();">
+                                            <i class="bi bi-arrow-clockwise"></i> Update
+                                        </button>
+                                        <button class="btn btn-outline-danger" type="button" id="delete-selected">
+                                            <i class="bi bi-trash"></i> Xóa đã chọn
+                                        </button>
+                                        <button class="btn btn-outline-danger" type="button" id="clear-cart">
+                                            <i class="bi bi-trash"></i> Clear All
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -152,9 +155,15 @@
                             <span class="summary-value" id="total">35,000 VNĐ</span>
                         </div>
                         <div class="checkout-button">
-                            <a href="@Url.Action("Checkout", "GioHang")" class="btn btn-accent w-100">
+                            @* <a href="@Url.Action("Checkout", "ThanhToan")" class="btn btn-accent w-100">
                                 Proceed to Checkout <i class="bi bi-arrow-right"></i>
-                            </a>
+                            </a> *@
+                            <form id="checkout-form" method="post" action="/GioHang/ProceedToCheckout">
+                                <input type="hidden" name="selectedIds" id="selected-ids" />
+                                <button type="submit" class="btn btn-accent w-100">
+                                    Proceed to Checkout <i class="bi bi-arrow-right"></i>
+                                </button>
+                            </form>
                         </div>
                         <div class="continue-shopping">
                             <a href="@Url.Action("Index", "SanPham")" class="btn btn-link w-100">
@@ -185,6 +194,9 @@
         let isProcessing = false;
         let cartQuantities = {};
 
+        let appliedVoucher = null; // Lưu thông tin voucher đã áp dụng
+        let discountAmount = 0; // Lưu giá trị giảm giá
+
         // Hàm tính tổng tiền dựa trên các sản phẩm được chọn
         function calculateTotals() {
             let subtotal = 0;
@@ -192,8 +204,14 @@
                 subtotal += parseFloat($(this).data('price')) || 0;
             });
             const shipping = 35000; // Giá vận chuyển cố định 35,000 VNĐ
-            const total = subtotal + shipping;
+            // const total = subtotal + shipping;
+            // $('#subtotal').text(subtotal.toLocaleString() + ' VNĐ');
+            // $('#total').text(total.toLocaleString() + ' VNĐ');
+            let total = subtotal + shipping - discountAmount;
+            if (total < 0) total = 0; // Tổng tiền không âm
             $('#subtotal').text(subtotal.toLocaleString() + ' VNĐ');
+            $('#discount-amount').text(discountAmount.toLocaleString() + ' VNĐ');
+            $('#coupon-discount').toggle(discountAmount > 0); // Hiển thị/ẩn mục giảm giá
             $('#total').text(total.toLocaleString() + ' VNĐ');
         }
 
@@ -236,10 +254,10 @@
                         // $input.data('max', maxQuantity);
                         // buttonState($input, maxQuantity);
                         const maxQuantity = response.maxQuantity || 99;
-        $input.data('max', maxQuantity);
+                        $input.data('max', maxQuantity);
+                        // GỌI LẠI SAU KHI CẬP NHẬT max
+                        buttonState($input, maxQuantity);
 
-        // GỌI LẠI SAU KHI CẬP NHẬT max
-        buttonState($input, maxQuantity);
                         $input.closest('.cart-item').find('.item-total span').text(response.thanhTien.toLocaleString());
                         // Cập nhật giá mới cho checkbox
                         $input.closest('.cart-item').find('.item-checkbox').data('price', response.thanhTien);
@@ -260,6 +278,43 @@
                 complete: function() {
                     isProcessing = false;
                     $('.quantity-btn, .quantity-input').prop('disabled', false);
+                }
+            });
+        }
+
+        // Hàm áp dụng voucher
+        function applyVoucher(code) {
+            if (isProcessing) return;
+            isProcessing = true;
+            $('#apply-coupon').prop('disabled', true);
+            $('#coupon-message').hide();
+
+            $.ajax({
+                url: '/GioHang/ApDungVoucher',
+                type: 'POST',
+                data: { code: code },
+                success: function(response) {
+                    if (response.success) {
+                        appliedVoucher = response.voucher;
+                        discountAmount = response.discountAmount;
+                        $('#coupon-message').text(`Áp dụng voucher thành công: ${response.message}`).addClass('text-success').removeClass('text-danger').show();
+                        calculateTotals(); // Cập nhật tổng tiền
+                    } else {
+                        appliedVoucher = null;
+                        discountAmount = 0;
+                        $('#coupon-message').text(response.message).addClass('text-danger').removeClass('text-success').show();
+                        calculateTotals();
+                    }
+                },
+                error: function(xhr) {
+                    appliedVoucher = null;
+                    discountAmount = 0;
+                    $('#coupon-message').text(xhr.responseJSON?.message || 'Có lỗi khi áp dụng voucher!').addClass('text-danger').removeClass('text-success').show();
+                    calculateTotals();
+                },
+                complete: function() {
+                    isProcessing = false;
+                    $('#apply-coupon').prop('disabled', false);
                 }
             });
         }
@@ -325,6 +380,26 @@
                 if (e.which === 13) {
                     e.preventDefault();
                     $(this).blur();
+                }
+            });
+
+            // Sự kiện áp dụng voucher
+            $(document).on('click', '#apply-coupon', function(e) {
+                e.preventDefault();
+                if (isProcessing) return;
+                let code = $('#couponCode').val().trim();
+                if (!code) {
+                    Swal.fire('Thông báo', 'Vui lòng nhập mã voucher!', 'warning');
+                    return;
+                }
+                applyVoucher(code);
+            });
+
+            // Sự kiện nhấn Enter trong input voucher
+            $(document).on('keydown', '#couponCode', function(e) {
+                if (e.which === 13) {
+                    e.preventDefault();
+                    $('#apply-coupon').click();
                 }
             });
 
@@ -439,7 +514,7 @@
                     showCancelButton: true,
                     confirmButtonText: 'Xóa',
                     cancelButtonText: 'Hủy'
-                }).then((result) => {
+                    }).then((result) => {
                     if (result.isConfirmed) {
                         isProcessing = true;
                         $.ajax({
@@ -465,6 +540,21 @@
                         });
                     }
                 });
+            });
+
+            $('#checkout-form').on('submit', function (e) {
+                var selectedIds = [];
+                $('.item-checkbox:checked').each(function () {
+                    selectedIds.push($(this).data('id'));
+                });
+
+                if (selectedIds.length === 0) {
+                    e.preventDefault();
+                    Swal.fire('Thông báo', 'Vui lòng chọn ít nhất một sản phẩm để thanh toán!', 'info');
+                    return false;
+                }
+
+                $('#selected-ids').val(selectedIds.join(','));
             });
 
             // Khởi tạo tổng tiền khi trang tải
