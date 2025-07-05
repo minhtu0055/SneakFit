@@ -200,6 +200,25 @@ namespace SneakFit.ApiIntegration.Services
             throw new Exception("Không thể cập nhật giá");
         }
 
+        //public async Task<bool> UpdateSoLuong(Guid id, int themSoLuong)
+        //{
+        //    var client = _httpClientFactory.CreateClient();
+        //    client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+        //    var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+        //    if (!string.IsNullOrEmpty(sessions))
+        //        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+        //    var json = JsonConvert.SerializeObject(themSoLuong);
+        //    var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+        //    var response = await client.PutAsync($"/api/spct/{id}/soluong", httpContent);
+        //    var body = await response.Content.ReadAsStringAsync();
+        //    if (response.IsSuccessStatusCode)
+        //    {
+        //        var result = JsonConvert.DeserializeObject<bool>(body);
+        //        return result;
+        //    }
+        //    throw new Exception("Không thể cập nhật số lượng");
+        //}
         public async Task<bool> UpdateSoLuong(Guid id, int themSoLuong)
         {
             var client = _httpClientFactory.CreateClient();
@@ -212,12 +231,43 @@ namespace SneakFit.ApiIntegration.Services
             var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
             var response = await client.PutAsync($"/api/spct/{id}/soluong", httpContent);
             var body = await response.Content.ReadAsStringAsync();
+
+            Console.WriteLine($"Phản hồi từ /api/spct/{id}/soluong: {body}"); // Log để debug
+
             if (response.IsSuccessStatusCode)
             {
-                var result = JsonConvert.DeserializeObject<bool>(body);
-                return result;
+                try
+                {
+                    var result = JsonConvert.DeserializeObject<ApiSuccessResult<object>>(body);
+                    if (result?.ResultObj != null && result.IsSuccessed)
+                    {
+                        dynamic obj = result.ResultObj;
+                        return obj.success; // Trích xuất trường 'success' từ ResultObj
+                    }
+                    return false;
+                }
+                catch (JsonException ex)
+                {
+                    //_logger.LogWarning(ex, $"Không thể deserialize phản hồi thành công: {body}");
+                    return false;
+                }
             }
-            throw new Exception("Không thể cập nhật số lượng");
+            else
+            {
+                try
+                {
+                    var errorResult = JsonConvert.DeserializeObject<ApiErrorResult<bool>>(body);
+                    if (errorResult != null && !string.IsNullOrEmpty(errorResult.Message))
+                    {
+                        throw new Exception(errorResult.Message);
+                    }
+                }
+                catch (JsonException)
+                {
+                    throw new Exception($"Lỗi từ server: {body}");
+                }
+                throw new Exception($"Không thể cập nhật số lượng. Mã lỗi: {response.StatusCode}");
+            }
         }
 
         public async Task<bool> UpdateTrangThai(Guid id, bool trangThai)

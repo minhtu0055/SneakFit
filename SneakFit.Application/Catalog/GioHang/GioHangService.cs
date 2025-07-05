@@ -193,7 +193,34 @@ namespace SneakFit.Application.Catalog.GioHang
             await _context.SaveChangesAsync();
             return true;
         }
+        public async Task<bool> XoaSanPhamDaMuaKhoiGioHang(Guid userId, List<Guid> sanPhamChiTietIds)
+        {
+            try
+            {
+                var gioHang = await _context.GioHang.FirstOrDefaultAsync(x => x.UserId == userId);
+                if (gioHang == null)
+                {
+                    return false; // Không ném ngoại lệ, chỉ trả về false
+                }
 
+                var gioHangChiTietsToRemove = _context.GioHangChiTiet
+                    .Where(x => x.GioHangId == gioHang.Id && sanPhamChiTietIds.Contains(x.SanPhamChiTietId))
+                    .ToList();
+
+                if (!gioHangChiTietsToRemove.Any())
+                {
+                    return false; // Không có sản phẩm nào để xóa
+                }
+
+                _context.GioHangChiTiet.RemoveRange(gioHangChiTietsToRemove);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                throw; // Ném lại ngoại lệ nếu có lỗi khác
+            }
+        }
         public async Task<bool> XoaGioHang(Guid id)
         {
             var gioHang = await _context.GioHang.FindAsync(id);

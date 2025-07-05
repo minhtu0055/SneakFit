@@ -16,6 +16,7 @@ namespace SneakFit.Application.Catalog.GioHang
         Task<GioHangViewModel> ThemVaoGioHang(ThemVaoGioHangRequest request);
         Task<GioHangViewModel> CapNhatGioHang(CapNhatGioHangRequest request);
         Task<bool> XoaSanPhamKhoiGioHang(Guid gioHangChiTietId);
+        Task<bool> XoaSanPhamDaMuaKhoiGioHang(Guid userId, List<Guid> sanPhamChiTietIds);
         Task<bool> XoaGioHang(Guid id);
         Task<ApiResult<bool>> CapNhatSoLuongAsync(CapNhatGioHang request);
     }

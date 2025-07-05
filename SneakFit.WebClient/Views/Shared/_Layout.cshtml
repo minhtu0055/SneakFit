@@ -104,10 +104,12 @@
                         </a>
 
                         <!-- Cart -->
-                        <a asp-action="index" asp-controller="GioHang" class="header-action-btn">
+                        @* <a asp-action="index" asp-controller="GioHang" class="header-action-btn">
                             <i class="bi bi-cart3"></i>
                             <span class="badge">3</span>
-                        </a>
+                        </a> *@
+                        <!-- Cart (dynamic badge via ViewComponent) -->
+                        @await Component.InvokeAsync("CartBadge")
 
                         <!-- Mobile Navigation Toggle -->
                         <i class="mobile-nav-toggle d-xl-none bi bi-list me-0"></i>
@@ -127,7 +129,7 @@
                             <li><a href="about.html">About</a></li>
                             <li><a asp-action="index" asp-controller="SanPham">Product</a></li>
                             <li><a asp-action="index" asp-controller="danhmuc">Category</a></li>
-                            <li><a href="product-details.html">Product Details</a></li>
+                            <li><a asp-action="index" asp-controller="HoaDon">Bill</a></li>
                             <li><a asp-action="index" asp-controller="GioHang">Cart</a></li>
                             <li><a asp-action="checkout" asp-controller="ThanhToan">Checkout</a></li>
                         </ul>

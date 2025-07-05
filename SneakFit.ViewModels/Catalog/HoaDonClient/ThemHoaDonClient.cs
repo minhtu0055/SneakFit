@@ -21,6 +21,7 @@ namespace SneakFit.ViewModels.Catalog.HoaDonClient
         public LoaiHoaDon LoaiHoaDon { get; set; }
         public DateTime? NgayThanhToan { get; set; }
         public DateTime? NgayDatHang { get; set; }
+        public DateTime NgayTao { get; set; }
         public string? MaGiaoDich { get; set; }
         public decimal PhiVanChuyen { get; set; }
         public string? DonViVanChuyen { get; set; }

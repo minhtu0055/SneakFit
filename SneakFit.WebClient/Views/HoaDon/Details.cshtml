@@ -1,0 +1,257 @@
+﻿@model OrderConfirmationViewModel
+@inject IConfiguration Configuration
+@{
+    var baseUrl = Configuration["BaseAddress"];
+    ViewData["Title"] = "Chi Tiết Đơn Hàng - SneakFit";
+}
+
+<main class="main py-4 bg-light">
+    <div class="container">
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+        }
+        else if (Model.HoaDonClient == null)
+        {
+            <div class="section-box text-center p-4">
+                <p class="text-muted">Không tìm thấy đơn hàng.</p>
+                <a href="@Url.Action("Index", "HoaDonClient")" class="btn btn-primary mt-3">Quay về danh sách</a>
+            </div>
+        }
+        else
+        {
+            <!-- Thông báo xác nhận -->
+            <div class="section-box confirmation-message mb-4 text-center">
+                <h5><i class="bi bi-info-circle-fill text-info"></i> Chi Tiết Đơn Hàng</h5>
+                <p>Mã đơn hàng: <strong>@Model.HoaDonClient.Id</strong></p>
+            </div>
+
+            <!-- Thông tin hóa đơn -->
+            <div class="section-box order-info mb-4">
+                <h5>Thông tin đơn hàng</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Người nhận:</strong> @Model.HoaDonClient.HoTen</p>
+                        <p><strong>Số điện thoại:</strong> @Model.HoaDonClient.SoDienThoai</p>
+                        <p><strong>Email:</strong> @Model.HoaDonClient.Email</p>
+                        <p><strong>Địa chỉ giao hàng:</strong> @(string.IsNullOrEmpty(Model.HoaDonClient.DiaChi) ? "" : Model.HoaDonClient.DiaChi)</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Ngày đặt hàng:</strong> @Model.HoaDonClient.NgayTao.ToString("dd/MM/yyyy HH:mm")</p>
+                        <p><strong>Phương thức thanh toán:</strong> @Model.HoaDonClient.PhuongThucThanhToan</p>
+                        <p><strong>Trạng thái:</strong> @Model.HoaDonClient.TrangThai</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Danh sách sản phẩm -->
+            <div class="section-box product-list mb-4">
+                <h5>Sản phẩm trong đơn hàng</h5>
+                @if (Model.ChiTietHoaDonClient != null && Model.ChiTietHoaDonClient.Any())
+                {
+                    @foreach (var item in Model.ChiTietHoaDonClient)
+                    {
+                        <div class="product-item d-flex align-items-center mb-3">
+                            <img src="@($"{baseUrl}/images/Default_Logo.png")" class="product-img" style="margin-left: 10px;" />
+                            <div class="product-info">
+                                <p class="mb-1">
+                                    @(string.IsNullOrEmpty(item.TenSanPham) ? "Tên sản phẩm không xác định" : item.TenSanPham)
+                                </p>
+                                <small class="text-muted">Số lượng: @item.SoLuong</small>
+                            </div>
+                            <div class="product-price ms-auto" style="margin-right: 10px;">@((item.GiaBan * item.SoLuong).ToString("N0")) ₫</div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted">Không có sản phẩm trong đơn hàng này.</p>
+                }
+            </div>
+
+            <!-- Tóm tắt thanh toán -->
+            <div class="section-box order-summary mb-4">
+                <h5>Tóm tắt thanh toán</h5>
+                <div class="summary-item">
+                    <span>Tổng tiền hàng</span>
+                    <span>@(Model.HoaDonClient.TongTienSanPham?.ToString("N0") ?? "0") ₫</span>
+                </div>
+                <div class="summary-item">
+                    <span>Phí vận chuyển</span>
+                    <span>@Model.HoaDonClient.PhiVanChuyen.ToString("N0") ₫</span>
+                </div>
+                <hr />
+                <div class="summary-item fw-bold fs-5">
+                    <span>Tổng thanh toán</span>
+                    <span>@Model.HoaDonClient.TongTien.ToString("N0") ₫</span>
+                </div>
+            </div>
+
+            <!-- Hành động -->
+            <div class="section-box actions text-center">
+                <a href="@Url.Action("Index", "HoaDonClient")" class="btn btn-primary">Quay về danh sách</a>
+            </div>
+        }
+    </div>
+</main>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+}
+
+<style>
+    .main {
+        padding: 20px 10px;
+        background-color: #F1F5F9;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    .section-box {
+        background-color: #FFFFFF;
+        padding: 20px;
+        border: 1px solid #60A5FA;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        margin-bottom: 25px;
+        transition: all 0.3s ease;
+    }
+
+        .section-box:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .section-box h5 {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #1E3A8A;
+            font-size: 1.4rem;
+            border-bottom: 2px solid #60A5FA;
+            padding-bottom: 10px;
+        }
+
+            .section-box h5 i {
+                margin-right: 10px;
+                font-size: 1.5rem;
+            }
+
+    .confirmation-message {
+        background-color: #E6F3FA;
+        padding: 30px;
+        border-radius: 10px;
+    }
+
+        .confirmation-message h5 {
+            font-size: 1.6rem;
+            color: #1E3A8A;
+        }
+
+        .confirmation-message p {
+            font-size: 1.1rem;
+            color: #4B5563;
+            margin: 10px 0;
+        }
+
+    .order-info p {
+        font-size: 1rem;
+        color: #4B5563;
+        margin-bottom: 10px;
+    }
+
+        .order-info p strong {
+            color: #1E3A8A;
+        }
+
+    .product-list .product-item {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        padding: 15px 0;
+        border-bottom: 1px solid #E5E7EB;
+        transition: background 0.3s ease;
+    }
+
+        .product-list .product-item:hover {
+            background-color: #F1F5F9;
+        }
+
+    .product-img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #E5E7EB;
+        flex-shrink: 0;
+    }
+
+    .product-info {
+        flex: 1;
+        margin-left: 20px;
+        min-width: 0;
+    }
+
+        .product-info p {
+            margin: 0 0 5px 0;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #1E3A8A;
+        }
+
+    .product-price {
+        font-weight: 700;
+        color: #1E3A8A;
+        font-size: 1.1rem;
+        margin-left: auto;
+        flex-shrink: 0;
+    }
+
+    .order-summary {
+        padding: 20px;
+        background-color: #FFFFFF;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .summary-item {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        font-size: 1.1rem;
+        color: #4B5563;
+    }
+
+        .summary-item span:last-child {
+            font-weight: 600;
+            color: #1E3A8A;
+        }
+
+        .summary-item.fw-bold {
+            font-size: 1.3rem;
+            color: #1E3A8A;
+        }
+
+    .actions .btn {
+        padding: 10px 20px;
+        font-size: 1.1rem;
+        border-radius: 6px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(90deg, #1E3A8A, #60A5FA);
+        border: none;
+        color: #FFFFFF;
+    }
+
+        .btn-primary:hover {
+            background: linear-gradient(90deg, #3B82F6, #163172);
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3);
+            transform: translateY(-2px);
+        }
+</style>

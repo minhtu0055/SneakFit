@@ -1,0 +1,127 @@
+﻿@using SneakFit.ViewModels.Catalog.HoaDonClient
+@model List<HoaDonClientViewModel>
+@inject IConfiguration Configuration
+@{
+    var baseUrl = Configuration["BaseAddress"];
+    ViewData["Title"] = "Danh Sách Đơn Hàng - SneakFit";
+}
+
+<main class="main py-4 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-4" style="color: #1E3A8A; font-weight: 600;">Danh Sách Đơn Hàng Của Bạn</h2>
+
+        @if (Model == null || !Model.Any())
+        {
+            <div class="section-box text-center p-4">
+                <p class="text-muted">Bạn chưa có đơn hàng nào.</p>
+                <a href="@Url.Action("Index", "Home")" class="btn btn-primary mt-3">Quay về trang chủ</a>
+            </div>
+        }
+        else
+        {
+            <div class="section-box">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead style="background-color: #1E3A8A; color: #FFFFFF;">
+                            <tr>
+                                <th>Mã Đơn Hàng</th>
+                                <th>Ngày Đặt Hàng</th>
+                                <th>Tổng Thanh Toán</th>
+                                <th>Trạng Thái</th>
+                                <th>Hành Động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.Id</td>
+                                    <td>@item.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@item.TongTien.ToString("N0") ₫</td>
+                                    <td>@item.TrangThai</td>
+                                    <td>
+                                        <a href="@Url.Action("Details", new { id = item.Id })" class="btn btn-outline-primary btn-sm">Xem Chi Tiết</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
+</main>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+}
+
+<style>
+    .main {
+        padding: 20px 10px;
+        background-color: #F1F5F9;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    .section-box {
+        background-color: #FFFFFF;
+        padding: 20px;
+        border: 1px solid #60A5FA;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        margin-bottom: 25px;
+        transition: all 0.3s ease;
+    }
+
+        .section-box:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+    .table thead th {
+        padding: 12px;
+        text-align: center;
+    }
+
+    .table tbody td {
+        padding: 12px;
+        text-align: center;
+        vertical-align: middle;
+        color: #4B5563;
+    }
+
+    .btn-outline-primary {
+        border-color: #60A5FA;
+        color: #60A5FA;
+        padding: 6px 12px;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-outline-primary:hover {
+            background-color: #60A5FA;
+            color: #FFFFFF;
+            transform: scale(1.05);
+        }
+
+    .btn-primary {
+        background: linear-gradient(90deg, #1E3A8A, #60A5FA);
+        border: none;
+        color: #FFFFFF;
+        padding: 10px 20px;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+    }
+
+        .btn-primary:hover {
+            background: linear-gradient(90deg, #3B82F6, #163172);
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3);
+            transform: translateY(-2px);
+        }
+</style>
