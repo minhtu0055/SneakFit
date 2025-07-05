@@ -11,10 +11,6 @@ namespace SneakFit.ViewModels.Catalog.Voucher
     public class UpdateVoucher
     {
         public Guid Id { get; set; }
-
-        [Required(ErrorMessage = "Mã voucher không được để trống")]
-        [MinLength(3, ErrorMessage = "Mã voucher phải có ít nhất 3 ký tự")]
-        [MaxLength(20, ErrorMessage = "Mã voucher không được vượt quá 20 ký tự")]
         public string MaVoucher { get; set; }
 
         [Required(ErrorMessage = "Loại giảm giá không được để trống")]
@@ -27,6 +23,10 @@ namespace SneakFit.ViewModels.Catalog.Voucher
         [Required(ErrorMessage = "Điều kiện áp dụng không được để trống")]
         [Range(0, double.MaxValue, ErrorMessage = "Điều kiện áp dụng phải lớn hơn 0")]
         public decimal DieuKienApDung { get; set; }
+
+        [Required(ErrorMessage = "Giá trị tối thiểu không được để trống")]
+        [Range(0, double.MaxValue, ErrorMessage = "Giá trị tối thiểu phải lớn hơn 0")]
+        public decimal GiaTriToiThieu { get; set; }
 
         public DateTime NgayTao { get; set; }
 
@@ -44,8 +44,8 @@ namespace SneakFit.ViewModels.Catalog.Voucher
 
         public LoaiVoucher LoaiVoucher { get; set; }
 
-        public List<Guid> SelectedUserIds { get; set; }
-        public string SelectedUserIdsHidden { get; set; }
+        public List<Guid>? SelectedUserIds { get; set; }
+        public string? SelectedUserIdsHidden { get; set; }
         public List<Guid> ParsedSelectedUserIds =>
             !string.IsNullOrEmpty(SelectedUserIdsHidden)
                 ? SelectedUserIdsHidden.Split(',').Select(Guid.Parse).ToList()

@@ -84,7 +84,7 @@ namespace SneakFit.ApiIntegration.Services
                         return apiResult.ResultObj;
                     }
                 }
-                throw new Exception("Không thể lấy danh sách Voucher");
+                return null;
             }
             catch (Exception ex)
             {

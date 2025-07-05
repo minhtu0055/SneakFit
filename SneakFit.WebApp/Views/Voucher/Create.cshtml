@@ -38,7 +38,6 @@
                         <label asp-for="LoaiGiamGia" class="col-sm-3 col-form-label">Loại Giảm giá <span class="text-danger">*</span></label>
                         <div class="col-sm-9">
                             <select asp-for="LoaiGiamGia" asp-items="@ViewBag.LoaiGiamGia" class="form-select">
-                                <option value="">-- Chọn loại giảm giá --</option>
                             </select>
                             <span asp-validation-for="LoaiGiamGia" class="text-danger"></span>
                         </div>
@@ -63,10 +62,21 @@
                         <label asp-for="DieuKienApDung" class="col-sm-3 col-form-label">Điều kiện áp dụng <span class="text-danger">*</span></label>
                         <div class="col-sm-9">
                             <div class="input-group">
-                                <input asp-for="DieuKienApDung" class="form-control" type="number" step="1000" />
+                                <input asp-for="DieuKienApDung" class="form-control" type="number" />
                                 <span class="input-group-text">VNĐ</span>
                             </div>
                             <span asp-validation-for="DieuKienApDung" class="text-danger"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3 row">
+                        <label asp-for="GiaTriToiThieu" class="col-sm-3 col-form-label">Giá Trị Tối Thiểu <span class="text-danger">*</span></label>
+                        <div class="col-sm-9">
+                            <div class="input-group">
+                                <input asp-for="GiaTriToiThieu" class="form-control" type="number" />
+                                <span class="input-group-text">VNĐ</span>
+                            </div>
+                            <span asp-validation-for="GiaTriToiThieu" class="text-danger"></span>
                         </div>
                     </div>
 
@@ -98,7 +108,6 @@
                         <label asp-for="LoaiVoucher" class="col-sm-3 col-form-label">Loại voucher <span class="text-danger">*</span></label>
                         <div class="col-sm-9">
                             <select asp-for="LoaiVoucher" asp-items="@ViewBag.LoaiVoucher" class="form-select">
-                                <option value="">-- Chọn loại voucher --</option>
                             </select>
                             <span asp-validation-for="LoaiVoucher" class="text-danger"></span>
                         </div>
@@ -150,7 +159,7 @@
                                     </tbody>
                                 </table>
                             </div>
-                            
+
                             <div id="customerPagination" class="mt-2 d-flex justify-content-center"></div>
                         </div>
                     </div>
@@ -175,6 +184,22 @@
     @* @{await Html.RenderPartialAsync("_ValidationScriptsPartial");} *@
     <script>
         $(document).ready(function () {
+
+            function updateDiscountUnit() {
+                var loaiGiamGia = $("#LoaiGiamGia").val();
+                if (loaiGiamGia === "@((int)LoaiGiamGia.PhamTram)") {
+                    $(".discount-unit").text("%");
+                    $(".discount-hint").text("Ví dụ: Nhập 20 nghĩa là giảm 20%.");
+                } else {
+                    $(".discount-unit").text("đ");
+                    $(".discount-hint").text("Ví dụ: Nhập 20000 nghĩa là giảm 20.000đ.");
+                }
+            }
+
+            updateDiscountUnit();
+
+            $("#LoaiGiamGia").on("change", updateDiscountUnit);
+
             function toggleUserSelection() {
                 var loaiVoucher = $("#LoaiVoucher").val();
                 if (loaiVoucher == "@((int)LoaiVoucher.RiengTu)") {
@@ -201,12 +226,12 @@
             });
 
             // Handle customer search
-            $("#btnSearchCustomer").click(function() {
+            $("#btnSearchCustomer").click(function () {
                 searchCustomers();
             });
 
-            $("#searchCustomer").keypress(function(e) {
-                if(e.which == 13) {
+            $("#searchCustomer").keypress(function (e) {
+                if (e.which == 13) {
                     searchCustomers();
                 }
             });
@@ -221,28 +246,28 @@
                         pageIndex: pageIndex,
                         pageSize: 10
                     },
-                    success: function(response) {
-                        if(response.isSuccessed) {
+                    success: function (response) {
+                        if (response.isSuccessed) {
                             var customers = response.resultObj.items;
                             var tbody = $("table tbody");
                             tbody.empty();
-                            customers.forEach(function(customer) {
+                            customers.forEach(function (customer) {
                                 var row = `
-                                    <tr>
-                                        <td>
-                                            <input type="checkbox" name="SelectedUserIds" value="${customer.id}" class="user-checkbox" />
-                                        </td>
-                                        <td>${customer.hoVaTen}</td>
-                                        <td>${customer.email}</td>
-                                        <td>${customer.soDienThoai}</td>
-                                    </tr>
-                                `;
+                                            <tr>
+                                                <td>
+                                                    <input type="checkbox" name="SelectedUserIds" value="${customer.id}" class="user-checkbox" />
+                                                </td>
+                                                <td>${customer.hoVaTen}</td>
+                                                <td>${customer.email}</td>
+                                                <td>${customer.soDienThoai}</td>
+                                            </tr>
+                                        `;
                                 tbody.append(row);
                             });
                             renderCustomerPagination(response.resultObj.pageIndex, response.resultObj.pageCount);
                         }
                     },
-                    error: function(error) {
+                    error: function (error) {
                         console.error('Error searching customers:', error);
                         toastr.error("Có lỗi xảy ra khi tìm kiếm khách hàng");
                     }
@@ -268,7 +293,7 @@
             window.renderCustomerPagination = renderCustomerPagination;
 
             // Khi load trang, render luôn phân trang nếu có dữ liệu
-            $(function() {
+            $(function () {
                 var khachHangs = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.KhachHangs));
                 if (khachHangs && khachHangs.pageCount > 1) {
                     renderCustomerPagination(khachHangs.pageIndex, khachHangs.pageCount);
@@ -367,6 +392,14 @@
                 }
                 return true;
             }
+            function validateGiaTriToiThieu() {
+                var giatritoithieu = parseFloat($("#GiaTriToiThieu").val());
+                if (isNaN(giatritoithieu) || giatritoithieu <= 0) {
+                    toastr.error("Giá trị tối thiểu phải lớn hơn 0");
+                    return false;
+                }
+                return true;
+            }
 
             // Add event listeners for real-time validation
             $("#SoLuong").on('input', validateSoLuong);
@@ -376,17 +409,19 @@
             $("#ThoiGianKetThuc").change(validateThoiGianKetThuc);
             $(".user-checkbox").change(validateKhachHang);
             $("#DieuKienApDung").on('input', validateDieuKienApDung);
+            $("#GiaTriToiThieu").on('input', validateGiaTriToiThieu);
 
             // Handle form submission
-            $("form").submit(function(e) {
+            $("form").submit(function (e) {
                 e.preventDefault();
-                
+
                 // Validate all fields before submission
                 if (!validateSoLuong() ||
-                    !validateGiaTriGiamGia() || 
-                    !validateThoiGianBatDau() || 
-                    !validateThoiGianKetThuc() || 
+                    !validateGiaTriGiamGia() ||
+                    !validateThoiGianBatDau() ||
+                    !validateThoiGianKetThuc() ||
                     !validateKhachHang() ||
+                    !validateGiaTriToiThieu() ||
                     !validateDieuKienApDung()) {
                     return false;
                 }
@@ -396,17 +431,17 @@
                     url: '@Url.Action("Create", "Voucher")',
                     type: 'POST',
                     data: formData,
-                    success: function(result) {
+                    success: function (result) {
                         if (result.success) {
                             toastr.success("Tạo voucher thành công!");
-                            setTimeout(function() {
+                            setTimeout(function () {
                                 window.location.href = '@Url.Action("Index", "Voucher")';
                             }, 1500);
                         } else {
                             toastr.error(result.message || "Không thể tạo voucher. Vui lòng thử lại!");
                         }
                     },
-                    error: function() {
+                    error: function () {
                         toastr.error("Đã xảy ra lỗi khi tạo voucher. Vui lòng thử lại sau!");
                     }
                 });

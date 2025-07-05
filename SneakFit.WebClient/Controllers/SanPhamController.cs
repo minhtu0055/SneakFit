@@ -12,6 +12,7 @@ using SneakFit.ViewModels.Catalog.DanhMuc;
 using SneakFit.ViewModels.Catalog.MauSac;
 using SneakFit.ViewModels.Catalog.ThuongHieu;
 using SneakFit.ViewModels.Catalog.SanPham;
+using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
 
 namespace SneakFit.WebClient.Controllers
 {
@@ -57,6 +58,17 @@ namespace SneakFit.WebClient.Controllers
             };
             var pagedSanPham = await _sanPhamApiClient.GetAllPaging(request);
             var allSpct = new List<SPCTViewModels>();
+
+            //tìm kiếm product
+            if (!string.IsNullOrEmpty(tuKhoa))
+            {
+                tuKhoa = tuKhoa.ToLower().Trim();
+                pagedSanPham.Items = pagedSanPham.Items
+                    .Where(x => x.TenSanPham?.ToLower().Contains(tuKhoa) == true)
+                    .ToList();
+            }
+
+            ViewBag.Keyword = tuKhoa;
 
             // Lấy 1 ảnh đại diện cho mỗi sản phẩm
             foreach (var sanPham in pagedSanPham.Items)

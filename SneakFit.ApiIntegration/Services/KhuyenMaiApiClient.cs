@@ -2,6 +2,7 @@
 using SneakFit.Data.Enums;
 using SneakFit.ViewModels.Catalog.KhuyenMai;
 using SneakFit.ViewModels.Common;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 
@@ -12,12 +13,14 @@ namespace SneakFit.ApiIntegration.Services
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly HttpClient _httpClient;
 
-        public KhuyenMaiApiClient(IConfiguration configuration, IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor)
+        public KhuyenMaiApiClient(IConfiguration configuration, IHttpClientFactory httpClientFactory, IHttpContextAccessor httpContextAccessor, HttpClient httpClient)
         {
             _configuration = configuration;
             _httpClientFactory = httpClientFactory;
             _httpContextAccessor = httpContextAccessor;
+            _httpClient = httpClient;
         }
 
         public async Task<PagedResult<KhuyenMaiViewModels>> GetAllPaging(PhanTrangKhuyenMai request)

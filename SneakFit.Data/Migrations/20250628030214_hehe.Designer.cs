@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SneakFit.Data.EF;
 
@@ -11,9 +12,11 @@ using SneakFit.Data.EF;
 namespace SneakFit.Data.Migrations
 {
     [DbContext(typeof(SneakFitDbContext))]
-    partial class SneakFitDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250628030214_hehe")]
+    partial class hehe
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -243,7 +246,7 @@ namespace SneakFit.Data.Migrations
                         {
                             Id = new Guid("69bd714f-9576-45ba-b5b7-f00649be00de"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "1f4a59e6-09fc-4fb1-9635-988dd68e5bd0",
+                            ConcurrencyStamp = "b4e0e428-2834-4c90-bd89-83501aa2daee",
                             Email = "tupmph49568@gmail.com",
                             EmailConfirmed = true,
                             GioiTinh = false,
@@ -252,7 +255,7 @@ namespace SneakFit.Data.Migrations
                             NgaySinh = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NormalizedEmail = "tupmph49568@gmail.com",
                             NormalizedUserName = "Admin",
-                            PasswordHash = "AQAAAAIAAYagAAAAEJJYjOmQk4MG2nfIkQ1PhDDeptn3hB5k3RDGgGEXEJJjkrlznoQLzwA4YMDVUD0C2A==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEIkLQkhzZddCDyiubTnrHUVLeE9XVZsZ/joiSyLPeeN1iPxdlGzQhrVxUhMGzh6iHA==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
                             TrangThai = true,
@@ -824,9 +827,6 @@ namespace SneakFit.Data.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("GiaTriGiamGia")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("GiaTriToiThieu")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("LoaiGiamGia")

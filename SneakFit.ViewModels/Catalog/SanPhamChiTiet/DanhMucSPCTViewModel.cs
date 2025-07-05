@@ -2,6 +2,7 @@
 using SneakFit.ViewModels.Catalog.MauSac;
 using SneakFit.ViewModels.Catalog.SanPham;
 using SneakFit.ViewModels.Catalog.ThuongHieu;
+using SneakFit.ViewModels.Catalog.KichThuoc;
 using SneakFit.ViewModels.Common;
 using System;
 using System.Collections.Generic;
@@ -17,7 +18,8 @@ namespace SneakFit.ViewModels.Catalog.SanPhamChiTiet
         //public List<MauSacViewModels> MauSacs { get; set; }
         //public List<ThuongHieuViewModels> ThuongHieus { get; set; }
         public IEnumerable<DanhMucViewModels> DanhMucs { get; set; }
-        public IEnumerable<MauSacViewModels> MauSacs { get; set; }
+        public IEnumerable<MauSacViewModels>? MauSacs { get; set; }
+        public IEnumerable<KichThuocViewModels>? KichThuocs { get; set; }
         public IEnumerable<ThuongHieuViewModels> ThuongHieus { get; set; }
         public PagedResult<SanPhamViewModels> SanPhams { get; set; }
         public PagedResult<SPCTViewModels> SanPhamChiTiets { get; set; }

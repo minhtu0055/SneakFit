@@ -26,7 +26,7 @@
 
                 <div class="widgets-container" style="border-radius: 8px">
 
-                    <!-- Product Categories Widget -->
+                    <!-- Product Categories Widget -->F
                     <ul class="category-tree list-unstyled mb-0">
                         @foreach (var cat in Model.DanhMucs)
                         {
@@ -128,13 +128,14 @@
                             <div class="row g-3">
                                 <div class="col-12 col-md-6 col-lg-4">
                                     <div class="filter-item search-form">
-                                        <label for="productSearch" class="form-label">Search Products</label>
-                                        <div class="input-group">
-                                            <input type="text" class="form-control" id="productSearch" placeholder="Search for products..." aria-label="Search for products">
-                                            <button class="btn search-btn" type="button">
-                                                <i class="bi bi-search"></i>
-                                            </button>
-                                        </div>
+                                        <form asp-action="Index" method="get">
+                                            <div class="input-group mb-3">
+                                                <input type="text" name="tuKhoa" value="@ViewBag.Keyword" class="form-control" placeholder="Tìm sản phẩm...">
+                                                <button class="btn btn-outline-secondary" type="submit">
+                                                    <i class="bi bi-search"></i>
+                                                </button>
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
 

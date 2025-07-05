@@ -19,7 +19,7 @@
     <div class="card mb-4">
         <div class="card-body">
             <div class="col-md-8 mx-auto">
-                <form asp-action="Edit" method="post" id="edit-form" class="needs-validation" novalidate>
+                <form asp-action="Edit" method="post" id="edit-form" class="needs-validation">
                     <input type="hidden" asp-for="Id" />
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
@@ -38,7 +38,6 @@
                         <label asp-for="LoaiGiamGia" class="col-sm-3 col-form-label">Loại Giảm giá <span class="text-danger">*</span></label>
                         <div class="col-sm-9">
                             <select asp-for="LoaiGiamGia" asp-items="@ViewBag.LoaiGiamGia" class="form-select">
-                                <option value="">-- Chọn loại giảm giá --</option>
                             </select>
                             <div class="invalid-feedback">
                                 Vui lòng chọn loại giảm giá
@@ -50,25 +49,47 @@
                         <label asp-for="GiaTriGiamGia" class="col-sm-3 col-form-label">Giá trị giảm giá <span class="text-danger">*</span></label>
                         <div class="col-sm-9">
                             <div class="input-group has-validation">
-                                <input asp-for="GiaTriGiamGia" class="form-control" type="number" step="0.01" />
+                                <input asp-for="GiaTriGiamGia" class="form-control" type="number"/>
                                 <span class="input-group-text discount-unit"></span>
-                                <div class="invalid-feedback">
-                                    Vui lòng nhập giá trị giảm giá hợp lệ
-                                </div>
                             </div>
                             <small class="form-text text-muted discount-hint"></small>
                         </div>
                     </div>
 
                     <div class="mb-3 row">
-                        <label asp-for="DieuKienApDung" class="col-sm-3 col-form-label">Điều kiện áp dụng <span class="text-danger">*</span></label>
+                        <label asp-for="DieuKienApDung" class="col-sm-3 col-form-label">
+                            Điều kiện áp dụng <span class="text-danger">*</span>
+                        </label>
                         <div class="col-sm-9">
                             <div class="input-group has-validation">
-                                <input asp-for="DieuKienApDung" class="form-control" type="number" step="1000" />
+                                <input type="text"
+                                       id="DieuKienApDungFormatted"
+                                       class="form-control"
+                                       value="@Model.DieuKienApDung.ToString("N0", new System.Globalization.CultureInfo("vi-VN"))"
+                                       oninput="formatAndSyncInput(this)" />
                                 <span class="input-group-text">VNĐ</span>
-                                <div class="invalid-feedback">
-                                    Vui lòng nhập điều kiện áp dụng (phải là bội số của 1000)
-                                </div>
+
+                                <!-- Input thật để binding model, không hiển thị -->
+                                <input asp-for="DieuKienApDung" type="hidden" />
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3 row">
+                        <label asp-for="GiaTriToiThieu" class="col-sm-3 col-form-label">
+                            Gia Trị Tối Thiểu <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-sm-9">
+                            <div class="input-group has-validation">
+                                <input type="text"
+                                       id="GiatritoithieuFormatted"
+                                       class="form-control"
+                                       value="@Model.GiaTriToiThieu.ToString("N0", new System.Globalization.CultureInfo("vi-VN"))"
+                                       oninput="formatAndSyncInput(this)" />
+                                <span class="input-group-text">VNĐ</span>
+
+                                <!-- Input thật để binding model, không hiển thị -->
+                                <input asp-for="GiaTriToiThieu" type="hidden" />
                             </div>
                         </div>
                     </div>
@@ -223,11 +244,65 @@
 </div>
 
 @section Scripts {
-    @* @{await Html.RenderPartialAsync("_ValidationScriptsPartial");} *@
+   @*  @{await Html.RenderPartialAsync("_ValidationScriptsPartial");} *@
     <script>
+
+        //Giá trị giảm
+        function formatAndSyncDiscount(input) {
+            // Lấy giá trị và làm sạch
+            const raw = input.value.replace(/[^\d.,]/g, '').replace(/\./g, '').replace(',', '.');
+            const numericValue = parseFloat(raw) || 0;
+
+            // Nếu là số nguyên, không hiển thị phần thập phân
+            const formatted = new Intl.NumberFormat('vi-VN', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: numericValue % 1 === 0 ? 0 : 2
+            }).format(numericValue);
+
+            input.value = formatted;
+
+            // Gán lại giá trị sạch vào input ẩn asp-for
+            document.querySelector('input[name="GiaTriGiamGia"]').value = numericValue;
+        }
+
+        function formatCurrencyInput(input) {
+            // Xóa ký tự không phải số, kể cả dấu chấm
+            let value = input.value.replace(/\D/g, '');
+            if (value) {
+                input.value = Number(value).toLocaleString('vi-VN');
+            } else {
+                input.value = '';
+            }
+        }
+
+        // Trước khi submit form: bỏ dấu chấm để server nhận đúng số
+        function formatAndSyncInput(input) {
+            // Xóa ký tự không phải số
+            const raw = input.value.replace(/\D/g, '');
+
+            // Cập nhật lại input hiển thị với định dạng tiền VNĐ
+            input.value = new Intl.NumberFormat('vi-VN').format(raw);
+
+            // Đồng bộ giá trị sạch về input hidden asp-for
+            document.querySelector('input[name="DieuKienApDung"]').value = raw;
+        }
+        // Trước khi submit form: bỏ dấu chấm để server nhận đúng số
+        function formatAndSyncInput(input) {
+            // Xóa ký tự không phải số
+            const raw = input.value.replace(/\D/g, '');
+
+            // Cập nhật lại input hiển thị với định dạng tiền VNĐ
+            input.value = new Intl.NumberFormat('vi-VN').format(raw);
+
+            // Đồng bộ giá trị sạch về input hidden asp-for
+            document.querySelector('input[name="GiaTriToiThieu"]').value = raw;
+        }
+
+
         var existingUserIds = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.ExistingUserIds ?? new List<Guid>()));
         var selectedUserIds = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SelectedUserIds ?? new List<Guid>()));
         $(document).ready(function () {
+
             // Hàm cập nhật đơn vị giảm giá và các thuộc tính của input giá trị giảm
             function capNhatLoaiGiamGia() {
                 var loaiGiamGia = $("#LoaiGiamGia").val();
@@ -256,6 +331,9 @@
 
             $("#LoaiGiamGia").change(capNhatLoaiGiamGia);
             capNhatLoaiGiamGia();
+
+
+//tìm kiếm và load danh sách 
 
 
             // Handle customer search
@@ -372,6 +450,8 @@
                 return true;
             }
 
+//validate dữ liệu
+
             function validateSoLuong() {
                 var soLuong = parseInt($("#SoLuong").val());
                 if (isNaN(soLuong) || soLuong <= 0) {
@@ -391,12 +471,12 @@
                 }
 
                 if (loaiGiamGia == "@((int)LoaiGiamGia.PhamTram)") {
-                    if (giaTriGiamGia < 0 || giaTriGiamGia > 100) {
-                        errorMsg = "Giá trị giảm giá phải từ 0% đến 100% đối với loại phần trăm";
+                    if (giaTriGiamGia < 1 || giaTriGiamGia > 100) {
+                        errorMsg = "Giá trị giảm giá phải từ 1% đến 100% đối với loại phần trăm";
                     }
                 } else if (loaiGiamGia == "@((int)LoaiGiamGia.SoTien)") {
-                    if (giaTriGiamGia <= 0) {
-                        errorMsg = "Giá trị giảm giá phải lớn hơn 0 VNĐ đối với loại số tiền";
+                    if (giaTriGiamGia <= 1000) {
+                        errorMsg = "Giá trị giảm giá phải lớn hơn 1000 VNĐ đối với loại số tiền";
                     }
                 }
 
@@ -442,6 +522,14 @@
                 }
                 return true;
             }
+            function validateGiatritoithieu() {
+                var giatritoithieu = parseFloat($("#GiaTriToiThieu").val());
+                if (isNaN(giatritoithieu) || giatritoithieu <= 0) {
+                    toastr.error("Gia Trị Tối Thiểu phải lớn hơn 0");
+                    return false;
+                }
+                return true;
+            }
 
             function validateKhachHang() {
                 var loaiVoucher = "@Model.LoaiVoucher";
@@ -455,6 +543,21 @@
                 return true;
             }
 
+            function validateLoaiVoucher() {
+                var loaiVoucher = parseInt($("#LoaiVoucher").val()); // Lấy giá trị loại voucher (int)
+                var isRiengTu = loaiVoucher === @((int)LoaiVoucher.RiengTu);
+
+                if (isRiengTu) {
+                    var selectedUsers = $("input[name='SelectedUserIds']:checked");
+                    if (selectedUsers.length === 0) {
+                        toastr.error("Vui lòng chọn ít nhất một khách hàng cho voucher riêng tư");
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
             // Add event listeners for real-time validation
             $("#SoLuong").on('input', validateSoLuong);
             $("#GiaTriGiamGia").on('input', validateGiaTriGiamGia);
@@ -462,6 +565,7 @@
             $("#ThoiGianBatDau").change(validateThoiGianBatDau);
             $("#ThoiGianKetThuc").change(validateThoiGianKetThuc);
             $("#DieuKienApDung").on('input', validateDieuKienApDung);
+            $("#GiaTriToiThieu").on('input', validateGiatritoithieu);
             $(".user-checkbox").change(validateKhachHang);
 
             // Handle form submission
@@ -474,6 +578,7 @@
                     !validateThoiGianBatDau() || 
                     !validateThoiGianKetThuc() || 
                     !validateDieuKienApDung() ||
+                    !validateGiatritoithieu() ||
                     !validateKhachHang()) {
                     return false;
                 }
