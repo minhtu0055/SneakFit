@@ -66,7 +66,7 @@
                    
                     <h5 class="section-title">Top Sản Phẩm Bán Chạy @ViewBag.FilterTitle</h5>
                     <div class="table-responsive">
-                        <table class="table table-bordered table-hover align-middle rounded">
+                        <table class="table table-bordered table-hover align-middle" style="border-radius: 8px; overflow: hidden">
                             <thead class="custom-table-header">
                                 <tr>
                                     <th>STT</th>
@@ -108,7 +108,7 @@
                 <div class="card-body">
                     <h5 class="section-title">Sản phẩm sắp hết hàng</h5>
                     <div class="table-responsive">
-                        <table class="table table-bordered table-hover align-middle rounded">
+                        <table class="table table-bordered table-hover align-middle" style="border-radius: 8px; overflow: hidden">
                             <thead class="custom-table-header">
                                 <tr>
                                     <th>STT</th>
@@ -148,7 +148,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
                 </div>
                 <div class="modal-body">
-                    <div id="chiTietSanPhamContent">
+                    <div id="chiTietSanPhamContent" style="border-radius: 8px; overflow: hidden">
                         <!-- Bảng chi tiết sẽ render ở đây -->
                     </div>
                 </div>
@@ -446,22 +446,24 @@
                 container.empty();
                 data.forEach(function (item) {
                     var percent = item.phanTramTangTruong;
-                      var color = percent > 0 ? 'text-success' : (percent < 0 ? 'text-danger' : 'text-secondary');
+                    var color = percent > 0 ? 'text-success' : (percent < 0 ? 'text-danger' : 'text-secondary');
                     var icon = percent > 0 ? '<i class="bx bx-trending-up"></i>' : percent < 0 ? '<i class="bx bx-trending-down"></i>' : '<i class="bx bx-minus"></i>';
-                    var html = `
-                        <div class="growth-item d-flex justify-content-between align-items-center mb-2 p-2">
-                            <div class="d-flex align-items-center gap-2">
-                                <i class="bx bx-bar-chart-alt-2 fs-5"></i>
-                                <span class="fw-bold">${item.tenChiSo}</span>
-                            </div>
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="fw-bold">${item.giaTriHienTai.toLocaleString('vi-VN')} ${item.donVi}</span>
-                                <span class="percent ${color}">
-                                    ${icon} ${Math.abs(percent)}%
-                                </span>
-                            </div>
-                        </div>
-                    `;
+                                    var html = `
+            <div class="growth-item d-flex align-items-center mb-2 p-2" style="width:100%;">
+                <div class="flex-shrink-0 d-flex align-items-center gap-2" style="min-width: 180px;">
+                    <i class="bx bx-bar-chart-alt-2 fs-5"></i>
+                    <span class="fw-bold">${item.tenChiSo}</span>
+                </div>
+                <div class="flex-grow-1 text-start" style="min-width: 160px; margin-left: 40px;">
+                    <span class="fw-bold">${item.giaTriHienTai.toLocaleString('vi-VN')} ${item.donVi}</span>
+                </div>
+                <div class="flex-shrink-0 text-end" style="min-width: 70px;">
+                    <span class="percent ${color}">
+                        ${icon} ${Math.abs(percent)}%
+                    </span>
+                </div>
+            </div>
+        `;
                     container.append(html);
                 });
             });
@@ -675,7 +677,12 @@
 
 <style>
     .growth-item {
-        background: #181818;
+        display: flex !important;
+        align-items: center;
+        width: 100%;
+        padding: 12px 18px;
+
+        background-color: #7DB9E8;
         color: #fff;
         border-radius: 10px;
         font-size: 1rem;
@@ -683,9 +690,14 @@
         box-shadow: 0 2px 8px rgba(0,0,0,0.05);
     }
 
+    .growth-item .text-center {
+        width: 100%;
+    }
+
     .growth-item .percent {
-        font-weight: bold;
-        font-size: 1.1rem;
+        min-width: 70px;
+        text-align: right;
+        display: inline-block;
     }
 
     .growth-item .text-success {

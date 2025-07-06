@@ -82,16 +82,16 @@
                         <h5 class="mb-4" style="text-align: center;">CHI TIẾT SẢN PHẨM</h5>
                         <div class="table-responsive" style="border-radius: 8px">
                             <table class="table table-hover" id="productDetailList">
-                                <thead style="background-color: mediumpurple; color: white;">
+                                <thead style="background-color: #7367F0; color: white;">
                                     <tr>
                                         <th style="width: 30px;"><input type="checkbox" id="checkAllProducts" /></th>
                                         <th style="width: 30px">STT</th>
-                                        <th>Tên sản phẩm</th>
-                                        <th>Màu sắc</th>
-                                        <th>Kích thước</th>
-                                        <th>Chất liệu</th>
-                                        <th>Đế giày</th>
-                                        <th>Thương hiệu</th>
+                                        <th style="min-width: 220px; white-space: nowrap;">Tên sản phẩm</th>
+                                        @* <th>Màu sắc</th> *@
+                                        @* <th>Kích thước</th> *@
+                                        @* <th>Chất liệu</th> *@
+                                        @* <th>Đế giày</th> *@
+                                        @* <th>Thương hiệu</th> *@
                                         <th style="width: 112px">Số lượng</th>
                                         <th style="width: 205px">Giá bán</th>
                                         <th style="width: 123px">Trạng thái</th>
@@ -104,7 +104,7 @@
                         </div>
                     </div>
                     <div class="mb-3 row">
-                        <div class="col-sm-9 offset-sm-8">
+                        <div class="col-sm-12 d-flex justify-content-end gap-2">
                             <button type="submit" class="btn btn-primary me-4">
                                 <i class="bx bx-save me-1"></i> Cập nhật
                             </button>
@@ -342,12 +342,12 @@
                 let row = `<tr>
                     <td><input type="checkbox" class="product-checkbox" data-id="${item.id}" ${checked} /></td>
                     <td>${start + idx + 1}</td>
-                    <td>${item.tenSanPham}</td>
-                    <td>${item.tenMauSac || ''}</td>
+                    <td style="white-space: nowrap; min-width: 220px;">${item.tenSanPham} [ ${item.maKichThuoc || ''} - ${item.tenMauSac || ''} ]</td>
+                   @* <td>${item.tenMauSac || ''}</td>
                     <td>${item.maKichThuoc || ''}</td>
                     <td>${item.tenChatLieu || ''}</td>
                     <td>${item.tenDeGiay || ''}</td>
-                    <td>${item.tenThuongHieu || ''}</td>
+                    <td>${item.tenThuongHieu || ''}</td>*@
                     <td>${item.soLuong}</td>
                     <td>${item.gia ? item.gia.toLocaleString('vi-VN') : 'N/A'} VNĐ</td>
                     <td>${item.trangThai ? 'Đang kinh doanh' : 'Ngừng kinh doanh'}</td>
