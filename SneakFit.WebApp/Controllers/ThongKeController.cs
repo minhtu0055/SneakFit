@@ -73,7 +73,7 @@ namespace SneakFit.Admin.Controllers
         }
 
         public async Task<IActionResult> GetTopSanPhamBanChay(
-            int top = 1,
+           // int top = 1,
             string filter = "thang",
             string ngay = null,
             string tuan = null,
@@ -81,7 +81,8 @@ namespace SneakFit.Admin.Controllers
             string tuNgay = null,
             string denNgay = null)
         {
-            var url = $"api/ThongKe/top-san-pham-ban-chay?top={top}&filter={filter}";
+            // var url = $"api/ThongKe/top-san-pham-ban-chay?top={top}&filter={filter}";
+            var url = $"api/ThongKe/top-san-pham-ban-chay?filter={filter}";
             if (!string.IsNullOrEmpty(ngay)) url += $"&ngay={ngay}";
             if (!string.IsNullOrEmpty(tuan)) url += $"&tuan={tuan}";
             if (!string.IsNullOrEmpty(thang)) url += $"&thang={thang}";

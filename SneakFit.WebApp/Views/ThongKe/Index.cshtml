@@ -77,11 +77,12 @@
                                    
                                 </tr>
                             </thead>
-                            <tbody id="topSanPhamTable"></tbody>
                             <tbody id="topSanPhamTable">
                                 <!-- Dữ liệu sẽ được render bằng JS -->
-                            </tbody>
+                            </tbody>                         
                         </table>
+                        <!-- Đặt phân trang ở đây, bên ngoài table -->
+                        <div id="topSanPhamPagination" class="d-flex justify-content-center mt-2"></div>
                     </div>
                 </div>
             </div>
@@ -118,10 +119,12 @@
                                    
                                 </tr>
                             </thead>
-                            <tbody id="sanPhamSapHetHangTable"></tbody>
+                            <tbody id="sanPhamSapHetHangTable">
                                 <!-- Dữ liệu sẽ được render bằng JS -->
                             </tbody>
                         </table>
+                        <!-- Đặt phân trang ở đây, bên ngoài table -->
+                        <div id="sanPhamSapHetHangPagination" class="d-flex justify-content-center mt-2"></div>
                     </div>
                 </div>
             </div>
@@ -237,20 +240,55 @@
             // Top sản phẩm bán chạy tháng này
             $.get('/ThongKe/GetTopSanPhamBanChay' + window.location.search, function (data) {
                 var tbody = $('#topSanPhamTable');
-                tbody.empty();
-                data.forEach(function (item) {
-                var row = `<tr class="row-sanpham" data-sanphamid="${item.sanPhamId}" data-type="banchay" style="position:relative;">
-                    <td>${item.stt}</td>
-                    <td>${item.tenSanPham}</td>
-                    <td>${item.moTa || ''}</td>
-                    <td>${item.danhMuc || ''}</td>
-                    <td>
-                        ${item.soLuongSanPhamChiTiet}
-                        <button class="btn btn-sm btn-info btn-xem-chi-tiet d-none" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:2;">Xem chi tiết</button>
-                    </td>
-                </tr>`;
-                    tbody.append(row);
-                });
+                var pagination = $('#topSanPhamPagination');
+                var pageSize = 5;
+                var currentPage = 1;
+
+                function renderPage(page) {
+                    tbody.empty();
+                    var start = (page - 1) * pageSize;
+                    var end = start + pageSize;
+                    var pageData = data.slice(start, end);
+                    pageData.forEach(function (item) {
+                        var row = `<tr class="row-sanpham" data-sanphamid="${item.sanPhamId}" data-type="banchay" style="position:relative;">
+                            <td>${item.stt}</td>
+                            <td>${item.tenSanPham}</td>
+                            <td>${item.moTa || ''}</td>
+                            <td>${item.danhMuc || ''}</td>
+                            <td>
+                                ${item.soLuongSanPhamChiTiet}
+                                <button class="btn btn-sm btn-info btn-xem-chi-tiet d-none" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:2;">Xem chi tiết</button>
+                            </td>
+                        </tr>`;
+                        tbody.append(row);
+                    });
+                    renderPagination(page);
+                }
+
+                function renderPagination(page) {
+                    var totalPages = Math.ceil(data.length / pageSize);
+                    var html = '';
+                    if (totalPages > 1) {
+                        html += '<nav><ul class="pagination">';
+                        for (var i = 1; i <= totalPages; i++) {
+                            html += `<li class="page-item${i === page ? ' active' : ''}">
+                                <a class="page-link" href="#" data-page="${i}">${i}</a>
+                            </li>`;
+                        }
+                        html += '</ul></nav>';
+                    }
+                    pagination.html(html);
+
+                    // Gắn sự kiện click
+                    pagination.find('.page-link').off('click').on('click', function (e) {
+                        e.preventDefault();
+                        var page = parseInt($(this).data('page'));
+                        currentPage = page;
+                        renderPage(page);
+                    });
+                }
+
+                renderPage(currentPage);
             });
 
             // Trạng Thái Đơn Hàng Tháng Này
@@ -351,20 +389,55 @@
             // Sản phẩm sắp hết hàng
             $.get('/ThongKe/GetSanPhamSapHetHang', function (data) {
                 var tbody = $('#sanPhamSapHetHangTable');
-                tbody.empty();
-                data.forEach(function (item) {
-                var row = `<tr class="row-sanpham" data-sanphamid="${item.sanPhamId}" data-type="hethang" style="position:relative;">
-                    <td>${item.stt}</td>
-                    <td>${item.tenSanPham}</td>
-                    <td>${item.moTa || ''}</td>
-                    <td>${item.danhMuc || ''}</td>
-                    <td>
-                        ${item.soLuongSanPhamChiTiet}
-                        <button class="btn btn-sm btn-info btn-xem-chi-tiet d-none" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:2;">Xem chi tiết</button>
-                    </td>
-                </tr>`;
-                    tbody.append(row);
-                });
+                var pagination = $('#sanPhamSapHetHangPagination');
+                var pageSize = 5;
+                var currentPage = 1;
+
+                function renderPage(page) {
+                    tbody.empty();
+                    var start = (page - 1) * pageSize;
+                    var end = start + pageSize;
+                    var pageData = data.slice(start, end);
+                    pageData.forEach(function (item) {
+                        var row = `<tr class="row-sanpham" data-sanphamid="${item.sanPhamId}" data-type="hethang" style="position:relative;">
+                            <td>${item.stt}</td>
+                            <td>${item.tenSanPham}</td>
+                            <td>${item.moTa || ''}</td>
+                            <td>${item.danhMuc || ''}</td>
+                            <td>
+                                ${item.soLuongSanPhamChiTiet}
+                                <button class="btn btn-sm btn-info btn-xem-chi-tiet d-none" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:2;">Xem chi tiết</button>
+                            </td>
+                        </tr>`;
+                        tbody.append(row);
+                    });
+                    renderPagination(page);
+                }
+
+                function renderPagination(page) {
+                    var totalPages = Math.ceil(data.length / pageSize);
+                    var html = '';
+                    if (totalPages > 1) {
+                        html += '<nav><ul class="pagination">';
+                        for (var i = 1; i <= totalPages; i++) {
+                            html += `<li class="page-item${i === page ? ' active' : ''}">
+                                <a class="page-link" href="#" data-page="${i}">${i}</a>
+                            </li>`;
+                        }
+                        html += '</ul></nav>';
+                    }
+                    pagination.html(html);
+
+                    // Gắn sự kiện click
+                    pagination.find('.page-link').off('click').on('click', function (e) {
+                        e.preventDefault();
+                        var page = parseInt($(this).data('page'));
+                        currentPage = page;
+                        renderPage(page);
+                    });
+                }
+
+                renderPage(currentPage);
             });
 
             // Tốc Độ Tăng Trưởng Cửa Hàng (giao diện nền đen, icon màu)
@@ -477,88 +550,122 @@
             }
 
             $.get(url, function(data) {
-                // ... (giữ nguyên phần render modal)
-                       var html = "";
-                if (type === "banchay") {
-            html = `
-                <div class="table-responsive">
-                    <table class="table table-bordered align-middle">
-                        <thead class="custom-table-header">
-                            <tr>
-                                <th>STT</th>
-                                <th>Ảnh</th>
-                                <th>Tên sản phẩm</th>
-                                <th>Màu sắc</th>
-                                <th>Kích thước</th>
-                                <th>Chất liệu</th>
-                                <th>Đế giày</th>
-                                <th>Thương hiệu</th>
-                                <th>Giá</th>
-                                <th>Số lượng đã bán</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${data.map(item => `
-                                <tr>
-                                    <td>${item.stt}</td>
-                                    <td style="width:60px; text-align:center;">
-                                        <img src="${item.anh || '/images/no-image.png'}" style="width:50px;height:50px;object-fit:cover;display:block;margin:auto;" />
-                                    </td>
-                                    <td>${item.tenSanPham}</td>
-                                    <td>${item.mauSac || ''}</td>
-                                    <td>${item.kichThuoc || ''}</td>
-                                    <td>${item.chatLieu || ''}</td>
-                                    <td>${item.deGiay || ''}</td>
-                                    <td>${item.thuongHieu || ''}</td>
-                                    <td>${item.gia ? item.gia.toLocaleString('vi-VN') + ' VND' : ''}</td>
-                                    <td>${item.soLuongDaBan}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-        } else if (type === "hethang") {
-            html = `
-                <div class="table-responsive">
-                    <table class="table table-bordered align-middle">
-                        <thead class="custom-table-header">
-                            <tr>
-                                <th>STT</th>
-                                <th>Ảnh</th>
-                                <th>Tên sản phẩm</th>
-                                <th>Màu sắc</th>
-                                <th>Kích thước</th>
-                                <th>Chất liệu</th>
-                                <th>Đế giày</th>
-                                <th>Thương hiệu</th>
-                                <th>Giá</th>
-                                <th>Còn lại</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${data.map(item => `
-                                <tr>
-                                    <td>${item.stt}</td>
-                                    <td style="width:60px; text-align:center;">
-                                        <img src="${item.anh || '/images/no-image.png'}" style="width:50px;height:50px;object-fit:cover;display:block;margin:auto;" />
-                                    </td>
-                                    <td>${item.tenSanPham}</td>
-                                    <td>${item.mauSac || ''}</td>
-                                    <td>${item.kichThuoc || ''}</td>
-                                    <td>${item.chatLieu || ''}</td>
-                                    <td>${item.deGiay || ''}</td>
-                                    <td>${item.thuongHieu || ''}</td>
-                                    <td>${item.gia ? item.gia.toLocaleString('vi-VN') + ' VND' : ''}</td>
-                                    <td>${item.soLuongConLai}</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-        }
-                $('#chiTietSanPhamContent').html(html);
+                var pageSize = 5;
+                var currentPage = 1;
+
+                function renderModalPage(page) {
+                    var start = (page - 1) * pageSize;
+                    var end = start + pageSize;
+                    var pageData = data.slice(start, end);
+
+                    var html = "";
+                    if (type === "banchay") {
+                        html = `
+                            <div class="table-responsive">
+                                <table class="table table-bordered align-middle">
+                                    <thead class="custom-table-header">
+                                        <tr>
+                                            <th>STT</th>
+                                            <th>Ảnh</th>
+                                            <th>Tên sản phẩm</th>
+                                            <th>Màu sắc</th>
+                                            <th>Kích thước</th>
+                                            <th>Chất liệu</th>
+                                            <th>Đế giày</th>
+                                            <th>Thương hiệu</th>
+                                            <th>Giá</th>
+                                            <th>Số lượng đã bán</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${pageData.map((item, idx) => `
+                                            <tr>
+                                                <td>${start + idx + 1}</td>
+                                                <td style="width:60px; text-align:center;">
+                                                    <img src="${item.anh || '/images/no-image.png'}" style="width:50px;height:50px;object-fit:cover;display:block;margin:auto;" />
+                                                </td>
+                                                <td>${item.tenSanPham}</td>
+                                                <td>${item.mauSac || ''}</td>
+                                                <td>${item.kichThuoc || ''}</td>
+                                                <td>${item.chatLieu || ''}</td>
+                                                <td>${item.deGiay || ''}</td>
+                                                <td>${item.thuongHieu || ''}</td>
+                                                <td>${item.gia ? item.gia.toLocaleString('vi-VN') + ' VND' : ''}</td>
+                                                <td>${item.soLuongDaBan}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                                <div id="modalPagination" class="d-flex justify-content-center mt-2"></div>
+                            </div>
+                        `;
+                    } else if (type === "hethang") {
+                        html = `
+                            <div class="table-responsive">
+                                <table class="table table-bordered align-middle">
+                                    <thead class="custom-table-header">
+                                        <tr>
+                                            <th>STT</th>
+                                            <th>Ảnh</th>
+                                            <th>Tên sản phẩm</th>
+                                            <th>Màu sắc</th>
+                                            <th>Kích thước</th>
+                                            <th>Chất liệu</th>
+                                            <th>Đế giày</th>
+                                            <th>Thương hiệu</th>
+                                            <th>Giá</th>
+                                            <th>Còn lại</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${pageData.map((item, idx) => `
+                                            <tr>
+                                                <td>${start + idx + 1}</td>
+                                                <td style="width:60px; text-align:center;">
+                                                    <img src="${item.anh || '/images/no-image.png'}" style="width:50px;height:50px;object-fit:cover;display:block;margin:auto;" />
+                                                </td>
+                                                <td>${item.tenSanPham}</td>
+                                                <td>${item.mauSac || ''}</td>
+                                                <td>${item.kichThuoc || ''}</td>
+                                                <td>${item.chatLieu || ''}</td>
+                                                <td>${item.deGiay || ''}</td>
+                                                <td>${item.thuongHieu || ''}</td>
+                                                <td>${item.gia ? item.gia.toLocaleString('vi-VN') + ' VND' : ''}</td>
+                                                <td>${item.soLuongConLai}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                                <div id="modalPagination" class="d-flex justify-content-center mt-2"></div>
+                            </div>
+                        `;
+                    }
+                    $('#chiTietSanPhamContent').html(html);
+
+                    // Render phân trang
+                    var totalPages = Math.ceil(data.length / pageSize);
+                    var pagHtml = '';
+                    if (totalPages > 1) {
+                        pagHtml += '<nav><ul class="pagination">';
+                        for (var i = 1; i <= totalPages; i++) {
+                            pagHtml += `<li class="page-item${i === page ? ' active' : ''}">
+                                <a class="page-link" href="#" data-page="${i}">${i}</a>
+                            </li>`;
+                        }
+                        pagHtml += '</ul></nav>';
+                    }
+                    $('#modalPagination').html(pagHtml);
+
+                    // Gắn sự kiện click
+                    $('#modalPagination .page-link').off('click').on('click', function (e) {
+                        e.preventDefault();
+                        var page = parseInt($(this).data('page'));
+                        currentPage = page;
+                        renderModalPage(page);
+                    });
+                }
+
+                renderModalPage(currentPage);
                 $('#modalChiTietSanPham').modal('show');
             });
         });

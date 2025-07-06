@@ -251,26 +251,37 @@ namespace SneakFit.Application.Catalog.KhuyenMai
                 NgayTao = khuyenMai.NgayTao,
                 NgaySuaDoi = khuyenMai.NgaySuaDoi,
                 ThoiGianBatDau = khuyenMai.ThoiGianBatDau,
-                ThoiGianKetThuc = khuyenMai.ThoiGianKetThuc,              
+                ThoiGianKetThuc = khuyenMai.ThoiGianKetThuc,
                 LoaiGiamGia = khuyenMai.LoaiGiamGia,
                 GiaTriGiamGia = khuyenMai.GiaTriGiamGia,
                 TrangThai = khuyenMai.TrangThai,
-                SanPhams = khuyenMai.KhuyenMaiChiTiet.Select(p => new KhuyenMaiSanPhamViewModels
+                SanPhams = khuyenMai.KhuyenMaiChiTiet.Select(p =>
                 {
-                    SanPhamId = p.SanPhamId,
-                    SPCTId = p.SPCTId,
-                    TenSanPham = p.SanPham.TenSanPham,
-                    GiaGoc = _context.SanPhamChiTiet
-                    .Where(x => x.ID == p.SPCTId)
-                    .Select(x => (decimal?)x.Gia)
-                    .FirstOrDefault() ?? 0m,
+                    var spct = _context.SanPhamChiTiet
+                        .Include(x => x.MauSac)
+                        .Include(x => x.KichThuoc)
+                        .Include(x => x.ChatLieu)
+                        .Include(x => x.DeGiay)
+                        .Include(x => x.ThuongHieu)
+                        .FirstOrDefault(x => x.ID == p.SPCTId);
 
-
-                    GiaKhuyenMai = _context.SanPhamChiTiet.FirstOrDefault(x => x.ID == p.SPCTId) != null
-                    ? (khuyenMai.LoaiGiamGia == LoaiGiamGia.PhamTram
-                        ? _context.SanPhamChiTiet.FirstOrDefault(x => x.ID == p.SPCTId).Gia * (100 - khuyenMai.GiaTriGiamGia) / 100
-                        : _context.SanPhamChiTiet.FirstOrDefault(x => x.ID == p.SPCTId).Gia - khuyenMai.GiaTriGiamGia)
-                    : 0
+                    return new KhuyenMaiSanPhamViewModels
+                    {
+                        SanPhamId = p.SanPhamId,
+                        SPCTId = p.SPCTId,
+                        TenSanPham = p.SanPham.TenSanPham,
+                        GiaGoc = spct?.Gia ?? 0m,
+                        GiaKhuyenMai = spct != null
+                            ? (khuyenMai.LoaiGiamGia == LoaiGiamGia.PhamTram
+                                ? spct.Gia * (100 - khuyenMai.GiaTriGiamGia) / 100
+                                : spct.Gia - khuyenMai.GiaTriGiamGia)
+                            : 0,
+                        TenMauSac = spct?.MauSac?.TenMauSac,
+                        MaKichThuoc = spct?.KichThuoc?.MaKichThuoc.ToString(),
+                        TenChatLieu = spct?.ChatLieu?.TenChatLieu,
+                        TenDeGiay = spct?.DeGiay?.TenDeGiay,
+                        TenThuongHieu = spct?.ThuongHieu?.TenThuongHieu
+                    };
                 }).ToList(),
                 SanPhamChiTiets = sanPhamChiTiets
             };

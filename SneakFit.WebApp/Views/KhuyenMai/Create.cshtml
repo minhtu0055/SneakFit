@@ -91,6 +91,11 @@
                                         <th style="width: 30px;"><input type="checkbox" id="checkAllProducts" /></th>
                                         <th style="width: 30px">STT</th>
                                         <th>Tên sản phẩm</th>
+                                        <th>Màu sắc</th>
+                                        <th>Kích thước</th>
+                                        <th>Chất liệu</th>
+                                        <th>Đế giày</th>
+                                        <th>Thương hiệu</th>
                                         <th style="width: 112px">Số lượng</th>
                                         <th style="width: 205px">Giá bán</th>
                                         <th style="width: 123px">Trạng thái</th>
@@ -257,6 +262,11 @@
                         <td><input type="checkbox" class="product-checkbox" data-id="${item.id}" ${checked} /></td>
                         <td>${start + idx + 1}</td>
                         <td>${item.tenSanPham}</td>
+                        <td>${item.tenMauSac || ''}</td>
+                        <td>${item.maKichThuoc || ''}</td>
+                        <td>${item.tenChatLieu || ''}</td>
+                        <td>${item.tenDeGiay || ''}</td>
+                        <td>${item.tenThuongHieu || ''}</td>
                         <td>${item.soLuong}</td>
                         <td>${item.gia ? item.gia.toLocaleString('vi-VN') : 'N/A'} VNĐ</td>
                         <td>${item.trangThai ? 'Đang kinh doanh' : 'Ngừng kinh doanh'}</td>
