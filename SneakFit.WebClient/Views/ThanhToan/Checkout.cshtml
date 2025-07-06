@@ -31,7 +31,17 @@
             @foreach (var item in Model.GioHangItems)
             {
                 <div class="product-item d-flex align-items-center mb-3" style="border-radius: 10px;">
-                    <img src="@($"{baseUrl}{item.AnhSanPham}")" class="product-img" style="margin-left: 10px;" />
+                    @* <img src="@($"{baseUrl}{item.AnhSanPham}")" class="product-img" style="margin-left: 10px;" /> *@
+                    @{
+                        var defaultImage = $"{baseUrl}/images/Default_Logo.png";
+                        string imageUrl = defaultImage;
+
+                        if (!string.IsNullOrEmpty(item.AnhSanPham))
+                        {
+                            imageUrl = $"{baseUrl}{item.AnhSanPham}";
+                        }
+                    }
+                    <img src="@imageUrl" class="product-img" style="margin-left: 10px;" onerror="this.src='@defaultImage'" />
                     <div class="product-info" style="align-items: center;">
                         <div class="d-flex align-items-center gap-2 mb-1">
                             <p class="mb-0 fw-semibold">

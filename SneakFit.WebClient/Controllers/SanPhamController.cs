@@ -180,6 +180,7 @@ namespace SneakFit.WebClient.Controllers
         [HttpPost]
         public async Task<IActionResult> AddToCart(Guid sanPhamChiTietId, int soLuong = 1)
         {
+            // Lấy ID người dùng, dùng ID mặc định nếu chưa đăng nhập
             var userIdStr = User?.Claims?.FirstOrDefault(x => x.Type == "UserId" || x.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             Guid userId = string.IsNullOrEmpty(userIdStr)
                 ? Guid.Parse("69BD714F-9576-45BA-B5B7-F00649BE00DE")
@@ -187,35 +188,34 @@ namespace SneakFit.WebClient.Controllers
 
             try
             {
-                // 1. Lấy chi tiết giỏ hàng hiện tại
+                // 1. Lấy giỏ hàng của người dùng
                 var gioHang = await _gioHangApiClient.GetByUserId(userId);
-                //var item = gioHang?.GioHangChiTiets?.FirstOrDefault(x => x.SanPhamChiTietId == sanPhamChiTietId);
                 var item = gioHang?.GioHangChiTiets?.FirstOrDefault(x => x.SanPhamChiTietId.Equals(sanPhamChiTietId));
-
 
                 // 2. Lấy thông tin sản phẩm chi tiết
                 var spct = await _spctApiClient.GetById(sanPhamChiTietId);
                 if (spct == null || spct.SoLuong <= 0)
                 {
-                    return Json(new { success = false, message = "Sản phẩm đã hết hàng" });
+                    return Json(new { success = false, message = "Sản phẩm đã hết hàng." });
                 }
 
-                // 3. Check nếu đã đạt max tồn kho
+                // 3. Tính số lượng
                 int soLuongTrongGio = item?.SoLuong ?? 0;
                 int soLuongConLai = spct.SoLuong - soLuongTrongGio;
 
-                if (soLuongConLai <= 0)
+                // 4. Kiểm tra nếu giỏ hàng đã chứa số lượng tối đa
+                if (soLuongTrongGio >= spct.SoLuong)
                 {
-                    return Json(new { success = false, message = $"Bạn đã thêm tối đa {spct.SoLuong} sản phẩm này vào giỏ hàng!" });
+                    return Json(new { success = false, message = $"Số lượng sản phẩm này trong giỏ hàng đã đạt số lượng tối đa ( {spct.SoLuong} )." });
                 }
 
+                // 5. Kiểm tra nếu số lượng yêu cầu vượt quá số lượng còn lại
                 if (soLuong > soLuongConLai)
                 {
-                    return Json(new { success = false, message = $"Chỉ còn {soLuongConLai} sản phẩm có thể thêm vào giỏ hàng" });
+                    return Json(new { success = false, message = $"Chỉ còn {soLuongConLai} sản phẩm có thể thêm vào giỏ hàng." });
                 }
 
-
-                // 5. Gọi API thêm vào giỏ hàng
+                // 6. Thêm vào giỏ hàng
                 var request = new ThemVaoGioHangRequest
                 {
                     UserId = userId,

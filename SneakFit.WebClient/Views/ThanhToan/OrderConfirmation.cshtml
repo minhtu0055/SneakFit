@@ -47,9 +47,19 @@
                     @foreach (var item in Model.ChiTietHoaDonClient)
                     {
                         <div class="product-item d-flex align-items-center mb-3">
-                            <img src="@($"{baseUrl}/images/Default_Logo.png")" class="product-img" style="margin-left: 10px;" /> <!-- Ảnh mặc định nếu không có -->
+                            @* <img src="@($"{baseUrl}/images/Default_Logo.png")" class="product-img" style="margin-left: 10px;" /> <!-- Ảnh mặc định nếu không có --> *@
+                            @{
+                                var defaultImage = $"{baseUrl}/images/Default_Logo.png";
+                                string imageUrl = defaultImage;
+
+                                if (!string.IsNullOrEmpty(item.AnhSanPham) && item.AnhSanPham != "/images/Default_Logo.png")
+                                {
+                                    imageUrl = $"{baseUrl}{item.AnhSanPham}";
+                                }
+                            }
+                            <img src="@imageUrl" class="product-img" style="margin-left: 10px;" onerror="this.src='@defaultImage'" />
                             <div class="product-info">
-                                <p class="mb-1">@item.TenSanPham</p>
+                                <p class="mb-1">@item.TenSanPham ( @item.TenMauSac, @item.MaKichThuoc )</p>
                                 <small class="text-muted">Số lượng: @item.SoLuong</small>
                             </div>
                             <div class="product-price ms-auto" style="margin-right: 10px;">@((item.GiaBan * item.SoLuong).ToString("N0")) ₫</div>
@@ -83,7 +93,7 @@
             <!-- Hành động -->
             <div class="section-box actions text-center">
                 <a href="@Url.Action("Index", "Home")" class="btn btn-primary">Quay về trang chủ</a>
-                <a href="@Url.Action("Details", "HoaDonClient", new { id = Model.HoaDonClient.Id })" class="btn btn-outline-primary ms-2">Xem chi tiết đơn hàng</a>
+                <a href="@Url.Action("Details", "HoaDon", new { id = Model.HoaDonClient.Id })" class="btn btn-outline-primary ms-2">Xem chi tiết đơn hàng</a>
             </div>
         }
     </div>

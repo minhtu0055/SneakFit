@@ -52,10 +52,20 @@
                     @foreach (var item in Model.ChiTietHoaDonClient)
                     {
                         <div class="product-item d-flex align-items-center mb-3">
-                            <img src="@($"{baseUrl}/images/Default_Logo.png")" class="product-img" style="margin-left: 10px;" />
+                            @* <img src="@($"{baseUrl}/images/Default_Logo.png")" class="product-img" style="margin-left: 10px;" /> *@
+                            @{
+                                var defaultImage = $"{baseUrl}/images/Default_Logo.png";
+                                string imageUrl = defaultImage;
+
+                                if (!string.IsNullOrEmpty(item.AnhSanPham) && item.AnhSanPham != "/images/Default_Logo.png")
+                                {
+                                    imageUrl = $"{baseUrl}{item.AnhSanPham}";
+                                }
+                            }
+                            <img src="@imageUrl" class="product-img" style="margin-left: 10px;" onerror="this.src='@defaultImage'" />
                             <div class="product-info">
                                 <p class="mb-1">
-                                    @(string.IsNullOrEmpty(item.TenSanPham) ? "Tên sản phẩm không xác định" : item.TenSanPham)
+                                    @(string.IsNullOrEmpty(item.TenSanPham) ? "Tên sản phẩm không xác định" : item.TenSanPham) ( @item.TenMauSac, @item.MaKichThuoc )
                                 </p>
                                 <small class="text-muted">Số lượng: @item.SoLuong</small>
                             </div>
@@ -89,7 +99,7 @@
 
             <!-- Hành động -->
             <div class="section-box actions text-center">
-                <a href="@Url.Action("Index", "HoaDonClient")" class="btn btn-primary">Quay về danh sách</a>
+                <a href="@Url.Action("Index", "HoaDon")" class="btn btn-primary">Quay về danh sách</a>
             </div>
         }
     </div>
