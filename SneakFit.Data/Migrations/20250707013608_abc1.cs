@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SneakFit.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class db1 : Migration
+    public partial class abc1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -326,7 +326,7 @@ namespace SneakFit.Data.Migrations
                     PhuongThucThanhToan = table.Column<int>(type: "int", maxLength: 50, nullable: false),
                     LoaiHoaDon = table.Column<int>(type: "int", nullable: false),
                     NgayThanhToan = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    MaGiaoDich = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    MaHoaDon = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     PhiVanChuyen = table.Column<decimal>(type: "decimal(18,2)", nullable: false, defaultValue: 0m),
                     DonViVanChuyen = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     MaVanDon = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
@@ -634,9 +634,9 @@ namespace SneakFit.Data.Migrations
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "GioiTinh", "HoVaTen", "LockoutEnabled", "LockoutEnd", "NgaySinh", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TrangThai", "TwoFactorEnabled", "UrlHinhAnh", "UserName" },
                 values: new object[,]
                 {
-                    { new Guid("69bd712f-9576-45ba-b5b7-f00649be00de"), 0, "8030548e-0785-4a40-976a-0a52cc80e150", "kiet@gmail.com", true, false, "Cu Em Kiệt", false, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "kiet@gmail.com", "nhanvien", "AQAAAAIAAYagAAAAEBsr8pztSluX+mguK8F06r8i0AByDsqRhj/O1ZUzxe7BSzcbwn3DD7hI3SjKF9JRjQ==", null, false, "", true, false, null, "nhanvien" },
-                    { new Guid("69bd714f-9576-45ba-b5b7-f00649be00de"), 0, "e248652e-11f5-445e-9cf2-d18899fa9642", "tupmph49568@gmail.com", true, false, "Phí Minh Tú", false, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "tupmph49568@gmail.com", "Admin", "AQAAAAIAAYagAAAAEInomlFp0aVWdIRiUzuY1uBxdgN/+2Ul0GfB1sYcGHDwgI/j1e75D6vyw1RgazG/BA==", null, false, "", true, false, null, "Admin" },
-                    { new Guid("69bd714f-9576-45ba-b5b7-f01649be00de"), 0, "dca7f486-1b6b-498a-9ba6-f133079efde9", "kiet@gmail.com", true, false, "Siu Nhân", false, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "kiet@gmail.com", "khachhang", "AQAAAAIAAYagAAAAEEXaF0biTDr617p24rTgyamvjofmgCFc9CLbSMqBfZrug4GJYAjGO1z6f+anWQ4whQ==", null, false, "", true, false, null, "khachhang" }
+                    { new Guid("69bd712f-9576-45ba-b5b7-f00649be00de"), 0, "760c37f7-bf8e-4706-b8c2-33425f31d2b2", "kiet@gmail.com", true, false, "Cu Em Kiệt", false, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "kiet@gmail.com", "nhanvien", "AQAAAAIAAYagAAAAEHX54v2KQlSCHhUaYrDEk63+KZ/2QfB5g0Phk9BkkMyPFFitRerMBbE90aZgjDe1dQ==", null, false, "", true, false, null, "nhanvien" },
+                    { new Guid("69bd714f-9576-45ba-b5b7-f00649be00de"), 0, "873746a1-abb2-4ae1-b72d-c1aad22d1ba3", "tupmph49568@gmail.com", true, false, "Phí Minh Tú", false, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "tupmph49568@gmail.com", "Admin", "AQAAAAIAAYagAAAAEDgTxwlfgPedP7SxRdEs1hLS3Zg6Sbl8FVC19tv/1YT3BJv3sC1vSZXXtUZMAIeBsQ==", null, false, "", true, false, null, "Admin" },
+                    { new Guid("69bd714f-9576-45ba-b5b7-f01649be00de"), 0, "adbf1c99-4f83-45e5-bddb-b25babd9b342", "kiet@gmail.com", true, false, "Siu Nhân", false, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "kiet@gmail.com", "khachhang", "AQAAAAIAAYagAAAAEFSxjnx5x0xTdxCl4d8mu6AJvcFJzAiXQBNaOJuoNP16T0sfIvVN4n12fZ0CD3qQRA==", null, false, "", true, false, null, "khachhang" }
                 });
 
             migrationBuilder.CreateIndex(

@@ -8,11 +8,11 @@
 <main class="main">
     <div class="page-title light-background">
         <div class="container d-lg-flex justify-content-between align-items-center">
-            <h1 class="mb-2 mb-lg-0">Cart</h1>
+            <h1 class="mb-2 mb-lg-0">Giỏ Hàng</h1>
             <nav class="breadcrumbs">
                 <ol>
                     <li><a href="/">Home</a></li>
-                    <li class="current">Cart</li>
+                    <li class="current">Giỏ Hàng</li>
                 </ol>
             </nav>
         </div>
@@ -27,10 +27,10 @@
                                 <div class="col-lg-1 text-center">
                                     <input type="checkbox" id="select-all" title="Chọn tất cả" style="margin-left: 38px; " />
                                 </div>
-                                <div class="col-lg-5"><h5 style="margin-left: 25px; ">Product</h5></div>
-                                <div class="col-lg-2 text-center"><h5>Price</h5></div>
-                                <div class="col-lg-2 text-center"><h5>Quantity</h5></div>
-                                <div class="col-lg-2 text-center"><h5 style="margin-right: 38.5px; ">Total</h5></div>
+                                <div class="col-lg-5"><h5 style="margin-left: 25px; ">Sản phẩm</h5></div>
+                                <div class="col-lg-2 text-center"><h5>Giá</h5></div>
+                                <div class="col-lg-2 text-center"><h5>Số lượng</h5></div>
+                                <div class="col-lg-2 text-center"><h5 style="margin-right: 38.5px; ">Tổng</h5></div>
                             </div>
                         </div>
 
@@ -63,7 +63,7 @@
                                                     </div>
                                                     <button class="remove-item btn btn-link text-danger p-0" type="button"
                                                             data-id="@item.SanPhamChiTietId" style="text-decoration: none">
-                                                        <i class="bi bi-trash"></i> Remove
+                                                        <i class="bi bi-trash"></i> Xóa sản phẩm
                                                     </button>
                                                 </div>
                                             </div>
@@ -123,13 +123,13 @@
                                 <div class="col-lg-6 col-md-6 text-md-end">
                                     <div class="d-flex justify-content-md-end gap-2">
                                         <button class="btn btn-outline-accent" type="button" onclick="location.reload();">
-                                            <i class="bi bi-arrow-clockwise"></i> Update
+                                            <i class="bi bi-arrow-clockwise"></i> Reload
                                         </button>
                                         <button class="btn btn-outline-danger" type="button" id="delete-selected">
                                             <i class="bi bi-trash"></i> Xóa đã chọn
                                         </button>
                                         <button class="btn btn-outline-danger" type="button" id="clear-cart">
-                                            <i class="bi bi-trash"></i> Clear All
+                                            <i class="bi bi-trash"></i> Xóa tất cả
                                         </button>
                                     </div>
                                 </div>
@@ -141,17 +141,17 @@
                 <!-- Order Summary -->
                 <div class="col-lg-4" data-aos="fade-up" data-aos-delay="300">
                     <div class="cart-summary">
-                        <h4 class="summary-title">Order Summary</h4>
+                        <h4 class="summary-title">Đơn hàng</h4>
                         <div class="summary-item">
-                            <span class="summary-label">Subtotal</span>
+                            <span class="summary-label">Tổng tiền sản phẩm</span>
                             <span class="summary-value" id="subtotal">0 VNĐ</span>
                         </div>
                         <div class="summary-item">
-                            <span class="summary-label">Shipping</span>
+                            <span class="summary-label">Phí ship</span>
                             <span class="summary-value">35,000 VNĐ</span>
                         </div>
                         <div class="summary-total">
-                            <span class="summary-label">Total</span>
+                            <span class="summary-label">Tổng đơn hàng</span>
                             <span class="summary-value" id="total">35,000 VNĐ</span>
                         </div>
                         <div class="checkout-button">
@@ -167,7 +167,7 @@
                         </div>
                         <div class="continue-shopping">
                             <a href="@Url.Action("Index", "SanPham")" class="btn btn-link w-100">
-                                <i class="bi bi-arrow-left"></i> Continue Shopping
+                                <i class="bi bi-arrow-left"></i> Tiếp tục mua sắm
                             </a>
                         </div>
                         <div class="payment-methods">

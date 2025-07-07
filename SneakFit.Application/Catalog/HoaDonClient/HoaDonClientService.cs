@@ -32,7 +32,7 @@ namespace SneakFit.Application.Catalog.HoaDonClient
                 .AsQueryable();
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(h => h.HoTen.Contains(request.Keyword) || h.MaGiaoDich.Contains(request.Keyword));
+                query = query.Where(h => h.HoTen.Contains(request.Keyword) || h.MaHoaDon.Contains(request.Keyword));
             }
             // Lọc theo trạng thái
             if (request.Trangthaihoadon.HasValue)
@@ -61,7 +61,7 @@ namespace SneakFit.Application.Catalog.HoaDonClient
                     PhuongThucThanhToan = h.PhuongThucThanhToan,
                     LoaiHoaDon = h.LoaiHoaDon,
                     NgayThanhToan = h.NgayThanhToan,
-                    MaGiaoDich = h.MaGiaoDich,
+                    MaHoaDon = h.MaHoaDon,
                     PhiVanChuyen = h.PhiVanChuyen,
                     DonViVanChuyen = h.DonViVanChuyen,
                     MaVanDon = h.MaVanDon,
@@ -99,7 +99,7 @@ namespace SneakFit.Application.Catalog.HoaDonClient
                 PhuongThucThanhToan = hoaDon.PhuongThucThanhToan,
                 LoaiHoaDon = hoaDon.LoaiHoaDon,
                 NgayThanhToan = hoaDon.NgayThanhToan,
-                MaGiaoDich = hoaDon.MaGiaoDich,
+                MaHoaDon = hoaDon.MaHoaDon,
                 PhiVanChuyen = hoaDon.PhiVanChuyen,
                 DonViVanChuyen = hoaDon.DonViVanChuyen,
                 MaVanDon = hoaDon.MaVanDon,
@@ -110,6 +110,7 @@ namespace SneakFit.Application.Catalog.HoaDonClient
 
         public async Task<HoaDonClientViewModel> Create(ThemHoaDonClient request)
         {
+            var maHoaDon = $"HD{DateTime.Now:yyyyMMddHHmmss}{new Random().Next(1000, 9999)}";
             var hoaDon = new Data.Entities.HoaDon
             {
                 Id = Guid.NewGuid(),
@@ -125,7 +126,7 @@ namespace SneakFit.Application.Catalog.HoaDonClient
                 PhuongThucThanhToan = request.PhuongThucThanhToan,
                 LoaiHoaDon = request.LoaiHoaDon,
                 NgayThanhToan = request.NgayThanhToan,
-                MaGiaoDich = request.MaGiaoDich,
+                MaHoaDon = maHoaDon,
                 PhiVanChuyen = request.PhiVanChuyen,
                 DonViVanChuyen = request.DonViVanChuyen,
                 MaVanDon = request.MaVanDon,
@@ -153,7 +154,7 @@ namespace SneakFit.Application.Catalog.HoaDonClient
             hoaDon.PhuongThucThanhToan = request.PhuongThucThanhToan;
             hoaDon.LoaiHoaDon = request.LoaiHoaDon;
             hoaDon.NgayThanhToan = request.NgayThanhToan;
-            hoaDon.MaGiaoDich = request.MaGiaoDich;
+            hoaDon.MaHoaDon = request.MaHoaDon;
             hoaDon.PhiVanChuyen = request.PhiVanChuyen;
             hoaDon.DonViVanChuyen = request.DonViVanChuyen;
             hoaDon.MaVanDon = request.MaVanDon;

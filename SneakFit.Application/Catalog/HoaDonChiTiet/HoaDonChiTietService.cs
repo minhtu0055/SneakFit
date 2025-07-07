@@ -28,7 +28,7 @@ namespace SneakFit.Application.Catalog.HoaDonChiTiet
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(x => x.HoaDon.MaGiaoDich.Contains(request.Keyword));
+                query = query.Where(x => x.HoaDon.MaHoaDon.Contains(request.Keyword));
             }
 
             int totalRow = await query.CountAsync();

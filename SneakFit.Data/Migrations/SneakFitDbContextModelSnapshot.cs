@@ -253,7 +253,7 @@ namespace SneakFit.Data.Migrations
                         {
                             Id = new Guid("69bd714f-9576-45ba-b5b7-f00649be00de"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "e248652e-11f5-445e-9cf2-d18899fa9642",
+                            ConcurrencyStamp = "873746a1-abb2-4ae1-b72d-c1aad22d1ba3",
                             Email = "tupmph49568@gmail.com",
                             EmailConfirmed = true,
                             GioiTinh = false,
@@ -262,7 +262,7 @@ namespace SneakFit.Data.Migrations
                             NgaySinh = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NormalizedEmail = "tupmph49568@gmail.com",
                             NormalizedUserName = "Admin",
-                            PasswordHash = "AQAAAAIAAYagAAAAEInomlFp0aVWdIRiUzuY1uBxdgN/+2Ul0GfB1sYcGHDwgI/j1e75D6vyw1RgazG/BA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEDgTxwlfgPedP7SxRdEs1hLS3Zg6Sbl8FVC19tv/1YT3BJv3sC1vSZXXtUZMAIeBsQ==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
                             TrangThai = true,
@@ -273,7 +273,7 @@ namespace SneakFit.Data.Migrations
                         {
                             Id = new Guid("69bd712f-9576-45ba-b5b7-f00649be00de"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "8030548e-0785-4a40-976a-0a52cc80e150",
+                            ConcurrencyStamp = "760c37f7-bf8e-4706-b8c2-33425f31d2b2",
                             Email = "kiet@gmail.com",
                             EmailConfirmed = true,
                             GioiTinh = false,
@@ -282,7 +282,7 @@ namespace SneakFit.Data.Migrations
                             NgaySinh = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NormalizedEmail = "kiet@gmail.com",
                             NormalizedUserName = "nhanvien",
-                            PasswordHash = "AQAAAAIAAYagAAAAEBsr8pztSluX+mguK8F06r8i0AByDsqRhj/O1ZUzxe7BSzcbwn3DD7hI3SjKF9JRjQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEHX54v2KQlSCHhUaYrDEk63+KZ/2QfB5g0Phk9BkkMyPFFitRerMBbE90aZgjDe1dQ==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
                             TrangThai = true,
@@ -293,7 +293,7 @@ namespace SneakFit.Data.Migrations
                         {
                             Id = new Guid("69bd714f-9576-45ba-b5b7-f01649be00de"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "dca7f486-1b6b-498a-9ba6-f133079efde9",
+                            ConcurrencyStamp = "adbf1c99-4f83-45e5-bddb-b25babd9b342",
                             Email = "kiet@gmail.com",
                             EmailConfirmed = true,
                             GioiTinh = false,
@@ -302,7 +302,7 @@ namespace SneakFit.Data.Migrations
                             NgaySinh = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NormalizedEmail = "kiet@gmail.com",
                             NormalizedUserName = "khachhang",
-                            PasswordHash = "AQAAAAIAAYagAAAAEEXaF0biTDr617p24rTgyamvjofmgCFc9CLbSMqBfZrug4GJYAjGO1z6f+anWQ4whQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEFSxjnx5x0xTdxCl4d8mu6AJvcFJzAiXQBNaOJuoNP16T0sfIvVN4n12fZ0CD3qQRA==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
                             TrangThai = true,
@@ -545,7 +545,7 @@ namespace SneakFit.Data.Migrations
                     b.Property<int>("LoaiHoaDon")
                         .HasColumnType("int");
 
-                    b.Property<string>("MaGiaoDich")
+                    b.Property<string>("MaHoaDon")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 

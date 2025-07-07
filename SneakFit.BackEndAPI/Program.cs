@@ -102,6 +102,11 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
+    options.AddPolicy("AllowSpecificOrigin", builder =>
+        builder.WithOrigins("https://localhost:7211") // Thay bằng port của WebClient
+               .AllowAnyMethod()
+               .AllowAnyHeader()
+               .AllowCredentials());
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(x =>
@@ -168,6 +173,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.UseCors();
+app.UseCors("AllowSpecificOrigin");
 app.UseStaticFiles();
 
 app.UseHttpsRedirection();

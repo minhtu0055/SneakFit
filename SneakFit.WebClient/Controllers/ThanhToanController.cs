@@ -19,13 +19,15 @@ namespace SneakFit.WebClient.Controllers
         private readonly ISpctApiClient _spctApiClient;
         private readonly IHoaDonChiTietClientApiClient _hoaDonChiTietClientApiClient;
         private readonly IKhuyenMaiApiClient _khuyenMaiApiClient;
+        private readonly IVoucherApiClient _voucherApiClient;
 
         public ThanhToanController(IHoaDonClientApiClient hoaDonClientApiClient, 
                                    IGioHangApiClient gioHangApiClient, 
                                    ISanPhamApiClient sanPhamApiClient, 
                                    ISpctApiClient spctApiClient,
                                    IHoaDonChiTietClientApiClient hoaDonChiTietClientApiClient,
-                                   IKhuyenMaiApiClient khuyenMaiApiClient)
+                                   IKhuyenMaiApiClient khuyenMaiApiClient,
+                                   IVoucherApiClient voucherApiClient)
         {
             _hoaDonClientApiClient = hoaDonClientApiClient;
             _gioHangApiClient = gioHangApiClient;
@@ -33,6 +35,7 @@ namespace SneakFit.WebClient.Controllers
             _spctApiClient = spctApiClient;
             _hoaDonChiTietClientApiClient = hoaDonChiTietClientApiClient;
             _khuyenMaiApiClient = khuyenMaiApiClient;
+            _voucherApiClient = voucherApiClient;
         }
 
         private Guid GetUserId()
@@ -225,7 +228,7 @@ namespace SneakFit.WebClient.Controllers
                 Email = model.Email,
                 GhiChu = model.GhiChu,
                 NgayDatHang = DateTime.Now,
-                MaGiaoDich = string.Empty,
+                MaHoaDon = string.Empty,
                 DonViVanChuyen = string.Empty,
                 MaVanDon = string.Empty
             };
