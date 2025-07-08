@@ -46,6 +46,7 @@ builder.Services.AddScoped<IHoaDonClientApiClient, HoaDonClientApiClient>();
 builder.Services.AddScoped<IHoaDonChiTietClientApiClient, HoaDonChiTietClientApiClient>();
 builder.Services.AddScoped<IGhnApiClient, GhnApiClient>();
 builder.Services.AddScoped<IUserApiClient, UserApiClient>();
+builder.Services.AddScoped<IDiaChiApiClient, DiaChiApiClient>();
 
 builder.Services.AddSession(options =>
 {

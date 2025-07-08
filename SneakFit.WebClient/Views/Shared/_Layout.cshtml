@@ -333,19 +333,13 @@
 
     <!-- Main JS File -->
     <script src="~/assets/js/main.js"></script>
-    <script src="~/assets/js/jquery-3.6.0.min.js"></script>
-    <script src="~/assets/js/jquery-3.7.1.min.js"></script>
-
+    @* <script src="~/assets/js/jquery-3.6.0.min.js"></script> *@
+    @* <script src="~/assets/js/jquery-3.7.1.min.js"></script> *@
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
+        var isAuthenticated = @(User.Identity.IsAuthenticated.ToString().ToLower());
         $(document).ready(function () {
             $('#cartIconBtn').on('click', function (e) {
-                var isAuthenticated = false;
-                try {
-                    // Kiểm tra có userId trong cookie hoặc local/session storage (nếu có logic lưu)
-                    // Hoặc kiểm tra có token đăng nhập (nếu có logic lưu token)
-                    // Ở đây đơn giản sẽ kiểm tra có thẻ user menu hoặc ẩn/hiện nút đăng nhập
-                    isAuthenticated = $('body').find('.account-dropdown .dropdown-footer .btn-primary').length === 0;
-                } catch (ex) { }
                 if (!isAuthenticated) {
                     e.preventDefault();
                     window.location.href = '/Login/Index';

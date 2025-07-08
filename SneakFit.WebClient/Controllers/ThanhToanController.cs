@@ -20,6 +20,7 @@ namespace SneakFit.WebClient.Controllers
         private readonly IHoaDonChiTietClientApiClient _hoaDonChiTietClientApiClient;
         private readonly IKhuyenMaiApiClient _khuyenMaiApiClient;
         private readonly IVoucherApiClient _voucherApiClient;
+        private readonly IDiaChiApiClient _diaChiApiClient;
 
         public ThanhToanController(IHoaDonClientApiClient hoaDonClientApiClient, 
                                    IGioHangApiClient gioHangApiClient, 
@@ -27,7 +28,8 @@ namespace SneakFit.WebClient.Controllers
                                    ISpctApiClient spctApiClient,
                                    IHoaDonChiTietClientApiClient hoaDonChiTietClientApiClient,
                                    IKhuyenMaiApiClient khuyenMaiApiClient,
-                                   IVoucherApiClient voucherApiClient)
+                                   IVoucherApiClient voucherApiClient,
+                                   IDiaChiApiClient diaChiApiClient)
         {
             _hoaDonClientApiClient = hoaDonClientApiClient;
             _gioHangApiClient = gioHangApiClient;
@@ -36,6 +38,7 @@ namespace SneakFit.WebClient.Controllers
             _hoaDonChiTietClientApiClient = hoaDonChiTietClientApiClient;
             _khuyenMaiApiClient = khuyenMaiApiClient;
             _voucherApiClient = voucherApiClient;
+            _diaChiApiClient = diaChiApiClient;
         }
 
         private Guid GetUserId()
@@ -48,7 +51,7 @@ namespace SneakFit.WebClient.Controllers
             return Guid.Parse(userIdStr);
         }
 
-        public IActionResult Checkout()
+        public async Task<IActionResult> Checkout()
         {
             var cartJson = HttpContext.Session.GetString("SelectedCartItems");
             var cartItems = string.IsNullOrEmpty(cartJson)
@@ -102,13 +105,34 @@ namespace SneakFit.WebClient.Controllers
                 }
             }
 
+            // Lấy userId từ claim
+            var userIdStr = User?.Claims?.FirstOrDefault(x => x.Type == "UserId" || x.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            Guid? userId = null;
+            if (!string.IsNullOrEmpty(userIdStr))
+                userId = Guid.Parse(userIdStr);
+
+            string hoTen = string.Empty, soDienThoai = string.Empty, diaChi = string.Empty, email = string.Empty;
+
+            // Nếu có userId, lấy địa chỉ mặc định từ API client
+            if (userId.HasValue)
+            {
+                var diaChis = await _diaChiApiClient.GetAllByUser();
+                var defaultAddress = diaChis.FirstOrDefault(x => x.MacDinh);
+                if (defaultAddress != null)
+                {
+                    hoTen = defaultAddress.TenNguoiNhan;
+                    soDienThoai = defaultAddress.SoDienThoai;
+                    diaChi = $"{defaultAddress.TenDiaChi}, {defaultAddress.TenXa}, {defaultAddress.TenHuyen}, {defaultAddress.TenThanhPho}";
+                }
+            }
+
             var model = new CheckoutViewModel
             {
-                HoTen = "Lại Gia Kiệt",
-                SoDienThoai = "+84 383212289",
-                Email = "laigiakiet@gmail.com",
+                HoTen = hoTen,
+                SoDienThoai = soDienThoai,
+                //Email = email,
                 DiaChiMoi = string.Empty,
-                DiaChi = "Thôn Thương, Xã Hồng Phong, Huyện Chương Mỹ, Hà Nội",
+                DiaChi = diaChi,
                 PhuongThucThanhToan = PhuongThucThanhToan.COD,
                 PhiVanChuyen = 35000,
                 GioHangItems = cartItems,
@@ -227,7 +251,7 @@ namespace SneakFit.WebClient.Controllers
                 TrangThaiThanhToan = TrangThaiThanhToan.ChuaThanhToan,
                 LoaiHoaDon = (model.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || model.PhuongThucThanhToan == PhuongThucThanhToan.MoMo)
                     ? LoaiHoaDon.Online : LoaiHoaDon.TaiQuay,
-                Email = model.Email,
+                //Email = model.Email,
                 GhiChu = model.GhiChu,
                 NgayDatHang = DateTime.Now,
                 MaHoaDon = string.Empty,

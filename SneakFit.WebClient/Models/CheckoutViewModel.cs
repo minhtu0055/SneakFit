@@ -23,9 +23,9 @@ namespace SneakFit.WebClient.Models
         [Display(Name = "Số điện thoại")]
         public string SoDienThoai { get; set; } = "";
 
-        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
-        [Display(Name = "Email")]
-        public string Email { get; set; } = "";
+        //[EmailAddress(ErrorMessage = "Email không hợp lệ")]
+        //[Display(Name = "Email")]
+        //public string Email { get; set; } = "";
 
         [Required(ErrorMessage = "Vui lòng nhập địa chỉ giao hàng")]
         [Display(Name = "Địa chỉ giao hàng")]
