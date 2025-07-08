@@ -18,9 +18,9 @@ namespace SneakFit.BackEndAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllPaging([FromQuery] PhanTrangHoaDonClient request)
+        public async Task<IActionResult> GetAllPaging([FromQuery] PhanTrangHoaDonClient request, [FromQuery] Guid? userId = null)
         {
-            var result = await _HoaDonClientService.GetAllPaging(request);
+            var result = await _HoaDonClientService.GetAllPaging(request, userId);
             return Ok(result);
         }
 

@@ -357,6 +357,10 @@
                     soLuong: soLuong
                 },
                 success: function (res) {
+                    if (res.requireLogin) {
+                        window.location.href = '/Login/Index';
+                        return;
+                    }
                     if (res.success) {
                         alert(res.message || 'Đã thêm vào giỏ hàng thành công!');
                     } else {

@@ -111,5 +111,12 @@ namespace SneakFit.BackEndAPI.Controllers
 
             return Ok(result);
         }
+
+        [HttpPost("tao-gio-hang-moi")]
+        public async Task<IActionResult> TaoGioHangMoi([FromBody] Guid userId)
+        {
+            var gioHang = await _gioHangService.TaoGioHangMoi(userId);
+            return Ok(gioHang);
+        }
     }
 }

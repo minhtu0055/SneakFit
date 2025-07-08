@@ -14,5 +14,6 @@ namespace SneakFit.ViewModels.Catalog.HoaDonClient
         public TrangThaiHoaDon? Trangthaihoadon { get; set; }
         public DateTime? NgayBatDau { get; set; }  // Ngày bắt đầu
         public DateTime? NgayKetThuc { get; set; }  // Ngày kết thúc
+        public Guid UserId { get; set; }
     }
 }

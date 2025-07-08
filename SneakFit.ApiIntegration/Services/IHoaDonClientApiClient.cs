@@ -6,7 +6,7 @@ namespace SneakFit.ApiIntegration.Services
 {
     public interface IHoaDonClientApiClient
     {
-        Task<PagedResult<HoaDonClientViewModel>> GetAllPaging(PhanTrangHoaDonClient request);
+        Task<PagedResult<HoaDonClientViewModel>> GetAllPaging(PhanTrangHoaDonClient request, Guid? userId = null);
         Task<HoaDonClientViewModel> GetById(Guid id);
         Task<HoaDonClientViewModel> Create(ThemHoaDonClient request);
         Task<HoaDonClientViewModel> Update(SuaHoaDonClient request);

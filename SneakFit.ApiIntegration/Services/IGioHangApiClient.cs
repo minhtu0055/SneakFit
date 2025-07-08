@@ -14,5 +14,6 @@ namespace SneakFit.ApiIntegration.Services
         Task<bool> XoaGioHang(Guid id);
         Task<ApiResult<bool>> CapNhatSoLuong(CapNhatGioHang request);
         Task<bool> XoaSanPhamDaMuaKhoiGioHang(Guid userId, List<Guid> sanPhamChiTietIds);
+        Task<GioHangViewModel> TaoGioHangMoi(Guid userId);
     }
 }

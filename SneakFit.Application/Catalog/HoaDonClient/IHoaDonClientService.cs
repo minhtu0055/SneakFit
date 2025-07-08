@@ -12,7 +12,7 @@ namespace SneakFit.Application.Catalog.HoaDonClient
 {
     public interface IHoaDonClientService
     {
-        Task<PagedResult<HoaDonClientViewModel>> GetAllPaging(PhanTrangHoaDonClient request);
+        Task<PagedResult<HoaDonClientViewModel>> GetAllPaging(PhanTrangHoaDonClient request, Guid? userId = null);
         Task<HoaDonClientViewModel> GetById(Guid id);
         Task<HoaDonClientViewModel> Create(ThemHoaDonClient request);
         Task<HoaDonClientViewModel> Update(SuaHoaDonClient request);

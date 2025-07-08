@@ -234,6 +234,24 @@ namespace SneakFit.Application.Catalog.GioHang
             return true;
         }
 
+        public async Task<GioHangViewModel> TaoGioHangMoi(Guid userId)
+        {
+            var gioHang = await _context.GioHang.FirstOrDefaultAsync(x => x.UserId == userId);
+            if (gioHang != null)
+            {
+                return await GetById(gioHang.Id);
+            }
+            gioHang = new Data.Entities.GioHang()
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                NgayTao = DateTime.Now
+            };
+            _context.GioHang.Add(gioHang);
+            await _context.SaveChangesAsync();
+            return await GetById(gioHang.Id);
+        }
+
         private async Task<List<GioHangChiTietViewModel>> GetGioHangChiTietsByGioHangId(Guid gioHangId)
         {
             var query = from ghct in _context.GioHangChiTiet

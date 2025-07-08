@@ -180,14 +180,19 @@ namespace SneakFit.WebClient.Controllers
         [HttpPost]
         public async Task<IActionResult> AddToCart(Guid sanPhamChiTietId, int soLuong = 1)
         {
-            // Lấy ID người dùng, dùng ID mặc định nếu chưa đăng nhập
-            var userIdStr = User?.Claims?.FirstOrDefault(x => x.Type == "UserId" || x.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            Guid userId = string.IsNullOrEmpty(userIdStr)
-                ? Guid.Parse("69BD714F-9576-45BA-B5B7-F00649BE00DE")
-                : Guid.Parse(userIdStr);
-
             try
             {
+                Guid userId;
+                try
+                {
+                    userId = (User?.Identity?.IsAuthenticated ?? false)
+                        ? Guid.Parse(User.Claims.FirstOrDefault(x => x.Type == "UserId" || x.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value)
+                        : throw new UnauthorizedAccessException();
+                }
+                catch
+                {
+                    return Json(new { success = false, requireLogin = true, message = "Bạn cần đăng nhập để mua hàng." });
+                }
                 // 1. Lấy giỏ hàng của người dùng
                 var gioHang = await _gioHangApiClient.GetByUserId(userId);
                 var item = gioHang?.GioHangChiTiets?.FirstOrDefault(x => x.SanPhamChiTietId.Equals(sanPhamChiTietId));

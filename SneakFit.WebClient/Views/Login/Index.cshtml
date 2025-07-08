@@ -1,4 +1,7 @@
-﻿<main class="main">
+﻿@using SneakFit.ViewModels.System.User
+@using SneakFit.ViewModels.System.DiaChi
+@model SneakFit.WebClient.Models.LoginRegisterViewModel
+<main class="main">
 
     <!-- Page Title -->
     <div class="page-title light-background">
@@ -6,7 +9,7 @@
             <h1 class="mb-2 mb-lg-0">Login</h1>
             <nav class="breadcrumbs">
                 <ol>
-                    <li><a href="index.html">Home</a></li>
+                    <li><a href="/">Home</a></li>
                     <li class="current">Login</li>
                 </ol>
             </nav>
@@ -18,19 +21,19 @@
         <div class="container" data-aos="fade-up" data-aos-delay="100">
 
             <div class="row justify-content-center">
-                <div class="col-lg-5">
+                <div class="col-lg-10">
                     <div class="login-register-wraper">
 
                         <!-- Tab Navigation -->
                         <ul class="nav nav-tabs nav-tabs-bordered justify-content-center mb-4" role="tablist">
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#login-register-login-form" type="button" role="tab" aria-selected="true">
-                                    <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                                <button class="nav-link @(ViewBag.ActiveTab == "register" ? "" : "active")" data-bs-toggle="tab" data-bs-target="#login-register-login-form" type="button" role="tab" aria-selected="@(ViewBag.ActiveTab == "register" ? "false" : "true")">
+                                    <i class="bi bi-box-arrow-in-right me-1"></i>Đăng Nhập
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#login-register-registration-form" type="button" role="tab" aria-selected="false">
-                                    <i class="bi bi-person-plus me-1"></i>Register
+                                <button class="nav-link @(ViewBag.ActiveTab == "register" ? "active" : "")" data-bs-toggle="tab" data-bs-target="#login-register-registration-form" type="button" role="tab" aria-selected="@(ViewBag.ActiveTab == "register" ? "true" : "false")">
+                                    <i class="bi bi-person-plus me-1"></i>Đăng ký
                                 </button>
                             </li>
                         </ul>
@@ -39,93 +42,199 @@
                         <div class="tab-content">
 
                             <!-- Login Form -->
-                            <div class="tab-pane fade show active" id="login-register-login-form" role="tabpanel">
-                                <form>
+                            <div class="tab-pane fade @(ViewBag.ActiveTab == "register" ? "" : "show active")" id="login-register-login-form" role="tabpanel">
+                                @if (TempData["ErrorMessages"] != null)
+                                {
+                                    <div class="alert alert-danger">
+                                        @TempData["ErrorMessages"]
+                                    </div>
+                                }
+                                <form asp-action="Index" asp-controller="Login" method="post">
+
                                     <div class="mb-4">
-                                        <label for="login-register-login-email" class="form-label">Email address</label>
-                                        <input type="email" class="form-control" id="login-register-login-email" required="">
+                                        <label for="login-register-login-email" class="form-label">Tên Đăng Nhập</label>
+                                        <input asp-for="Login.UserName" type="text" class="form-control" id="login-register-login-email" required />
+                                        <span asp-validation-for="Login.UserName" class="text-danger"></span>
                                     </div>
 
                                     <div class="mb-4">
-                                        <label for="login-register-login-password" class="form-label">Password</label>
-                                        <input type="password" class="form-control" id="login-register-login-password" required="">
+                                        <label for="login-register-login-password" class="form-label">Mật Khẩu</label>
+                                        <input asp-for="Login.Password" type="password" class="form-control" id="login-register-login-password" required />
+                                        <span asp-validation-for="Login.Password" class="text-danger"></span>
                                     </div>
 
                                     <div class="d-flex justify-content-between align-items-center mb-4">
                                         <div class="form-check">
-                                            <input type="checkbox" class="form-check-input" id="login-register-remember-me">
+                                            <input asp-for="Login.RememberMe" type="checkbox" class="form-check-input" id="login-register-remember-me" />
                                             <label class="form-check-label" for="login-register-remember-me">Remember me</label>
                                         </div>
                                         <a href="#" class="forgot-password">Forgot Password?</a>
                                     </div>
 
                                     <div class="d-grid">
-                                        <button type="submit" class="btn btn-primary btn-lg">Login</button>
+                                        <button type="submit" class="btn btn-primary btn-lg" name="submitType" value="login">Login</button>
+
                                     </div>
                                 </form>
                             </div>
 
                             <!-- Registration Form -->
-                            <div class="tab-pane fade" id="login-register-registration-form" role="tabpanel">
-                                <form>
-                                    <div class="row g-3">
-                                        <div class="col-sm-6">
-                                            <div class="mb-4">
-                                                <label for="login-register-reg-firstname" class="form-label">First name</label>
-                                                <input type="text" class="form-control" id="login-register-reg-firstname" required="">
-                                            </div>
+                            <div class="tab-pane fade @(ViewBag.ActiveTab == "register" ? "show active" : "")" id="login-register-registration-form" role="tabpanel">
+                                @if (ViewBag.ActiveTab == "register" && !ViewData.ModelState.IsValid)
+                                {
+                                    <div class="alert alert-danger">
+                                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                        {
+                                            <div>@error.ErrorMessage</div>
+                                        }
+                                    </div>
+                                }
+                                <form asp-action="Register" asp-controller="Login" method="post" enctype="multipart/form-data">
+                                    @Html.AntiForgeryToken()
+                                    <div class="row align-items-center">
+                                        <div class="col-md-4 text-center mb-3">
+                                            <label for="registerFileInput">
+                                                <span style="display:inline-block;width:140px;height:140px;background:#f0f0f0;border-radius:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+                                                    <img id="registerPreviewImage" src="" alt="Ảnh" style="display:none;width:140px;height:140px;object-fit:cover;border-radius:20px;" />
+                                                    <span id="registerCameraIcon" style="font-size:48px;color:#888;">
+                                                        <i class="bi bi-camera"></i>
+                                                    </span>
+                                                </span>
+                                            </label>
+                                            <input asp-for="Register.HinhAnh" id="registerFileInput" type="file" accept="image/*" class="form-control d-none" onchange="registerPreviewFile(this)" />
                                         </div>
-
-                                        <div class="col-sm-6">
-                                            <div class="mb-4">
-                                                <label for="login-register-reg-lastname" class="form-label">Last name</label>
-                                                <input type="text" class="form-control" id="login-register-reg-lastname" required="">
-                                            </div>
-                                        </div>
-
-                                        <div class="col-12">
-                                            <div class="mb-4">
-                                                <label for="login-register-reg-email" class="form-label">Email address</label>
-                                                <input type="email" class="form-control" id="login-register-reg-email" required="">
-                                            </div>
-                                        </div>
-
-                                        <div class="col-12">
-                                            <div class="mb-4">
-                                                <label for="login-register-reg-password" class="form-label">Password</label>
-                                                <input type="password" class="form-control" id="login-register-reg-password" required="">
-                                            </div>
-                                        </div>
-
-                                        <div class="col-12">
-                                            <div class="mb-4">
-                                                <label for="login-register-reg-confirm-password" class="form-label">Confirm password</label>
-                                                <input type="password" class="form-control" id="login-register-reg-confirm-password" required="">
-                                            </div>
-                                        </div>
-
-                                        <div class="col-12">
-                                            <div class="form-check">
-                                                <input type="checkbox" class="form-check-input" id="login-register-terms" required="">
-                                                <label class="form-check-label" for="login-register-terms">
-                                                    I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
-                                                </label>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-12">
-                                            <div class="d-grid">
-                                                <button type="submit" class="btn btn-primary btn-lg">Create Account</button>
+                                        <div class="col-md-8">
+                                            <div class="row g-3">
+                                                <div class="row align-items-center">
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3 row">
+                                                            <label asp-for="Register.HoVaTen" class="col-sm-2 col-form-label">Họ và tên <span class="text-danger">*</span></label>
+                                                            <div class="col-sm-10">
+                                                                <input asp-for="Register.HoVaTen" class="form-control" placeholder="Vui lòng nhập Họ Tên..." required />
+                                                                <span class="invalid-feedback">Vui lòng nhập họ và tên</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mb-3 row">
+                                                            <label asp-for="Register.UserName" class="col-sm-2 col-form-label">Tài khoản <span class="text-danger">*</span></label>
+                                                            <div class="col-sm-10">
+                                                                <input asp-for="Register.UserName" class="form-control" placeholder="Nhập tài khoản..." required />
+                                                                <span class="invalid-feedback">Vui lòng nhập tài khoản</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mb-3 row">
+                                                            <label asp-for="Register.Email" class="col-sm-2 col-form-label">Email <span class="text-danger">*</span></label>
+                                                            <div class="col-sm-10">
+                                                                <input asp-for="Register.Email" class="form-control" placeholder="Nhập Gmail..." required />
+                                                                <span class="invalid-feedback">Vui lòng nhập email hợp lệ</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mb-3 row">
+                                                            <label asp-for="Register.SoDienThoai" class="col-sm-2 col-form-label">Số điện thoại <span class="text-danger">*</span></label>
+                                                            <div class="col-sm-10">
+                                                                <input asp-for="Register.SoDienThoai" class="form-control" placeholder="Nhập số điện thoại..." required pattern="[0-9]{10}" />
+                                                                <span class="invalid-feedback">Vui lòng nhập số điện thoại hợp lệ (10 số)</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mb-3 row">
+                                                            <label asp-for="Register.NgaySinh" class="col-sm-2 col-form-label">Ngày sinh <span class="text-danger">*</span></label>
+                                                            <div class="col-sm-10">
+                                                                <div class="input-group has-validation">
+                                                                    <input asp-for="Register.NgaySinh" type="datetime-local" class="form-control" required />
+                                                                    <span class="invalid-feedback">Vui lòng chọn ngày sinh</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="mb-3 row">
+                                                            <label asp-for="Register.GioiTinh" class="col-sm-2 col-form-label">Giới tính <span class="text-danger">*</span></label>
+                                                            <div class="col-sm-10">
+                                                                <div class="form-check form-check-inline">
+                                                                    <input class="form-check-input" type="radio" asp-for="Register.GioiTinh" id="nam" value="true" checked>
+                                                                    <label class="form-check-label" for="nam">Nam</label>
+                                                                </div>
+                                                                <div class="form-check form-check-inline">
+                                                                    <input class="form-check-input" type="radio" asp-for="Register.GioiTinh" id="nu" value="false">
+                                                                    <label class="form-check-label" for="nu">Nữ</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mb-3 row">
+                                                            <label asp-for="Register.DiaChi.TenDiaChi" class="col-sm-2 col-form-label"><span class="text-danger">*</span></label>
+                                                            <div class="col-sm-10">
+                                                                <div class="input-group has-validation">
+                                                                    <input asp-for="Register.DiaChi.TenDiaChi" class="form-control" placeholder="Nhập địa chỉ chi tiết..." required />
+                                                                    <span class="invalid-feedback">Vui lòng nhập địa chỉ chi tiết</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mb-3 row">
+                                                            <label asp-for="Register.DiaChi.TenThanhPho" class="col-sm-2 col-form-label">Thành phố/Tỉnh <span class="text-danger">*</span></label>
+                                                            <div class="col-sm-10">
+                                                                <select id="province" class="form-select" required>
+                                                                    <option value="">Chọn Tỉnh/Thành phố</option>
+                                                                </select>
+                                                                <input type="hidden" asp-for="Register.DiaChi.TenThanhPho" id="provinceName" />
+                                                                <input type="hidden" asp-for="Register.DiaChi.MaTinh" id="provinceCode" />
+                                                                <span class="invalid-feedback">Vui lòng chọn tỉnh/thành phố</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mb-3 row">
+                                                            <label asp-for="Register.DiaChi.TenHuyen" class="col-sm-2 col-form-label"><span class="text-danger">*</span></label>
+                                                            <div class="col-sm-10">
+                                                                <select id="district" class="form-select" required disabled>
+                                                                    <option value="">Chọn Quận/Huyện</option>
+                                                                </select>
+                                                                <input type="hidden" asp-for="Register.DiaChi.TenHuyen" id="districtName" />
+                                                                <input type="hidden" asp-for="Register.DiaChi.MaHuyen" id="districtCode" />
+                                                                <span class="invalid-feedback">Vui lòng chọn quận/huyện</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="mb-3 row">
+                                                            <label asp-for="Register.DiaChi.TenXa" class="col-sm-2 col-form-label"><span class="text-danger">*</span></label>
+                                                            <div class="col-sm-10">
+                                                                <select id="ward" class="form-select" required disabled>
+                                                                    <option value="">Chọn Phường/Xã</option>
+                                                                </select>
+                                                                <input type="hidden" asp-for="Register.DiaChi.TenXa" id="wardName" />
+                                                                <input type="hidden" asp-for="Register.DiaChi.MaXa" id="wardCode" />
+                                                                <span class="invalid-feedback">Vui lòng chọn phường/xã</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="row mt-4">
+                                        <div class="col-12 text-center">
+                                            <button type="submit" class="btn btn-primary btn-lg px-5">Đăng ký</button>
+                                        </div>
+                                    </div>
                                 </form>
+                                @* /* hiển thị ảnh */ *@
+                                <script>
+                                    function registerPreviewFile(input) {
+                                        const file = input.files[0];
+                                        if (file) {
+                                            const reader = new FileReader();
+                                            reader.onload = function(e) {
+                                                document.getElementById('registerPreviewImage').src = e.target.result;
+                                                document.getElementById('registerPreviewImage').style.display = 'block';
+                                                document.getElementById('registerCameraIcon').style.display = 'none';
+                                            }
+                                            reader.readAsDataURL(file);
+                                        }
+                                    }
+                                </script>
                             </div>
 
                         </div>
 
                     </div>
                 </div>
+
+
             </div>
 
         </div>
@@ -133,3 +242,123 @@
     </section><!-- /Login Register Section -->
 
 </main>
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        $(document).ready(function () {
+
+            // Hiển thị toast nếu có TempData
+            var loginSuccess = '@TempData["LoginSuccess"]';
+            if (loginSuccess && loginSuccess !== '') {
+                toastr.success(loginSuccess);
+            }
+            // Giữ tab đăng ký khi có lỗi đăng ký
+            var activeTab = '@ViewBag.ActiveTab';
+            if (activeTab === 'register') {
+                var tab = new bootstrap.Tab(document.querySelector('button[data-bs-target="#login-register-registration-form"]'));
+                tab.show();
+            }
+
+            // Lấy TempData
+            var successMessage = '@TempData["SuccessMessage"]';
+            var errorMessage = '@TempData["ErrorMessage"]';
+
+            if (successMessage) {
+                toastr.success(successMessage);
+            }
+
+            if (errorMessage) {
+                toastr.error(errorMessage);
+            }
+
+            // Khi chọn tỉnh/thành phố
+            $('#province').change(function () {
+                const provinceId = $(this).val();
+                const provinceName = $(this).find('option:selected').data('name');
+                $('#provinceName').val(provinceName);
+                $('#provinceCode').val(provinceId);
+
+                // Reset quận/huyện và phường/xã
+                $('#district').html('<option value="">Chọn Quận/Huyện</option>');
+                $('#ward').html('<option value="">Chọn Phường/Xã</option>');
+                $('#districtName').val('');
+                $('#districtCode').val('');
+                $('#wardName').val('');
+                $('#wardCode').val('');
+
+                if (provinceId) {
+                    $('#district').prop('disabled', false);
+                    // Load quận/huyện
+                    $.ajax({
+                        url: 'https://localhost:7277/api/ghn/districts',  // Thêm BaseAddress vào
+                        type: 'GET',
+                        success: function (response) {
+                            const districts = response.data.filter(d => d.ProvinceID == provinceId);
+                            let options = '<option value="">Chọn Quận/Huyện</option>';
+                            districts.forEach(function (district) {
+                                options += `<option value="${district.DistrictID}" data-name="${district.DistrictName}">${district.DistrictName}</option>`;
+                            });
+                            $('#district').html(options);
+                        },
+                        error: function (error) {
+                            console.error('Lỗi khi tải danh sách quận/huyện:', error);
+                            toastr.error('Không thể tải danh sách quận/huyện');
+                        }
+                    });
+                } else {
+                    $('#district').prop('disabled', true);
+                    $('#ward').prop('disabled', true);
+                }
+            });
+
+            // Khi chọn quận/huyện
+            $('#district').change(function () {
+                const districtId = $(this).val();
+                const districtName = $(this).find('option:selected').data('name');
+                $('#districtName').val(districtName);
+                $('#districtCode').val(districtId);
+
+                // Reset phường/xã
+                $('#ward').html('<option value="">Chọn Phường/Xã</option>');
+                $('#wardName').val('');
+                $('#wardCode').val('');
+
+                if (districtId) {
+                    $('#ward').prop('disabled', false);
+                    // Load phường/xã
+                    $.ajax({
+                        url: `https://localhost:7277/api/ghn/wards/${districtId}`,  // Thêm BaseAddress vào
+                        type: 'GET',
+                        success: function (response) {
+                            const wards = response.data;
+                            let options = '<option value="">Chọn Phường/Xã</option>';
+                            wards.forEach(function (ward) {
+                                options += `<option value="${ward.WardCode}" data-name="${ward.WardName}">${ward.WardName}</option>`;
+                            });
+                            $('#ward').html(options);
+                        },
+                        error: function (error) {
+                            console.error('Lỗi khi tải danh sách phường/xã:', error);
+                            toastr.error('Không thể tải danh sách phường/xã');
+                        }
+                    });
+                } else {
+                    $('#ward').prop('disabled', true);
+                }
+            });
+
+            // Khi chọn phường/xã
+            $('#ward').change(function () {
+                const wardName = $(this).find('option:selected').data('name');
+                $('#wardName').val(wardName);
+                $('#wardCode').val(wardName.split('/')[0]);
+            });
+        });
+
+
+    </script>
+}

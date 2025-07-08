@@ -20,7 +20,7 @@ namespace SneakFit.ApiIntegration.Services
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<PagedResult<HoaDonClientViewModel>> GetAllPaging(PhanTrangHoaDonClient request)
+        public async Task<PagedResult<HoaDonClientViewModel>> GetAllPaging(PhanTrangHoaDonClient request, Guid? userId = null)
         {
             var client = _httpClientFactory.CreateClient();
             client.BaseAddress = new Uri(_configuration["BaseAddress"]);
@@ -28,7 +28,12 @@ namespace SneakFit.ApiIntegration.Services
             if (!string.IsNullOrEmpty(sessions))
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
 
-            var response = await client.GetAsync($"/api/HoaDonClient?pageIndex={request.PageIndex}&pageSize={request.PageSize}&keyword={request.Keyword}&trangthaihoadon={request.Trangthaihoadon}&ngayBatDau={request.NgayBatDau:yyyy-MM-dd}&ngayKetThuc={request.NgayKetThuc:yyyy-MM-dd}");
+            var url = $"/api/HoaDonClient?pageIndex={request.PageIndex}&pageSize={request.PageSize}&keyword={request.Keyword}&trangthaihoadon={request.Trangthaihoadon}&ngayBatDau={request.NgayBatDau:yyyy-MM-dd}&ngayKetThuc={request.NgayKetThuc:yyyy-MM-dd}";
+            if (userId.HasValue)
+            {
+                url += $"&userId={userId}";
+            }
+            var response = await client.GetAsync(url);
 
             var body = await response.Content.ReadAsStringAsync();
             if (response.IsSuccessStatusCode)

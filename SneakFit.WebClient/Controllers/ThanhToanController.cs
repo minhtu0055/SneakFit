@@ -41,9 +41,11 @@ namespace SneakFit.WebClient.Controllers
         private Guid GetUserId()
         {
             var userIdStr = User?.Claims?.FirstOrDefault(x => x.Type == "UserId" || x.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            return string.IsNullOrEmpty(userIdStr)
-                ? Guid.Parse("69BD714F-9576-45BA-B5B7-F00649BE00DE") // hardcode for demo
-                : Guid.Parse(userIdStr);
+            if (string.IsNullOrEmpty(userIdStr))
+            {
+                throw new UnauthorizedAccessException("Vui lòng đăng nhập để tiếp tục.");
+            }
+            return Guid.Parse(userIdStr);
         }
 
         public IActionResult Checkout()

@@ -197,5 +197,22 @@ namespace SneakFit.ApiIntegration.Services
 
             return JsonConvert.DeserializeObject<ApiResult<bool>>(body);
         }
+
+        public async Task<GioHangViewModel> TaoGioHangMoi(Guid userId)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var token = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            var json = Newtonsoft.Json.JsonConvert.SerializeObject(userId);
+            var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await client.PostAsync($"/api/giohang/tao-gio-hang-moi", httpContent);
+            var result = await response.Content.ReadAsStringAsync();
+            if (!response.IsSuccessStatusCode)
+                throw new Exception(result);
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<GioHangViewModel>(result);
+        }
     }
 }

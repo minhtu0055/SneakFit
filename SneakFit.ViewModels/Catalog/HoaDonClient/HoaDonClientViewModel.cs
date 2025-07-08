@@ -28,7 +28,7 @@ namespace SneakFit.ViewModels.Catalog.HoaDonClient
         public TrangThaiThanhToan TrangThaiThanhToan { get; set; }
         public List<HoaDonChiTietViewModel> HoaDonChiTiet { get; set; }
         public Guid? VoucherId { get; set; }
-
+        public Guid UserId { get; set; }
         public decimal? TongTienSanPham => TongTien > 0 && PhiVanChuyen > 0 ? TongTien - PhiVanChuyen : TongTien;
     }
 }

@@ -41,66 +41,87 @@ namespace SneakFit.WebClient.Controllers
         private Guid GetUserId()
         {
             var userIdStr = User?.Claims?.FirstOrDefault(x => x.Type == "UserId" || x.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            return string.IsNullOrEmpty(userIdStr)
-                ? Guid.Parse("69BD714F-9576-45BA-B5B7-F00649BE00DE") // hardcode for demo
-                : Guid.Parse(userIdStr);
+
+            if (string.IsNullOrEmpty(userIdStr))
+            {
+                throw new UnauthorizedAccessException("Vui lòng đăng nhập để tiếp tục.");
+            }
+
+            return Guid.Parse(userIdStr);
         }
 
         public async Task<IActionResult> Index()
         {
-            var userId = GetUserId();
-
-            var gioHang = await _gioHangApiClient.GetByUserId(userId);
-            var list = gioHang?.GioHangChiTiets?.Select(x => new GioHangItemViewModel
+            try
             {
-                SanPhamChiTietId = x.SanPhamChiTietId,
-                TenSanPham = x.TenSanPham,
-                AnhSanPham = x.HinhAnh ?? "/images/Default_Logo.png",
-                MauSac = x.MauSac,
-                KichThuoc = x.KichThuoc.ToString(),
-                GiaGoc = x.DonGia,
-                GiaKhuyenMai = x.DonGia,
-                SoLuong = x.SoLuong,
-            }).ToList() ?? new List<GioHangItemViewModel>();
-
-            // Lấy danh sách khuyến mãi đang hoạt động
-            var khuyenMais = await _khuyenMaiApiClient.GetAllPaging(new PhanTrangKhuyenMai
-            {
-                PageIndex = 1,
-                PageSize = 100,
-                Keyword = null,
-                TrangThai = SneakFit.Data.Enums.TrangThaiGiamGia.HoatDong
-            });
-
-            // Gắn giá KM vào từng item
-            foreach (var item in list)
-            {
-                var km = khuyenMais.Items
-                    .Where(x => x.SanPhamChiTiets != null && x.SanPhamChiTiets.Any(ct => ct.SPCTId == item.SanPhamChiTietId))
-                    .OrderByDescending(x => x.ThoiGianBatDau)
-                    .FirstOrDefault();
-
-                if (km != null)
+                var userId = GetUserId();
+                var gioHang = await _gioHangApiClient.GetByUserId(userId);
+                if (gioHang == null)
                 {
-                    if (km.LoaiGiamGia == LoaiGiamGia.PhamTram)
+                    // Tạo giỏ hàng mới nếu chưa có
+                    await _gioHangApiClient.TaoGioHangMoi(userId);
+                    gioHang = await _gioHangApiClient.GetByUserId(userId);
+                }
+                var list = gioHang?.GioHangChiTiets?.Select(x => new GioHangItemViewModel
+                {
+                    SanPhamChiTietId = x.SanPhamChiTietId,
+                    TenSanPham = x.TenSanPham,
+                    AnhSanPham = x.HinhAnh ?? "/images/Default_Logo.png",
+                    MauSac = x.MauSac,
+                    KichThuoc = x.KichThuoc.ToString(),
+                    GiaGoc = x.DonGia,
+                    GiaKhuyenMai = x.DonGia,
+                    SoLuong = x.SoLuong,
+                }).ToList() ?? new List<GioHangItemViewModel>();
+
+                // Lấy danh sách khuyến mãi đang hoạt động
+                var khuyenMais = await _khuyenMaiApiClient.GetAllPaging(new PhanTrangKhuyenMai
+                {
+                    PageIndex = 1,
+                    PageSize = 100,
+                    Keyword = null,
+                    TrangThai = SneakFit.Data.Enums.TrangThaiGiamGia.HoatDong
+                });
+
+                // Gắn giá KM vào từng item
+                foreach (var item in list)
+                {
+                    var km = khuyenMais.Items
+                        .Where(x => x.SanPhamChiTiets != null && x.SanPhamChiTiets.Any(ct => ct.SPCTId == item.SanPhamChiTietId))
+                        .OrderByDescending(x => x.ThoiGianBatDau)
+                        .FirstOrDefault();
+
+                    if (km != null)
                     {
-                        item.PhanTramGiamGia = (int)Math.Round(km.GiaTriGiamGia);
-                        item.GiaKhuyenMai = Math.Round(item.GiaGoc * (1 - km.GiaTriGiamGia / 100m), 0);
+                        if (km.LoaiGiamGia == LoaiGiamGia.PhamTram)
+                        {
+                            item.PhanTramGiamGia = (int)Math.Round(km.GiaTriGiamGia);
+                            item.GiaKhuyenMai = Math.Round(item.GiaGoc * (1 - km.GiaTriGiamGia / 100m), 0);
+                        }
+                        else if (km.LoaiGiamGia == LoaiGiamGia.SoTien)
+                        {
+                            item.GiaKhuyenMai = Math.Max(0, item.GiaGoc - km.GiaTriGiamGia);
+                            item.PhanTramGiamGia = item.GiaGoc > 0 ? (int)Math.Round((km.GiaTriGiamGia / item.GiaGoc) * 100, 0) : 0;
+                        }
                     }
-                    else if (km.LoaiGiamGia == LoaiGiamGia.SoTien)
+                    else
                     {
-                        item.GiaKhuyenMai = Math.Max(0, item.GiaGoc - km.GiaTriGiamGia);
-                        item.PhanTramGiamGia = item.GiaGoc > 0 ? (int)Math.Round((km.GiaTriGiamGia / item.GiaGoc) * 100, 0) : 0;
+                        item.GiaKhuyenMai = item.GiaGoc;
+                        item.PhanTramGiamGia = 0;
                     }
                 }
-                else
-                {
-                    item.GiaKhuyenMai = item.GiaGoc;
-                    item.PhanTramGiamGia = 0;
-                }
+
+                return View(list);
             }
-
-            return View(list);
+            catch (UnauthorizedAccessException)
+            {
+                return RedirectToAction("Index", "Login"); // Chuyển hướng đến trang đăng nhập đúng controller/action
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Có lỗi xảy ra: {ex.Message}";
+                return View(new List<GioHangItemViewModel>());
+            }
         }
 
         [HttpPost]

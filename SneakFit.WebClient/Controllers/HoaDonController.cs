@@ -19,9 +19,11 @@ namespace SneakFit.WebClient.Controllers
         private Guid GetUserId()
         {
             var userIdStr = User?.Claims?.FirstOrDefault(x => x.Type == "UserId" || x.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            return string.IsNullOrEmpty(userIdStr)
-                ? Guid.Parse("69BD714F-9576-45BA-B5B7-F00649BE00DE") // hardcode for demo
-                : Guid.Parse(userIdStr);
+            if (string.IsNullOrEmpty(userIdStr))
+            {
+                throw new UnauthorizedAccessException("Vui lòng đăng nhập để tiếp tục.");
+            }
+            return Guid.Parse(userIdStr);
         }
 
         // Hiển thị danh sách hóa đơn
@@ -37,14 +39,17 @@ namespace SneakFit.WebClient.Controllers
                     Keyword = "",
                     Trangthaihoadon = null,
                     NgayBatDau = null,
-                    NgayKetThuc = null
+                    NgayKetThuc = null,
+                    UserId = userId // Thêm lọc theo userId
                 };
                 var hoaDons = await _hoaDonClientApiClient.GetAllPaging(request);
                 if (hoaDons == null || hoaDons.Items == null)
                 {
                     return View(new List<HoaDonClientViewModel>());
                 }
-                return View(hoaDons.Items);
+                // Chỉ hiển thị hóa đơn của userId hiện tại (phòng trường hợp API trả về nhiều user)
+                var filtered = hoaDons.Items.Where(x => x.UserId == userId).ToList();
+                return View(filtered);
             }
             catch (Exception ex)
             {
@@ -58,10 +63,11 @@ namespace SneakFit.WebClient.Controllers
         {
             try
             {
+                var userId = GetUserId();
                 var hoaDon = await _hoaDonClientApiClient.GetById(id);
-                if (hoaDon == null)
+                if (hoaDon == null || hoaDon.UserId != userId)
                 {
-                    TempData["ErrorMessage"] = "Không tìm thấy đơn hàng.";
+                    TempData["ErrorMessage"] = "Không tìm thấy đơn hàng hoặc bạn không có quyền xem đơn hàng này.";
                     return RedirectToAction("Index");
                 }
 

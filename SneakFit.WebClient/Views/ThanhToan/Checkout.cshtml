@@ -31,7 +31,6 @@
             @foreach (var item in Model.GioHangItems)
             {
                 <div class="product-item d-flex align-items-center mb-3" style="border-radius: 10px;">
-                    @* <img src="@($"{baseUrl}{item.AnhSanPham}")" class="product-img" style="margin-left: 10px;" /> *@
                     @{
                         var defaultImage = $"{baseUrl}/images/Default_Logo.png";
                         string imageUrl = defaultImage;
@@ -145,10 +144,10 @@
             }
 
             <form method="post" asp-action="Checkout" asp-controller="ThanhToan" id="checkoutForm">
-                <input type="hidden" asp-for="HoTen" value="@Model.HoTen" />
-                <input type="hidden" asp-for="SoDienThoai" value="@Model.SoDienThoai" />
+                <input type="hidden" asp-for="HoTen" id="HoTenInput" value="@Model.HoTen" />
+                <input type="hidden" asp-for="SoDienThoai" id="SoDienThoaiInput" value="@Model.SoDienThoai" />
                 <input type="hidden" asp-for="Email" value="@Model.Email" />
-                <input type="hidden" asp-for="DiaChi" value="@Model.DiaChi" />
+                <input type="hidden" asp-for="DiaChi" id="DiaChiInput" value="@Model.DiaChi" />
                 <input type="hidden" asp-for="GhiChu" value="@Model.GhiChu ?? String.Empty" />
                 <input type="hidden" asp-for="PhiVanChuyen" value="@Model.PhiVanChuyen" />
                 <input type="hidden" asp-for="TongTienSanPham" value="@Model.TongTienSanPham" />
@@ -157,7 +156,6 @@
                 <button type="submit" class="btn btn-danger btn-checkout mt-3" id="submitBtn">Đặt hàng</button>
             </form>
         </div>
-
     </div>
 </main>
 
@@ -166,6 +164,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script>
         const baseUrl = '@baseUrl';
+        const userId = '@Context.User.FindFirst("sub")?.Value'; // Giả sử bạn lưu UserId trong Claims
+        let selectedAddressId = null; // Biến để theo dõi địa chỉ được chọn
 
         $(document).ready(function () {
             // Hàm chung để load dữ liệu cho dropdown
@@ -174,7 +174,7 @@
                     url: url,
                     type: 'GET',
                     success: function (response) {
-                        console.log('Response from API:', response); // Debug log
+                        console.log('Response from API:', response);
                         const items = response.data || response;
 
                         if (!Array.isArray(items) || items.length === 0) {
@@ -212,13 +212,11 @@
                 }
 
                 $(districtSelector).prop('disabled', false);
-
-                // Gọi API lấy tất cả districts, sau đó filter theo provinceId
                 $.ajax({
                     url: `${baseUrl}/api/ghn/districts`,
                     type: 'GET',
                     success: function (response) {
-                        console.log('Districts response:', response); // Debug log
+                        console.log('Districts response:', response);
                         const allDistricts = response.data || response;
 
                         if (!Array.isArray(allDistricts)) {
@@ -227,13 +225,11 @@
                             return;
                         }
 
-                        // Filter districts theo ProvinceID
                         const filteredDistricts = allDistricts.filter(district =>
                             district.ProvinceID == provinceId
                         );
 
-                        console.log('Filtered districts:', filteredDistricts); // Debug log
-
+                        console.log('Filtered districts:', filteredDistricts);
                         if (filteredDistricts.length === 0) {
                             $(districtSelector).html('<option value="">Không có quận/huyện</option>');
                             return;
@@ -251,7 +247,6 @@
                     }
                 });
 
-                // Reset ward dropdown
                 $(wardSelector).html('<option value="">Chọn phường / xã</option>').prop('disabled', true);
             }
 
@@ -266,115 +261,205 @@
                 loadDropdown(`${baseUrl}/api/ghn/wards/${districtId}`, wardSelector, 'Chọn phường / xã', 'WardCode', 'WardName');
             }
 
-            // Khởi tạo - Load tỉnh/thành cho cả hai dropdown
-            loadProvinces('#province');
-            loadProvinces('#modal-province');
+            // Load danh sách địa chỉ của người dùng
+            function loadUserAddresses() {
+                $.ajax({
+                    url: `${baseUrl}/api/addresses/user/${userId}`,
+                    type: 'GET',
+                    success: function (response) {
+                        console.log('User addresses:', response);
+                        const addresses = response.data || response;
+                        let addressHtml = '';
+                        if (addresses.length === 0) {
+                            addressHtml = '<p>Chưa có địa chỉ nào. Vui lòng thêm địa chỉ mới.</p>';
+                        } else {
+                            addresses.forEach(address => {
+                                const isDefault = address.mac_Dinh ? '<span class="badge bg-success">Mặc định</span>' : '';
+                                addressHtml += `
+                                    <div class="address-item mb-3 p-3 border rounded" data-address-id="${address.id}" style="cursor: pointer;">
+                                        <p class="mb-1"><strong>${address.tenNguoiNhan}</strong> <span class="text-muted">(${address.soDienThoai})</span> ${isDefault}</p>
+                                        <p class="mb-1">${address.tenDiaChi}, ${address.tenXa}, ${address.tenHuyen}, ${address.tenThanhPho}</p>
+                                        <span class="set-default text-primary" style="cursor: pointer;" data-address-id="${address.id}">Đặt làm địa chỉ mặc định</span>
+                                    </div>`;
+                            });
+                        }
+                        $('#addressItems').html(addressHtml);
+                    },
+                    error: function (xhr) {
+                        console.error('Lỗi khi tải danh sách địa chỉ:', xhr.status, xhr.responseText);
+                        $('#addressItems').html('<p>Lỗi khi tải danh sách địa chỉ.</p>');
+                    }
+                });
+            }
 
-            // Xử lý khi chọn tỉnh/thành (dropdown chính)
-            $('#province').on('change', function () {
-                const provinceId = $(this).val();
-                const provinceName = $(this).find('option:selected').data('name');
+            // Đặt địa chỉ mặc định
+            function setDefaultAddress(addressId) {
+                $.ajax({
+                    url: `${baseUrl}/api/addresses/set-default/${addressId}`,
+                    type: 'PUT',
+                    success: function (response) {
+                        console.log('Đặt địa chỉ mặc định thành công:', response);
+                        selectedAddressId = addressId; // Cập nhật địa chỉ được chọn
+                        loadUserAddresses();
+                    },
+                    error: function (xhr) {
+                        console.error('Lỗi khi đặt địa chỉ mặc định:', xhr.status, xhr.responseText);
+                        alert('Lỗi khi đặt địa chỉ mặc định.');
+                    }
+                });
+            }
 
-                console.log('Selected province:', provinceId, provinceName); // Debug log
-
-                // Reset và load districts
-                loadDistricts(provinceId, '#district', '#ward');
-
-                // Cập nhật hidden fields nếu cần
-                if (provinceId) {
-                    $('#provinceName').val(provinceName);
-                    $('#provinceCode').val(provinceId);
-                } else {
-                    $('#provinceName').val('');
-                    $('#provinceCode').val('');
+            // Cập nhật địa chỉ trên form thanh toán
+            function updateCheckoutAddress(addressId) {
+                if (!addressId) {
+                    alert('Vui lòng chọn một địa chỉ.');
+                    return;
                 }
+                $.ajax({
+                    url: `${baseUrl}/api/addresses/${addressId}`,
+                    type: 'GET',
+                    success: function (response) {
+                        const address = response.data || response;
+                        const fullAddress = `${address.tenDiaChi}, ${address.tenXa}, ${address.tenHuyen}, ${address.tenThanhPho}`;
+                        $('.address-box p:last').text(fullAddress);
+                        $('.address-box p:first strong').text(address.tenNguoiNhan);
+                        $('.address-box p:first span').text(`(${address.soDienThoai})`);
+                        $('#HoTenInput').val(address.tenNguoiNhan);
+                        $('#SoDienThoaiInput').val(address.soDienThoai);
+                        $('#DiaChiInput').val(fullAddress);
+                        $('#HiddenAddressInput').val(fullAddress);
+                        $('#changeAddressModal').modal('hide');
+                    },
+                    error: function (xhr) {
+                        console.error('Lỗi khi lấy thông tin địa chỉ:', xhr.status, xhr.responseText);
+                        alert('Lỗi khi cập nhật địa chỉ.');
+                    }
+                });
+            }
+
+            // Khởi tạo
+            loadProvinces('#province');
+
+            // Load provinces cho modal thêm địa chỉ mới khi modal được mở
+            $('#addNewAddressModal').on('show.bs.modal', function () {
+                loadProvinces('#modal-province');
+                // Reset form
+                $('#modal-receiver-name').val('');
+                $('#modal-phone-number').val('');
+                $('#modal-detail-address').val('');
+                $('#modal-province').val('');
+                $('#modal-district').html('<option value="">Chọn quận / huyện</option>').prop('disabled', true);
+                $('#modal-ward').html('<option value="">Chọn phường / xã</option>').prop('disabled', true);
+                // Đảm bảo changeAddressModal vẫn mở
+                $('#changeAddressModal').modal('show');
             });
 
-        // Xử lý khi chọn quận/huyện (dropdown chính)
-        $('#district').on('change', function () {
-            const districtId = $(this).val();
-            const districtName = $(this).find('option:selected').data('name');
+            // Xử lý khi chọn tỉnh/thành
+            $('#province, #modal-province').on('change', function () {
+                const provinceId = $(this).val();
+                const districtSelector = $(this).attr('id') === 'province' ? '#district' : '#modal-district';
+                const wardSelector = $(this).attr('id') === 'province' ? '#ward' : '#modal-ward';
+                loadDistricts(provinceId, districtSelector, wardSelector);
+            });
 
-            console.log('Selected district:', districtId, districtName); // Debug log
+            // Xử lý khi chọn quận/huyện
+            $('#district, #modal-district').on('change', function () {
+                const districtId = $(this).val();
+                const wardSelector = $(this).attr('id') === 'district' ? '#ward' : '#modal-ward';
+                loadWards(districtId, wardSelector);
+            });
 
-            // Load wards
-            loadWards(districtId, '#ward');
+            // Click "Thay đổi" địa chỉ
+            $('#btnChangeAddress').click(function (e) {
+                e.preventDefault();
+                selectedAddressId = null; // Reset địa chỉ được chọn
+                loadUserAddresses();
+                $('#changeAddressModal').modal('show');
+            });
 
-            // Cập nhật hidden fields nếu cần
-            if (districtId) {
-                $('#districtName').val(districtName);
-                $('#districtCode').val(districtId);
-            } else {
-                $('#districtName').val('');
-                $('#districtCode').val('');
-            }
-        });
+            // Click vào địa chỉ để chọn
+            $(document).on('click', '.address-item', function () {
+                $('.address-item').removeClass('selected');
+                $(this).addClass('selected');
+                selectedAddressId = $(this).data('address-id');
+            });
 
-        // Xử lý khi chọn phường/xã (dropdown chính)
-        $('#ward').on('change', function () {
-            const wardCode = $(this).val();
-            const wardName = $(this).find('option:selected').data('name');
+            // Click "Đặt làm mặc định"
+            $(document).on('click', '.set-default', function (e) {
+                e.stopPropagation(); // Ngăn sự kiện click trên address-item
+                const addressId = $(this).data('address-id');
+                setDefaultAddress(addressId);
+            });
 
-            console.log('Selected ward:', wardCode, wardName); // Debug log
+            // Click "Xác nhận" trong changeAddressModal
+            $('#confirm-address').click(function () {
+                updateCheckoutAddress(selectedAddressId);
+            });
 
-            // Cập nhật hidden fields nếu cần
-            if (wardCode) {
-                $('#wardName').val(wardName);
-                $('#wardCode').val(wardCode);
-            } else {
-                $('#wardName').val('');
-                $('#wardCode').val('');
-            }
-        });
+            // Click "Hủy" hoặc "X" trong addNewAddressModal
+            $('#cancel-new-address, #close-new-address').click(function () {
+                $('#addNewAddressModal').modal('hide');
+                $('#changeAddressModal').modal('show');
+            });
 
-        // Xử lý cho modal (tương tự như trên)
-        $('#modal-province').on('change', function () {
-            const provinceId = $(this).val();
-            loadDistricts(provinceId, '#modal-district', '#modal-ward');
-        });
+            // Click "Lưu địa chỉ mới"
+            $('#save-new-address').click(function () {
+                const receiverName = $('#modal-receiver-name').val();
+                const phoneNumber = $('#modal-phone-number').val();
+                const province = $('#modal-province option:selected').data('name');
+                const provinceId = $('#modal-province').val();
+                const district = $('#modal-district option:selected').data('name');
+                const districtId = $('#modal-district').val();
+                const ward = $('#modal-ward option:selected').data('name');
+                const wardCode = $('#modal-ward').val();
+                const detailAddress = $('#modal-detail-address').val();
 
-        $('#modal-district').on('change', function () {
-            const districtId = $(this).val();
-            loadWards(districtId, '#modal-ward');
-        });
+                if (!receiverName || !phoneNumber || !province || !district || !ward || !detailAddress) {
+                    alert('Vui lòng điền đầy đủ thông tin địa chỉ.');
+                    return;
+                }
 
-        // Click "Thay đổi" địa chỉ
-        $('#btnChangeAddress').click(function (e) {
-            e.preventDefault();
-            $('#changeAddressModal').modal('show');
-        });
+                const newAddress = {
+                    tenNguoiNhan: receiverName,
+                    soDienThoai: phoneNumber,
+                    tenDiaChi: detailAddress,
+                    tenThanhPho: province,
+                    tenHuyen: district,
+                    tenXa: ward,
+                    maTinh: provinceId,
+                    maHuyen: districtId,
+                    maXa: wardCode,
+                    mac_Dinh: false,
+                    userId: userId
+                };
 
-        // Khi bấm "Lưu địa chỉ"
-        $('#save-address').click(function () {
-            const province = $('#modal-province option:selected').text();
-            const district = $('#modal-district option:selected').text();
-            const ward = $('#modal-ward option:selected').text();
-            const detail = $('#modal-detail-address').val();
-
-            if (!province || province === 'Chọn tỉnh / thành' ||
-                !district || district === 'Chọn quận / huyện' ||
-                !ward || ward === 'Chọn phường / xã' || !detail) {
-                alert('Vui lòng điền đầy đủ thông tin địa chỉ.');
-                return;
-            }
-
-            const fullAddress = `${detail}, ${ward}, ${district}, ${province}`;
-            $('.address-box p:last').text(fullAddress); // Cập nhật UI
-            $('#HiddenAddressInput').val(fullAddress); // Cập nhật hidden input
-            $('#changeAddressModal').modal('hide');
-        });
+                $.ajax({
+                    url: `${baseUrl}/api/addresses`,
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(newAddress),
+                    success: function (response) {
+                        console.log('Thêm địa chỉ thành công:', response);
+                        loadUserAddresses();
+                        $('#addNewAddressModal').modal('hide');
+                        $('#changeAddressModal').modal('show');
+                    },
+                    error: function (xhr) {
+                        console.error('Lỗi khi thêm địa chỉ:', xhr.status, xhr.responseText);
+                        alert('Lỗi khi thêm địa chỉ.');
+                    }
+                });
+            });
 
             // Xử lý radio thanh toán
             let lastSelectedRadio = null;
             $('.payment-btn input[type="radio"]').on('click', function () {
                 const $radio = $(this);
                 if ($radio.is(':checked') && lastSelectedRadio === $radio[0]) {
-                    // Nếu radio đang được chọn và được click lần nữa, bỏ chọn
                     $radio.prop('checked', false);
                     $('#selectedPayment').val('');
                     lastSelectedRadio = null;
                 } else {
-                    // Chọn radio mới và cập nhật giá trị
                     $('#selectedPayment').val($radio.val());
                     lastSelectedRadio = $radio[0];
                     $('#paymentError').hide();
@@ -389,13 +474,12 @@
                     return false;
                 }
             });
-
         });
     </script>
 }
 
-<!-- Modal chọn địa chỉ GHN -->
-<div class="modal fade" id="changeAddressModal" tabindex="-1" aria-labelledby="changeAddressLabel" aria-hidden="true">
+<!-- Modal chọn địa chỉ -->
+<div class="modal fade" id="changeAddressModal" tabindex="-1" aria-labelledby="changeAddressLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
@@ -403,7 +487,40 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
             </div>
             <div class="modal-body">
+                <!-- Danh sách địa chỉ -->
+                <div id="addressList" class="mb-4">
+                    <h6>Danh sách địa chỉ</h6>
+                    <div id="addressItems"></div>
+                </div>
+                <!-- Nút thêm địa chỉ mới -->
+                <button id="btnAddNewAddress" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addNewAddressModal">Thêm địa chỉ mới</button>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" id="confirm-address" class="btn btn-primary">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal thêm địa chỉ mới -->
+<div class="modal fade" id="addNewAddressModal" tabindex="-1" aria-labelledby="addNewAddressLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addNewAddressLabel">Thêm địa chỉ mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng" id="close-new-address"></button>
+            </div>
+            <div class="modal-body">
                 <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Tên người nhận</label>
+                        <input type="text" class="form-control" id="modal-receiver-name" placeholder="Nhập tên người nhận" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Số điện thoại</label>
+                        <input type="text" class="form-control" id="modal-phone-number" placeholder="Nhập số điện thoại" />
+                    </div>
                     <div class="col-md-4">
                         <label class="form-label">Tỉnh / Thành</label>
                         <select id="modal-province" class="form-select"></select>
@@ -416,20 +533,24 @@
                         <label class="form-label">Phường / Xã</label>
                         <select id="modal-ward" class="form-select"></select>
                     </div>
-                </div>
-                <div class="mt-3">
-                    <label class="form-label">Địa chỉ chi tiết</label>
-                    <input type="text" class="form-control" id="modal-detail-address" placeholder="Số nhà, tên đường..." />
+                    <div class="col-md-12">
+                        <label class="form-label">Địa chỉ chi tiết</label>
+                        <input type="text" class="form-control" id="modal-detail-address" placeholder="Số nhà, tên đường..." />
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" id="save-address" class="btn btn-primary">Lưu địa chỉ</button>
+                <button type="button" class="btn btn-secondary" id="cancel-new-address">Hủy</button>
+                <button id="save-new-address" class="btn btn-primary">Lưu địa chỉ</button>
             </div>
         </div>
     </div>
 </div>
 
 <style>
+    /* ==========================================================================
+       1. Global Styles
+       ========================================================================== */
     main.main {
         padding: 20px 10px;
         background-color: #F1F5F9;
@@ -442,7 +563,9 @@
         width: 100%;
     }
 
-    /* Section boxes */
+    /* ==========================================================================
+       2. Section Boxes
+       ========================================================================== */
     .section-box {
         background-color: #FFFFFF;
         padding: 20px;
@@ -458,7 +581,6 @@
             transform: translateY(-2px);
         }
 
-        /* Header titles */
         .section-box h5 {
             font-weight: 600;
             margin-bottom: 15px;
@@ -474,7 +596,9 @@
                 color: #1E3A8A;
             }
 
-    /* Address section */
+    /* ==========================================================================
+       3. Address Section
+       ========================================================================== */
     .address-box {
         display: flex;
         flex-direction: column;
@@ -516,25 +640,9 @@
         margin-left: 15px;
     }
 
-    .btn-change {
-        min-width: 100px;
-        font-size: 0.95rem;
-        background: linear-gradient(90deg, #1E3A8A, #60A5FA);
-        color: #FFFFFF;
-        border: none;
-        padding: 8px 15px;
-        border-radius: 5px;
-        transition: all 0.3s ease;
-        display: inline-block;
-    }
-
-        .btn-change:hover {
-            background: linear-gradient(90deg, #3B82F6, #163172);
-            transform: scale(1.05);
-            color: #FFFFFF;
-        }
-
-    /* Product list */
+    /* ==========================================================================
+       4. Product List
+       ========================================================================== */
     .product-list .product-item {
         display: flex;
         flex-wrap: wrap;
@@ -578,7 +686,6 @@
         flex-shrink: 0;
     }
 
-    /* Discount */
     .discount {
         display: inline-block;
         background: #ffe4e0;
@@ -590,7 +697,9 @@
         vertical-align: middle;
     }
 
-    /* Shipping method */
+    /* ==========================================================================
+       5. Shipping Method
+       ========================================================================== */
     .shipping-method select {
         height: calc(2.5rem + 2px);
         font-size: 1rem;
@@ -612,7 +721,9 @@
             color: #1E3A8A;
         }
 
-    /* Payment method */
+    /* ==========================================================================
+       6. Payment Method
+       ========================================================================== */
     .payment-method {
         padding: 15px 20px;
         border-radius: 8px;
@@ -657,7 +768,9 @@
             color: #FFFFFF;
         }
 
-    /* Order summary */
+    /* ==========================================================================
+       7. Order Summary
+       ========================================================================== */
     .order-summary {
         padding: 20px;
         background-color: #FFFFFF;
@@ -692,6 +805,27 @@
             color: #1E3A8A;
         }
 
+    /* ==========================================================================
+       8. Buttons
+       ========================================================================== */
+    .btn-change {
+        min-width: 100px;
+        font-size: 0.95rem;
+        background: linear-gradient(90deg, #1E3A8A, #60A5FA);
+        color: #FFFFFF;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+        display: inline-block;
+    }
+
+        .btn-change:hover {
+            background: linear-gradient(90deg, #3B82F6, #163172);
+            transform: scale(1.05);
+            color: #FFFFFF;
+        }
+
     .btn-checkout {
         width: 100%;
         padding: 12px 0;
@@ -711,36 +845,266 @@
             color: #FFFFFF;
         }
 
-    /* Modal styling */
+    /* ==========================================================================
+       9. Modal Common Styles
+       ========================================================================== */
+    .modal.fade .modal-dialog {
+        transition: transform 0.3s ease-out;
+        transform: translate(0, -50px);
+    }
+
+    .modal.show .modal-dialog {
+        transform: translate(0, 0);
+    }
+
+    .modal-content {
+        border: none;
+        border-radius: 12px;
+        background-color: #FFFFFF;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        font-family: 'Poppins', sans-serif;
+    }
+
     .modal-header {
-        border-bottom: none;
-        background: #F1F5F9;
-        border-radius: 10px 10px 0 0;
+        background: linear-gradient(90deg, #F1F5F9, #E6F0FA);
+        border-bottom: 1px solid #E5E7EB;
+        padding: 20px;
+        border-radius: 12px 12px 0 0;
     }
 
     .modal-title {
         font-weight: 600;
-        font-size: 1.3rem;
+        font-size: 1.4rem;
         color: #1E3A8A;
+        line-height: 1.4;
+    }
+
+    .btn-close {
+        background: none;
+        border: none;
+        font-size: 1.2rem;
+        color: #4B5563;
+        opacity: 0.7;
+        transition: opacity 0.3s ease;
+    }
+
+        .btn-close:hover {
+            opacity: 1;
+            color: #1E3A8A;
+        }
+
+    .modal-body {
+        padding: 25px;
+        color: #4B5563;
+        font-size: 1rem;
     }
 
     .modal-footer {
-        padding: 15px;
+        padding: 15px 25px;
         border-top: 1px solid #E5E7EB;
+        background-color: #F9FAFB;
+        border-radius: 0 0 12px 12px;
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
     }
 
         .modal-footer button {
             min-width: 120px;
+            padding: 10px 20px;
             font-size: 1rem;
-            background: #60A5FA;
-            color: #FFFFFF;
-            border: none;
-            border-radius: 5px;
+            font-weight: 500;
+            border-radius: 6px;
             transition: all 0.3s ease;
         }
 
-            .modal-footer button:hover {
-                background: #3B82F6;
-                transform: scale(1.05);
+        .modal-footer .btn-primary {
+            background: linear-gradient(90deg, #1E3A8A, #60A5FA);
+            color: #FFFFFF;
+            border: none;
+        }
+
+            .modal-footer .btn-primary:hover {
+                background: linear-gradient(90deg, #3B82F6, #163172);
+                box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3);
+                transform: translateY(-2px);
             }
+
+        .modal-footer .btn-secondary {
+            background-color: #6B7280;
+            color: #FFFFFF;
+            border: none;
+        }
+
+            .modal-footer .btn-secondary:hover {
+                background-color: #4B5563;
+                box-shadow: 0 4px 15px rgba(75, 85, 99, 0.2);
+                transform: translateY(-2px);
+            }
+
+    /* ==========================================================================
+       10. Change Address Modal
+       ========================================================================== */
+    #changeAddressModal .modal-dialog {
+        max-width: 700px;
+    }
+
+    #changeAddressModal .modal-body {
+        max-height: 500px;
+        overflow-y: auto;
+    }
+
+    #changeAddressModal h6 {
+        font-weight: 600;
+        font-size: 1.2rem;
+        color: #1E3A8A;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #60A5FA;
+        padding-bottom: 10px;
+    }
+
+    #addressList .address-item {
+        padding: 15px;
+        border: 1px solid #E5E7EB;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+        #addressList .address-item:hover {
+            background-color: #F1F5F9;
+            border-color: #60A5FA;
+            transform: translateY(-2px);
+        }
+
+        #addressList .address-item.selected {
+            background-color: #E6F0FA;
+            border: 2px solid #60A5FA;
+            box-shadow: 0 4px 15px rgba(96, 165, 250, 0.2);
+        }
+
+        #addressList .address-item p {
+            margin: 0 0 8px 0;
+            font-size: 1rem;
+            color: #4B5563;
+        }
+
+            #addressList .address-item p strong {
+                color: #1E3A8A;
+            }
+
+        #addressList .address-item .badge {
+            font-size: 0.85rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-left: 10px;
+        }
+
+    #addressList .set-default {
+        font-size: 0.9rem;
+        color: #60A5FA;
+        text-decoration: underline;
+        transition: color 0.3s ease;
+    }
+
+        #addressList .set-default:hover {
+            color: #1E3A8A;
+        }
+
+    #btnAddNewAddress {
+        background: linear-gradient(90deg, #1E3A8A, #60A5FA);
+        color: #FFFFFF;
+        border: none;
+        padding: 10px 20px;
+        font-size: 1rem;
+        font-weight: 500;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+    }
+
+        #btnAddNewAddress:hover {
+            background: linear-gradient(90deg, #3B82F6, #163172);
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3);
+            transform: translateY(-2px);
+        }
+
+    /* ==========================================================================
+       11. Add New Address Modal
+       ========================================================================== */
+    #addNewAddressModal .modal-dialog {
+        max-width: 800px;
+    }
+
+    #addNewAddressModal .modal-body {
+        padding: 30px;
+    }
+
+    #addNewAddressModal .form-label {
+        font-weight: 500;
+        font-size: 1rem;
+        color: #1E3A8A;
+        margin-bottom: 8px;
+    }
+
+    #addNewAddressModal .form-control,
+    #addNewAddressModal .form-select {
+        border: 1px solid #60A5FA;
+        border-radius: 6px;
+        padding: 10px 15px;
+        font-size: 1rem;
+        color: #4B5563;
+        background-color: #F9FAFB;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        #addNewAddressModal .form-control:focus,
+        #addNewAddressModal .form-select:focus {
+            border-color: #1E3A8A;
+            box-shadow: 0 0 8px rgba(30, 58, 138, 0.2);
+            background-color: #FFFFFF;
+            outline: none;
+        }
+
+        #addNewAddressModal .form-control::placeholder {
+            color: #9CA3AF;
+            font-size: 0.95rem;
+        }
+
+    #addNewAddressModal .row.g-3 {
+        margin-bottom: 15px;
+    }
+
+    #addNewAddressModal .col-md-4,
+    #addNewAddressModal .col-md-6,
+    #addNewAddressModal .col-md-12 {
+        margin-bottom: 15px;
+    }
+
+    /* ==========================================================================
+       12. Miscellaneous
+       ========================================================================== */
+    .address-item {
+        transition: all 0.3s ease;
+    }
+
+        .address-item:hover {
+            background-color: #F1F5F9;
+        }
+
+        .address-item.selected {
+            background-color: #E6F0FA;
+            border-color: #60A5FA;
+        }
+
+    .set-default {
+        font-size: 0.9rem;
+        text-decoration: underline;
+    }
+
+    .badge {
+        font-size: 0.8rem;
+        vertical-align: middle;
+        margin-left: 10px;
+    }
 </style>

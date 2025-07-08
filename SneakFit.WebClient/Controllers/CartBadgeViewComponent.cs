@@ -1,9 +1,11 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using SneakFit.ApiIntegration.Services;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System;
 using System.Linq;
+using SneakFit.WebClient.Models;
+using SneakFit.ViewModels.Catalog.GioHang; // Added this import for GioHangViewModel
 
 namespace SneakFit.WebClient.Controllers
 {
@@ -15,22 +17,38 @@ namespace SneakFit.WebClient.Controllers
             _gioHangApiClient = gioHangApiClient;
         }
 
-        private Guid GetUserId()
+        private Guid? TryGetUserId()
         {
-            var userIdStr = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == "UserId" || x.Type == ClaimTypes.NameIdentifier)?.Value;
-            return string.IsNullOrEmpty(userIdStr)
-                ? Guid.Parse("69BD714F-9576-45BA-B5B7-F00649BE00DE") // hardcode for demo
-                : Guid.Parse(userIdStr);
+            var userIdStr = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == "UserId" || x.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdStr))
+            {
+                return null;
+            }
+            return Guid.Parse(userIdStr);
         }
 
         public async Task<IViewComponentResult> InvokeAsync()
         {
             int count = 0;
-            var userId = GetUserId();
-            var gioHang = await _gioHangApiClient.GetByUserId(userId);
-            if (gioHang?.GioHangChiTiets != null)
+            var userId = TryGetUserId();
+            if (userId != null)
             {
-                count = gioHang.GioHangChiTiets.Sum(x => x.SoLuong);
+                GioHangViewModel gioHang = null;
+
+                try
+                {
+                    gioHang = await _gioHangApiClient.GetByUserId(userId.Value);
+                }
+                catch
+                {
+                    // Nếu không có giỏ hàng thì tạo mới
+                    gioHang = await _gioHangApiClient.TaoGioHangMoi(userId.Value);
+                }
+
+                if (gioHang?.GioHangChiTiets != null)
+                {
+                    count = gioHang.GioHangChiTiets.Count;
+                }
             }
             ViewBag.Count = count;
             return View();

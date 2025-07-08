@@ -22,7 +22,7 @@ namespace SneakFit.Application.Catalog.HoaDonClient
         {
             _context = context;
         }
-        public async Task<PagedResult<HoaDonClientViewModel>> GetAllPaging(PhanTrangHoaDonClient request)
+        public async Task<PagedResult<HoaDonClientViewModel>> GetAllPaging(PhanTrangHoaDonClient request, Guid? userId = null)
         {
             var query = _context.HoaDon
                 .Include(h => h.HoaDonChiTiet)
@@ -43,6 +43,11 @@ namespace SneakFit.Application.Catalog.HoaDonClient
             if (request.NgayBatDau.HasValue && request.NgayKetThuc.HasValue)
             {
                 query = query.Where(h => h.NgayTao >= request.NgayBatDau.Value && h.NgayTao <= request.NgayKetThuc.Value);
+            }
+            // Lọc theo userId nếu có
+            if (userId.HasValue)
+            {
+                query = query.Where(h => h.UserId == userId.Value);
             }
             int totalRow = await query.CountAsync();
             var data = await query
@@ -66,6 +71,7 @@ namespace SneakFit.Application.Catalog.HoaDonClient
                     DonViVanChuyen = h.DonViVanChuyen,
                     MaVanDon = h.MaVanDon,
                     TrangThaiThanhToan = h.TrangThaiThanhToan,
+                    UserId = h.UserId
                 }).ToListAsync();
             var pagedResult = new PagedResult<HoaDonClientViewModel>()
             {
@@ -105,6 +111,7 @@ namespace SneakFit.Application.Catalog.HoaDonClient
                 MaVanDon = hoaDon.MaVanDon,
                 TrangThaiThanhToan = hoaDon.TrangThaiThanhToan,
                 VoucherId = hoaDon.VoucherId,
+                UserId = hoaDon.UserId
             };
         }
 
