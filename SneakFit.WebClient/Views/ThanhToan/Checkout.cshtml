@@ -284,16 +284,16 @@
                             addressHtml = '<p>Chưa có địa chỉ nào. Vui lòng thêm địa chỉ mới.</p>';
                         } else {
                             // Sắp xếp để địa chỉ mặc định lên đầu
-                            let defaultAddr = addresses.find(a => a.mac_Dinh);
-                            let otherAddrs = addresses.filter(a => !a.mac_Dinh);
+                            let defaultAddr = addresses.find(a => a.macDinh);
+                            let otherAddrs = addresses.filter(a => !a.macDinh);
                             let sortedAddresses = defaultAddr ? [defaultAddr, ...otherAddrs] : otherAddrs;
 
                             sortedAddresses.forEach(address => {
-                                if (address.mac_Dinh) {
+                                if (address.macDinh) {
                                     defaultAddress = address;
                                 }
                                 addressHtml += `
-                                    <div class="address-item mb-3 p-3 border rounded d-flex align-items-center justify-content-between ${address.mac_Dinh ? 'selected' : ''}" data-address-id="${address.id}" style="cursor: pointer;">
+                                    <div class="address-item mb-3 p-3 border rounded d-flex align-items-center justify-content-between ${address.macDinh ? 'selected' : ''}" data-address-id="${address.id}" style="cursor: pointer;">
                                         <div class="address-content">
                                             <div class="address-radio">
                                                 <input type="radio" name="addressRadio" class="address-radio-default" value="${address.id}" ${selectedAddressId === address.id ? 'checked' : ''} style="margin-right: 10px; width: 20px; height: 20px;">
@@ -301,7 +301,7 @@
                                             <div class="address-text">
                                                 <p class="mb-1"><strong>${address.tenNguoiNhan}</strong> <span class="text-muted">(${address.soDienThoai})</span></p>
                                                 <p class="mb-1">${address.tenDiaChi}, ${address.tenXa}, ${address.tenHuyen}, ${address.tenThanhPho}</p>
-                                                ${address.mac_Dinh ? '<span class="badge bg-success align-middle" style="font-size:0.9rem;min-width:80px;text-align:center;">Mặc định</span>' : ''}
+                                                ${address.macDinh ? '<span class="badge align-middle" style="min-width:80px; text-align:center;">Mặc Định</span>' : ''}
                                             </div>
                                         </div>
                                         <div class="address-actions">
@@ -391,9 +391,12 @@
                                 $('#edit-district').val(address.maHuyen);
                                 loadWards(address.maHuyen, '#edit-ward', function () {
                                     $('#edit-ward').val(address.maXa);
-                                    // Đặt checkbox sau khi tất cả đã load xong
-                                    console.log('mac_Dinh:', address.mac_Dinh, typeof address.mac_Dinh);
-                                    let isDefault = address.mac_Dinh === true || address.mac_Dinh === "true" || address.mac_Dinh === "True" || address.mac_Dinh === 1 || address.mac_Dinh === "1";
+                                    // Kiểm tra và gán checkbox một cách chính xác
+                                    console.log('macDinh value:', address.macDinh, 'Type:', typeof address.macDinh);
+                                    let isDefault = false;
+                                    if (address.macDinh !== null && address.macDinh !== undefined) {
+                                        isDefault = String(address.macDinh).toLowerCase() === 'true' || address.macDinh === 1 || address.macDinh === true;
+                                    }
                                     $('#edit-set-default').prop('checked', isDefault);
                                     $('#editAddressModal').modal('show');
                                 });
@@ -434,7 +437,7 @@
                     maTinh: provinceId,
                     maHuyen: districtId,
                     maXa: wardCode,
-                    mac_Dinh: isDefault
+                    macDinh: isDefault
                 };
 
                 $.ajax({
@@ -482,7 +485,7 @@
                     maTinh: provinceId,
                     maHuyen: districtId,
                     maXa: wardCode,
-                    mac_Dinh: isDefault
+                    macDinh: isDefault
                 };
 
                 $.ajax({
@@ -1352,6 +1355,8 @@
         font-size: 0.8rem;
         vertical-align: middle;
         margin-left: 10px;
+        background-color: #D1FAE5;
+        color: #065A60;
     }
     /* Thêm vào phần Miscellaneous */
     .address-content {
