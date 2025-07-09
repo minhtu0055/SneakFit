@@ -112,7 +112,7 @@ namespace SneakFit.WebClient.Controllers
             if (!string.IsNullOrEmpty(userIdStr))
                 userId = Guid.Parse(userIdStr);
 
-            string hoTen = string.Empty, soDienThoai = string.Empty, diaChi = string.Empty;
+            string hoTen = string.Empty, soDienThoai = string.Empty, diaChi = string.Empty, email = string.Empty;
 
             // Nếu có userId, lấy địa chỉ mặc định từ API client
             if (userId.HasValue)
@@ -130,6 +130,8 @@ namespace SneakFit.WebClient.Controllers
                 {
                     TempData["WarningMessage"] = "Bạn chưa có địa chỉ mặc định. Vui lòng thêm địa chỉ trước khi thanh toán.";
                 }
+                // Lấy email từ claim
+                email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? string.Empty;
             }
 
             var model = new CheckoutViewModel
@@ -144,7 +146,8 @@ namespace SneakFit.WebClient.Controllers
                 TongTienSanPham = cartItems.Sum(x => x.GiaKhuyenMai * x.SoLuong),
                 DiscountAmount = 0,
                 GhiChu = string.Empty,
-                DefaultAddressId = defaultAddressId // Thêm DefaultAddressId vào model
+                DefaultAddressId = defaultAddressId, // Thêm DefaultAddressId vào model
+                Email = email
             };
 
             return View(model);
@@ -244,6 +247,8 @@ namespace SneakFit.WebClient.Controllers
             var diaChi = !string.IsNullOrEmpty(model.DiaChiMoi) ? model.DiaChiMoi : model.DiaChi;
             var tongTien = cartItems.Sum(x => x.GiaKhuyenMai * x.SoLuong) + model.PhiVanChuyen;
 
+            // Lấy email từ claim thay vì model.Email
+            var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? string.Empty;
             var hoaDonRequest = new ThemHoaDonClient
             {
                 TongTien = tongTien,
@@ -257,7 +262,7 @@ namespace SneakFit.WebClient.Controllers
                 TrangThaiThanhToan = TrangThaiThanhToan.ChuaThanhToan,
                 LoaiHoaDon = (model.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || model.PhuongThucThanhToan == PhuongThucThanhToan.MoMo)
                     ? LoaiHoaDon.Online : LoaiHoaDon.TaiQuay,
-                //Email = model.Email,
+                Email = email,
                 GhiChu = model.GhiChu,
                 NgayDatHang = DateTime.Now,
                 MaHoaDon = string.Empty,
