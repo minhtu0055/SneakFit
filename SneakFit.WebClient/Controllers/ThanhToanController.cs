@@ -108,10 +108,11 @@ namespace SneakFit.WebClient.Controllers
             // Lấy userId từ claim
             var userIdStr = User?.Claims?.FirstOrDefault(x => x.Type == "UserId" || x.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             Guid? userId = null;
+            Guid? defaultAddressId = null;
             if (!string.IsNullOrEmpty(userIdStr))
                 userId = Guid.Parse(userIdStr);
 
-            string hoTen = string.Empty, soDienThoai = string.Empty, diaChi = string.Empty, email = string.Empty;
+            string hoTen = string.Empty, soDienThoai = string.Empty, diaChi = string.Empty;
 
             // Nếu có userId, lấy địa chỉ mặc định từ API client
             if (userId.HasValue)
@@ -123,6 +124,11 @@ namespace SneakFit.WebClient.Controllers
                     hoTen = defaultAddress.TenNguoiNhan;
                     soDienThoai = defaultAddress.SoDienThoai;
                     diaChi = $"{defaultAddress.TenDiaChi}, {defaultAddress.TenXa}, {defaultAddress.TenHuyen}, {defaultAddress.TenThanhPho}";
+                    defaultAddressId = defaultAddress.Id;
+                }
+                else
+                {
+                    TempData["WarningMessage"] = "Bạn chưa có địa chỉ mặc định. Vui lòng thêm địa chỉ trước khi thanh toán.";
                 }
             }
 
@@ -130,7 +136,6 @@ namespace SneakFit.WebClient.Controllers
             {
                 HoTen = hoTen,
                 SoDienThoai = soDienThoai,
-                //Email = email,
                 DiaChiMoi = string.Empty,
                 DiaChi = diaChi,
                 PhuongThucThanhToan = PhuongThucThanhToan.COD,
@@ -138,7 +143,8 @@ namespace SneakFit.WebClient.Controllers
                 GioHangItems = cartItems,
                 TongTienSanPham = cartItems.Sum(x => x.GiaKhuyenMai * x.SoLuong),
                 DiscountAmount = 0,
-                GhiChu = string.Empty
+                GhiChu = string.Empty,
+                DefaultAddressId = defaultAddressId // Thêm DefaultAddressId vào model
             };
 
             return View(model);

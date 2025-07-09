@@ -45,7 +45,7 @@ namespace SneakFit.WebClient.Models
         public List<GioHangItemViewModel> GioHangItems { get; set; } = new();
         public decimal TongTienSanPham { get; set; }
         public decimal? DiscountAmount { get; set; } = 0;
-
+        public Guid? DefaultAddressId { get; set; }
         public CheckoutViewModel()
         {
             PhuongThucThanhToan = Data.Enums.PhuongThucThanhToan.COD;
