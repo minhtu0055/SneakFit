@@ -105,6 +105,15 @@ namespace SneakFit.WebClient.Controllers
                 }
             }
 
+            // Lấy danh sách voucher đang hoạt động
+            var voucherPaging = await _voucherApiClient.GetAllPaging(new SneakFit.ViewModels.Catalog.Voucher.GetVoucherPagingRequest
+            {
+                PageIndex = 1,
+                PageSize = 100,
+                Status = SneakFit.Data.Enums.TrangThaiGiamGia.HoatDong
+            });
+            var vouchers = voucherPaging.Items?.ToList() ?? new List<SneakFit.ViewModels.Catalog.Voucher.VoucherViewModels>();
+
             // Lấy userId từ claim
             var userIdStr = User?.Claims?.FirstOrDefault(x => x.Type == "UserId" || x.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             Guid? userId = null;
@@ -147,7 +156,8 @@ namespace SneakFit.WebClient.Controllers
                 DiscountAmount = 0,
                 GhiChu = string.Empty,
                 DefaultAddressId = defaultAddressId, // Thêm DefaultAddressId vào model
-                Email = email
+                Email = email,
+                Vouchers = vouchers
             };
 
             return View(model);

@@ -1,4 +1,5 @@
 ﻿using SneakFit.Data.Enums;
+using SneakFit.ViewModels.Catalog.Voucher;
 using System.ComponentModel.DataAnnotations;
 
 namespace SneakFit.WebClient.Models
@@ -46,6 +47,7 @@ namespace SneakFit.WebClient.Models
         public decimal TongTienSanPham { get; set; }
         public decimal? DiscountAmount { get; set; } = 0;
         public Guid? DefaultAddressId { get; set; }
+        public List<VoucherViewModels> Vouchers { get; set; } = new();
         public CheckoutViewModel()
         {
             PhuongThucThanhToan = Data.Enums.PhuongThucThanhToan.COD;
