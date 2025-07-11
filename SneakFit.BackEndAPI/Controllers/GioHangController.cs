@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SneakFit.Application.Catalog.GioHang;
 using SneakFit.ViewModels.Catalog.GioHang;
+using SneakFit.ViewModels.Common;
 
 namespace SneakFit.BackEndAPI.Controllers
 {
@@ -76,6 +77,22 @@ namespace SneakFit.BackEndAPI.Controllers
             return Ok(result);
         }
 
+        [HttpPost("xoasanphamdamuakhoigiohang")]
+        public async Task<IActionResult> XoaSanPhamDaMuaKhoiGioHang([FromBody] XoaSanPhamDaMuaRequest request)
+        {
+            if (request == null || request.SanPhamChiTietIds == null || !request.SanPhamChiTietIds.Any())
+            {
+                return BadRequest(new ApiErrorResult<bool>("Danh sách sản phẩm không hợp lệ"));
+            }
+
+            var result = await _gioHangService.XoaSanPhamDaMuaKhoiGioHang(request.UserId, request.SanPhamChiTietIds);
+            if (result)
+            {
+                return Ok(new ApiSuccessResult<bool>(true));
+            }
+            return NotFound(new ApiErrorResult<bool>("Không tìm thấy sản phẩm hoặc giỏ hàng để xóa"));
+        }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> XoaGioHang(Guid id)
         {
@@ -93,6 +110,13 @@ namespace SneakFit.BackEndAPI.Controllers
                 return BadRequest(result);
 
             return Ok(result);
+        }
+
+        [HttpPost("tao-gio-hang-moi")]
+        public async Task<IActionResult> TaoGioHangMoi([FromBody] Guid userId)
+        {
+            var gioHang = await _gioHangService.TaoGioHangMoi(userId);
+            return Ok(gioHang);
         }
     }
 }

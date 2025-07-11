@@ -14,6 +14,7 @@ namespace SneakFit.ViewModels.Catalog.SanPhamChiTiet
         public string MoTa { get; set; }
         public decimal Gia { get; set; }
         public int SoLuong { get; set; }
+        public int SoLuongTon { get; set; }
         public DateTime NgayTao { get; set; }
         public Guid MauSacId { get; set; }
         public Guid KichThuocId { get; set; }

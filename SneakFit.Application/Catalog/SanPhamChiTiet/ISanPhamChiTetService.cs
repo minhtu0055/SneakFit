@@ -18,7 +18,8 @@ namespace SneakFit.Application.Catalog.SanPhamChiTiet
         Task<PagedResult<SPCTViewModels>> GetAllPaging(PhanTrangSPCT request);
         Task<bool> UpdateTrangThai(Guid id, bool trangThai);
         Task<bool> UpdateGia(Guid id, decimal giaMoi);
-        Task<bool> UpdateSoLuong(Guid productId, int themSoLuong);
+        //Task<bool> UpdateSoLuong(Guid productId, int themSoLuong);
+        Task<ApiResult<bool>> UpdateSoLuong(Guid productId, int deltaSoLuong);
         Task<int> AddImage(Guid idSanPham, IFormFile image);
         Task<int> RemoveImage(Guid imageId);
         Task<List<string>> GetListImages(Guid idSanPham);

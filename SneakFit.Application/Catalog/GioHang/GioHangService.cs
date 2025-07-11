@@ -193,7 +193,34 @@ namespace SneakFit.Application.Catalog.GioHang
             await _context.SaveChangesAsync();
             return true;
         }
+        public async Task<bool> XoaSanPhamDaMuaKhoiGioHang(Guid userId, List<Guid> sanPhamChiTietIds)
+        {
+            try
+            {
+                var gioHang = await _context.GioHang.FirstOrDefaultAsync(x => x.UserId == userId);
+                if (gioHang == null)
+                {
+                    return false; // Không ném ngoại lệ, chỉ trả về false
+                }
 
+                var gioHangChiTietsToRemove = _context.GioHangChiTiet
+                    .Where(x => x.GioHangId == gioHang.Id && sanPhamChiTietIds.Contains(x.SanPhamChiTietId))
+                    .ToList();
+
+                if (!gioHangChiTietsToRemove.Any())
+                {
+                    return false; // Không có sản phẩm nào để xóa
+                }
+
+                _context.GioHangChiTiet.RemoveRange(gioHangChiTietsToRemove);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                throw; // Ném lại ngoại lệ nếu có lỗi khác
+            }
+        }
         public async Task<bool> XoaGioHang(Guid id)
         {
             var gioHang = await _context.GioHang.FindAsync(id);
@@ -202,9 +229,27 @@ namespace SneakFit.Application.Catalog.GioHang
 
             var gioHangChiTiets = _context.GioHangChiTiet.Where(x => x.GioHangId == id);
             _context.GioHangChiTiet.RemoveRange(gioHangChiTiets);
-            _context.GioHang.Remove(gioHang);
+            //_context.GioHang.Remove(gioHang);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<GioHangViewModel> TaoGioHangMoi(Guid userId)
+        {
+            var gioHang = await _context.GioHang.FirstOrDefaultAsync(x => x.UserId == userId);
+            if (gioHang != null)
+            {
+                return await GetById(gioHang.Id);
+            }
+            gioHang = new Data.Entities.GioHang()
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                NgayTao = DateTime.Now
+            };
+            _context.GioHang.Add(gioHang);
+            await _context.SaveChangesAsync();
+            return await GetById(gioHang.Id);
         }
 
         private async Task<List<GioHangChiTietViewModel>> GetGioHangChiTietsByGioHangId(Guid gioHangId)

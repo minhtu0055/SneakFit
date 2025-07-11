@@ -117,6 +117,52 @@ namespace SneakFit.ApiIntegration.Services
                 throw new Exception(result);
             return true;
         }
+        public async Task<bool> XoaSanPhamDaMuaKhoiGioHang(Guid userId, List<Guid> sanPhamChiTietIds)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var token = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(token))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var request = new { UserId = userId, SanPhamChiTietIds = sanPhamChiTietIds };
+            var json = JsonConvert.SerializeObject(request);
+            var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await client.PostAsync($"/api/giohang/xoasanphamdamuakhoigiohang", httpContent); // Sử dụng POST
+            var body = await response.Content.ReadAsStringAsync();
+
+            Console.WriteLine($"Phản hồi từ /api/giohang/xoasanphamdamuakhoigiohang: {body}"); // Log để debug
+
+            if (response.IsSuccessStatusCode)
+            {
+                try
+                {
+                    var result = JsonConvert.DeserializeObject<ApiSuccessResult<bool>>(body);
+                    return result?.ResultObj ?? false;
+                }
+                catch (System.Text.Json.JsonException)
+                {
+                    return false; // Xử lý an toàn nếu deserialize thất bại
+                }
+            }
+            else
+            {
+                try
+                {
+                    var errorResult = JsonConvert.DeserializeObject<ApiErrorResult<bool>>(body);
+                    if (errorResult != null && !string.IsNullOrEmpty(errorResult.Message))
+                    {
+                        throw new Exception(errorResult.Message);
+                    }
+                }
+                catch (System.Text.Json.JsonException)
+                {
+                    throw new Exception($"Lỗi từ server: {body}");
+                }
+                throw new Exception($"Không thể xóa sản phẩm đã mua. Mã lỗi: {response.StatusCode}");
+            }
+        }
 
         public async Task<bool> XoaGioHang(Guid id)
         {
@@ -150,6 +196,23 @@ namespace SneakFit.ApiIntegration.Services
                 throw new Exception(body);
 
             return JsonConvert.DeserializeObject<ApiResult<bool>>(body);
+        }
+
+        public async Task<GioHangViewModel> TaoGioHangMoi(Guid userId)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var token = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            var json = Newtonsoft.Json.JsonConvert.SerializeObject(userId);
+            var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await client.PostAsync($"/api/giohang/tao-gio-hang-moi", httpContent);
+            var result = await response.Content.ReadAsStringAsync();
+            if (!response.IsSuccessStatusCode)
+                throw new Exception(result);
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<GioHangViewModel>(result);
         }
     }
 }
