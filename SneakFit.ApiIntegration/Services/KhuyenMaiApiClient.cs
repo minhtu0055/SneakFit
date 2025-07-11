@@ -105,8 +105,29 @@ namespace SneakFit.ApiIntegration.Services
                     var apiResult = JsonConvert.DeserializeObject<ApiSuccessResult<KhuyenMaiViewModels>>(result);
                     return apiResult.ResultObj;
                 }
+                else
+                {
+                    // Lấy message lỗi chi tiết từ response (nếu có)
+                    var errorMsg = result;
+                    try
+                    {
+                        // Nếu API trả về lỗi dạng JSON có trường message
+                        dynamic errorObj = Newtonsoft.Json.JsonConvert.DeserializeObject(result);
+                        if (errorObj != null && errorObj.message != null)
+                        {
+                            errorMsg = errorObj.message.ToString();
+                        }
+                        // Nếu có trường errors (dạng ModelState)
+                        else if (errorObj != null && errorObj.errors != null)
+                        {
+                            errorMsg = string.Join("; ", errorObj.errors.ToObject<List<string>>());
+                        }
+                    }
+                    catch { /* Nếu không parse được thì giữ nguyên errorMsg */ }
+                    throw new Exception(errorMsg);
+                }
 
-                throw new Exception("Không thể tạo khuyến mại");
+               // throw new Exception("Không thể tạo khuyến mại");
             }
             catch (Exception ex)
             {
@@ -133,9 +154,30 @@ namespace SneakFit.ApiIntegration.Services
                     var apiResult = JsonConvert.DeserializeObject<ApiSuccessResult<KhuyenMaiViewModels>>(result);
                     return apiResult.ResultObj;
                 }
+                else
+                {
+                    // Lấy message lỗi chi tiết từ response (nếu có)
+                    var errorMsg = result;
+                    try
+                    {
+                        // Nếu API trả về lỗi dạng JSON có trường message
+                        dynamic errorObj = Newtonsoft.Json.JsonConvert.DeserializeObject(result);
+                        if (errorObj != null && errorObj.message != null)
+                        {
+                            errorMsg = errorObj.message.ToString();
+                        }
+                        // Nếu có trường errors (dạng ModelState)
+                        else if (errorObj != null && errorObj.errors != null)
+                        {
+                            errorMsg = string.Join("; ", errorObj.errors.ToObject<List<string>>());
+                        }
+                    }
+                    catch { /* Nếu không parse được thì giữ nguyên errorMsg */ }
+                    throw new Exception(errorMsg);
+                }
 
                 // Lấy lỗi chi tiết từ API và ném ra
-                throw new Exception(result);
+                //throw new Exception(result);
             }
             catch (Exception ex)
             {

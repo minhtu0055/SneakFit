@@ -307,7 +307,17 @@ namespace SneakFit.Application.Catalog.SanPham
             spct.MauSacId = model.MauSacId;
             spct.SoLuong = model.SoLuong;
             spct.Gia = model.GiaBan;
-            spct.TrangThai = model.SoLuong > 0;
+            
+            //spct.TrangThai = model.TrangThai;
+            if (model.SoLuong == 0)
+            {
+                spct.TrangThai = false;
+            }
+            else
+            {
+                spct.TrangThai = model.TrangThai;
+            }
+            //spct.TrangThai = model.SoLuong > 0;
 
             await _context.SaveChangesAsync();
             return true;

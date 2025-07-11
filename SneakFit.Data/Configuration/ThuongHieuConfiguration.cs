@@ -14,7 +14,7 @@ namespace SneakFit.Data.Configuration
         public void Configure(EntityTypeBuilder<ThuongHieu> builder)
         {
             builder.HasKey(th => th.Id);
-            builder.Property(th => th.TenThuongHieu).IsRequired().HasMaxLength(50);
+            builder.Property(th => th.TenThuongHieu).HasMaxLength(50);
         }
     }
 }

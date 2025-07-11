@@ -14,9 +14,9 @@ namespace SneakFit.Data.Configuration
         public void Configure(EntityTypeBuilder<GioHangChiTiet> builder)
         {
             builder.HasKey(x => x.Id);
-            builder.Property(x => x.Gia).HasColumnType("decimal(18,2)").IsRequired();
-            builder.Property(x => x.SoLuong).IsRequired();
-            builder.Property(x => x.NgayTao).IsRequired();
+            builder.Property(x => x.Gia).HasColumnType("decimal(18,2)");
+            builder.Property(x => x.SoLuong);
+            builder.Property(x => x.NgayTao);
             builder.HasOne(x => x.GioHang).WithMany(x => x.GioHangChiTiet).HasForeignKey(x => x.GioHangId);
             builder.HasOne(x => x.SanPhamChiTiet).WithMany(x => x.GioHangChiTiet).HasForeignKey(x => x.SanPhamChiTietId);
 

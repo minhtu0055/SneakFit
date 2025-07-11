@@ -1,0 +1,210 @@
+﻿@using SneakFit.ViewModels.Common
+@using SneakFit.Data.Enums
+@model PagedResult<SneakFit.ViewModels.Catalog.HoaDon.HoaDonViewModel>
+@{
+	ViewData["Title"] = "Danh sách hóa đơn";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="text-end mb-4">
+	<div class="card">
+		<div class="card-header">
+				<div class="col-md-12 col-xs-12">
+					<form asp-action="Index" method="get">
+						<div class="row">
+							<div class="col-md-6">
+								<input type="text" value="@ViewBag.TuKhoa" name="tuKhoa" class="form-control" placeholder="Tìm kiếm..." />
+							</div>
+						<div class="col-md-4">
+							<div class="input-group">
+								<!-- Ô chọn ngày bắt đầu -->
+								<input type="date" class="form-control" name="ngayBatDau" id="ngayBatDau" value="@ViewBag.NgayBatDau?.ToString("yyyy-MM-dd")" />
+								<!-- Ô chọn ngày kết thúc -->
+								<input type="date" class="form-control" name="ngayKetThuc" id="ngayKetThuc" value="@ViewBag.NgayKetThuc?.ToString("yyyy-MM-dd")" />
+							</div>
+						</div>
+							<div class="col-md-2 mb-2 d-flex align-items-end">
+								<div class="btn-group w-100">
+									<button type="submit" class="btn btn-primary">
+										<i class="bx bx-search"></i> Tìm
+									</button>
+									<button type="button" onclick="window.location.href='/Hoadon/Index'" class="btn btn-dark">
+										<i class="bx bx-reset"></i> Reset
+									</button>
+								</div>
+							</div>
+							
+						</div>
+					</form>
+				</div>
+		</div>
+	</div>
+</div>
+<div class="card">
+	<div class="card-header">
+		<div class="row">
+			<div class="col-md-6 col-xs-12">
+				<form asp-action="Index" method="get">
+					<div class="row">
+						<div class="col-md-12">
+							<ul class="nav nav-tabs mb-3">
+								<li class="nav-item">
+									<a class="nav-link @(ViewBag.TrangThai == null ? "active" : "")"
+									   href="@Url.Action("Index", new { trangThai = (TrangThaiHoaDon?)null })">
+										Tất Cả
+									</a>
+								</li>
+
+								@foreach (var trangThai in Enum.GetValues(typeof(TrangThaiHoaDon)))
+								{
+									// Kiểm tra để không hiển thị số lượng cho "Tất Cả"
+									if (trangThai.ToString() != "TatCa")
+									{
+										<li class="nav-item">
+											<a class="nav-link @(ViewBag.TrangThai != null && ViewBag.TrangThai.ToString() == trangThai.ToString() ? "active" : "")"
+											   href="@Url.Action("Index", new { trangThai = trangThai })">
+												@GetStatusDisplayName(trangThai)
+												@if (ViewBag.CountByStatus != null && ViewBag.CountByStatus.ContainsKey(trangThai.ToString()))
+												{
+													<span class="badge badge-pill" style="background-color: red; color: white;">
+														@ViewBag.CountByStatus[trangThai.ToString()]
+													</span>
+												}
+											</a>
+										</li>
+									}
+								}
+							</ul>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+	<div class="table-responsive text-nowrap">
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Mã hóa đơn</th>
+					<th>Tên khách hàng</th>
+					<th>Số điện thoại</th>
+					<th>Loại hóa đơn</th>
+					<th>Ngày tạo</th>
+					<th>Tổng tiền</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody class="table-border-bottom-0">
+				@foreach (var item in Model.Items)
+				{
+					<tr>
+						<td>
+							@Html.DisplayFor(modelItem => item.MaHoaDon)
+						</td>
+						<td>
+							@Html.DisplayFor(modelItem => item.HoTen)
+						</td>
+						<td>
+							@Html.DisplayFor(modelItem => item.SoDienThoai)
+						</td>						
+						<td>
+							<span class="badge bg-label-@GetStatusColor(item.LoaiHoaDon) me-1">
+								@GetStatusName(item.LoaiHoaDon)
+							</span>
+						</td>
+						<td>
+							@item.NgayTao.ToString("dd/MM/yyyy HH:mm")
+						</td>
+						<td>
+							@String.Format("{0:N0}", item.TongTien) VNĐ
+						</td>
+						<td>
+							<div class="dropdown">
+								<button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+									<i class="bx bx-dots-vertical-rounded"></i>
+								</button>
+								<div class="dropdown-menu">
+									<a class="dropdown-item" href="@Url.Action("Details", "HoaDon", new { id = item.Id })">
+										<i class="bx bx-edit-alt me-1"></i> Chi tiết hóa đơn
+									</a>								
+								</div>
+							</div>
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	</div>
+	@await Component.InvokeAsync("Pager", Model)
+</div>
+@section Scripts {
+	<script>
+		// Hiển thị thông báo toast nếu có
+		$(document).ready(function () {
+			var successMessage = '@TempData["success"]';
+			if (successMessage) {
+				toastr.success(successMessage);
+			}
+		});
+			  // Sử dụng JavaScript để thêm placeholder vào ô date
+		document.addEventListener("DOMContentLoaded", function() {
+			const ngayBatDau = document.getElementById("ngayBatDau");
+			const ngayKetThuc = document.getElementById("ngayKetThuc");
+
+			// Đặt placeholder cho ô chọn ngày bắt đầu
+			if (!ngayBatDau.value) {
+				ngayBatDau.setAttribute("placeholder", "Từ ngày");
+			}
+
+			// Đặt placeholder cho ô chọn ngày kết thúc
+			if (!ngayKetThuc.value) {
+				ngayKetThuc.setAttribute("placeholder", "Đến ngày");
+			}
+		});
+	</script>
+}
+@functions {
+	string GetStatusName(LoaiHoaDon status)
+	{
+		switch (status)
+		{
+			case LoaiHoaDon.Online:
+				return "Online";
+			case LoaiHoaDon.TaiQuay:
+				return "Tại Quầy";
+			default:
+				return status.ToString();
+		}
+	}
+	string GetStatusColor(LoaiHoaDon status)
+	{
+		switch (status)
+		{
+			case LoaiHoaDon.Online:
+				return "success";
+			case LoaiHoaDon.TaiQuay:
+				return "warning";
+			default:
+				return "danger";
+		}
+	}
+	string GetStatusDisplayName(object trangThai)
+	{
+		switch (trangThai.ToString())
+		{
+			case "ChoXacNhan":
+				return "Chờ xác nhận";
+			case "ChoGiao":
+				return "Chờ giao";
+			case "HoanThanh":
+				return "Hoàn thành";
+			case "DaHuy":
+				return "Đã hủy";
+			case "HoanHang":
+				return "Hoàn hàng";
+			case "DaXacNhan":
+				return "Đã xác nhận";
+			default:
+				return trangThai.ToString();
+		}
+	}
+}

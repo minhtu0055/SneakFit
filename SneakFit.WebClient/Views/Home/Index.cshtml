@@ -20,6 +20,7 @@
     var listMauCoSPCT = (allSpct ?? new List<SPCTViewModels>()).Select(x => x.MauSacId).Distinct().ToList();
     var listSizeCoSPCT = (allSpct ?? new List<SPCTViewModels>()).Select(x => x.KichThuocId).Distinct().ToList();
 
+    var productPrices = ViewBag.ProductPrices as Dictionary<Guid, Tuple<decimal?, decimal?, string>>;
 }
 <!-- Hero Section -->
 <section class="ecommerce-hero-1 hero section" id="hero">
@@ -496,6 +497,7 @@
                                 }
 
                                 <div class="product-overlay">
+<!-- Note -->
                                     @foreach (var spct in Model.AllSpct.Where(x => x.SanPhamId == item.Id))
                                     {
                                         <a href="javascript:void(0)"
@@ -505,6 +507,16 @@
                                             <i class="bi bi-cart-plus"></i> MUA NGAY
                                         </a>
                                     }
+<!-- Note -->
+                                    @* <a href="/gio-hang/them/@item.Id" class="btn-cart"><i class="bi bi-cart-plus"></i> Add to Cart</a> *@
+                                    <form action="@Url.Action("AddToCart", "Cart")" method="post" class="d-inline" id="cartForm" style="display: none;">
+                                        <input type="hidden" name="id" id="selectedSpctId" value="" />
+                                        <input type="hidden" name="quantity" id="cartQuantityInput" value="1" />
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-cart-plus"></i> Thêm vào giỏ hàng
+                                        </button>
+                                    </form>
+<!-- Note -->
                                     <div class="product-actions">
                                         <div class="product-quick-actions">
                                             <button type="button" class="quick-action-btn"><i class="bi bi-heart"></i></button>
@@ -516,6 +528,7 @@
                                         </div>
                                     </div>
                                 </div>
+<!-- Note -->
                             </div>
 
                             <div class="product-info">
@@ -666,13 +679,51 @@
                                             <i class="bi bi-cart-plus"></i> Thêm vào giỏ hàng
                                         </button>
                                     </form>
+<!-- Note -->
+                            </div>
+
+                            <div class="product-info">
+                                <div class="product-content">
+                                    <div class="product-details d-flex justify-content-between">
+                                        <h2 class="product-title mb-0" style="font-weight: bold">@item.TenSanPham</h2>
+                                        <h4 class="product-category mb-0 ms-2" style="font-size:1rem; font-weight:600; color:#1766b3;">
+                                            @item.TenDanhMuc
+                                        </h4>
+                                    </div>
+                                    <div class="product-price mt-2" style="font-size:1.13rem; font-weight:600; color:#e53935;">
+                                        @if (listGia.Any())
+                                        {
+                                            <span>@listGia.Min().ToString("N0") đ</span>
+                                        }
+                                        else
+                                        {
+                                            <span>Liên hệ</span>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="product-stock mt-1">
+                                    <span class="stock-amount">@item.TongSoSanPham sản phẩm</span>
+<!-- Note -->
                                 </div>
                             </div>
                         </div>
                     </div>
+<!-- Note -->
                 </div>
             </div>
         }
+<!-- Note -->
+                }
+            }
+            else
+            {
+                <div class="col-12">
+                    <p>Không có sản phẩm nào để hiển thị 😢</p>
+                </div>
+            }
+        </div>
+<!-- Note -->
 
         <div class="text-center mt-5" data-aos="fade-up">
             <a href="#" class="view-all-btn">View All Products <i class="bi bi-arrow-right"></i></a>
@@ -681,12 +732,12 @@
     </div>
 
 </section><!-- /Product List Section -->
-
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-color/2.1.2/jquery.color.min.js"></script>
 
     <script>
+<!-- Note -->
         let spctData = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SanPhamChiTiets));
         let selectedColorId = null, selectedSizeId = null;
 
@@ -858,11 +909,30 @@
             updateStatusShowHide();
             updateUI();
         });
+<!-- Note -->
+        $(function () {
+            // Dùng jQuery-color để chuẩn hóa và animate nếu muốn
+            $('.color-circle').each(function () {
+                var color = $(this).data('color');
+                // Nếu màu chưa đúng định dạng hex, convert ở backend trước khi truyền ra
+                $(this).css('background-color', $.Color(color));
+            });
+
+            // Chọn màu khi click
+            $('.color-circle').click(function () {
+                $('.color-circle').removeClass('selected');
+                $(this).addClass('selected');
+                // Gửi filter nếu muốn hoặc lấy $(this).data('id') để lọc
+            });
+
+
+        });
+
+<!-- Note -->
     </script>
 }
 
 <style>
-
     .color-circle:hover {
         border: 2px solid #000 !important;
         transform: scale(1.1);
@@ -929,9 +999,6 @@
             outline: none;
             box-shadow: 0 0 0 3px rgba(0,123,255,0.4);
         }
-
-    /*modal*/
-
     .color-circle {
         display: inline-block;
         width: 28px;
@@ -947,7 +1014,6 @@
             border: 2px solid #000;
         }
 
-
     /*Ảnh modal*/
     .shadow-image {
         box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
@@ -962,4 +1028,5 @@
             transform: scale(1.02);
             box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
         }
+
 </style>

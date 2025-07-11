@@ -89,5 +89,41 @@ namespace SneakFit.BackEndAPI.Controllers
             }
             return Ok(result);
         }
+        [HttpPost("quenMatKhau")]
+        [AllowAnonymous]
+        public async Task<IActionResult> QuenMatKhau([FromBody] QuenMatKhauRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (string.IsNullOrEmpty(request?.Email))
+            {
+                return BadRequest(new { message = "Email không được để trống" });
+            }
+
+            var result = await _userService.QuenMatKhau(request.Email);
+            if (result.IsSuccessed)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+        [HttpPost("doiMatKhau/{id}")]
+        public async Task<IActionResult> DoiMatKhau(Guid id, [FromBody] DoiMatKhauRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var result = await _userService.DoiMatKhau(id, request);
+            if (!result.IsSuccessed)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
     }
 }

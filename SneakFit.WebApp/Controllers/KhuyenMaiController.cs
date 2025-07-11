@@ -195,8 +195,10 @@ namespace SneakFit.Admin.Controllers
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
-                ViewBag.ModelErrors = new List<string> { ex.Message };
+                // Lấy dòng đầu tiên của message (tránh stacktrace)
+                string errorMsg = ex.Message.Split('\n').FirstOrDefault()?.Trim() ?? "Có lỗi xảy ra";
+                ModelState.AddModelError("", errorMsg);
+
                 var sanPhams = await _sanPhamApiClient.GetAll();
                 if (request.SanPhamIds != null && request.SanPhamIds.Any())
                 {
@@ -206,7 +208,6 @@ namespace SneakFit.Admin.Controllers
                 {
                     request.SelectedProductDetails = new List<SPCTViewModels>();
                 }
-                // Lấy sản phẩm cha đã chọn (nếu có)
                 Guid? selectedParentProductId = null;
                 if (request.SelectedProductDetails != null && request.SelectedProductDetails.Any())
                 {
@@ -215,10 +216,10 @@ namespace SneakFit.Admin.Controllers
                 ViewBag.SanPhams = new SelectList(sanPhams, "Id", "TenSanPham", selectedParentProductId);
 
                 ViewBag.LoaiGiamGia = new List<SelectListItem>
-                {
-                    new SelectListItem("Giảm theo phần trăm", LoaiGiamGia.PhamTram.ToString("d"), request.LoaiGiamGia == LoaiGiamGia.PhamTram),
-                    new SelectListItem("Giảm theo số tiền", LoaiGiamGia.SoTien.ToString("d"), request.LoaiGiamGia == LoaiGiamGia.SoTien)
-                };
+    {
+        new SelectListItem("Giảm theo phần trăm", LoaiGiamGia.PhamTram.ToString("d"), request.LoaiGiamGia == LoaiGiamGia.PhamTram),
+        new SelectListItem("Giảm theo số tiền", LoaiGiamGia.SoTien.ToString("d"), request.LoaiGiamGia == LoaiGiamGia.SoTien)
+    };
                 return View(request);
             }
         }

@@ -14,7 +14,7 @@
             </h4>
         </div>
         <div>
-            <a asp-action="Index" asp-controller="SanPham" class="btn btn-secondary"> @* Thêm asp-controller="SanPham" để trả về SanPham/index *@
+            <a asp-action="Index" asp-controller="SPCT" class="btn btn-secondary"> @* Thêm asp-controller="SanPham" để trả về SanPham/index *@
                 <i class="bx bx-arrow-back me-1"></i> Quay lại
             </a>
         </div>
@@ -148,7 +148,7 @@
                                         <th style="width: 155px; text-align: center; color: white;">Upload Ảnh</th>
                                     </tr>
                                 </thead>
-                                <tbody id="productDetailList" style="background-color: cornsilk;">
+                                <tbody id="productDetailList" style="background-color: #FFFFFF;">
                                     <!-- Dữ liệu sẽ được thêm vào đây bằng JavaScript -->
                                 </tbody>
                             </table>
@@ -1279,11 +1279,11 @@
                 let message = response.message || 'Tạo mới sản phẩm chi tiết thành công!';
                 if (hasError) {
                     Swal.fire('Cảnh báo', message, 'warning').then(() => {
-                        window.location.href = '/SPCT/Index';
+                        window.location.href = '/SanPham/Index';
                     });
                 } else {
                     Swal.fire('Thành công', message, 'success').then(() => {
-                        window.location.href = '/SPCT/Index';
+                        window.location.href = '/SanPham/Index';
                     });
                 }
             } catch (error) {

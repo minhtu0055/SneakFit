@@ -1,10 +1,10 @@
-﻿using System;
+﻿using SneakFit.ViewModels.Common;
+using SneakFit.ViewModels.System.User;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SneakFit.ViewModels.Common;
-using SneakFit.ViewModels.System.User;
 
 namespace SneakFit.Application.System.User
 {
@@ -17,5 +17,7 @@ namespace SneakFit.Application.System.User
         Task<bool> TrangThai(Guid id, bool trangThai);
         Task<ApiResult<bool>> RoleAssign(Guid id, RoleAssignRequest request);
         Task<ApiResult<bool>> Update(UserUpdateRequest request);
+        Task<ApiResult<bool>> QuenMatKhau(string email);
+        Task<ApiResult<bool>> DoiMatKhau(Guid id, DoiMatKhauRequest request);
     }
 }

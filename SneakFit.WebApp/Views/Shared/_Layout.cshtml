@@ -170,6 +170,15 @@
                     <li class="menu-header small text-uppercase">
                         <span class="menu-header-text">Apps &amp; Pages</span>
                     </li>
+
+                    <!-- Nút Thống kê -->
+                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "ThongKe" ? "active open" : "")">
+                        <a asp-action="Index" asp-controller="ThongKe" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-bar-chart-alt-2"></i>
+                            <div class="text-truncate" data-i18n="ThongKe">Thống kê</div>
+                        </a>
+                    </li>
+
                     <!-- Pages -->
                     <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "BanHang" ? "active open" : "")">
                         <a asp-action="Index" asp-controller="BanHang" class="menu-link">
@@ -193,9 +202,9 @@
                                     <div class="text-truncate" data-i18n="Account">Khách Hàng</div>
                                 </a>
                             </li>
-                            <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" && ViewContext.RouteData.Values["action"]?.ToString() == "ChangePassword" ? "active" : "") ">
-                                <a asp-action="ChangePassword" asp-controller="User" class="menu-link">
-                                    <div class="text-truncate" data-i18n="Notifications">ChangePassword</div>
+                            <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" && ViewContext.RouteData.Values["action"]?.ToString() == "DoiMatKhau" ? "active" : "") ">
+                                <a asp-action="DoiMatKhau" asp-controller="User" class="menu-link">
+                                    <div class="text-truncate" data-i18n="Notifications">Đổi Mật Khẩu</div>
                                 </a>
                             </li>
                         </ul>

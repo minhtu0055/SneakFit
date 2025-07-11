@@ -71,8 +71,6 @@ namespace SneakFit.WebClient.Controllers
 
             ViewBag.Keyword = tuKhoa;
             ViewBag.AllSPCT = allSpct;
-
-            //Gán ảnh đại diện cho từng sản phẩm
             foreach (var sanPham in pagedSanPham.Items)
             {
                 // Lấy danh sách SPCT theo tên sản phẩm
@@ -89,7 +87,6 @@ namespace SneakFit.WebClient.Controllers
                     : baseAddress + "/assets/img/product/no-image.png";
             }
 
-            //Lấy 1 ảnh đại diện cho mỗi sản phẩm
             //foreach (var sanPham in pagedSanPham.Items)
             //{
             //    // Lấy danh sách SPCT theo tên sản phẩm
@@ -162,6 +159,7 @@ namespace SneakFit.WebClient.Controllers
 
             return View(viewModel);
         }
+
 
         public IActionResult Privacy()
         {

@@ -14,7 +14,7 @@ namespace SneakFit.Data.Configuration
         public void Configure(EntityTypeBuilder<DeGiay> builder)
         {
             builder.HasKey(dg => dg.Id);
-            builder.Property(dg => dg.TenDeGiay).IsRequired().HasMaxLength(50);
+            builder.Property(dg => dg.TenDeGiay).HasMaxLength(50);
         }
     }
 }
