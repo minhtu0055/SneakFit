@@ -16,7 +16,6 @@ namespace SneakFit.ViewModels.Catalog.Voucher
         public LoaiVoucher  loaiVoucher { get; set; }
         public decimal GiaTriGiamGia { get; set; }
         public decimal DieuKienApDung { get; set; }
-        public decimal GiaTriToiThieu {  get; set; }
         public int SoLuong { get; set; }
         public DateTime NgayTao { get; set; }
         public DateTime ThoiGianBatDau { get; set; }

@@ -910,9 +910,6 @@ namespace SneakFit.Data.Migrations
                     b.Property<decimal>("GiaTriGiamGia")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<decimal>("GiaTriToiThieu")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<int>("LoaiGiamGia")
                         .HasColumnType("int");
 
