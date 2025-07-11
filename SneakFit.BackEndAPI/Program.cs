@@ -18,6 +18,7 @@ using SneakFit.Application.Catalog.KichThuoc;
 using SneakFit.Application.Catalog.MauSac;
 using SneakFit.Application.Catalog.SanPham;
 using SneakFit.Application.Catalog.SanPhamChiTiet;
+using SneakFit.Application.Catalog.ThongKe;
 using SneakFit.Application.Catalog.ThanhToan;
 using SneakFit.Application.Catalog.ThuongHieu;
 using SneakFit.Application.Catalog.Voucher;
@@ -95,6 +96,7 @@ builder.Services.AddScoped<IHoaDonChiTietService, HoaDonChiTietService>();// kha
 builder.Services.AddScoped<IHoaDonClientService, HoaDonClientService>();// khai báo dịch vụ
 builder.Services.AddScoped<IHoaDonChiTietClientService, HoaDonChiTietClientService>();// khai báo dịch vụ
 builder.Services.AddHttpClient<IGhnService, GhnService>();
+builder.Services.AddScoped<IThongKeService, ThongKeService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IThanhToanService, ThanhToanService>();
 builder.Services.AddCors(options =>

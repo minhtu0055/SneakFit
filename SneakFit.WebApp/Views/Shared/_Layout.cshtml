@@ -170,6 +170,15 @@
                     <li class="menu-header small text-uppercase">
                         <span class="menu-header-text">Apps &amp; Pages</span>
                     </li>
+
+                    <!-- Nút Thống kê -->
+                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "ThongKe" ? "active open" : "")">
+                        <a asp-action="Index" asp-controller="ThongKe" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-bar-chart-alt-2"></i>
+                            <div class="text-truncate" data-i18n="ThongKe">Thống kê</div>
+                        </a>
+                    </li>
+
                     <!-- Pages -->
                     <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "BanHang" ? "active open" : "")">
                         <a asp-action="Index" asp-controller="BanHang" class="menu-link">
