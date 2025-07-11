@@ -10,11 +10,16 @@ using SneakFit.Application.Catalog.DeGiay;
 using SneakFit.Application.Catalog.GioHang;
 using SneakFit.Application.Catalog.HoaDon;
 using SneakFit.Application.Catalog.HoaDonChiTiet;
+using SneakFit.Application.Catalog.HoaDonChiTietClientClient;
+using SneakFit.Application.Catalog.HoaDonChiTietClients;
+using SneakFit.Application.Catalog.HoaDonClient;
 using SneakFit.Application.Catalog.KhuyenMai;
 using SneakFit.Application.Catalog.KichThuoc;
 using SneakFit.Application.Catalog.MauSac;
 using SneakFit.Application.Catalog.SanPham;
 using SneakFit.Application.Catalog.SanPhamChiTiet;
+using SneakFit.Application.Catalog.ThongKe;
+using SneakFit.Application.Catalog.ThanhToan;
 using SneakFit.Application.Catalog.ThuongHieu;
 using SneakFit.Application.Catalog.Voucher;
 using SneakFit.Application.Email;
@@ -88,7 +93,12 @@ builder.Services.AddScoped<IEmailSender, EmailSender>(); // khai báo dịch v�
 builder.Services.AddScoped<IDiaChiService, DiaChiService>(); // khai báo dịch vụ
 builder.Services.AddScoped<IHoaDonService, HoaDonService>();// khai báo dịch vụ
 builder.Services.AddScoped<IHoaDonChiTietService, HoaDonChiTietService>();// khai báo dịch vụ
+builder.Services.AddScoped<IHoaDonClientService, HoaDonClientService>();// khai báo dịch vụ
+builder.Services.AddScoped<IHoaDonChiTietClientService, HoaDonChiTietClientService>();// khai báo dịch vụ
 builder.Services.AddHttpClient<IGhnService, GhnService>();
+builder.Services.AddScoped<IThongKeService, ThongKeService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IThanhToanService, ThanhToanService>();
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -97,6 +107,11 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
+    options.AddPolicy("AllowSpecificOrigin", builder =>
+        builder.WithOrigins("https://localhost:7211") // Thay bằng port của WebClient
+               .AllowAnyMethod()
+               .AllowAnyHeader()
+               .AllowCredentials());
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(x =>
@@ -163,6 +178,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.UseCors();
+app.UseCors("AllowSpecificOrigin");
 app.UseStaticFiles();
 
 app.UseHttpsRedirection();

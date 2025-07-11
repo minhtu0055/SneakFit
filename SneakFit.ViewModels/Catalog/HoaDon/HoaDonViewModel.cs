@@ -26,6 +26,7 @@ namespace SneakFit.ViewModels.Catalog.HoaDon
         public DateTime? NgayThanhToan { get; set; }
         public string MaHoaDon { get; set; }
         public decimal? PhiVanChuyen { get; set; }
+        public string DonViVanChuyen { get; set; }
         public TrangThaiThanhToan TrangThaiThanhToan { get; set; }
         public List<HoaDonChiTietViewModel> HoaDonChiTiet { get; set; }
         public Guid? VoucherId { get; set; }

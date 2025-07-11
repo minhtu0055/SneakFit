@@ -43,6 +43,29 @@ namespace SneakFit.Application.Catalog.KhuyenMai
             if (request.ThoiGianKetThuc <= request.ThoiGianBatDau)
                 throw new Exception("Ngày kết thúc phải sau ngày bắt đầu");
 
+
+            // KIỂM TRA TRÙNG SẢN PHẨM CHI TIẾT ĐANG CÓ KHUYẾN MẠI CÒN HIỆU LỰC
+            foreach (var spctId in request.SanPhamIds)
+            {
+                var kmcts = await _context.KhuyenMaiChiTiet
+                    .Where(x => x.SPCTId == spctId)
+                    .ToListAsync();
+
+                foreach (var kmct in kmcts)
+                {
+                    var km = await _context.KhuyenMai.FindAsync(kmct.KhuyenMaiId);
+                    if (km == null) continue;
+                    if (km.TrangThai == TrangThaiGiamGia.HetHan) continue;
+
+                    // Kiểm tra thời gian giao nhau
+                    bool isOverlap = !(request.ThoiGianKetThuc <= km.ThoiGianBatDau || request.ThoiGianBatDau >= km.ThoiGianKetThuc);
+                    if (isOverlap)
+                    {
+                        throw new Exception($"Sản phẩm chi tiết đã nằm trong khuyến mại '{km.TenKhuyenMai}' từ {km.ThoiGianBatDau:dd/MM/yyyy HH:mm} đến {km.ThoiGianKetThuc:dd/MM/yyyy HH:mm}!");
+                    }
+                }
+            }
+
             var khuyenMai = new Data.Entities.KhuyenMai()
             {
                 Id = Guid.NewGuid(),
@@ -146,39 +169,89 @@ namespace SneakFit.Application.Catalog.KhuyenMai
             }
             int totalRow = await query.CountAsync();
 
+            //var data = await query.Skip((request.PageIndex - 1) * request.PageSize)
+            //    .Take(request.PageSize)
+            //    .Select(khuyenMai => new KhuyenMaiViewModels()
+            //    {
+            //        Id = khuyenMai.Id,
+            //        TenKhuyenMai = khuyenMai.TenKhuyenMai,
+            //        MoTa = khuyenMai.MoTa,
+            //        NgayTao = khuyenMai.NgayTao,
+            //        NgaySuaDoi = khuyenMai.NgaySuaDoi,
+            //        ThoiGianBatDau = khuyenMai.ThoiGianBatDau,
+            //        ThoiGianKetThuc = khuyenMai.ThoiGianKetThuc,
+            //        LoaiGiamGia = khuyenMai.LoaiGiamGia,
+            //        GiaTriGiamGia = khuyenMai.GiaTriGiamGia,
+            //        TrangThai = khuyenMai.TrangThai,
+            //        SanPhams = khuyenMai.KhuyenMaiChiTiet.Select(p => new KhuyenMaiSanPhamViewModels
+            //        {
+            //            SanPhamId = p.SanPhamId,
+            //            SPCTId = p.SPCTId,
+            //            TenSanPham = p.SanPham.TenSanPham,
+            //            GiaGoc = _context.SanPhamChiTiet
+            //        .Where(x => x.ID == p.SPCTId)
+            //        .Select(x => (decimal?)x.Gia)
+            //        .FirstOrDefault() ?? 0m,
+
+
+            //            GiaKhuyenMai = _context.SanPhamChiTiet.FirstOrDefault(x => x.ID == p.SPCTId) != null
+            //        ? (khuyenMai.LoaiGiamGia == LoaiGiamGia.PhamTram
+            //            ? _context.SanPhamChiTiet.FirstOrDefault(x => x.ID == p.SPCTId).Gia * (100 - khuyenMai.GiaTriGiamGia) / 100
+            //            : _context.SanPhamChiTiet.FirstOrDefault(x => x.ID == p.SPCTId).Gia - khuyenMai.GiaTriGiamGia)
+            //        : 0
+            //        }).ToList()
+
+            //    }).ToListAsync();
+
             var data = await query.Skip((request.PageIndex - 1) * request.PageSize)
-                .Take(request.PageSize)
-                .Select(khuyenMai => new KhuyenMaiViewModels()
+            .Take(request.PageSize)
+            .Select(khuyenMai => new KhuyenMaiViewModels()
+            {
+                Id = khuyenMai.Id,
+                TenKhuyenMai = khuyenMai.TenKhuyenMai,
+                MoTa = khuyenMai.MoTa,
+                NgayTao = khuyenMai.NgayTao,
+                NgaySuaDoi = khuyenMai.NgaySuaDoi,
+                ThoiGianBatDau = khuyenMai.ThoiGianBatDau,
+                ThoiGianKetThuc = khuyenMai.ThoiGianKetThuc,
+                LoaiGiamGia = khuyenMai.LoaiGiamGia,
+                GiaTriGiamGia = khuyenMai.GiaTriGiamGia,
+                TrangThai = khuyenMai.TrangThai,
+                SanPhams = khuyenMai.KhuyenMaiChiTiet.Select(p => new KhuyenMaiSanPhamViewModels
                 {
-                    Id = khuyenMai.Id,
-                    TenKhuyenMai = khuyenMai.TenKhuyenMai,
-                    MoTa = khuyenMai.MoTa,
-                    NgayTao = khuyenMai.NgayTao,
-                    NgaySuaDoi = khuyenMai.NgaySuaDoi,
-                    ThoiGianBatDau = khuyenMai.ThoiGianBatDau,
-                    ThoiGianKetThuc = khuyenMai.ThoiGianKetThuc,              
-                    LoaiGiamGia = khuyenMai.LoaiGiamGia,
-                    GiaTriGiamGia = khuyenMai.GiaTriGiamGia,
-                    TrangThai = khuyenMai.TrangThai,
-                    SanPhams = khuyenMai.KhuyenMaiChiTiet.Select(p => new KhuyenMaiSanPhamViewModels
-                    {
-                        SanPhamId = p.SanPhamId,
-                        SPCTId = p.SPCTId,
-                        TenSanPham = p.SanPham.TenSanPham,
-                        GiaGoc = _context.SanPhamChiTiet
-                    .Where(x => x.ID == p.SPCTId)
-                    .Select(x => (decimal?)x.Gia)
-                    .FirstOrDefault() ?? 0m,
+                    SanPhamId = p.SanPhamId,
+                    SPCTId = p.SPCTId,
+                    TenSanPham = p.SanPham.TenSanPham,
+                    GiaGoc = _context.SanPhamChiTiet
+                        .Where(x => x.ID == p.SPCTId)
+                        .Select(x => (decimal?)x.Gia)
+                        .FirstOrDefault() ?? 0m,
+                    GiaKhuyenMai = _context.SanPhamChiTiet.FirstOrDefault(x => x.ID == p.SPCTId) != null
+                        ? (khuyenMai.LoaiGiamGia == LoaiGiamGia.PhamTram
+                            ? _context.SanPhamChiTiet.FirstOrDefault(x => x.ID == p.SPCTId).Gia * (100 - khuyenMai.GiaTriGiamGia) / 100
+                            : _context.SanPhamChiTiet.FirstOrDefault(x => x.ID == p.SPCTId).Gia - khuyenMai.GiaTriGiamGia)
+                        : 0
+                }).ToList(),
+
+                // THÊM ĐOẠN NÀY VÌ NẾU KHÔNG CLIENT SẼ KHÔNG BIẾT KM ÁP DỤNG VỚI SPCT NÀO
+                SanPhamChiTiets = khuyenMai.KhuyenMaiChiTiet.Select(ct => new KhuyenMaiSPCTViewModels
+                {
+                    SPCTId = ct.SPCTId,
+                    MauSacId = _context.SanPhamChiTiet.Where(x => x.ID == ct.SPCTId).Select(x => x.MauSacId).FirstOrDefault(),
+                    KichThuocId = _context.SanPhamChiTiet.Where(x => x.ID == ct.SPCTId).Select(x => x.KichThuocId).FirstOrDefault(),
+                    ChatLieuId = _context.SanPhamChiTiet.Where(x => x.ID == ct.SPCTId).Select(x => x.ChatLieuId).FirstOrDefault(),
+                    DeGiayId = _context.SanPhamChiTiet.Where(x => x.ID == ct.SPCTId).Select(x => x.DeGiayId).FirstOrDefault(),
+                    ThuongHieuId = _context.SanPhamChiTiet.Where(x => x.ID == ct.SPCTId).Select(x => x.ThuongHieuId).FirstOrDefault(),
+                    SanPhamId = _context.SanPhamChiTiet.Where(x => x.ID == ct.SPCTId).Select(x => x.SanPhamId).FirstOrDefault(),
+                    Gia = _context.SanPhamChiTiet.Where(x => x.ID == ct.SPCTId).Select(x => (decimal?)x.Gia).FirstOrDefault() ?? 0,
+                    SoLuong = _context.SanPhamChiTiet.Where(x => x.ID == ct.SPCTId).Select(x => (int?)x.SoLuong).FirstOrDefault() ?? 0,
+                    TrangThai = _context.SanPhamChiTiet.Where(x => x.ID == ct.SPCTId).Select(x => (bool?)x.TrangThai).FirstOrDefault() ?? false,
+                    NgayTao = _context.SanPhamChiTiet.Where(x => x.ID == ct.SPCTId).Select(x => (DateTime?)x.NgayTao).FirstOrDefault() ?? DateTime.MinValue
+                }).ToList()
+
+            }).ToListAsync();
 
 
-                        GiaKhuyenMai = _context.SanPhamChiTiet.FirstOrDefault(x => x.ID == p.SPCTId) != null
-                    ? (khuyenMai.LoaiGiamGia == LoaiGiamGia.PhamTram
-                        ? _context.SanPhamChiTiet.FirstOrDefault(x => x.ID == p.SPCTId).Gia * (100 - khuyenMai.GiaTriGiamGia) / 100
-                        : _context.SanPhamChiTiet.FirstOrDefault(x => x.ID == p.SPCTId).Gia - khuyenMai.GiaTriGiamGia)
-                    : 0
-                    }).ToList()
-
-                }).ToListAsync();
             var pagedResult = new PagedResult<KhuyenMaiViewModels>()
             {
                 TotalRecords = totalRow,
@@ -228,26 +301,37 @@ namespace SneakFit.Application.Catalog.KhuyenMai
                 NgayTao = khuyenMai.NgayTao,
                 NgaySuaDoi = khuyenMai.NgaySuaDoi,
                 ThoiGianBatDau = khuyenMai.ThoiGianBatDau,
-                ThoiGianKetThuc = khuyenMai.ThoiGianKetThuc,              
+                ThoiGianKetThuc = khuyenMai.ThoiGianKetThuc,
                 LoaiGiamGia = khuyenMai.LoaiGiamGia,
                 GiaTriGiamGia = khuyenMai.GiaTriGiamGia,
                 TrangThai = khuyenMai.TrangThai,
-                SanPhams = khuyenMai.KhuyenMaiChiTiet.Select(p => new KhuyenMaiSanPhamViewModels
+                SanPhams = khuyenMai.KhuyenMaiChiTiet.Select(p =>
                 {
-                    SanPhamId = p.SanPhamId,
-                    SPCTId = p.SPCTId,
-                    TenSanPham = p.SanPham.TenSanPham,
-                    GiaGoc = _context.SanPhamChiTiet
-                    .Where(x => x.ID == p.SPCTId)
-                    .Select(x => (decimal?)x.Gia)
-                    .FirstOrDefault() ?? 0m,
+                    var spct = _context.SanPhamChiTiet
+                        .Include(x => x.MauSac)
+                        .Include(x => x.KichThuoc)
+                        .Include(x => x.ChatLieu)
+                        .Include(x => x.DeGiay)
+                        .Include(x => x.ThuongHieu)
+                        .FirstOrDefault(x => x.ID == p.SPCTId);
 
-
-                    GiaKhuyenMai = _context.SanPhamChiTiet.FirstOrDefault(x => x.ID == p.SPCTId) != null
-                    ? (khuyenMai.LoaiGiamGia == LoaiGiamGia.PhamTram
-                        ? _context.SanPhamChiTiet.FirstOrDefault(x => x.ID == p.SPCTId).Gia * (100 - khuyenMai.GiaTriGiamGia) / 100
-                        : _context.SanPhamChiTiet.FirstOrDefault(x => x.ID == p.SPCTId).Gia - khuyenMai.GiaTriGiamGia)
-                    : 0
+                    return new KhuyenMaiSanPhamViewModels
+                    {
+                        SanPhamId = p.SanPhamId,
+                        SPCTId = p.SPCTId,
+                        TenSanPham = p.SanPham.TenSanPham,
+                        GiaGoc = spct?.Gia ?? 0m,
+                        GiaKhuyenMai = spct != null
+                            ? (khuyenMai.LoaiGiamGia == LoaiGiamGia.PhamTram
+                                ? spct.Gia * (100 - khuyenMai.GiaTriGiamGia) / 100
+                                : spct.Gia - khuyenMai.GiaTriGiamGia)
+                            : 0,
+                        TenMauSac = spct?.MauSac?.TenMauSac,
+                        MaKichThuoc = spct?.KichThuoc?.MaKichThuoc.ToString(),
+                        TenChatLieu = spct?.ChatLieu?.TenChatLieu,
+                        TenDeGiay = spct?.DeGiay?.TenDeGiay,
+                        TenThuongHieu = spct?.ThuongHieu?.TenThuongHieu
+                    };
                 }).ToList(),
                 SanPhamChiTiets = sanPhamChiTiets
             };
@@ -283,6 +367,29 @@ namespace SneakFit.Application.Catalog.KhuyenMai
             }
             if (request.ThoiGianKetThuc <= request.ThoiGianBatDau)
                 throw new Exception("Ngày kết thúc phải sau ngày bắt đầu");
+
+            // KIỂM TRA TRÙNG SẢN PHẨM CHI TIẾT ĐANG CÓ KHUYẾN MẠI CÒN HIỆU LỰC (TRỪ CHÍNH KM ĐANG SỬA)
+            foreach (var spctId in request.SanPhamIds)
+            {
+                var kmcts = await _context.KhuyenMaiChiTiet
+                    .Where(x => x.SPCTId == spctId)
+                    .ToListAsync();
+
+                foreach (var kmct in kmcts)
+                {
+                    var km = await _context.KhuyenMai.FindAsync(kmct.KhuyenMaiId);
+                    if (km == null) continue;
+                    if (km.Id == request.Id) continue; // Bỏ qua chính khuyến mại đang sửa
+                    if (km.TrangThai == TrangThaiGiamGia.HetHan) continue;
+
+                    // Kiểm tra thời gian giao nhau
+                    bool isOverlap = !(request.ThoiGianKetThuc <= km.ThoiGianBatDau || request.ThoiGianBatDau >= km.ThoiGianKetThuc);
+                    if (isOverlap)
+                    {
+                        throw new Exception($"Sản phẩm chi tiết đã nằm trong khuyến mại '{km.TenKhuyenMai}' từ {km.ThoiGianBatDau:dd/MM/yyyy HH:mm} đến {km.ThoiGianKetThuc:dd/MM/yyyy HH:mm}!");
+                    }
+                }
+            }
 
             khuyenMai.TenKhuyenMai = request.TenKhuyenMai;
             khuyenMai.MoTa = request.MoTa;

@@ -299,13 +299,44 @@ namespace SneakFit.Application.Catalog.SanPhamChiTiet
         }
 
         // Cập nhật số lượng sản phẩm chi tiết
-        public async Task<bool> UpdateSoLuong(Guid id, int soLuong)
+        //public async Task<bool> UpdateSoLuong(Guid id, int soLuong)
+        //{
+        //    var entity = await _context.SanPhamChiTiet.FindAsync(id);
+        //    if (entity == null) return false;
+        //    entity.SoLuong = soLuong;
+        //    await _context.SaveChangesAsync();
+        //    return true;
+        //}
+        public async Task<ApiResult<bool>> UpdateSoLuong(Guid id, int deltaSoLuong)
         {
-            var entity = await _context.SanPhamChiTiet.FindAsync(id);
-            if (entity == null) return false;
-            entity.SoLuong = soLuong;
-            await _context.SaveChangesAsync();
-            return true;
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var entity = await _context.SanPhamChiTiet.FindAsync(id);
+                if (entity == null)
+                {
+                    await transaction.RollbackAsync();
+                    return new ApiResult<bool> { IsSuccessed = false, Message = "Sản phẩm chi tiết không tồn tại." };
+                }
+
+                int newSoLuong = entity.SoLuong + deltaSoLuong;
+                if (newSoLuong < 0)
+                {
+                    await transaction.RollbackAsync();
+                    return new ApiResult<bool> { IsSuccessed = false, Message = "Số lượng không thể âm sau khi cập nhật." };
+                }
+
+                entity.SoLuong = newSoLuong;
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return new ApiResult<bool> { IsSuccessed = true, ResultObj = true };
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                //_logger.LogError(ex, $"Lỗi khi cập nhật số lượng cho sản phẩm {id}");
+                return new ApiResult<bool> { IsSuccessed = false, Message = $"Lỗi server: {ex.Message}" };
+            }
         }
 
         // Lưu file

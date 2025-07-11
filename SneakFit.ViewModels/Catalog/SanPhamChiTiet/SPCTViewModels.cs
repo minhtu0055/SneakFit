@@ -14,6 +14,7 @@ namespace SneakFit.ViewModels.Catalog.SanPhamChiTiet
         public string MoTa { get; set; }
         public decimal Gia { get; set; }
         public int SoLuong { get; set; }
+        public int SoLuongTon { get; set; }
         public DateTime NgayTao { get; set; }
         public Guid MauSacId { get; set; }
         public Guid KichThuocId { get; set; }
@@ -30,6 +31,12 @@ namespace SneakFit.ViewModels.Catalog.SanPhamChiTiet
         public string? TenChatLieu { get; set; }
         public string? TenDeGiay { get; set; }
         public string? TenThuongHieu { get; set; }
+
+
+        public decimal GiaGoc { get; set; }
+        public decimal GiaKhuyenMai { get; set; }
+        public decimal KhuyenMaiPhanTram { get; set; }
+        public Guid? KhuyenMaiId { get; set; }
 
         public List<string>? Images { get; set; }
     }

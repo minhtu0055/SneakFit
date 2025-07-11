@@ -30,6 +30,10 @@ namespace SneakFit.Data.Entities
         public LoaiHoaDon LoaiHoaDon { get; set; }
         public bool? GiaoHang { get; set; }
         public DateTime? NgayThanhToan { get; set; }      
+        public string? MaHoaDon { get; set; }
+        public decimal PhiVanChuyen { get; set; }
+        public string? DonViVanChuyen { get; set; }
+        public TrangThaiThanhToan TrangThaiThanhToan { get; set; }
         public Guid? VoucherId { get; set; }
         public Voucher? Voucher { get; set; }
         public List<HoaDonChiTiet>? HoaDonChiTiet { get; set; }

@@ -10,6 +10,7 @@ namespace SneakFit.Data.Enums
     {
         TienMat = 1,
         COD = 2,
-        VnPay = 3
+        VnPay = 3,
+        MoMo = 4
     }
 }

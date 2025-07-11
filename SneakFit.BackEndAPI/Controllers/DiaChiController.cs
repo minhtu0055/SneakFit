@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SneakFit.Application.System.DiaChi;
 using SneakFit.ViewModels.System.DiaChi;
 using System.Security.Claims;
 namespace SneakFit.BackEndAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class DiaChiController : ControllerBase
@@ -18,7 +20,10 @@ namespace SneakFit.BackEndAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllByUser()
         {
-            var userId = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+                return Unauthorized("Không tìm thấy thông tin đăng nhập.");
+            var userId = Guid.Parse(userIdClaim.Value);
             var result = await _diaChiService.GetAllByUser(userId);
             return Ok(result);
         }

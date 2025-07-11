@@ -1,0 +1,32 @@
+﻿using SneakFit.Data.Enums;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SneakFit.ViewModels.Catalog.HoaDonClient
+{
+    public class ThemHoaDonClient
+    {
+        public decimal TongTien { get; set; }
+        public TrangThaiHoaDon TrangThai { get; set; }
+        public Guid UserId { get; set; }
+        public string DiaChi { get; set; }
+        public string SoDienThoai { get; set; }
+        public string Email { get; set; }
+        public string HoTen { get; set; }
+        public string GhiChu { get; set; }
+        public PhuongThucThanhToan PhuongThucThanhToan { get; set; }
+        public LoaiHoaDon LoaiHoaDon { get; set; }
+        public DateTime? NgayThanhToan { get; set; }
+        public DateTime? NgayDatHang { get; set; }
+        public DateTime NgayTao { get; set; }
+        public string? MaHoaDon { get; set; }
+        public decimal PhiVanChuyen { get; set; }
+        public string? DonViVanChuyen { get; set; }
+        public string? MaVanDon { get; set; }
+        public TrangThaiThanhToan TrangThaiThanhToan { get; set; }
+        public Guid? VoucherId { get; set; }
+    }
+}

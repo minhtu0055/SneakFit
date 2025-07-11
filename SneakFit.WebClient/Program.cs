@@ -1,9 +1,30 @@
-﻿using SneakFit.ApiIntegration.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using SneakFit.ApiIntegration.Services;
+using SneakFit.Application.GHN;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Thêm Memory Cache
+builder.Services.AddMemoryCache();
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+.AddCookie(options =>
+{
+    options.LoginPath = "/Login/Index";
+    options.AccessDeniedPath = "/Forbidden/Index";
+    // Thêm các cấu hình sau
+    options.Cookie.Name = "SneakFit.WebClient";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+
+    // Cấu hình thời gian sống của cookie
+    options.ExpireTimeSpan = TimeSpan.FromHours(24);
+    options.SlidingExpiration = true;
+});
 
 builder.Services.AddHttpClient();
 
@@ -17,12 +38,31 @@ builder.Services.AddScoped<IMauSacApiClient, MauSacApiClient>();
 builder.Services.AddScoped<IKichThuocApiClient, KichThuocApiClient>();
 builder.Services.AddScoped<ISanPhamApiClient, SanPhamApiClient>();
 builder.Services.AddScoped<IThuongHieuApiClient, ThuongHieuApiClient>();
+builder.Services.AddScoped<IDeGiayApiClient, DeGiayApiClient>();
+builder.Services.AddScoped<IChatLieuApiClient, ChatLieuApiClient>();
+builder.Services.AddScoped<IKhuyenMaiApiClient, KhuyenMaiApiClient>();
+builder.Services.AddScoped<IGioHangApiClient, GioHangApiClient>();
+builder.Services.AddScoped<IVoucherApiClient, VoucherApiClient>();
+builder.Services.AddScoped<IHoaDonClientApiClient, HoaDonClientApiClient>();
+builder.Services.AddScoped<IHoaDonChiTietClientApiClient, HoaDonChiTietClientApiClient>();
+builder.Services.AddScoped<IGhnApiClient, GhnApiClient>();
+builder.Services.AddScoped<IUserApiClient, UserApiClient>();
+builder.Services.AddScoped<IDiaChiApiClient, DiaChiApiClient>();
 
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("http://localhost:7211") // Cho phép frontend gọi
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
 
@@ -34,12 +74,16 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseCors();
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseSession();
 
 app.UseRouting();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

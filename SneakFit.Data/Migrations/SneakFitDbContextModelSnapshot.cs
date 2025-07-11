@@ -253,7 +253,7 @@ namespace SneakFit.Data.Migrations
                         {
                             Id = new Guid("69bd714f-9576-45ba-b5b7-f00649be00de"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "a0ab6e4a-e60b-4c29-9cfc-11409d57f2fc",
+                            ConcurrencyStamp = "873746a1-abb2-4ae1-b72d-c1aad22d1ba3",
                             Email = "tupmph49568@gmail.com",
                             EmailConfirmed = true,
                             GioiTinh = false,
@@ -545,6 +545,7 @@ namespace SneakFit.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("MaHoaDon")
+
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 

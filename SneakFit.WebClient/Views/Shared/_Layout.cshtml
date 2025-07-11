@@ -27,6 +27,9 @@
 
     <!-- Main CSS File -->
     <link href="~/assets/css/main.css" rel="stylesheet">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
 </head>
 
 <body class="index-page">
@@ -73,7 +76,7 @@
                                     <p class="mb-0">Access account &amp; manage orders</p>
                                 </div>
                                 <div class="dropdown-body">
-                                    <a class="dropdown-item d-flex align-items-center" href="account.html">
+                                    <a class="dropdown-item d-flex align-items-center" href="@Url.Action("MyProfile", "Account")">
                                         <i class="bi bi-person-circle me-2"></i>
                                         <span>My Profile</span>
                                     </a>
@@ -104,10 +107,12 @@
                         </a>
 
                         <!-- Cart -->
-                        <a asp-action="index" asp-controller="GioHang" class="header-action-btn">
+                        @* <a asp-action="index" asp-controller="GioHang" class="header-action-btn">
                             <i class="bi bi-cart3"></i>
                             <span class="badge">3</span>
-                        </a>
+                        </a> *@
+                        <!-- Cart (dynamic badge via ViewComponent) -->
+                        @await Component.InvokeAsync("CartBadge")
 
                         <!-- Mobile Navigation Toggle -->
                         <i class="mobile-nav-toggle d-xl-none bi bi-list me-0"></i>
@@ -123,13 +128,13 @@
                 <div class="position-relative">
                     <nav id="navmenu" class="navmenu">
                         <ul>
-                            <li><a asp-action="index" asp-controller="home" class="active">Home</a></li>
-                            <li><a href="about.html">About</a></li>
-                            <li><a asp-action="index" asp-controller="SanPham">Product</a></li>
-                            <li><a asp-action="index" asp-controller="danhmuc">Category</a></li>
-                            <li><a href="product-details.html">Product Details</a></li>
-                            <li><a asp-action="index" asp-controller="giohang">Cart</a></li>
-                            <li><a href="checkout.html">Checkout</a></li>
+                            <li><a asp-action="index" asp-controller="Home" class="active">Home</a></li>
+                            @* <li><a href="about.html">About</a></li> *@
+                            <li><a asp-action="index" asp-controller="SanPham">Sản phẩm</a></li>
+                            <li><a asp-action="index" asp-controller="danhmuc">Danh mục</a></li>
+                            <li><a asp-action="index" asp-controller="HoaDon">Hóa đơn</a></li>
+                            <li><a asp-action="index" asp-controller="GioHang">Giỏ hàng</a></li>
+                            <li><a asp-action="checkout" asp-controller="ThanhToan">Thanh toán</a></li>
                         </ul>
                     </nav>
                 </div>
@@ -328,7 +333,20 @@
 
     <!-- Main JS File -->
     <script src="~/assets/js/main.js"></script>
-
+    @* <script src="~/assets/js/jquery-3.6.0.min.js"></script> *@
+    @* <script src="~/assets/js/jquery-3.7.1.min.js"></script> *@
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        var isAuthenticated = @(User.Identity.IsAuthenticated.ToString().ToLower());
+        $(document).ready(function () {
+            $('#cartIconBtn').on('click', function (e) {
+                if (!isAuthenticated) {
+                    e.preventDefault();
+                    window.location.href = '/Login/Index';
+                }
+            });
+        });
+    </script>
     @RenderSection("Scripts", required: false)
 </body>
 
