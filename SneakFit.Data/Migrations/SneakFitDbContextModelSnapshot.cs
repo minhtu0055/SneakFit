@@ -154,7 +154,7 @@ namespace SneakFit.Data.Migrations
                         new
                         {
                             UserId = new Guid("69bd714f-9576-45ba-b5b7-f01649be00de"),
-                            RoleId = new Guid("8d04dce2-969a-435d-bba4-df3f325984dc")
+                            RoleId = new Guid("8d04dce2-979a-435d-bba4-df3f325983dc")
                         });
                 });
 
@@ -262,7 +262,7 @@ namespace SneakFit.Data.Migrations
                             NgaySinh = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NormalizedEmail = "tupmph49568@gmail.com",
                             NormalizedUserName = "Admin",
-                            PasswordHash = "AQAAAAIAAYagAAAAEDgTxwlfgPedP7SxRdEs1hLS3Zg6Sbl8FVC19tv/1YT3BJv3sC1vSZXXtUZMAIeBsQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEIKhNdq2R1ie2SZ3dIYGHTBypIbl9+K+iP1YUcoW0Hgo9rWSjStcAEv8OegqBzu1eA==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
                             TrangThai = true,
@@ -273,7 +273,7 @@ namespace SneakFit.Data.Migrations
                         {
                             Id = new Guid("69bd712f-9576-45ba-b5b7-f00649be00de"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "760c37f7-bf8e-4706-b8c2-33425f31d2b2",
+                            ConcurrencyStamp = "91c0a21e-25ba-4a8c-b498-1b4e357a5e99",
                             Email = "kiet@gmail.com",
                             EmailConfirmed = true,
                             GioiTinh = false,
@@ -282,7 +282,7 @@ namespace SneakFit.Data.Migrations
                             NgaySinh = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NormalizedEmail = "kiet@gmail.com",
                             NormalizedUserName = "nhanvien",
-                            PasswordHash = "AQAAAAIAAYagAAAAEHX54v2KQlSCHhUaYrDEk63+KZ/2QfB5g0Phk9BkkMyPFFitRerMBbE90aZgjDe1dQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAENNkTWJrsnnnhxESpxKp7N31liNQQxG0w8h0/9oWQ1CkoA489YzZ+zcoi6Sw9nGfEw==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
                             TrangThai = true,
@@ -293,7 +293,7 @@ namespace SneakFit.Data.Migrations
                         {
                             Id = new Guid("69bd714f-9576-45ba-b5b7-f01649be00de"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "adbf1c99-4f83-45e5-bddb-b25babd9b342",
+                            ConcurrencyStamp = "8504ae4e-221d-4ce2-bb71-e3c4c6f5eea9",
                             Email = "kiet@gmail.com",
                             EmailConfirmed = true,
                             GioiTinh = false,
@@ -302,7 +302,7 @@ namespace SneakFit.Data.Migrations
                             NgaySinh = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NormalizedEmail = "kiet@gmail.com",
                             NormalizedUserName = "khachhang",
-                            PasswordHash = "AQAAAAIAAYagAAAAEFSxjnx5x0xTdxCl4d8mu6AJvcFJzAiXQBNaOJuoNP16T0sfIvVN4n12fZ0CD3qQRA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEDrbdvuVdYdtbClKJsu0sBnihYTEZH+FWsdkrZOR/eZjDWPYeETQKUhslS7a83YyXA==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
                             TrangThai = true,
@@ -526,10 +526,6 @@ namespace SneakFit.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("DonViVanChuyen")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<string>("Email")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
@@ -537,6 +533,9 @@ namespace SneakFit.Data.Migrations
                     b.Property<string>("GhiChu")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool?>("GiaoHang")
+                        .HasColumnType("bit");
 
                     b.Property<string>("HoTen")
                         .HasMaxLength(50)
@@ -546,10 +545,7 @@ namespace SneakFit.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("MaHoaDon")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("MaVanDon")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -559,10 +555,12 @@ namespace SneakFit.Data.Migrations
                     b.Property<DateTime?>("NgayThanhToan")
                         .HasColumnType("datetime2");
 
-                    b.Property<decimal>("PhiVanChuyen")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("decimal(18,2)")
-                        .HasDefaultValue(0m);
+                    b.Property<string>("NguoiTao")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("PhiVanChuyen")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("PhuongThucThanhToan")
                         .HasMaxLength(50)
@@ -571,6 +569,9 @@ namespace SneakFit.Data.Migrations
                     b.Property<string>("SoDienThoai")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<decimal?>("TienKhachDua")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("TongTien")
                         .HasColumnType("decimal(18,2)");
@@ -581,7 +582,7 @@ namespace SneakFit.Data.Migrations
                     b.Property<int>("TrangThaiThanhToan")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid?>("UserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("VoucherId")
@@ -1018,9 +1019,7 @@ namespace SneakFit.Data.Migrations
                 {
                     b.HasOne("SneakFit.Data.Entities.AppUser", "User")
                         .WithMany("HoaDon")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
                     b.HasOne("SneakFit.Data.Entities.Voucher", "Voucher")
                         .WithMany("HoaDon")
@@ -1163,8 +1162,7 @@ namespace SneakFit.Data.Migrations
                 {
                     b.Navigation("DiaChi");
 
-                    b.Navigation("GioHang")
-                        .IsRequired();
+                    b.Navigation("GioHang");
 
                     b.Navigation("HoaDon");
                 });

@@ -9,5 +9,8 @@ namespace SneakFit.ApiIntegration.Services
         Task<List<HoaDonChiTietViewModel>> GetByHoaDonId(Guid id);
         Task<HoaDonChiTietViewModel> Create(ThemHoaDonChiTiet request);
         Task<HoaDonChiTietViewModel> Edit(SuaHoaDonChiTiet request);
+        Task<HoaDonChiTietViewModel> CreateOrUpdate(ThemHoaDonChiTiet request);
+        Task<bool> Delete(Guid id);
+        Task<bool> UpdateQuantity(Guid hoaDonChiTietId, int newQuantity);
     }
 }

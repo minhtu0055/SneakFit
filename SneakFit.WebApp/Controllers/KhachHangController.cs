@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SneakFit.ApiIntegration.Services;
+using SneakFit.ViewModels.System.DiaChi;
 using SneakFit.ViewModels.System.User;
 
 namespace SneakFit.Admin.Controllers
@@ -42,10 +43,6 @@ namespace SneakFit.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(RegisterRequest request, IFormFile imageFile)
         {
-            if (!ModelState.IsValid)
-            {
-                return View(request);
-            }
 
             if (imageFile != null && imageFile.Length > 0)
             {
@@ -92,7 +89,19 @@ namespace SneakFit.Admin.Controllers
                     SoDienThoai = user.SoDienThoai,
                     HoVaTen = user.HoVaTen,
                     TrangThai = user.TrangThai,
-                    UrlHinhAnh = user.UrlHinhAnh
+                    UrlHinhAnh = user.UrlHinhAnh,
+                    DiaChi = user.DiaChi != null ? new DiaChiViewModel()
+                    {
+                        TenDiaChi = user.DiaChi.TenDiaChi,
+                        TenThanhPho = user.DiaChi.TenThanhPho,
+                        TenHuyen = user.DiaChi.TenHuyen,
+                        TenXa = user.DiaChi.TenXa,
+                        SoDienThoai = user.DiaChi.SoDienThoai,
+                        TenNguoiNhan = user.DiaChi.TenNguoiNhan,
+                        MaTinh = user.DiaChi.MaTinh,
+                        MaHuyen = user.DiaChi.MaHuyen,
+                        MaXa = user.DiaChi.MaXa
+                    } : null
                 };
                 return View(updateRequest);
             }
@@ -102,19 +111,43 @@ namespace SneakFit.Admin.Controllers
         public async Task<IActionResult> Edit(UserUpdateRequest request)
         {
             if (!ModelState.IsValid)
-                return View();
+                return View(request);
+
+            // Xử lý file hình ảnh
+            if (Request.Form.Files.Count > 0)
+            {
+                var file = Request.Form.Files[0];
+                if (file != null && file.Length > 0)
+                {
+                    request.HinhAnh = file;
+                }
+            }
+            // Xử lý địa chỉ từ form
+            if (request.DiaChi == null)
+            {
+                request.DiaChi = new DiaChiViewModel();
+            }
+
+            request.DiaChi.TenDiaChi = Request.Form["DiaChi.TenDiaChi"].ToString();
+            request.DiaChi.TenThanhPho = Request.Form["DiaChi.TenThanhPho"].ToString();
+            request.DiaChi.TenHuyen = Request.Form["DiaChi.TenHuyen"].ToString();
+            request.DiaChi.TenXa = Request.Form["DiaChi.TenXa"].ToString();
+            request.DiaChi.SoDienThoai = Request.Form["DiaChi.SoDienThoai"].ToString();
+            request.DiaChi.TenNguoiNhan = Request.Form["DiaChi.TenNguoiNhan"].ToString();
+            request.DiaChi.MaTinh = Request.Form["DiaChi.MaTinh"].ToString();
+            request.DiaChi.MaHuyen = Request.Form["DiaChi.MaHuyen"].ToString();
+            request.DiaChi.MaXa = Request.Form["DiaChi.MaXa"].ToString();
 
             var result = await _userApiClient.Update(request);
             if (result.IsSuccessed)
             {
-                TempData["success"] = "Cập nhật thông tin thành công";
+                TempData["SuccessMessage"] = "Cập nhật thông tin thành công";
                 return RedirectToAction("Index");
             }
 
             ModelState.AddModelError("", result.Message);
             return View(request);
         }
-
         [HttpPost]
         public async Task<IActionResult> CapNhatTrangThai(Guid id, bool trangThai)
         {

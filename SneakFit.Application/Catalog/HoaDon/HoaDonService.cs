@@ -43,6 +43,10 @@ namespace SneakFit.Application.Catalog.HoaDon
             {
                 query = query.Where(h => h.NgayTao >= request.NgayBatDau.Value && h.NgayTao <= request.NgayKetThuc.Value);
             }
+             if (!string.IsNullOrEmpty(request.NguoiTao))
+            {
+                query = query.Where(h => h.NguoiTao == request.NguoiTao);
+            }
             int totalRow = await query.CountAsync();
             var data = await query
                 .Skip((request.PageIndex - 1) * request.PageSize)
@@ -57,14 +61,14 @@ namespace SneakFit.Application.Catalog.HoaDon
                     DiaChi = h.DiaChi,
                     SoDienThoai = h.SoDienThoai,
                     Email = h.Email,
+                    GiaoHang = h.GiaoHang,
                     PhuongThucThanhToan = h.PhuongThucThanhToan,
                     LoaiHoaDon = h.LoaiHoaDon,
                     NgayThanhToan = h.NgayThanhToan,
                     MaHoaDon = h.MaHoaDon,
                     PhiVanChuyen = h.PhiVanChuyen,
-                    DonViVanChuyen = h.DonViVanChuyen,
-                    MaVanDon = h.MaVanDon,
                     TrangThaiThanhToan = h.TrangThaiThanhToan,
+                    TienKhachDua = h.TienKhachDua,
                 }).ToListAsync();
             var pagedResult = new PagedResult<HoaDonViewModel>()
             {
@@ -94,42 +98,44 @@ namespace SneakFit.Application.Catalog.HoaDon
                 HoTen = hoaDon.HoTen,
                 DiaChi = hoaDon.DiaChi,
                 SoDienThoai = hoaDon.SoDienThoai,
+                GiaoHang = hoaDon.GiaoHang,
                 Email = hoaDon.Email,
                 PhuongThucThanhToan = hoaDon.PhuongThucThanhToan,
                 LoaiHoaDon = hoaDon.LoaiHoaDon,
                 NgayThanhToan = hoaDon.NgayThanhToan,
                 MaHoaDon = hoaDon.MaHoaDon,
                 PhiVanChuyen = hoaDon.PhiVanChuyen,
-                DonViVanChuyen = hoaDon.DonViVanChuyen,
-                MaVanDon = hoaDon.MaVanDon,
                 TrangThaiThanhToan = hoaDon.TrangThaiThanhToan,
                 VoucherId = hoaDon.VoucherId,
+                TienKhachDua = hoaDon.TienKhachDua,
             };
         }
 
-        public async Task<HoaDonViewModel> Create(ThemHoaDon request)
+        public async Task<HoaDonViewModel> Create(ThemHoaDon request, string tenNguoiTao)
         {
+            var maHoaDon = $"HD{DateTime.Now:yyyyMMddHHmmss}{new Random().Next(1000, 9999)}";
             var hoaDon = new Data.Entities.HoaDon
             {
                 Id = Guid.NewGuid(),
                 NgayTao = DateTime.Now,
                 TongTien = request.TongTien,
-                TrangThai = request.TrangThai,
+                TrangThai = TrangThaiHoaDon.ChoXacNhan,
                 UserId = request.UserId,
                 DiaChi = request.DiaChi,
                 SoDienThoai = request.SoDienThoai,
                 Email = request.Email,
                 HoTen = request.HoTen,
                 GhiChu = request.GhiChu,
+                GiaoHang = request.GiaoHang,
+                NguoiTao = tenNguoiTao,
                 PhuongThucThanhToan = request.PhuongThucThanhToan,
                 LoaiHoaDon = request.LoaiHoaDon,
                 NgayThanhToan = request.NgayThanhToan,
-                MaHoaDon = request.MaHoaDon,
+                MaHoaDon = maHoaDon,
                 PhiVanChuyen = request.PhiVanChuyen,
-                DonViVanChuyen = request.DonViVanChuyen,
-                MaVanDon = request.MaVanDon,
                 TrangThaiThanhToan = request.TrangThaiThanhToan,
-                VoucherId = request.VoucherId
+                VoucherId = request.VoucherId,
+                TienKhachDua = request.TienKhachDua
             };
             _context.HoaDon.Add(hoaDon);
             await _context.SaveChangesAsync();
@@ -148,16 +154,17 @@ namespace SneakFit.Application.Catalog.HoaDon
             hoaDon.SoDienThoai = request.SoDienThoai;
             hoaDon.Email = request.Email;
             hoaDon.HoTen = request.HoTen;
+            hoaDon.UserId = request.UserId;
+            hoaDon.GiaoHang = request.GiaoHang;
             hoaDon.GhiChu = request.GhiChu;
             hoaDon.PhuongThucThanhToan = request.PhuongThucThanhToan;
             hoaDon.LoaiHoaDon = request.LoaiHoaDon;
             hoaDon.NgayThanhToan = request.NgayThanhToan;
             hoaDon.MaHoaDon = request.MaHoaDon;
             hoaDon.PhiVanChuyen = request.PhiVanChuyen;
-            hoaDon.DonViVanChuyen = request.DonViVanChuyen;
-            hoaDon.MaVanDon = request.MaVanDon;
             hoaDon.TrangThaiThanhToan = request.TrangThaiThanhToan;
             hoaDon.VoucherId = request.VoucherId;
+            hoaDon.TienKhachDua = request.TienKhachDua;
 
             await _context.SaveChangesAsync();
             return await GetById(hoaDon.Id);
@@ -173,6 +180,70 @@ namespace SneakFit.Application.Catalog.HoaDon
 
             // Đưa về Dictionary cho dễ dùng
             return counts.ToDictionary(x => x.TrangThai, x => x.Count);
+        }
+        public async Task<List<HoaDonViewModel>> GetHoaDonChoByNguoiTao(string nguoiTao)
+        {
+            var query = _context.HoaDon
+                .Include(h => h.HoaDonChiTiet)
+                .ThenInclude(hdc => hdc.SanPhamChiTiet)
+                .Include(h => h.User)
+                .Include(h => h.Voucher)
+                .Where(h => h.NguoiTao == nguoiTao && h.TrangThai == TrangThaiHoaDon.ChoXacNhan)
+                .AsQueryable();
+
+            var data = await query
+                .Select(h => new HoaDonViewModel
+                {
+                    Id = h.Id,
+                    NgayTao = h.NgayTao,
+                    TongTien = h.TongTien,
+                    TrangThai = h.TrangThai,
+                    UserId = h.UserId,
+                    HoTen = h.HoTen,
+                    DiaChi = h.DiaChi,
+                    SoDienThoai = h.SoDienThoai,
+                    GiaoHang = h.GiaoHang,
+                    Email = h.Email,
+                    PhuongThucThanhToan = h.PhuongThucThanhToan,
+                    LoaiHoaDon = h.LoaiHoaDon,
+                    NgayThanhToan = h.NgayThanhToan,
+                    MaHoaDon = h.MaHoaDon,
+                    PhiVanChuyen = h.PhiVanChuyen,
+                    TrangThaiThanhToan = h.TrangThaiThanhToan,
+                    VoucherId = h.VoucherId,
+                    TienKhachDua = h.TienKhachDua,
+                }).ToListAsync();
+
+            return data;
+        }
+
+        public async Task<bool> Delete(Guid id)
+        {
+            var hoaDon = await _context.HoaDon
+                .Include(h => h.HoaDonChiTiet)
+                .ThenInclude(hdct => hdct.SanPhamChiTiet)
+                .FirstOrDefaultAsync(h => h.Id == id);
+
+            if (hoaDon == null) return false;
+
+            // Hoàn kho cho từng sản phẩm trong hóa đơn chi tiết
+            if (hoaDon.HoaDonChiTiet != null)
+            {
+                foreach (var hdct in hoaDon.HoaDonChiTiet)
+                {
+                    if (hdct.SanPhamChiTiet != null)
+                    {
+                        hdct.SanPhamChiTiet.SoLuong += hdct.SoLuong;
+                    }
+                }
+                // Xóa hết hóa đơn chi tiết
+                _context.HoaDonChiTiet.RemoveRange(hoaDon.HoaDonChiTiet);
+            }
+
+            // Xóa hóa đơn
+            _context.HoaDon.Remove(hoaDon);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

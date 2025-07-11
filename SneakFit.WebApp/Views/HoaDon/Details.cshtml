@@ -120,7 +120,7 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Tổng tiền: </label>
-                            <p class="form-control-static">@Model.TongTien.ToString("N0") đ</p>
+                            <p class="form-control-static">@Model.TongTien.ToString("N0") VNĐ</p>
                         </div>
                     </div>
                     <div class="mb-3">
@@ -172,16 +172,16 @@
                                             <span class="fw-semibold">@item.ProductName</span>
                                         </div>
                                     </td> *@
-                                    <td>@item.GiaBan.ToString("N0") đ</td>
+                                    <td>@item.GiaBan.ToString("N0") VNĐ</td>
                                     <td>@item.SoLuong</td>
-                                    <td>@((item.GiaBan * item.SoLuong).ToString("N0")) đ</td>
+                                    <td>@((item.GiaBan * item.SoLuong).ToString("N0")) VNĐ</td>
                                 </tr>
                             }
                         </tbody>
                         <tfoot>
                             <tr>
                                 <td colspan="4" class="text-end fw-bold">Tổng cộng:</td>
-                                <td class="fw-bold">@Model.TongTien.ToString("N0") đ</td>
+                                <td class="fw-bold">@Model.TongTien.ToString("N0") VNĐ</td>
                             </tr>
                         </tfoot>
                     </table>

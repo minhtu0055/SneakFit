@@ -55,6 +55,7 @@ namespace SneakFit.Application.System.User
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Role, string.Join(";",roles)),
                 new Claim(ClaimTypes.Name, request.UserName),
+                new Claim(ClaimTypes.GivenName, user.HoVaTen ?? ""), 
                 new Claim("SessionId", Guid.NewGuid().ToString()), // Thêm một claim để phân biệt các phiên đăng nhập
                 new Claim("UrlHinhAnh", user.UrlHinhAnh ?? "") // Thêm claim cho đường dẫn ảnh
             };
@@ -113,7 +114,7 @@ namespace SneakFit.Application.System.User
             var query = _userManager.Users;
             if (!string.IsNullOrEmpty(request.TuKhoa))
             {
-                query = query.Where(x => x.UserName.Contains(request.TuKhoa)
+                query = query.Where(x => x.HoVaTen.Contains(request.TuKhoa)
                  || x.PhoneNumber.Contains(request.TuKhoa));
             }
             // Lọc theo role nếu được chỉ định

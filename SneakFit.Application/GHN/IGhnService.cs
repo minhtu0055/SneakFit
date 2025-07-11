@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SneakFit.ViewModels.GHN;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,5 +12,6 @@ namespace SneakFit.Application.GHN
         Task<string> GetProvincesAsync();
         Task<string> GetDistrictsAsync();
         Task<string> GetWardsAsync(int districtId);
+        Task<string> CalculateShippingFeeAsync(ShippingFeeRequest request);
     }
 }

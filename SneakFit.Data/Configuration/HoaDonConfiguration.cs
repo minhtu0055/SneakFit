@@ -32,7 +32,7 @@ namespace SneakFit.Data.Configuration
             builder.Property(x => x.LoaiHoaDon).HasConversion<int>();
             builder.Property(x => x.NgayThanhToan).IsRequired(false);
             builder.Property(x => x.MaHoaDon).HasMaxLength(50);
-            builder.Property(x => x.PhiVanChuyen).HasColumnType("decimal(18,2)").HasDefaultValue(0);
+            builder.Property(x => x.PhiVanChuyen).HasColumnType("decimal(18,2)");
             builder.Property(x => x.DonViVanChuyen).HasMaxLength(50);
             builder.Property(x => x.MaVanDon).HasMaxLength(50);
             builder.Property(x => x.TrangThaiThanhToan).HasConversion<int>();
