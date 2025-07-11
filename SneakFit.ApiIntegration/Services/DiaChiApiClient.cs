@@ -37,8 +37,7 @@ namespace SneakFit.ApiIntegration.Services
             }
             throw new Exception("Không thể lấy danh sách địa chỉ của user");
         }
-    }
-}
+
         public async Task<List<DiaChiViewModel>> GetAllByUser()
         {
             var client = _httpClientFactory.CreateClient();

@@ -23,17 +23,14 @@ namespace SneakFit.Data.Entities
         // Người tạo hóa đơn
         public string NguoiTao { get; set; }
         public string? MaHoaDon { get; set; }
-        public decimal? PhiVanChuyen { get; set; }
+        public decimal PhiVanChuyen { get; set; }
         public TrangThaiThanhToan TrangThaiThanhToan { get; set; }
         public string? GhiChu { get; set; }
         public PhuongThucThanhToan PhuongThucThanhToan { get; set; }
         public LoaiHoaDon LoaiHoaDon { get; set; }
         public bool? GiaoHang { get; set; }
         public DateTime? NgayThanhToan { get; set; }      
-        public string? MaHoaDon { get; set; }
-        public decimal PhiVanChuyen { get; set; }
         public string? DonViVanChuyen { get; set; }
-        public TrangThaiThanhToan TrangThaiThanhToan { get; set; }
         public Guid? VoucherId { get; set; }
         public Voucher? Voucher { get; set; }
         public List<HoaDonChiTiet>? HoaDonChiTiet { get; set; }

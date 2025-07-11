@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using SneakFit.ApiIntegration.Services;
-using SneakFit.Application.GHN;
 
 
 var builder = WebApplication.CreateBuilder(args);

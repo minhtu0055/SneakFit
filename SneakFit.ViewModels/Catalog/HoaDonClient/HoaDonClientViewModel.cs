@@ -22,13 +22,12 @@ namespace SneakFit.ViewModels.Catalog.HoaDonClient
         public LoaiHoaDon LoaiHoaDon { get; set; }
         public DateTime? NgayThanhToan { get; set; }
         public string MaHoaDon { get; set; }
-        public decimal PhiVanChuyen { get; set; }
+        public decimal? PhiVanChuyen { get; set; }
         public string DonViVanChuyen { get; set; }
-        public string MaVanDon { get; set; }
         public TrangThaiThanhToan TrangThaiThanhToan { get; set; }
         public List<HoaDonChiTietViewModel> HoaDonChiTiet { get; set; }
         public Guid? VoucherId { get; set; }
-        public Guid UserId { get; set; }
+        public Guid? UserId { get; set; }
         public decimal? TongTienSanPham => TongTien > 0 && PhiVanChuyen > 0 ? TongTien - PhiVanChuyen : TongTien;
     }
 }

@@ -69,7 +69,6 @@ namespace SneakFit.Application.Catalog.HoaDonClient
                     MaHoaDon = h.MaHoaDon,
                     PhiVanChuyen = h.PhiVanChuyen,
                     DonViVanChuyen = h.DonViVanChuyen,
-                    MaVanDon = h.MaVanDon,
                     TrangThaiThanhToan = h.TrangThaiThanhToan,
                     UserId = h.UserId
                 }).ToListAsync();
@@ -108,7 +107,6 @@ namespace SneakFit.Application.Catalog.HoaDonClient
                 MaHoaDon = hoaDon.MaHoaDon,
                 PhiVanChuyen = hoaDon.PhiVanChuyen,
                 DonViVanChuyen = hoaDon.DonViVanChuyen,
-                MaVanDon = hoaDon.MaVanDon,
                 TrangThaiThanhToan = hoaDon.TrangThaiThanhToan,
                 VoucherId = hoaDon.VoucherId,
                 UserId = hoaDon.UserId
@@ -136,7 +134,6 @@ namespace SneakFit.Application.Catalog.HoaDonClient
                 MaHoaDon = maHoaDon,
                 PhiVanChuyen = request.PhiVanChuyen,
                 DonViVanChuyen = request.DonViVanChuyen,
-                MaVanDon = request.MaVanDon,
                 TrangThaiThanhToan = request.TrangThaiThanhToan,
                 VoucherId = request.VoucherId
             };
@@ -164,7 +161,6 @@ namespace SneakFit.Application.Catalog.HoaDonClient
             hoaDon.MaHoaDon = request.MaHoaDon;
             hoaDon.PhiVanChuyen = request.PhiVanChuyen;
             hoaDon.DonViVanChuyen = request.DonViVanChuyen;
-            hoaDon.MaVanDon = request.MaVanDon;
             hoaDon.TrangThaiThanhToan = request.TrangThaiThanhToan;
             hoaDon.VoucherId = request.VoucherId;
 
