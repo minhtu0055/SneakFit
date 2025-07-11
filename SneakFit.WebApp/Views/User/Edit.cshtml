@@ -2,10 +2,10 @@
 @inject IConfiguration Configuration
 
 <div class="container-fluid">
-	<h3 class="mt-4">Cập nhật khách hàng</h3>
+	<h3 class="mt-4">Cập nhật nhân viên</h3>
 	<ol class="breadcrumb mb-4">
 		<li class="breadcrumb-item"><a href="/">Trang chủ</a></li>
-		<li class="breadcrumb-item"><a asp-action="Index">Danh sách khách hàng</a></li>
+		<li class="breadcrumb-item"><a asp-action="Index">Danh sách nhân viên</a></li>
 		<li class="breadcrumb-item active">Cập nhật</li>
 	</ol>
 	<div class="card mb-4">
@@ -136,9 +136,6 @@
 	</div>
 </div>
 @section Scripts {
-	@{
-		await Html.RenderPartialAsync("_ValidationScriptsPartial");
-	}
 	<script>
 		var selectedProvince = '@Model.DiaChi?.MaTinh';
 		var selectedDistrict = '@Model.DiaChi?.MaHuyen';

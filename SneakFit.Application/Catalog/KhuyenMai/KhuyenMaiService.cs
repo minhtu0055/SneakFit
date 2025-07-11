@@ -169,39 +169,89 @@ namespace SneakFit.Application.Catalog.KhuyenMai
             }
             int totalRow = await query.CountAsync();
 
+            //var data = await query.Skip((request.PageIndex - 1) * request.PageSize)
+            //    .Take(request.PageSize)
+            //    .Select(khuyenMai => new KhuyenMaiViewModels()
+            //    {
+            //        Id = khuyenMai.Id,
+            //        TenKhuyenMai = khuyenMai.TenKhuyenMai,
+            //        MoTa = khuyenMai.MoTa,
+            //        NgayTao = khuyenMai.NgayTao,
+            //        NgaySuaDoi = khuyenMai.NgaySuaDoi,
+            //        ThoiGianBatDau = khuyenMai.ThoiGianBatDau,
+            //        ThoiGianKetThuc = khuyenMai.ThoiGianKetThuc,
+            //        LoaiGiamGia = khuyenMai.LoaiGiamGia,
+            //        GiaTriGiamGia = khuyenMai.GiaTriGiamGia,
+            //        TrangThai = khuyenMai.TrangThai,
+            //        SanPhams = khuyenMai.KhuyenMaiChiTiet.Select(p => new KhuyenMaiSanPhamViewModels
+            //        {
+            //            SanPhamId = p.SanPhamId,
+            //            SPCTId = p.SPCTId,
+            //            TenSanPham = p.SanPham.TenSanPham,
+            //            GiaGoc = _context.SanPhamChiTiet
+            //        .Where(x => x.ID == p.SPCTId)
+            //        .Select(x => (decimal?)x.Gia)
+            //        .FirstOrDefault() ?? 0m,
+
+
+            //            GiaKhuyenMai = _context.SanPhamChiTiet.FirstOrDefault(x => x.ID == p.SPCTId) != null
+            //        ? (khuyenMai.LoaiGiamGia == LoaiGiamGia.PhamTram
+            //            ? _context.SanPhamChiTiet.FirstOrDefault(x => x.ID == p.SPCTId).Gia * (100 - khuyenMai.GiaTriGiamGia) / 100
+            //            : _context.SanPhamChiTiet.FirstOrDefault(x => x.ID == p.SPCTId).Gia - khuyenMai.GiaTriGiamGia)
+            //        : 0
+            //        }).ToList()
+
+            //    }).ToListAsync();
+
             var data = await query.Skip((request.PageIndex - 1) * request.PageSize)
-                .Take(request.PageSize)
-                .Select(khuyenMai => new KhuyenMaiViewModels()
+            .Take(request.PageSize)
+            .Select(khuyenMai => new KhuyenMaiViewModels()
+            {
+                Id = khuyenMai.Id,
+                TenKhuyenMai = khuyenMai.TenKhuyenMai,
+                MoTa = khuyenMai.MoTa,
+                NgayTao = khuyenMai.NgayTao,
+                NgaySuaDoi = khuyenMai.NgaySuaDoi,
+                ThoiGianBatDau = khuyenMai.ThoiGianBatDau,
+                ThoiGianKetThuc = khuyenMai.ThoiGianKetThuc,
+                LoaiGiamGia = khuyenMai.LoaiGiamGia,
+                GiaTriGiamGia = khuyenMai.GiaTriGiamGia,
+                TrangThai = khuyenMai.TrangThai,
+                SanPhams = khuyenMai.KhuyenMaiChiTiet.Select(p => new KhuyenMaiSanPhamViewModels
                 {
-                    Id = khuyenMai.Id,
-                    TenKhuyenMai = khuyenMai.TenKhuyenMai,
-                    MoTa = khuyenMai.MoTa,
-                    NgayTao = khuyenMai.NgayTao,
-                    NgaySuaDoi = khuyenMai.NgaySuaDoi,
-                    ThoiGianBatDau = khuyenMai.ThoiGianBatDau,
-                    ThoiGianKetThuc = khuyenMai.ThoiGianKetThuc,              
-                    LoaiGiamGia = khuyenMai.LoaiGiamGia,
-                    GiaTriGiamGia = khuyenMai.GiaTriGiamGia,
-                    TrangThai = khuyenMai.TrangThai,
-                    SanPhams = khuyenMai.KhuyenMaiChiTiet.Select(p => new KhuyenMaiSanPhamViewModels
-                    {
-                        SanPhamId = p.SanPhamId,
-                        SPCTId = p.SPCTId,
-                        TenSanPham = p.SanPham.TenSanPham,
-                        GiaGoc = _context.SanPhamChiTiet
-                    .Where(x => x.ID == p.SPCTId)
-                    .Select(x => (decimal?)x.Gia)
-                    .FirstOrDefault() ?? 0m,
+                    SanPhamId = p.SanPhamId,
+                    SPCTId = p.SPCTId,
+                    TenSanPham = p.SanPham.TenSanPham,
+                    GiaGoc = _context.SanPhamChiTiet
+                        .Where(x => x.ID == p.SPCTId)
+                        .Select(x => (decimal?)x.Gia)
+                        .FirstOrDefault() ?? 0m,
+                    GiaKhuyenMai = _context.SanPhamChiTiet.FirstOrDefault(x => x.ID == p.SPCTId) != null
+                        ? (khuyenMai.LoaiGiamGia == LoaiGiamGia.PhamTram
+                            ? _context.SanPhamChiTiet.FirstOrDefault(x => x.ID == p.SPCTId).Gia * (100 - khuyenMai.GiaTriGiamGia) / 100
+                            : _context.SanPhamChiTiet.FirstOrDefault(x => x.ID == p.SPCTId).Gia - khuyenMai.GiaTriGiamGia)
+                        : 0
+                }).ToList(),
+
+                // THÊM ĐOẠN NÀY VÌ NẾU KHÔNG CLIENT SẼ KHÔNG BIẾT KM ÁP DỤNG VỚI SPCT NÀO
+                SanPhamChiTiets = khuyenMai.KhuyenMaiChiTiet.Select(ct => new KhuyenMaiSPCTViewModels
+                {
+                    SPCTId = ct.SPCTId,
+                    MauSacId = _context.SanPhamChiTiet.Where(x => x.ID == ct.SPCTId).Select(x => x.MauSacId).FirstOrDefault(),
+                    KichThuocId = _context.SanPhamChiTiet.Where(x => x.ID == ct.SPCTId).Select(x => x.KichThuocId).FirstOrDefault(),
+                    ChatLieuId = _context.SanPhamChiTiet.Where(x => x.ID == ct.SPCTId).Select(x => x.ChatLieuId).FirstOrDefault(),
+                    DeGiayId = _context.SanPhamChiTiet.Where(x => x.ID == ct.SPCTId).Select(x => x.DeGiayId).FirstOrDefault(),
+                    ThuongHieuId = _context.SanPhamChiTiet.Where(x => x.ID == ct.SPCTId).Select(x => x.ThuongHieuId).FirstOrDefault(),
+                    SanPhamId = _context.SanPhamChiTiet.Where(x => x.ID == ct.SPCTId).Select(x => x.SanPhamId).FirstOrDefault(),
+                    Gia = _context.SanPhamChiTiet.Where(x => x.ID == ct.SPCTId).Select(x => (decimal?)x.Gia).FirstOrDefault() ?? 0,
+                    SoLuong = _context.SanPhamChiTiet.Where(x => x.ID == ct.SPCTId).Select(x => (int?)x.SoLuong).FirstOrDefault() ?? 0,
+                    TrangThai = _context.SanPhamChiTiet.Where(x => x.ID == ct.SPCTId).Select(x => (bool?)x.TrangThai).FirstOrDefault() ?? false,
+                    NgayTao = _context.SanPhamChiTiet.Where(x => x.ID == ct.SPCTId).Select(x => (DateTime?)x.NgayTao).FirstOrDefault() ?? DateTime.MinValue
+                }).ToList()
+
+            }).ToListAsync();
 
 
-                        GiaKhuyenMai = _context.SanPhamChiTiet.FirstOrDefault(x => x.ID == p.SPCTId) != null
-                    ? (khuyenMai.LoaiGiamGia == LoaiGiamGia.PhamTram
-                        ? _context.SanPhamChiTiet.FirstOrDefault(x => x.ID == p.SPCTId).Gia * (100 - khuyenMai.GiaTriGiamGia) / 100
-                        : _context.SanPhamChiTiet.FirstOrDefault(x => x.ID == p.SPCTId).Gia - khuyenMai.GiaTriGiamGia)
-                    : 0
-                    }).ToList()
-
-                }).ToListAsync();
             var pagedResult = new PagedResult<KhuyenMaiViewModels>()
             {
                 TotalRecords = totalRow,

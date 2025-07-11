@@ -1,256 +1,175 @@
-﻿<main class="main">
+﻿@model List<SneakFit.WebClient.Models.GioHangItemViewModel>
+@inject IConfiguration Configuration
 
-    <!-- Page Title -->
+@{
+    var baseUrl = Configuration["BaseAddress"];
+}
+
+<main class="main">
     <div class="page-title light-background">
         <div class="container d-lg-flex justify-content-between align-items-center">
-            <h1 class="mb-2 mb-lg-0">Cart</h1>
+            <h1 class="mb-2 mb-lg-0">Giỏ Hàng</h1>
             <nav class="breadcrumbs">
                 <ol>
-                    <li><a href="index.html">Home</a></li>
-                    <li class="current">Cart</li>
+                    <li><a href="/">Home</a></li>
+                    <li class="current">Giỏ Hàng</li>
                 </ol>
             </nav>
         </div>
-    </div><!-- End Page Title -->
-    <!-- Cart Section -->
-    <section id="cart" class="cart section">
-
+    </div>
+    <section id="cartDetails" class="cart section">
         <div class="container" data-aos="fade-up" data-aos-delay="100">
-
             <div class="row g-4">
                 <div class="col-lg-8" data-aos="fade-up" data-aos-delay="200">
                     <div class="cart-items">
                         <div class="cart-header d-none d-lg-block">
                             <div class="row align-items-center gy-4">
-                                <div class="col-lg-6">
-                                    <h5>Product</h5>
+                                <div class="col-lg-1 text-center">
+                                    <input type="checkbox" id="select-all" title="Chọn tất cả" style="margin-left: 38px; " />
                                 </div>
-                                <div class="col-lg-2 text-center">
-                                    <h5>Price</h5>
-                                </div>
-                                <div class="col-lg-2 text-center">
-                                    <h5>Quantity</h5>
-                                </div>
-                                <div class="col-lg-2 text-center">
-                                    <h5>Total</h5>
-                                </div>
+                                <div class="col-lg-5"><h5 style="margin-left: 25px; ">Sản phẩm</h5></div>
+                                <div class="col-lg-2 text-center"><h5>Giá</h5></div>
+                                <div class="col-lg-2 text-center"><h5>Số lượng</h5></div>
+                                <div class="col-lg-2 text-center"><h5 style="margin-right: 38.5px; ">Tổng</h5></div>
                             </div>
                         </div>
 
-                        <!-- Cart Item 1 -->
-                        <div class="cart-item" data-aos="fade-up" data-aos-delay="100">
-                            <div class="row align-items-center gy-4">
-                                <div class="col-lg-6 col-12 mb-3 mb-lg-0">
-                                    <div class="product-info d-flex align-items-center">
-                                        <div class="product-image">
-                                            <img src="assets/img/product/product-2.webp" alt="Product" class="img-fluid" loading="lazy">
+                        @if (Model.Count == 0)
+                        {
+                            <div class="alert alert-info mt-3">Giỏ hàng của bạn đang trống.</div>
+                        }
+                        else
+                        {
+                            int idx = 0;
+                            foreach (var item in Model)
+                            {
+                                <div class="cart-item" data-aos="fade-up" data-aos-delay="@(100 + idx * 100)">
+                                    <div class="row align-items-center gy-4">
+                                        <div class="col-lg-1 col-12 text-center mb-3 mb-lg-0">
+                                            <input type="checkbox" class="item-checkbox" data-id="@item.SanPhamChiTietId" data-price="@item.ThanhTien" />
                                         </div>
-                                        <div class="product-details">
-                                            <h6 class="product-title">Lorem ipsum dolor sit amet</h6>
-                                            <div class="product-meta">
-                                                <span class="product-color">Color: Black</span>
-                                                <span class="product-size">Size: M</span>
+                                        <div class="col-lg-5 col-12 mb-3 mb-lg-0">
+                                            <div class="product-info d-flex align-items-center">
+                                                <div class="product-image">
+                                                    <img src="@($"{Configuration["BaseAddress"]}{(string.IsNullOrEmpty(item.AnhSanPham) ? "/images/Default_Logo.png" : item.AnhSanPham)}")"
+                                                         alt="@item.TenSanPham"
+                                                         class="img-fluid" loading="lazy" style="max-width:75px; max-height:75px; border-radius: 12px" />
+                                                </div>
+                                                <div class="product-details ms-3">
+                                                    <h6 class="product-title">@item.TenSanPham</h6>
+                                                    <div class="product-meta">
+                                                        <span class="product-color">Color: @item.MauSac</span>
+                                                        <span class="product-size">Size: @item.KichThuoc</span>
+                                                    </div>
+                                                    <button class="remove-item btn btn-link text-danger p-0" type="button"
+                                                            data-id="@item.SanPhamChiTietId" style="text-decoration: none">
+                                                        <i class="bi bi-trash"></i> Xóa sản phẩm
+                                                    </button>
+                                                </div>
                                             </div>
-                                            <button class="remove-item" type="button">
-                                                <i class="bi bi-trash"></i> Remove
-                                            </button>
                                         </div>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-lg-2 text-center">
-                                    <div class="price-tag">
-                                        <span class="current-price">$89.99</span>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-lg-2 text-center">
-                                    <div class="quantity-selector">
-                                        <button class="quantity-btn decrease">
-                                            <i class="bi bi-dash"></i>
-                                        </button>
-                                        <input type="number" class="quantity-input" value="1" min="1" max="10">
-                                        <button class="quantity-btn increase">
-                                            <i class="bi bi-plus"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-lg-2 text-center mt-3 mt-lg-0">
-                                    <div class="item-total">
-                                        <span>$89.99</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div><!-- End Cart Item -->
-                        <!-- Cart Item 2 -->
-                        <div class="cart-item" data-aos="fade-up" data-aos-delay="200">
-                            <div class="row align-items-center gy-4">
-                                <div class="col-lg-6 col-12 mb-3 mb-lg-0">
-                                    <div class="product-info d-flex align-items-center">
-                                        <div class="product-image">
-                                            <img src="assets/img/product/product-7.webp" alt="Product" class="img-fluid" loading="lazy">
-                                        </div>
-                                        <div class="product-details">
-                                            <h6 class="product-title">Consectetur adipiscing elit</h6>
-                                            <div class="product-meta">
-                                                <span class="product-color">Color: White</span>
-                                                <span class="product-size">Size: L</span>
+                                        <div class="col-12 col-lg-2 text-center">
+                                            <div class="price-tag">
+                                                @if (item.GiaKhuyenMai > 0 && item.GiaKhuyenMai < item.GiaGoc)
+                                                {
+                                                    <span class="current-price">@item.GiaKhuyenMai.ToString("N0")</span>
+                                                    <span class="original-price text-muted" style="text-decoration:line-through">@item.GiaGoc.ToString("N0")</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="current-price">@item.GiaGoc.ToString("N0")</span>
+                                                }
                                             </div>
-                                            <button class="remove-item" type="button">
-                                                <i class="bi bi-trash"></i> Remove
-                                            </button>
                                         </div>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-lg-2 text-center">
-                                    <div class="price-tag">
-                                        <span class="current-price">$64.99</span>
-                                        <span class="original-price">$79.99</span>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-lg-2 text-center">
-                                    <div class="quantity-selector">
-                                        <button class="quantity-btn decrease">
-                                            <i class="bi bi-dash"></i>
-                                        </button>
-                                        <input type="number" class="quantity-input" value="2" min="1" max="10">
-                                        <button class="quantity-btn increase">
-                                            <i class="bi bi-plus"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-lg-2 text-center mt-3 mt-lg-0">
-                                    <div class="item-total">
-                                        <span>$129.98</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div><!-- End Cart Item -->
-                        <!-- Cart Item 3 -->
-                        <div class="cart-item" data-aos="fade-up" data-aos-delay="300">
-                            <div class="row align-items-center gy-4">
-                                <div class="col-lg-6 col-12 mb-3 mb-lg-0">
-                                    <div class="product-info d-flex align-items-center">
-                                        <div class="product-image">
-                                            <img src="assets/img/product/product-10.webp" alt="Product" class="img-fluid" loading="lazy">
-                                        </div>
-                                        <div class="product-details">
-                                            <h6 class="product-title">Sed do eiusmod tempor</h6>
-                                            <div class="product-meta">
-                                                <span class="product-color">Color: Blue</span>
-                                                <span class="product-size">Size: S</span>
+                                        <div class="col-12 col-lg-2 text-center">
+                                            <div class="quantity-selector">
+                                                <button class="quantity-btn decrease" type="button" data-id="@item.SanPhamChiTietId" style="font-weight: bold">
+                                                    <i class="bi bi-dash"></i>
+                                                </button>
+                                                <input type="number" class="quantity-input" value="@item.SoLuong" min="1" data-max="99"
+                                                       data-id="@item.SanPhamChiTietId">
+                                                @* <button class="quantity-btn increase" type="button" data-id="@item.SanPhamChiTietId">
+                                                    <i class="bi bi-plus"></i>
+                                                </button> *@
+                                                <button class="quantity-btn increase" type="button" data-id="@item.SanPhamChiTietId"
+                                                @(item.SoLuong >= item.SoLuongTon ? "disabled title='Đã đạt số lượng tồn kho tối đa!'" : "" ) >
+                                                    <i class="bi bi-plus"></i>
+                                                </button>
                                             </div>
-                                            <button class="remove-item" type="button">
-                                                <i class="bi bi-trash"></i> Remove
-                                            </button>
+                                        </div>
+                                        <div class="col-12 col-lg-2 text-center mt-3 mt-lg-0">
+                                            <div class="item-total">
+                                                <span>@item.ThanhTien.ToString("N0")</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-12 col-lg-2 text-center">
-                                    <div class="price-tag">
-                                        <span class="current-price">$49.99</span>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-lg-2 text-center">
-                                    <div class="quantity-selector">
-                                        <button class="quantity-btn decrease">
-                                            <i class="bi bi-dash"></i>
-                                        </button>
-                                        <input type="number" class="quantity-input" value="1" min="1" max="10">
-                                        <button class="quantity-btn increase">
-                                            <i class="bi bi-plus"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-lg-2 text-center mt-3 mt-lg-0">
-                                    <div class="item-total">
-                                        <span>$49.99</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div><!-- End Cart Item -->
+                                idx++;
+                            }
+                        }
 
-                        <div class="cart-actions">
-                            <div class="row g-3">
+                        <!-- Coupon/Action Bar -->
+                        <div class="cart-actions mt-3">
+                            <div class="row g-3 align-items-center">
                                 <div class="col-lg-6 col-md-6">
                                     <div class="coupon-form">
                                         <div class="input-group">
-                                            <input type="text" class="form-control" placeholder="Coupon code">
-                                            <button class="btn btn-accent" type="button">Apply</button>
+                                            <input type="text" class="form-control" placeholder="Nhập mã voucher" id="couponCode">
+                                            <button class="btn btn-accent" type="button" id="apply-coupon">Áp dụng</button>
                                         </div>
+                                        <div id="coupon-message" class="text-success mt-2" style="display: none;"></div>
                                     </div>
                                 </div>
                                 <div class="col-lg-6 col-md-6 text-md-end">
-                                    <button class="btn btn-outline-accent me-2">
-                                        <i class="bi bi-arrow-clockwise"></i> Update
-                                    </button>
-                                    <button class="btn btn-outline-danger">
-                                        <i class="bi bi-trash"></i> Clear
-                                    </button>
+                                    <div class="d-flex justify-content-md-end gap-2">
+                                        <button class="btn btn-outline-accent" type="button" onclick="location.reload();">
+                                            <i class="bi bi-arrow-clockwise"></i> Reload
+                                        </button>
+                                        <button class="btn btn-outline-danger" type="button" id="delete-selected">
+                                            <i class="bi bi-trash"></i> Xóa đã chọn
+                                        </button>
+                                        <button class="btn btn-outline-danger" type="button" id="clear-cart">
+                                            <i class="bi bi-trash"></i> Xóa tất cả
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Order Summary -->
                 <div class="col-lg-4" data-aos="fade-up" data-aos-delay="300">
                     <div class="cart-summary">
-                        <h4 class="summary-title">Order Summary</h4>
-
+                        <h4 class="summary-title">Đơn hàng</h4>
                         <div class="summary-item">
-                            <span class="summary-label">Subtotal</span>
-                            <span class="summary-value">$269.96</span>
+                            <span class="summary-label">Tổng tiền sản phẩm</span>
+                            <span class="summary-value" id="subtotal">0 VNĐ</span>
                         </div>
-
-                        <div class="summary-item shipping-item">
-                            <span class="summary-label">Shipping</span>
-                            <div class="shipping-options">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="shipping" id="standard" checked="">
-                                    <label class="form-check-label" for="standard">
-                                        Standard Delivery - $4.99
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="shipping" id="express">
-                                    <label class="form-check-label" for="express">
-                                        Express Delivery - $12.99
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="shipping" id="free">
-                                    <label class="form-check-label" for="free">
-                                        Free Shipping (Orders over $300)
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="summary-item">
-                            <span class="summary-label">Tax</span>
-                            <span class="summary-value">$27.00</span>
+                            <span class="summary-label">Phí ship</span>
+                            <span class="summary-value">35,000 VNĐ</span>
                         </div>
-
-                        <div class="summary-item discount">
-                            <span class="summary-label">Discount</span>
-                            <span class="summary-value">-$0.00</span>
-                        </div>
-
                         <div class="summary-total">
-                            <span class="summary-label">Total</span>
-                            <span class="summary-value">$301.95</span>
+                            <span class="summary-label">Tổng đơn hàng</span>
+                            <span class="summary-value" id="total">35,000 VNĐ</span>
                         </div>
-
                         <div class="checkout-button">
-                            <a href="#" class="btn btn-accent w-100">
+                            @* <a href="@Url.Action("Checkout", "ThanhToan")" class="btn btn-accent w-100">
                                 Proceed to Checkout <i class="bi bi-arrow-right"></i>
-                            </a>
+                            </a> *@
+                            <form id="checkout-form" method="post" action="/GioHang/ProceedToCheckout">
+                                <input type="hidden" name="selectedIds" id="selected-ids" />
+                                <button type="submit" class="btn btn-accent w-100">
+                                    Proceed to Checkout <i class="bi bi-arrow-right"></i>
+                                </button>
+                            </form>
                         </div>
-
                         <div class="continue-shopping">
-                            <a href="#" class="btn btn-link w-100">
-                                <i class="bi bi-arrow-left"></i> Continue Shopping
+                            <a href="@Url.Action("Index", "SanPham")" class="btn btn-link w-100">
+                                <i class="bi bi-arrow-left"></i> Tiếp tục mua sắm
                             </a>
                         </div>
-
                         <div class="payment-methods">
                             <p class="payment-title">We Accept</p>
                             <div class="payment-icons">
@@ -264,9 +183,382 @@
                     </div>
                 </div>
             </div>
-
         </div>
-
-    </section><!-- /Cart Section -->
-
+    </section>
 </main>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        let isProcessing = false;
+        let cartQuantities = {};
+
+        let appliedVoucher = null; // Lưu thông tin voucher đã áp dụng
+        let discountAmount = 0; // Lưu giá trị giảm giá
+
+        // Hàm tính tổng tiền dựa trên các sản phẩm được chọn
+        function calculateTotals() {
+            let subtotal = 0;
+            $('.item-checkbox:checked').each(function () {
+                subtotal += parseFloat($(this).data('price')) || 0;
+            });
+            const shipping = 35000; // Giá vận chuyển cố định 35,000 VNĐ
+            // const total = subtotal + shipping;
+            // $('#subtotal').text(subtotal.toLocaleString() + ' VNĐ');
+            // $('#total').text(total.toLocaleString() + ' VNĐ');
+            let total = subtotal + shipping - discountAmount;
+            if (total < 0) total = 0; // Tổng tiền không âm
+            $('#subtotal').text(subtotal.toLocaleString() + ' VNĐ');
+            $('#discount-amount').text(discountAmount.toLocaleString() + ' VNĐ');
+            $('#coupon-discount').toggle(discountAmount > 0); // Hiển thị/ẩn mục giảm giá
+            $('#total').text(total.toLocaleString() + ' VNĐ');
+        }
+
+        // Hàm enable/disable nút + -
+        function buttonState($input, maxQuantity) {
+            let qty = parseInt($input.val()) || 1;
+            let $decrease = $input.siblings('.decrease');
+            let $increase = $input.siblings('.increase');
+
+            if (qty <= 1) {
+                $decrease.prop('disabled', true).addClass('opacity-50').attr('title', 'Số lượng tối thiểu là 1!');
+            } else {
+                $decrease.prop('disabled', false).removeClass('opacity-50').attr('title', '');
+            }
+
+            if (qty >= maxQuantity) {
+                $increase.prop('disabled', true).addClass('opacity-50').attr('title', 'Đã đạt số lượng tồn kho tối đa!');
+            } else {
+                $increase.prop('disabled', false).removeClass('opacity-50').attr('title', '');
+            }
+        }
+
+        // Hàm cập nhật số lượng (AJAX)
+        function updateQuantity(productId, quantity, $input) {
+            if (isProcessing) return;
+            isProcessing = true;
+            $('.quantity-btn, .quantity-input').prop('disabled', true);
+            $.ajax({
+                url: '/GioHang/CapNhatSoLuong',
+                type: 'POST',
+                data: {
+                    sanPhamChiTietId: productId,
+                    soLuong: quantity
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $input.val(response.soLuong);
+                        cartQuantities[productId] = response.soLuong;
+                        // let maxQuantity = response.maxQuantity || 99;
+                        // $input.data('max', maxQuantity);
+                        // buttonState($input, maxQuantity);
+                        const maxQuantity = response.maxQuantity || 99;
+                        $input.data('max', maxQuantity);
+                        // GỌI LẠI SAU KHI CẬP NHẬT max
+                        buttonState($input, maxQuantity);
+
+                        $input.closest('.cart-item').find('.item-total span').text(response.thanhTien.toLocaleString());
+                        // Cập nhật giá mới cho checkbox
+                        $input.closest('.cart-item').find('.item-checkbox').data('price', response.thanhTien);
+                        calculateTotals(); // Tính lại tổng khi số lượng thay đổi
+                    } else {
+                        Swal.fire('Lỗi', response.message || 'Có lỗi!', 'error');
+                        $input.val($input.data('old') || 1);
+                        cartQuantities[productId] = $input.data('old') || 1;
+                        buttonState($input, $input.data('max') || 99);
+                    }
+                },
+                error: function() {
+                    Swal.fire('Lỗi', 'Có lỗi khi cập nhật số lượng!', 'error');
+                    $input.val($input.data('old') || 1);
+                    cartQuantities[productId] = $input.data('old') || 1;
+                    buttonState($input, $input.data('max') || 99);
+                },
+                complete: function() {
+                    isProcessing = false;
+                    $('.quantity-btn, .quantity-input').prop('disabled', false);
+                }
+            });
+        }
+
+        // Hàm áp dụng voucher
+        function applyVoucher(code) {
+            if (isProcessing) return;
+            isProcessing = true;
+            $('#apply-coupon').prop('disabled', true);
+            $('#coupon-message').hide();
+
+            $.ajax({
+                url: '/GioHang/ApDungVoucher',
+                type: 'POST',
+                data: { code: code },
+                success: function(response) {
+                    if (response.success) {
+                        appliedVoucher = response.voucher;
+                        discountAmount = response.discountAmount;
+                        $('#coupon-message').text(`Áp dụng voucher thành công: ${response.message}`).addClass('text-success').removeClass('text-danger').show();
+                        calculateTotals(); // Cập nhật tổng tiền
+                    } else {
+                        appliedVoucher = null;
+                        discountAmount = 0;
+                        $('#coupon-message').text(response.message).addClass('text-danger').removeClass('text-success').show();
+                        calculateTotals();
+                    }
+                },
+                error: function(xhr) {
+                    appliedVoucher = null;
+                    discountAmount = 0;
+                    $('#coupon-message').text(xhr.responseJSON?.message || 'Có lỗi khi áp dụng voucher!').addClass('text-danger').removeClass('text-success').show();
+                    calculateTotals();
+                },
+                complete: function() {
+                    isProcessing = false;
+                    $('#apply-coupon').prop('disabled', false);
+                }
+            });
+        }
+
+        $(function() {
+            // Khởi tạo số lượng & maxQuantity
+            $('.quantity-input').each(function() {
+                let $input = $(this);
+                let id = $input.data('id');
+                let val = parseInt($input.val()) || 1;
+                let maxQuantity = parseInt($input.data('max')) || 99;
+                cartQuantities[id] = val;
+                buttonState($input, maxQuantity);
+            });
+
+            // Sự kiện click +/-
+            $(document).on('click', '.increase, .decrease', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (isProcessing) return;
+                let $input = $(this).siblings('.quantity-input');
+                let id = $input.data('id');
+                let maxQuantity = parseInt($input.data('max')) || 99;
+                let val = cartQuantities[id] !== undefined ? cartQuantities[id] : (parseInt($input.val()) || 1);
+                $input.data('old', val);
+
+                let newVal = $(this).hasClass('increase') ? val + 1 : val - 1;
+                if (newVal < 1) newVal = 1;
+                if (newVal > maxQuantity) newVal = maxQuantity;
+
+                if (newVal !== val) {
+                    cartQuantities[id] = newVal;
+                    updateQuantity(id, newVal, $input);
+                }
+                setTimeout(function() {
+                    buttonState($input, maxQuantity);
+                }, 100);
+            });
+
+            // Sự kiện nhập input số lượng
+            $(document).on('focus', '.quantity-input', function () {
+                $(this).data('old', parseInt($(this).val()) || 1);
+            });
+
+            $(document).on('blur', '.quantity-input', function () {
+                if (isProcessing) return;
+                let $input = $(this);
+                let oldVal = $input.data('old') || 1;
+                let newVal = parseInt($input.val()) || 1;
+                let maxQuantity = parseInt($input.data('max')) || 99;
+                if (newVal < 1) newVal = 1;
+                if (newVal > maxQuantity) newVal = maxQuantity;
+                if (newVal !== oldVal) {
+                    updateQuantity($input.data('id'), newVal, $input);
+                } else {
+                    $input.val(newVal);
+                    buttonState($input, maxQuantity);
+                }
+                buttonState($input, maxQuantity);
+            });
+
+            $(document).on('keydown', '.quantity-input', function(e) {
+                if (e.which === 13) {
+                    e.preventDefault();
+                    $(this).blur();
+                }
+            });
+
+            // Sự kiện áp dụng voucher
+            $(document).on('click', '#apply-coupon', function(e) {
+                e.preventDefault();
+                if (isProcessing) return;
+                let code = $('#couponCode').val().trim();
+                if (!code) {
+                    Swal.fire('Thông báo', 'Vui lòng nhập mã voucher!', 'warning');
+                    return;
+                }
+                applyVoucher(code);
+            });
+
+            // Sự kiện nhấn Enter trong input voucher
+            $(document).on('keydown', '#couponCode', function(e) {
+                if (e.which === 13) {
+                    e.preventDefault();
+                    $('#apply-coupon').click();
+                }
+            });
+
+            // Xóa sản phẩm
+            $(document).on('click', '.remove-item', function (e) {
+                e.preventDefault();
+                if (isProcessing) return;
+                var spctId = $(this).data('id');
+                Swal.fire({
+                    title: 'Xác nhận',
+                    text: 'Bạn có chắc muốn xóa sản phẩm này?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Xóa',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        isProcessing = true;
+                        $.ajax({
+                            url: '/GioHang/XoaSanPham',
+                            type: 'POST',
+                            data: { sanPhamChiTietId: spctId },
+                            success: function (res) {
+                                isProcessing = false;
+                                if (res.success) {
+                                    Swal.fire('Thành công', res.message, 'success').then(() => {
+                                        window.location.reload();
+                                    });
+                                } else {
+                                    Swal.fire('Lỗi', res.message, 'error');
+                                }
+                            },
+                            error: function (xhr) {
+                                isProcessing = false;
+                                var errorMsg = xhr.responseJSON?.message || 'Có lỗi khi xóa sản phẩm!';
+                                Swal.fire('Lỗi', errorMsg, 'error');
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Xóa toàn bộ giỏ hàng
+            $(document).on('click', '#clear-cart', function (e) {
+                e.preventDefault();
+                if (isProcessing) return;
+                Swal.fire({
+                    title: 'Xác nhận',
+                    text: 'Bạn có chắc muốn xóa toàn bộ giỏ hàng?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Xóa hết',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        isProcessing = true;
+                        $.ajax({
+                            url: '/GioHang/XoaTatCa',
+                            type: 'POST',
+                            success: function (res) {
+                                isProcessing = false;
+                                if (res.success) {
+                                    Swal.fire('Thành công', res.message, 'success').then(() => {
+                                        window.location.reload();
+                                    });
+                                } else {
+                                    Swal.fire('Lỗi', res.message, 'error');
+                                }
+                            },
+                            error: function (xhr) {
+                                isProcessing = false;
+                                var errorMsg = xhr.responseJSON?.message || 'Có lỗi khi xóa giỏ hàng!';
+                                Swal.fire('Lỗi', errorMsg, 'error');
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Checkbox: Chọn tất cả
+            $(document).on('change', '#select-all', function () {
+                var isChecked = $(this).is(':checked');
+                $('.item-checkbox').prop('checked', isChecked).trigger('change'); // Trigger change để tính tổng
+            });
+
+            // Checkbox: Cập nhật trạng thái "Chọn tất cả" và tính tổng khi thay đổi
+            $(document).on('change', '.item-checkbox', function () {
+                var allChecked = $('.item-checkbox').length === $('.item-checkbox:checked').length;
+                $('#select-all').prop('checked', allChecked);
+                calculateTotals(); // Tính lại tổng khi checkbox thay đổi
+            });
+
+            // Xóa các sản phẩm đã chọn
+            $(document).on('click', '#delete-selected', function (e) {
+                e.preventDefault();
+                if (isProcessing) return;
+
+                var selectedIds = [];
+                $('.item-checkbox:checked').each(function () {
+                    selectedIds.push($(this).data('id'));
+                });
+
+                if (selectedIds.length === 0) {
+                    Swal.fire('Thông báo', 'Vui lòng chọn ít nhất một sản phẩm để xóa!', 'info');
+                    return;
+                }
+
+                Swal.fire({
+                    title: 'Xác nhận',
+                    text: `Bạn có chắc muốn xóa ${selectedIds.length} sản phẩm đã chọn?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Xóa',
+                    cancelButtonText: 'Hủy'
+                    }).then((result) => {
+                    if (result.isConfirmed) {
+                        isProcessing = true;
+                        $.ajax({
+                            url: '/GioHang/XoaNhieuSanPham',
+                            type: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify(selectedIds),
+                            success: function (res) {
+                                isProcessing = false;
+                                if (res.success) {
+                                    Swal.fire('Thành công', res.message, 'success').then(() => {
+                                        window.location.reload();
+                                    });
+                                } else {
+                                    Swal.fire('Lỗi', res.message, 'error');
+                                }
+                            },
+                            error: function (xhr) {
+                                isProcessing = false;
+                                var errorMsg = xhr.responseJSON?.message || 'Có lỗi khi xóa các sản phẩm!';
+                                Swal.fire('Lỗi', errorMsg, 'error');
+                            }
+                        });
+                    }
+                });
+            });
+
+            $('#checkout-form').on('submit', function (e) {
+                var selectedIds = [];
+                $('.item-checkbox:checked').each(function () {
+                    selectedIds.push($(this).data('id'));
+                });
+
+                if (selectedIds.length === 0) {
+                    e.preventDefault();
+                    Swal.fire('Thông báo', 'Vui lòng chọn ít nhất một sản phẩm để thanh toán!', 'info');
+                    return false;
+                }
+
+                $('#selected-ids').val(selectedIds.join(','));
+            });
+
+            // Khởi tạo tổng tiền khi trang tải
+            calculateTotals();
+        });
+    </script>
+}

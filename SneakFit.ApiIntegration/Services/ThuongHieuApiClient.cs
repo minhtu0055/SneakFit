@@ -4,7 +4,7 @@ using SneakFit.ViewModels.Common;
 using System.Net.Http.Headers;
 using System.Text;
 
-namespace SneakFit.ApiIntegration.Services.ThuongHieu
+namespace SneakFit.ApiIntegration.Services
 {
     public class ThuongHieuApiClient : IThuongHieuApiClient
     {

@@ -14,7 +14,7 @@ namespace SneakFit.Data.Entities
         public bool GioiTinh { get; set; }
         public bool TrangThai { get; set; }
         public string HoVaTen { get; set; }
-        public List<HoaDon> HoaDon { get; set; }
+        public List<HoaDon> HoaDon { get; set; } 
         public List<DiaChi> DiaChi { get; set; }
         public GioHang GioHang { get; set; }
     }

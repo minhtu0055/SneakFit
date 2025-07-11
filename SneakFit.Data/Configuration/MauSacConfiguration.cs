@@ -14,7 +14,7 @@ namespace SneakFit.Data.Configuration
         public void Configure(EntityTypeBuilder<MauSac> builder)
         {
             builder.HasKey(ms => ms.Id);
-            builder.Property(ms => ms.TenMauSac).IsRequired().HasMaxLength(50);
+            builder.Property(ms => ms.TenMauSac).HasMaxLength(50);
         }
     }
 }

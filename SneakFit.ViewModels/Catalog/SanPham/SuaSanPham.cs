@@ -16,7 +16,6 @@ namespace SneakFit.ViewModels.Catalog.SanPham
         public string TenSanPham { get; set; }
         public string Mota { get; set; }
         public Guid DanhMucId { get; set; }
-        public Guid ThuongHieuId { get; set; }
         public bool TrangThai { get; set; }
 
     }

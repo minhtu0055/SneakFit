@@ -1,4 +1,5 @@
 ﻿using SneakFit.Data.Enums;
+using SneakFit.ViewModels.Catalog.HoaDonChiTiet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,11 +21,12 @@ namespace SneakFit.ViewModels.Catalog.HoaDon
         public PhuongThucThanhToan PhuongThucThanhToan { get; set; }
         public LoaiHoaDon LoaiHoaDon { get; set; }
         public DateTime? NgayThanhToan { get; set; }
-        public string MaGiaoDich { get; set; }
+        public string MaHoaDon { get; set; }
         public decimal PhiVanChuyen { get; set; }
         public string DonViVanChuyen { get; set; }
         public string MaVanDon { get; set; }
         public TrangThaiThanhToan TrangThaiThanhToan { get; set; }
         public List<HoaDonChiTietViewModel> HoaDonChiTiet { get; set; }
+        public Guid? VoucherId { get; set; }
     }
 }

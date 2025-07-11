@@ -129,12 +129,47 @@ namespace SneakFit.Data.Extensions
                 PasswordHash = hasher.HashPassword(null, "123456aD@"),
                 SecurityStamp = string.Empty,
                 TrangThai = true
+            },
+            new AppUser
+            {
+                Id = nhanVienId,
+                UserName = "nhanvien",
+                HoVaTen = "Cu Em Kiệt",
+                NormalizedUserName = "nhanvien",
+                Email = "kiet@gmail.com",
+                NormalizedEmail = "kiet@gmail.com",
+                EmailConfirmed = true,
+                PasswordHash = hasher.HashPassword(null, "123456aD@"),
+                SecurityStamp = string.Empty,
+                TrangThai = true
+            },
+            new AppUser
+            {
+                Id = khachHangId,
+                UserName = "khachhang",
+                HoVaTen = "Siu Nhân",
+                NormalizedUserName = "khachhang",
+                Email = "kiet@gmail.com",
+                NormalizedEmail = "kiet@gmail.com",
+                EmailConfirmed = true,
+                PasswordHash = hasher.HashPassword(null, "123456aD@"),
+                SecurityStamp = string.Empty,
+                TrangThai = true
             });
 
             modelBuilder.Entity<IdentityUserRole<Guid>>().HasData(new IdentityUserRole<Guid>
             {
                 RoleId = roleId,
-                UserId = adminId
+                UserId = adminId,
+            },
+            new IdentityUserRole<Guid>
+            {
+                RoleId = roleNVId,
+                UserId = nhanVienId,
+            }, new IdentityUserRole<Guid>
+            {
+                RoleId = roleNVId,
+                UserId = khachHangId,
             });
         }
     }

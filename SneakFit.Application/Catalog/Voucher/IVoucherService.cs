@@ -17,6 +17,9 @@ namespace SneakFit.Application.Catalog.Voucher
         Task<VoucherViewModels> GetByCode(string code); // Lấy theo mã
         Task<bool> UpdateTrangThai(Guid Id, TrangThaiGiamGia status);
         Task<PagedResult<VoucherViewModels>> GetAllPaging(GetVoucherPagingRequest request); // lấy dang sách voucher phân trang 
-        Task<bool> UseVoucher(string code);
+        Task<bool> UseVoucher(string code, Guid userId);
+        Task<List<VoucherUserViewModel>> GetUsersForVoucher(Guid? voucherId = null);
+        Task<PagedResult<VoucherUserViewModel>> GetUsersForVoucherPaging(GetVoucherUserPagingRequest request); // lấy danh sách khách hàng phân trang
+        Task<string> GetNextVoucherCode();
     }
 }

@@ -14,10 +14,10 @@ namespace SneakFit.Data.Configuration
         public void Configure(EntityTypeBuilder<SanPhamChiTiet> builder)
         {
             builder.HasKey(x => x.ID);
-            builder.Property(x => x.Gia).IsRequired();
-            builder.Property(x => x.SoLuong).IsRequired();
-            builder.Property(x => x.TrangThai).IsRequired();
-            builder.Property(x => x.NgayTao).IsRequired();
+            builder.Property(x => x.Gia);
+            builder.Property(x => x.SoLuong);
+            builder.Property(x => x.TrangThai);
+            builder.Property(x => x.NgayTao);
             builder.HasOne(x => x.ChatLieu).WithMany(x => x.SanPhamChiTiet).HasForeignKey(x => x.ChatLieuId);
             builder.HasOne(x => x.MauSac).WithMany(x => x.SanPhamChiTiet).HasForeignKey(x => x.MauSacId);
             builder.HasOne(x => x.KichThuoc).WithMany(x => x.SanPhamChiTiet).HasForeignKey(x => x.KichThuocId);

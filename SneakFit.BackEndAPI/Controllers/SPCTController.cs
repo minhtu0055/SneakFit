@@ -119,29 +119,30 @@ namespace SneakFit.BackEndAPI.Controllers
         [HttpPut("{productId}/soluong")]
         public async Task<IActionResult> UpdateSoLuong(Guid productId, [FromBody] int addedQuantity)
         {
-            var product = await _sanPhamChiTetService.GetById(productId);
-            if (product == null)
-                return NotFound($"Không tìm thấy sản phẩm với id: {productId}");
-
-            // Kiểm tra số lượng sau khi trừ không được âm
-            if (product.SoLuong + addedQuantity < 0)
-                return BadRequest("Số lượng sản phẩm trong kho không đủ");
-
-            var result = await _sanPhamChiTetService.UpdateSoLuong(productId, product.SoLuong + addedQuantity);
-            if (result)
+            try
             {
-                // Lấy thông tin sản phẩm sau khi cập nhật
+                var product = await _sanPhamChiTetService.GetById(productId);
+                if (product == null)
+                    return NotFound(new ApiErrorResult<bool>($"Không tìm thấy sản phẩm với id: {productId}"));
+
+                var result = await _sanPhamChiTetService.UpdateSoLuong(productId, addedQuantity);
+                if (!result.IsSuccessed)
+                    return BadRequest(result);
+
                 var updatedProduct = await _sanPhamChiTetService.GetById(productId);
-                return Ok(new
+                return Ok(new ApiSuccessResult<object>(new
                 {
                     success = true,
                     message = "Cập nhật số lượng thành công",
                     newQuantity = updatedProduct.SoLuong,
                     status = updatedProduct.TrangThai
-                });
+                }));
             }
-
-            return BadRequest(new { success = false, message = "Cập nhật số lượng thất bại" });
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Lỗi khi cập nhật số lượng cho sản phẩm {productId}");
+                return StatusCode(500, new ApiErrorResult<bool>($"Lỗi server: {ex.Message}"));
+            }
         }
 
         [HttpPost("{id}/images")]

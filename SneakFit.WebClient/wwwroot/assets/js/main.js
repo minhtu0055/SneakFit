@@ -161,60 +161,60 @@
    * Handles quantity changes and item removal
    */
 
-  function ecommerceCartTools() {
-    // Get all quantity buttons and inputs directly
-    const decreaseButtons = document.querySelectorAll('.quantity-btn.decrease');
-    const increaseButtons = document.querySelectorAll('.quantity-btn.increase');
-    const quantityInputs = document.querySelectorAll('.quantity-input');
-    const removeButtons = document.querySelectorAll('.remove-item');
+  //function ecommerceCartTools() {
+  //  // Get all quantity buttons and inputs directly
+  //  const decreaseButtons = document.querySelectorAll('.quantity-btn.decrease');
+  //  const increaseButtons = document.querySelectorAll('.quantity-btn.increase');
+  //  const quantityInputs = document.querySelectorAll('.quantity-input');
+  //  const removeButtons = document.querySelectorAll('.remove-item');
 
-    // Decrease quantity buttons
-    decreaseButtons.forEach(btn => {
-      btn.addEventListener('click', function() {
-        const quantityInput = btn.closest('.quantity-selector').querySelector('.quantity-input');
-        let currentValue = parseInt(quantityInput.value);
-        if (currentValue > 1) {
-          quantityInput.value = currentValue - 1;
-        }
-      });
-    });
+  //  // Decrease quantity buttons
+  //  decreaseButtons.forEach(btn => {
+  //    btn.addEventListener('click', function() {
+  //      const quantityInput = btn.closest('.quantity-selector').querySelector('.quantity-input');
+  //      let currentValue = parseInt(quantityInput.value);
+  //      if (currentValue > 1) {
+  //        quantityInput.value = currentValue - 1;
+  //      }
+  //    });
+  //  });
 
-    // Increase quantity buttons
-    increaseButtons.forEach(btn => {
-      btn.addEventListener('click', function() {
-        const quantityInput = btn.closest('.quantity-selector').querySelector('.quantity-input');
-        let currentValue = parseInt(quantityInput.value);
-        if (currentValue < parseInt(quantityInput.getAttribute('max'))) {
-          quantityInput.value = currentValue + 1;
-        }
-      });
-    });
+  //  // Increase quantity buttons
+  //  increaseButtons.forEach(btn => {
+  //    btn.addEventListener('click', function() {
+  //      const quantityInput = btn.closest('.quantity-selector').querySelector('.quantity-input');
+  //      let currentValue = parseInt(quantityInput.value);
+  //      if (currentValue < parseInt(quantityInput.getAttribute('max'))) {
+  //        quantityInput.value = currentValue + 1;
+  //      }
+  //    });
+  //  });
 
-    // Manual quantity inputs
-    quantityInputs.forEach(input => {
-      input.addEventListener('change', function() {
-        let currentValue = parseInt(input.value);
-        const min = parseInt(input.getAttribute('min'));
-        const max = parseInt(input.getAttribute('max'));
+  //  // Manual quantity inputs
+  //  quantityInputs.forEach(input => {
+  //    input.addEventListener('change', function() {
+  //      let currentValue = parseInt(input.value);
+  //      const min = parseInt(input.getAttribute('min'));
+  //      const max = parseInt(input.getAttribute('max'));
 
-        // Validate input
-        if (isNaN(currentValue) || currentValue < min) {
-          input.value = min;
-        } else if (currentValue > max) {
-          input.value = max;
-        }
-      });
-    });
+  //      // Validate input
+  //      if (isNaN(currentValue) || currentValue < min) {
+  //        input.value = min;
+  //      } else if (currentValue > max) {
+  //        input.value = max;
+  //      }
+  //    });
+  //  });
 
-    // Remove item buttons
-    removeButtons.forEach(btn => {
-      btn.addEventListener('click', function() {
-        btn.closest('.cart-item').remove();
-      });
-    });
-  }
+  //  // Remove item buttons
+  //  removeButtons.forEach(btn => {
+  //    btn.addEventListener('click', function() {
+  //      btn.closest('.cart-item').remove();
+  //    });
+  //  });
+  //}
 
-  ecommerceCartTools();
+  //ecommerceCartTools();
 
   /**
    * Product Image Zoom and Thumbnail Functionality

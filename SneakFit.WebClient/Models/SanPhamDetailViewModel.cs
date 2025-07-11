@@ -11,5 +11,9 @@ namespace SneakFit.WebClient.Models
         public List<SPCTViewModels> SanPhamChiTiets { get; set; }
         public List<MauSacViewModels> MauSacs { get; set; }
         public List<KichThuocViewModels> KichThuocs { get; set; }
+        public string? ThuongHieu { get; set; }
+        public string? ChatLieu { get; set; }
+        public string? Degiay { get; set; }
+        public Guid? KhuyenMaiId { get; set; }
     }
 }

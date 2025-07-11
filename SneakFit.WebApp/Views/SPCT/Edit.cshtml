@@ -173,7 +173,7 @@
                             <td><input type="checkbox" class="row-check" /></td>
                             <td>@stt</td>
                             <td>
-                                <img src="@(item.Images != null && item.Images.Count > 0 ? item.Images[0] : "/images/no-image.png")" width="60" />
+                                <img src="@(item.Images != null && item.Images.Count > 0 ? item.Images[0] : "/images/Default_Logo.png")" width="60" />
                             </td>
                             <td>@(sanPhams != null && sanPhams.ContainsKey(item.SanPhamId) ? sanPhams[item.SanPhamId] : "")</td>
                             <td><input type="number" class="form-control so-luong" value="@item.SoLuong" min="0" /></td>
