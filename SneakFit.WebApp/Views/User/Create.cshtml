@@ -290,8 +290,9 @@
 			// Khi chọn phường/xã
 			$('#ward').change(function() {
 				const wardName = $(this).find('option:selected').data('name');
-				$('#wardName').val(wardName);
-				$('#wardCode').val(wardName.split('/')[0]);
+				const wardCode = $(this).val();
+				$('#wardName').val(wardName || '');
+				$('#wardCode').val(wardCode || '');
 			});
 		});
 	</script>

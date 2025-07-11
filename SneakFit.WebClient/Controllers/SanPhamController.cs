@@ -3,7 +3,6 @@ using SneakFit.ApiIntegration.Services;
 using System.Threading.Tasks;
 using SneakFit.ViewModels.Common;
 using SneakFit.ViewModels.Catalog.SanPhamChiTiet;
-using SneakFit.ApiIntegration.Services.ThuongHieu;
 using SneakFit.WebClient.Models;
 using System;
 using System.Linq;

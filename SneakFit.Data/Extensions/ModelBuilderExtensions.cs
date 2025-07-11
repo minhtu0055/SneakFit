@@ -168,7 +168,7 @@ namespace SneakFit.Data.Extensions
                 UserId = nhanVienId,
             }, new IdentityUserRole<Guid>
             {
-                RoleId = roleNVId,
+                RoleId = roleKHId,
                 UserId = khachHangId,
             });
         }

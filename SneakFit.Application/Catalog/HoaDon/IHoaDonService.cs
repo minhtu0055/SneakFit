@@ -13,8 +13,10 @@ namespace SneakFit.Application.Catalog.HoaDon
     {
         Task<PagedResult<HoaDonViewModel>> GetAllPaging(PhanTrangHoaDon request);
         Task<HoaDonViewModel> GetById(Guid id);
-        Task<HoaDonViewModel> Create(ThemHoaDon request);
+        Task<HoaDonViewModel> Create(ThemHoaDon request, string tenNguoiTao);
         Task<HoaDonViewModel> Update(SuaHoaDon request);
         Task<Dictionary<TrangThaiHoaDon, int>> GetCountByStatusAsync();
+        Task<List<HoaDonViewModel>> GetHoaDonChoByNguoiTao(string nguoiTao);
+        Task<bool> Delete(Guid id);
     }
 }

@@ -12,5 +12,8 @@ namespace SneakFit.ApiIntegration.Services
         Task<HoaDonViewModel> Update(SuaHoaDon request);
         Task<bool> UpdateStatus(Guid id, TrangThaiHoaDon trangThai);
         Task<Dictionary<string, int>> GetCountByStatusAsync();
+        Task<List<HoaDonViewModel>> GetHoaDonChoByNguoiTao(string nguoiTao);
+        Task<bool> Delete(Guid id);
+        Task<bool> ThanhToan(SuaHoaDon request);
     }
 }

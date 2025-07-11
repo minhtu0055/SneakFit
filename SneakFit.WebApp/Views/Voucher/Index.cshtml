@@ -84,13 +84,13 @@
                                 @(item.LoaiGiamGia == LoaiGiamGia.PhamTram ? "Phần trăm" : "Số tiền")
                             </td>
                             <td>
-                                @(item.LoaiGiamGia == LoaiGiamGia.PhamTram ? item.GiaTriGiamGia + "%" : item.GiaTriGiamGia.ToString("N0") + " đ")
+                                @(item.LoaiGiamGia == LoaiGiamGia.PhamTram ? item.GiaTriGiamGia + "%" : item.GiaTriGiamGia.ToString("N0") + " VNĐ")
                             </td>
                             <td>
                                 @(item.loaiVoucher ==  LoaiVoucher.CongKhai ? "Công Khai" : "Riêng Tư")
                             </td>
                             <td>
-                                @item.DieuKienApDung.ToString("N0") đ
+                                @item.DieuKienApDung.ToString("N0") VNĐ
                             </td>
                             <td class="text-center">
                                 <span class="badge bg-label-dark">@item.SoLuong</span>

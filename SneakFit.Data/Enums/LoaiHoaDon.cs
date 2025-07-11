@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace SneakFit.Data.Enums
 {
-    public enum LoaiGiamGia
+    public enum LoaiHoaDon
     {
-        PhamTram,
-        SoTien
+        Online = 1,
+        TaiQuay = 2
     }
 }

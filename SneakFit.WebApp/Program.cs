@@ -43,6 +43,7 @@ builder.Services.AddScoped<IVoucherApiClient, VoucherApiClient>();
 builder.Services.AddScoped<IHoaDonApiClient, HoaDonApiClient>();
 builder.Services.AddScoped<IHoaDonChiTietApiClient, HoaDonChiTietApiClient>();
 builder.Services.AddScoped<IGhnApiClient, GhnApiClient>();
+builder.Services.AddScoped<IDiaChiApiClient, DiaChiApiClient>();
 
 builder.Services.AddCors(options =>
 {

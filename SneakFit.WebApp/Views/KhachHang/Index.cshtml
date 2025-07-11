@@ -99,7 +99,17 @@
                 toastr.success(successMessage);
             }
         });
+                // Lấy TempData
+        var successMessage = '@TempData["SuccessMessage"]';
+        var errorMessage = '@TempData["ErrorMessage"]';
 
+        if (successMessage) {
+            toastr.success(successMessage);
+        }
+
+        if (errorMessage) {
+            toastr.error(errorMessage);
+        }
         function capNhatTrangThai(id, trangThai) {
             var label = $("label[for='switch-" + id + "']");
             label.text(trangThai ? "Hoạt động" : "Ngưng hoạt động");

@@ -89,6 +89,54 @@ namespace SneakFit.ApiIntegration.Services
                 return JsonConvert.DeserializeObject<HoaDonChiTietViewModel>(body);
 
             throw new Exception("Cập nhật hóa đơn thất bại");
-        }        
+        }
+
+        public async Task<HoaDonChiTietViewModel> CreateOrUpdate(ThemHoaDonChiTiet request)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var json = JsonConvert.SerializeObject(request);
+            var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync("/api/HoaDonChiTiet/CreateOrUpdate", httpContent);
+            var body = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+                return JsonConvert.DeserializeObject<HoaDonChiTietViewModel>(body);
+
+            throw new Exception("Tạo/cập nhật hóa đơn chi tiết thất bại");
+        }
+
+        public async Task<bool> Delete(Guid id)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var response = await client.DeleteAsync($"/api/HoaDonChiTiet/{id}");
+            var body = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+                return true;
+
+            throw new Exception("Xóa hóa đơn chi tiết thất bại");
+        }
+
+        public async Task<bool> UpdateQuantity(Guid hoaDonChiTietId, int newQuantity)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var json = JsonConvert.SerializeObject(new { HoaDonChiTietId = hoaDonChiTietId, NewQuantity = newQuantity });
+            var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await client.PutAsync("/api/HoaDonChiTiet/UpdateQuantity", httpContent);
+            return response.IsSuccessStatusCode;
+        }
     }
 }

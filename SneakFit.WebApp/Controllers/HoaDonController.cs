@@ -5,6 +5,7 @@ using SneakFit.ViewModels.Catalog.HoaDon;
 using SneakFit.ViewModels.Catalog.SanPham;
 using SneakFit.ViewModels.Common;
 using System.Globalization;
+using System.Security.Claims;
 
 namespace SneakFit.Admin.Controllers
 {
@@ -63,6 +64,89 @@ namespace SneakFit.Admin.Controllers
             var chiTiet = await _hoaDonChiTietApiClient.GetByHoaDonId(id);
             hoaDon.HoaDonChiTiet = chiTiet;
             return View(hoaDon);
-        }   
+        }
+        [HttpPost]
+        public async Task<IActionResult> CreateHoaDonCho([FromBody] ThemHoaDon request)
+        {
+            try
+            {
+                // Thiết lập thông tin hóa đơn chờ
+                request.TrangThai = TrangThaiHoaDon.ChoXacNhan;
+                request.LoaiHoaDon = LoaiHoaDon.TaiQuay;
+
+
+                // Gọi API để tạo hóa đơn
+                var result = await _hoaDonApiClient.Create(request);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetHoaDonCho()
+        {
+            try
+            {
+                // Lấy thông tin người dùng hiện tại
+                var hoVaTen = User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.GivenName)?.Value ?? User.Identity?.Name;
+
+                // Gọi API để lấy danh sách hóa đơn chờ của người dùng hiện tại
+                var result = await _hoaDonApiClient.GetHoaDonChoByNguoiTao(hoVaTen);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+        [HttpDelete]
+        public async Task<IActionResult> DeleteHoaDonCho(Guid id)
+        {
+            try
+            {
+                var result = await _hoaDonApiClient.Delete(id);
+                if (result)
+                    return Ok(new { success = true });
+                return NotFound(new { success = false, message = "Không tìm thấy hóa đơn" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+        [HttpPut]
+        public async Task<IActionResult> UpdateHoaDonCho([FromBody] SuaHoaDon request)
+        {
+            try
+            {
+                  var result = await _hoaDonApiClient.Update(request);
+                if (result != null)
+                    return Ok(new { success = true, data = result });
+                return NotFound(new { success = false, message = "Không tìm thấy hóa đơn" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+        [HttpPost]
+        public async Task<IActionResult> ThanhToan([FromBody] SuaHoaDon request)
+        {
+            try
+            {
+                var result = await _hoaDonApiClient.ThanhToan(request);
+                if (result)
+                    return Ok(new { success = true });
+                return BadRequest(new { success = false, message = "Thanh toán thất bại!" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
     }
 }

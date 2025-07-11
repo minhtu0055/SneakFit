@@ -76,7 +76,6 @@ namespace SneakFit.Application.System.DiaChi
             {
                 diaChi.Mac_Dinh = true;
             }
-
             _context.DiaChi.Add(diaChi);
             await _context.SaveChangesAsync();
 
@@ -104,7 +103,6 @@ namespace SneakFit.Application.System.DiaChi
             // Đặt địa chỉ được chọn thành mặc định
             diaChi.Mac_Dinh = true;
             await _context.SaveChangesAsync();
-
             return new ApiSuccessResult<bool>();
         }
         public async Task<ApiResult<DiaChiViewModel>> GetById(Guid id, Guid userId)

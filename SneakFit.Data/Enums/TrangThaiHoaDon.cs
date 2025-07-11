@@ -8,13 +8,13 @@ namespace SneakFit.Data.Enums
 {
     public enum TrangThaiHoaDon
     {
-        ChoXacNhan,
-        DaXacNhan,
-        ChoVanChuyen,
-        DangVanChuyen,
-        DaThanhToan,
-        ThanhCong,
-        DaHuy,
-        TraHang
+        ChoXacNhan = 0,
+        DaXacNhan = 1,
+        ChoVanChuyen = 2,
+        DangVanChuyen = 3,
+        DaThanhToan = 4,
+        ThanhCong = 5,
+        DaHuy = 6,
+        TraHang = 7
     }
 }

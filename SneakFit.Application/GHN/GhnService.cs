@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using SneakFit.ViewModels.GHN;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,6 +41,36 @@ namespace SneakFit.Application.GHN
             var content = new StringContent(JsonSerializer.Serialize(new { district_id = districtId }), Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync(url, content);
             return await response.Content.ReadAsStringAsync();
+        }
+        public async Task<string> CalculateShippingFeeAsync(ShippingFeeRequest request)
+        {
+            var url = $"{_configuration["GhnSettings:BaseUrl"]}v2/shipping-order/fee";
+
+            var requestBody = new
+            {
+                from_district_id = request.FromDistrictId,
+                service_id = request.ServiceId,
+                to_district_id = request.ToDistrictId,
+                to_ward_code = request.ToWardCode,
+                weight = request.Weight,
+                length = request.Length,
+                width = request.Width,
+                height = request.Height
+            };
+
+            var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync(url, content);
+
+            // Lấy nội dung response
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            // Xử lý response nếu có lỗi
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"GHN API lỗi ({response.StatusCode}): {responseContent}");
+            }
+
+            return responseContent;
         }
     }
 }

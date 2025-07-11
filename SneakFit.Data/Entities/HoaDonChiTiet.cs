@@ -13,7 +13,7 @@ namespace SneakFit.Data.Entities
         public decimal GiaBan { get; set; }
         public Guid HoaDonId { get; set; }
         public Guid SanPhamChiTietId { get; set; }
-        public  HoaDon HoaDon { get; set; }
-        public SanPhamChiTiet SanPhamChiTiet { get; set; }
+        public  HoaDon? HoaDon { get; set; }
+        public SanPhamChiTiet? SanPhamChiTiet { get; set; }
     }
 }

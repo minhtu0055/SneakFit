@@ -14,19 +14,21 @@ namespace SneakFit.ViewModels.Catalog.HoaDon
         public DateTime NgayTao { get; set; }
         public decimal TongTien { get; set; }
         public TrangThaiHoaDon TrangThai { get; set; }
+        public Guid? UserId { get; set; }
         public string HoTen { get; set; }
         public string DiaChi { get; set; }
         public string SoDienThoai { get; set; }
         public string Email { get; set; }
+        public bool? GiaoHang { get; set; }
         public PhuongThucThanhToan PhuongThucThanhToan { get; set; }
         public LoaiHoaDon LoaiHoaDon { get; set; }
+        public string NguoiTao { get; set; }
         public DateTime? NgayThanhToan { get; set; }
-        public string MaGiaoDich { get; set; }
-        public decimal PhiVanChuyen { get; set; }
-        public string DonViVanChuyen { get; set; }
-        public string MaVanDon { get; set; }
+        public string MaHoaDon { get; set; }
+        public decimal? PhiVanChuyen { get; set; }
         public TrangThaiThanhToan TrangThaiThanhToan { get; set; }
         public List<HoaDonChiTietViewModel> HoaDonChiTiet { get; set; }
         public Guid? VoucherId { get; set; }
+        public decimal? TienKhachDua { get; set; }
     }
 }
