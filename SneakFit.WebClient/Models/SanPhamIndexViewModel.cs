@@ -1,6 +1,5 @@
 ﻿using SneakFit.ViewModels.Catalog.DanhMuc;
 using SneakFit.ViewModels.Catalog.MauSac;
-using SneakFit.ViewModels.Catalog.SanPham;
 using SneakFit.ViewModels.Catalog.SanPhamChiTiet;
 using SneakFit.ViewModels.Catalog.ThuongHieu;
 using SneakFit.ViewModels.Common;
@@ -16,8 +15,5 @@ namespace SneakFit.WebClient.Models
         public Guid? SelectedCategoryId { get; set; }
         public Guid? SelectedColorId { get; set; }
         public Guid? SelectedBrandId { get; set; }
-        public List<SanPhamViewModels> SanPhams { get; set; }
-        public decimal GiaBan { get; set; }
-        public decimal GiaCu { get; set; }
     }
 }

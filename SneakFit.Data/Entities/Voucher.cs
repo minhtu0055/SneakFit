@@ -14,7 +14,6 @@ namespace SneakFit.Data.Entities
         public LoaiGiamGia LoaiGiamGia { get; set; }
         public decimal GiaTriGiamGia { get; set; }
         public decimal DieuKienApDung { get; set; }
-        public decimal GiaTriToiThieu { get; set; }
         public int SoLuong { get; set; }
         public DateTime NgayTao { get; set; }
         public DateTime ThoiGianBatDau { get; set; }

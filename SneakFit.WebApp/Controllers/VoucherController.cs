@@ -156,7 +156,6 @@ namespace SneakFit.Admin.Controllers
                 LoaiGiamGia = result.LoaiGiamGia,
                 GiaTriGiamGia = result.GiaTriGiamGia,
                 DieuKienApDung = result.DieuKienApDung,
-                GiaTriToiThieu = result.GiaTriToiThieu,
                 SoLuong = result.SoLuong,
                 NgayTao = result.NgayTao,
                 ThoiGianBatDau = result.ThoiGianBatDau,
