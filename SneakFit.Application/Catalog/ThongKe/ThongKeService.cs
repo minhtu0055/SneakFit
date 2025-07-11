@@ -111,9 +111,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                 .Where(x =>
                     (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                 )
                 .ToListAsync();
 
@@ -123,9 +123,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                     (
                         (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         ||
-                        (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                        (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         ||
-                        (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                        (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     )
                 )
                 .ToList();
@@ -135,9 +135,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                     && (
                         (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         ||
-                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.HoanThanh && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         ||
-                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.HoaDon.TrangThai == TrangThaiHoaDon.HoanThanh && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     )
                 )
                 .SumAsync(x => x.SoLuong);
@@ -260,9 +260,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                         .Where(x =>
                             (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                             ||
-                            (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                            (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                             ||
-                            (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                            (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         )
                         .ToListAsync();
 
@@ -271,9 +271,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                             && (
                                 (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                                 ||
-                                (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.HoanThanh && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                                (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                                 ||
-                                (x.HoaDon.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.HoaDon.TrangThai == TrangThaiHoaDon.HoanThanh && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                                (x.HoaDon.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                             )
                         )
                         .SumAsync(x => x.SoLuong);
@@ -294,9 +294,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                         .Where(x =>
                             (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                             ||
-                            (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                            (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                             ||
-                            (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                            (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         )
                         .ToListAsync();
 
@@ -305,9 +305,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                             && (
                                 (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                                 ||
-                                (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.HoanThanh && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                                (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                                 ||
-                                (x.HoaDon.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.HoaDon.TrangThai == TrangThaiHoaDon.HoanThanh && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                                (x.HoaDon.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                             )
                         )
                         .SumAsync(x => x.SoLuong);
@@ -402,9 +402,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                             && (
                                 (hdct.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && hdct.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && hdct.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                                 ||
-                                (hdct.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (hdct.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || hdct.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && hdct.HoaDon.TrangThai == TrangThaiHoaDon.HoanThanh && hdct.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                                (hdct.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (hdct.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || hdct.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && hdct.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && hdct.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                                 ||
-                                (hdct.HoaDon.LoaiHoaDon == LoaiHoaDon.TaiQuay && hdct.HoaDon.TrangThai == TrangThaiHoaDon.HoanThanh && hdct.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                                (hdct.HoaDon.LoaiHoaDon == LoaiHoaDon.TaiQuay && hdct.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && hdct.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                             )
                         group new { hdct, spct, sp, dm } by new { sp.Id, sp.TenSanPham, sp.Mota, DanhMuc = dm.TenDanhMuc } into g
                         orderby g.Sum(x => x.hdct.SoLuong) descending
@@ -559,9 +559,9 @@ namespace SneakFit.Application.Catalog.ThongKe
             .Where(x =>
                 (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                 ||
-                (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                 ||
-                (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
             )
             .SumAsync(x => x.TongTien - x.PhiVanChuyen);
 
@@ -570,9 +570,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                 .Where(x =>
                     (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                 )
                 .SumAsync(x => x.TongTien - x.PhiVanChuyen);
 
@@ -588,9 +588,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                 .Where(x =>
                     (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                 )
                 .SumAsync(x => x.TongTien - x.PhiVanChuyen);
 
@@ -600,9 +600,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                 .Where(x =>
                     (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                 )
                 .SumAsync(x => x.TongTien - x.PhiVanChuyen);
 
@@ -612,9 +612,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                 .Where(x =>
                     (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                 )
                 .SumAsync(x => x.TongTien - x.PhiVanChuyen);
 
@@ -623,9 +623,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                 .Where(x =>
                     (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                 )
                 .SumAsync(x => x.TongTien - x.PhiVanChuyen);
 
@@ -635,9 +635,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                 .Where(x =>
                     (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                 )
                 .SumAsync(x => x.TongTien - x.PhiVanChuyen);
 
@@ -646,9 +646,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                 .Where(x =>
                     (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                 )
                 .SumAsync(x => x.TongTien - x.PhiVanChuyen);
 
@@ -660,9 +660,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                     && (
                         (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         ||
-                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.HoanThanh && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         ||
-                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.HoaDon.TrangThai == TrangThaiHoaDon.HoanThanh && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     )
                 )
                 .SumAsync(x => x.SoLuong);
@@ -672,9 +672,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                     && (
                         (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         ||
-                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.HoanThanh && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         ||
-                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.HoaDon.TrangThai == TrangThaiHoaDon.HoanThanh && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     )
                 )
                 .SumAsync(x => x.SoLuong);
@@ -685,9 +685,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                      && (
                         (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         ||
-                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.HoanThanh && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         ||
-                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.HoaDon.TrangThai == TrangThaiHoaDon.HoanThanh && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     )
                 )
                  .SumAsync(x => x.SoLuong);
@@ -697,9 +697,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                     && (
                         (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         ||
-                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.HoanThanh && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         ||
-                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.HoaDon.TrangThai == TrangThaiHoaDon.HoanThanh && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     )
                 )
                 .SumAsync(x => x.SoLuong);
@@ -710,9 +710,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                     && (
                         (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         ||
-                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.HoanThanh && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         ||
-                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.HoaDon.TrangThai == TrangThaiHoaDon.HoanThanh && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     )
                 )
                 .SumAsync(x => x.SoLuong);
@@ -722,9 +722,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                     && (
                         (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         ||
-                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.HoanThanh && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         ||
-                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.HoaDon.TrangThai == TrangThaiHoaDon.HoanThanh && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     )
                 )
                 .SumAsync(x => x.SoLuong);
@@ -735,9 +735,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                      && (
                             (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                             ||
-                            (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.HoanThanh && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                            (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                             ||
-                            (x.HoaDon.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.HoaDon.TrangThai == TrangThaiHoaDon.HoanThanh && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                            (x.HoaDon.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         )
                     )
                  .SumAsync(x => x.SoLuong);
@@ -747,9 +747,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                     && (
                         (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         ||
-                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.HoanThanh && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         ||
-                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.HoaDon.TrangThai == TrangThaiHoaDon.HoanThanh && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     )
                 )
                 .SumAsync(x => x.SoLuong);
@@ -760,9 +760,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                 (
                     (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                 )
             );
 
@@ -771,9 +771,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                 (
                     (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                 )
             );
 
@@ -782,9 +782,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                 (
                     (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                 )
             );
 
@@ -793,9 +793,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                 (
                     (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                 )
             );
 
@@ -805,9 +805,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                 (
                     (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                 )
             );
 
@@ -816,9 +816,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                 (
                     (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                 )
             );
 
@@ -828,9 +828,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                 (
                     (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                 )
             );
 
@@ -839,9 +839,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                 (
                     (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
-                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.HoanThanh && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.TaiQuay && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                 )
             );
 
@@ -958,9 +958,9 @@ namespace SneakFit.Application.Catalog.ThongKe
                         && (
                             (hdct.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && hdct.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && hdct.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                             ||
-                            (hdct.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (hdct.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || hdct.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && hdct.HoaDon.TrangThai == TrangThaiHoaDon.HoanThanh && hdct.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                            (hdct.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (hdct.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || hdct.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && hdct.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && hdct.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                             ||
-                            (hdct.HoaDon.LoaiHoaDon == LoaiHoaDon.TaiQuay && hdct.HoaDon.TrangThai == TrangThaiHoaDon.HoanThanh && hdct.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                            (hdct.HoaDon.LoaiHoaDon == LoaiHoaDon.TaiQuay && hdct.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && hdct.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         )
                         group new { hdct, spct, sp, ms, kt, cl, dg, th } by new
                         {
