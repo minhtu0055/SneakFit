@@ -5,6 +5,7 @@ using SneakFit.ApiIntegration.Services;
 using SneakFit.ViewModels.Catalog.SanPham;
 using SneakFit.ViewModels.Catalog.SanPhamChiTiet;
 using SneakFit.ViewModels.Common;
+using SneakFit.ApiIntegration.Services.ThuongHieu;
 using SneakFit.Data.Entities;
 
 namespace SneakFit.WebClient.Controllers
@@ -43,8 +44,10 @@ namespace SneakFit.WebClient.Controllers
         {
             var categories = await _danhMucApiClient.GetAll();
             var colors = await _mauSacApiClient.GetAll();
+            var kichthuocs = await _kichThuocApiClient.GetAll();
             var brands = await _thuongHieuApiClient.GetAll();
             var baseAddress = _configuration["BaseAddress"]; // ✅ Lấy baseAddress từ cấu hình
+            
 
             var request = new SanPhamPagingRequest
             {
@@ -67,8 +70,7 @@ namespace SneakFit.WebClient.Controllers
             }
 
             ViewBag.Keyword = tuKhoa;
-
-            // Gán ảnh đại diện cho từng sản phẩm
+            ViewBag.AllSPCT = allSpct;
             foreach (var sanPham in pagedSanPham.Items)
             {
                 // Lấy danh sách SPCT theo tên sản phẩm
@@ -85,7 +87,6 @@ namespace SneakFit.WebClient.Controllers
                     : baseAddress + "/assets/img/product/no-image.png";
             }
 
-            // Lấy 1 ảnh đại diện cho mỗi sản phẩm
             //foreach (var sanPham in pagedSanPham.Items)
             //{
             //    // Lấy danh sách SPCT theo tên sản phẩm
@@ -99,38 +100,64 @@ namespace SneakFit.WebClient.Controllers
             {
                 DanhMucs = categories,
                 MauSacs = colors,
+                KichThuocs = kichthuocs,
                 ThuongHieus = brands,
                 SanPhams = pagedSanPham,
                 AllSpct = allSpct,
             };
 
             return View(viewModel);
+        }
+        [HttpGet]
+        public async Task<IActionResult> Details(Guid id)
+        {
 
-            //var products = await _sanPhamApiClient.GetAll(); // ✅ Trả về List<SanPhamViewModels>
-            //var baseAddress = _configuration["BaseAddress"]; // ✅ Lấy baseAddress từ cấu hình
-            //var allSpct = new List<SPCTViewModels>();
+            //// 1. Lấy sản phẩm chính
+            //var sanPham = await _sanPhamApiClient.GetById(id);
+            //if (sanPham == null)
+            //    return NotFound();
 
-            //foreach (var sanPham in products)
+            //// 2. Lấy danh sách các sản phẩm chi tiết của sản phẩm đó
+            //var allSpct = await _spctApiClient.GetAll();
+            //var spctVariants = allSpct.Where(x => x.SanPhamId == id).ToList();
+
+            //// 3. Lấy màu sắc và kích thước
+            //var mauSacs = await _mauSacApiClient.GetAll();
+            //var kichThuocs = await _kichThuocApiClient.GetAll();
+
+            //// 4. Truyền qua ViewBag để Razor xử lý trực tiếp
+            //ViewBag.MauSacs = mauSacs;
+            //ViewBag.KichThuocs = kichThuocs;
+            //ViewBag.AllSPCT = spctVariants;
+            //ViewBag.BaseAddress = _configuration["BaseAddress"];
+
+            //// 5. ViewModel chính cho Razor
+            //var viewModel = new DanhMucSPCTViewModel
             //{
-            //    // ✅ Lấy danh sách SPCT theo ID (an toàn hơn theo tên)
-            //    var spctList = await _sanPhamApiClient.GetSPCTByProductName(sanPham.TenSanPham);
-
-            //    // ✅ Tìm SPCT có ảnh
-            //    var spctWithImage = spctList.FirstOrDefault(spct => spct.Images != null && spct.Images.Any());
-            //    var firstImage = spctWithImage?.Images?.FirstOrDefault();
-
-            //    // ✅ Gán ảnh đầy đủ đường dẫn
-            //    sanPham.ImageDaiDien = !string.IsNullOrEmpty(firstImage)
-            //        ? baseAddress + firstImage
-            //        : baseAddress + "/images/Default.jpg";
-            //}
-
-            //var model = new SanPhamIndexViewModel
-            //{
-            //    SanPhams = products
+            //    SanPhams = new PagedResult<SanPhamViewModels>
+            //    {
+            //        Items = new List<SanPhamViewModels> { sanPham },
+            //        TotalRecords = 1
+            //    },
+            //    AllSpct = spctVariants
             //};
 
-            //return View(model);
+            //return View(viewModel);
+
+            var sanPham = await _sanPhamApiClient.GetById(id);
+            var spctList = await _sanPhamApiClient.GetSPCTByProductName(sanPham.TenSanPham);
+            var colors = await _mauSacApiClient.GetAll();
+            var sizes = await _kichThuocApiClient.GetAll();
+
+            var viewModel = new SanPhamDetailViewModel
+            {
+                SanPham = sanPham,
+                SanPhamChiTiets = spctList,
+                MauSacs = colors,
+                KichThuocs = sizes
+            };
+
+            return View(viewModel);
         }
 
 
