@@ -62,6 +62,7 @@ namespace SneakFit.Application.Catalog.Voucher
                 LoaiGiamGia = request.LoaiGiamGia,
                 GiaTriGiamGia = request.GiaTriGiamGia,
                 DieuKienApDung = request.DieuKienApDung,
+                GiaTriToiDa = request.GiaTriToiDa,
                 SoLuong = request.SoLuong,
                 NgayTao = DateTime.Now,
                 ThoiGianBatDau = request.ThoiGianBatDau,
@@ -99,6 +100,7 @@ namespace SneakFit.Application.Catalog.Voucher
                             <li><strong>Loại giảm giá:</strong> {(vc.LoaiGiamGia == LoaiGiamGia.PhamTram ? "Giảm theo phần trăm" : "Giảm theo số tiền")}</li>
                             <li><strong>Giá trị giảm giá:</strong> {vc.GiaTriGiamGia}{(vc.LoaiGiamGia == LoaiGiamGia.PhamTram ? "%" : " VNĐ")}</li>
                             <li><strong>Điều kiện áp dụng:</strong> {vc.DieuKienApDung:N0} VNĐ</li>
+                            <li><strong>Điều kiện áp dụng:</strong> {vc.GiaTriToiDa:N0} VNĐ</li>
                             <li><strong>Thời gian sử dụng:</strong> từ {vc.ThoiGianBatDau:dd/MM/yyyy HH:mm} đến {vc.ThoiGianKetThuc:dd/MM/yyyy HH:mm}</li>
                         </ul>
                         <p>Vui lòng sử dụng mã voucher này khi thanh toán đơn hàng của bạn.</p>
@@ -179,6 +181,7 @@ namespace SneakFit.Application.Catalog.Voucher
                     loaiVoucher = x.loaiVoucher,
                     GiaTriGiamGia = x.GiaTriGiamGia,
                     DieuKienApDung = x.DieuKienApDung,
+                    GiaTriToiDa = x.GiaTriToiDa,
                     SoLuong = x.SoLuong,
                     NgayTao = x.NgayTao,
                     ThoiGianBatDau = x.ThoiGianBatDau,
@@ -219,6 +222,7 @@ namespace SneakFit.Application.Catalog.Voucher
                 loaiVoucher = voucher.loaiVoucher,
                 GiaTriGiamGia = voucher.GiaTriGiamGia,
                 DieuKienApDung = voucher.DieuKienApDung,
+                GiaTriToiDa = voucher.GiaTriToiDa,
                 SoLuong = voucher.SoLuong,
                 NgayTao = voucher.NgayTao,
                 ThoiGianBatDau = voucher.ThoiGianBatDau,
@@ -248,6 +252,7 @@ namespace SneakFit.Application.Catalog.Voucher
                 loaiVoucher = voucher.loaiVoucher,
                 GiaTriGiamGia = voucher.GiaTriGiamGia,
                 DieuKienApDung = voucher.DieuKienApDung,
+                GiaTriToiDa = voucher.GiaTriToiDa,
                 SoLuong = voucher.SoLuong,
                 NgayTao = voucher.NgayTao,
                 ThoiGianBatDau = voucher.ThoiGianBatDau,
@@ -261,6 +266,12 @@ namespace SneakFit.Application.Catalog.Voucher
             var voucher = await _context.Voucher.FindAsync(request.Id);
             if (voucher == null) return null;
 
+            if (request.LoaiVoucher == LoaiVoucher.RiengTu &&
+                (request.SelectedUserIds == null || !request.SelectedUserIds.Any()))
+            {
+                throw new Exception("Voucher riêng tư phải có ít nhất một khách hàng được chọn.");
+            }
+
             // Kiểm tra nếu đang cố gắng chuyển từ riêng tư sang công khai
             if (voucher.loaiVoucher == LoaiVoucher.RiengTu && request.LoaiVoucher == LoaiVoucher.CongKhai)
             {
@@ -271,6 +282,7 @@ namespace SneakFit.Application.Catalog.Voucher
             voucher.LoaiGiamGia = request.LoaiGiamGia;
             voucher.GiaTriGiamGia = request.GiaTriGiamGia;
             voucher.DieuKienApDung = request.DieuKienApDung;
+            voucher.GiaTriToiDa = request.GiaTriToiDa;
             voucher.SoLuong = request.SoLuong;
             voucher.ThoiGianBatDau = request.ThoiGianBatDau;
             voucher.ThoiGianKetThuc = request.ThoiGianKetThuc;
@@ -312,6 +324,7 @@ namespace SneakFit.Application.Catalog.Voucher
                                 <li><strong>Loại giảm giá:</strong> {(voucher.LoaiGiamGia == LoaiGiamGia.PhamTram ? "Giảm theo phần trăm" : "Giảm theo số tiền")}</li>
                                 <li><strong>Giá trị giảm giá:</strong> {voucher.GiaTriGiamGia}{(voucher.LoaiGiamGia == LoaiGiamGia.PhamTram ? "%" : " VNĐ")}</li>
                                 <li><strong>Điều kiện áp dụng:</strong> {voucher.DieuKienApDung:N0} VNĐ</li>
+                                <li><strong>Điều kiện áp dụng:</strong> {voucher.GiaTriToiDa:N0} VNĐ</li>
                                 <li><strong>Thời gian sử dụng:</strong> từ {voucher.ThoiGianBatDau:dd/MM/yyyy HH:mm} đến {voucher.ThoiGianKetThuc:dd/MM/yyyy HH:mm}</li>
                             </ul>
                             <p>Vui lòng sử dụng mã voucher này khi thanh toán đơn hàng của bạn.</p>
@@ -351,6 +364,7 @@ namespace SneakFit.Application.Catalog.Voucher
                             <li><strong>Loại giảm giá:</strong> {(voucher.LoaiGiamGia == LoaiGiamGia.PhamTram ? "Giảm theo phần trăm" : "Giảm theo số tiền")}</li>
                             <li><strong>Giá trị giảm giá:</strong> {voucher.GiaTriGiamGia}{(voucher.LoaiGiamGia == LoaiGiamGia.PhamTram ? "%" : " VNĐ")}</li>
                             <li><strong>Điều kiện áp dụng:</strong> {voucher.DieuKienApDung:N0} VNĐ</li>
+                            <li><strong>Điều kiện áp dụng:</strong> {voucher.GiaTriToiDa:N0} VNĐ</li>
                             <li><strong>Thời gian sử dụng:</strong> từ {voucher.ThoiGianBatDau:dd/MM/yyyy HH:mm} đến {voucher.ThoiGianKetThuc:dd/MM/yyyy HH:mm}</li>
                         </ul>
                         <p>Vui lòng kiểm tra thông tin mới của voucher trước khi sử dụng.</p>
@@ -384,6 +398,7 @@ namespace SneakFit.Application.Catalog.Voucher
                             <li><strong>Loại giảm giá:</strong> {(voucher.LoaiGiamGia == LoaiGiamGia.PhamTram ? "Giảm theo phần trăm" : "Giảm theo số tiền")}</li>
                             <li><strong>Giá trị giảm giá:</strong> {voucher.GiaTriGiamGia}{(voucher.LoaiGiamGia == LoaiGiamGia.PhamTram ? "%" : " VNĐ")}</li>
                             <li><strong>Điều kiện áp dụng:</strong> {voucher.DieuKienApDung:N0} VNĐ</li>
+                            <li><strong>Điều kiện áp dụng:</strong> {voucher.GiaTriToiDa:N0} VNĐ</li>
                             <li><strong>Thời gian sử dụng:</strong> từ {voucher.ThoiGianBatDau:dd/MM/yyyy HH:mm} đến {voucher.ThoiGianKetThuc:dd/MM/yyyy HH:mm}</li>
                         </ul>
                         <p>Vui lòng kiểm tra thông tin mới của voucher trước khi sử dụng.</p>
@@ -407,6 +422,7 @@ namespace SneakFit.Application.Catalog.Voucher
                 loaiVoucher = voucher.loaiVoucher,
                 GiaTriGiamGia = voucher.GiaTriGiamGia,
                 DieuKienApDung = voucher.DieuKienApDung,
+                GiaTriToiDa = voucher.GiaTriToiDa,
                 SoLuong = voucher.SoLuong,
                 NgayTao = voucher.NgayTao,
                 ThoiGianBatDau = voucher.ThoiGianBatDau,
@@ -532,8 +548,8 @@ namespace SneakFit.Application.Catalog.Voucher
             // Lọc theo từ khóa nếu có
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(x => x.user.HoVaTen.Contains(request.Keyword) || 
-                                       x.user.Email.Contains(request.Keyword) || 
+                query = query.Where(x => x.user.HoVaTen.Contains(request.Keyword) ||
+                                       x.user.Email.Contains(request.Keyword) ||
                                        x.user.PhoneNumber.Contains(request.Keyword));
             }
 
