@@ -22,9 +22,9 @@ namespace SneakFit.WebClient.Controllers
         private readonly IVoucherApiClient _voucherApiClient;
         private readonly IDiaChiApiClient _diaChiApiClient;
 
-        public ThanhToanController(IHoaDonClientApiClient hoaDonClientApiClient, 
-                                   IGioHangApiClient gioHangApiClient, 
-                                   ISanPhamApiClient sanPhamApiClient, 
+        public ThanhToanController(IHoaDonClientApiClient hoaDonClientApiClient,
+                                   IGioHangApiClient gioHangApiClient,
+                                   ISanPhamApiClient sanPhamApiClient,
                                    ISpctApiClient spctApiClient,
                                    IHoaDonChiTietClientApiClient hoaDonChiTietClientApiClient,
                                    IKhuyenMaiApiClient khuyenMaiApiClient,

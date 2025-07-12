@@ -7,22 +7,21 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Thêm Memory Cache
-builder.Services.AddMemoryCache();
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+})
 .AddCookie(options =>
 {
-    options.LoginPath = "/Login/Index";
+    options.LoginPath = "/Login/Login";
     options.AccessDeniedPath = "/Forbidden/Index";
-    // Thêm các cấu hình sau
-    options.Cookie.Name = "SneakFit.WebClient";
+});
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(3);
     options.Cookie.HttpOnly = true;
-    options.Cookie.SameSite = SameSiteMode.Lax;
-    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-
-    // Cấu hình thời gian sống của cookie
-    options.ExpireTimeSpan = TimeSpan.FromHours(24);
-    options.SlidingExpiration = true;
+    options.Cookie.IsEssential = true;
 });
 
 builder.Services.AddHttpClient();
@@ -48,10 +47,7 @@ builder.Services.AddScoped<IGhnApiClient, GhnApiClient>();
 builder.Services.AddScoped<IUserApiClient, UserApiClient>();
 builder.Services.AddScoped<IDiaChiApiClient, DiaChiApiClient>();
 
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-});
+
 
 builder.Services.AddCors(options =>
 {
@@ -78,14 +74,14 @@ app.UseCors();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
-app.UseSession();
+
 
 app.UseRouting();
 
 app.UseAuthentication();
 
 app.UseAuthorization();
-
+app.UseSession();
 
 app.MapControllerRoute(
     name: "default",
