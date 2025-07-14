@@ -109,7 +109,7 @@ namespace SneakFit.Application.Catalog.ThongKe
             var don = await _context.HoaDon
                 .Where(x => x.NgayTao >= fromDate && x.NgayTao < toDate)
                 .Where(x =>
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.TrangThai != TrangThaiHoaDon.DaHuy && x.TrangThai != TrangThaiHoaDon.TraHang)
                     ||
                     (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
@@ -121,7 +121,7 @@ namespace SneakFit.Application.Catalog.ThongKe
                 .Where(x =>
                     x.NgayTao.Date == today &&
                     (
-                        (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                        (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.TrangThai != TrangThaiHoaDon.DaHuy && x.TrangThai != TrangThaiHoaDon.TraHang)
                         ||
                         (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         ||
@@ -133,7 +133,7 @@ namespace SneakFit.Application.Catalog.ThongKe
             var soLuongSanPhamBan = await _context.HoaDonChiTiet
                 .Where(x => x.HoaDon.NgayTao >= fromDate && x.HoaDon.NgayTao < toDate
                     && (
-                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.HoaDon.TrangThai != TrangThaiHoaDon.DaHuy && x.HoaDon.TrangThai != TrangThaiHoaDon.TraHang)
                         ||
                         (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         ||
@@ -258,7 +258,7 @@ namespace SneakFit.Application.Catalog.ThongKe
                     var hoaDon = await _context.HoaDon
                         .Where(x => x.NgayTao >= start && x.NgayTao < end)
                         .Where(x =>
-                            (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                            (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.TrangThai != TrangThaiHoaDon.DaHuy && x.TrangThai != TrangThaiHoaDon.TraHang)
                             ||
                             (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                             ||
@@ -269,7 +269,7 @@ namespace SneakFit.Application.Catalog.ThongKe
                     var sanPham = await _context.HoaDonChiTiet
                         .Where(x => x.HoaDon.NgayTao >= start && x.HoaDon.NgayTao < end
                             && (
-                                (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                                (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.HoaDon.TrangThai != TrangThaiHoaDon.DaHuy && x.HoaDon.TrangThai != TrangThaiHoaDon.TraHang)
                                 ||
                                 (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                                 ||
@@ -292,7 +292,7 @@ namespace SneakFit.Application.Catalog.ThongKe
                     var hoaDon = await _context.HoaDon
                         .Where(x => x.NgayTao.Date == date)
                         .Where(x =>
-                            (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                            (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.TrangThai != TrangThaiHoaDon.DaHuy && x.TrangThai != TrangThaiHoaDon.TraHang)
                             ||
                             (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                             ||
@@ -303,7 +303,7 @@ namespace SneakFit.Application.Catalog.ThongKe
                     var sanPham = await _context.HoaDonChiTiet
                         .Where(x => x.HoaDon.NgayTao.Date == date
                             && (
-                                (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                                (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.HoaDon.TrangThai != TrangThaiHoaDon.DaHuy && x.HoaDon.TrangThai != TrangThaiHoaDon.TraHang)
                                 ||
                                 (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                                 ||
@@ -400,7 +400,7 @@ namespace SneakFit.Application.Catalog.ThongKe
                         join dm in _context.DanhMuc on sp.DanhMucId equals dm.Id
                         where hdct.HoaDon.NgayTao >= fromDate && hdct.HoaDon.NgayTao < toDate
                             && (
-                                (hdct.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && hdct.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && hdct.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                                (hdct.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (hdct.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || hdct.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && hdct.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && hdct.HoaDon.TrangThai != TrangThaiHoaDon.DaHuy && hdct.HoaDon.TrangThai != TrangThaiHoaDon.TraHang)
                                 ||
                                 (hdct.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (hdct.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || hdct.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && hdct.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && hdct.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                                 ||
@@ -557,7 +557,7 @@ namespace SneakFit.Application.Catalog.ThongKe
             var doanhThuNgay = await _context.HoaDon
             .Where(x => x.NgayTao.Date == today)
             .Where(x =>
-                (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.TrangThai != TrangThaiHoaDon.DaHuy && x.TrangThai != TrangThaiHoaDon.TraHang)
                 ||
                 (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                 ||
@@ -568,7 +568,7 @@ namespace SneakFit.Application.Catalog.ThongKe
             var doanhThuNgayTruoc = await _context.HoaDon
                 .Where(x => x.NgayTao.Date == today.AddDays(-1))
                 .Where(x =>
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.TrangThai != TrangThaiHoaDon.DaHuy && x.TrangThai != TrangThaiHoaDon.TraHang)
                     ||
                     (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
@@ -586,7 +586,7 @@ namespace SneakFit.Application.Catalog.ThongKe
             var doanhThuTuan = await _context.HoaDon
                 .Where(x => x.NgayTao >= startOfWeek && x.NgayTao < endOfWeek)
                 .Where(x =>
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.TrangThai != TrangThaiHoaDon.DaHuy && x.TrangThai != TrangThaiHoaDon.TraHang)
                     ||
                     (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
@@ -598,7 +598,7 @@ namespace SneakFit.Application.Catalog.ThongKe
                  .Where(x => x.NgayTao >= startOfLastWeek && x.NgayTao < endOfLastWeek)
                 .Where(x => x.NgayTao >= startOfLastWeek && x.NgayTao < startOfWeek)
                 .Where(x =>
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.TrangThai != TrangThaiHoaDon.DaHuy && x.TrangThai != TrangThaiHoaDon.TraHang)
                     ||
                     (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
@@ -610,7 +610,7 @@ namespace SneakFit.Application.Catalog.ThongKe
             var doanhThuThang = await _context.HoaDon
                 .Where(x => x.NgayTao >= firstDayOfMonth && x.NgayTao < endOfToday)
                 .Where(x =>
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.TrangThai != TrangThaiHoaDon.DaHuy && x.TrangThai != TrangThaiHoaDon.TraHang)
                     ||
                     (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
@@ -621,7 +621,7 @@ namespace SneakFit.Application.Catalog.ThongKe
             var doanhThuThangTruoc = await _context.HoaDon
                 .Where(x => x.NgayTao >= firstDayOfMonth.AddMonths(-1) && x.NgayTao < firstDayOfMonth)
                 .Where(x =>
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.TrangThai != TrangThaiHoaDon.DaHuy && x.TrangThai != TrangThaiHoaDon.TraHang)
                     ||
                     (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
@@ -633,7 +633,7 @@ namespace SneakFit.Application.Catalog.ThongKe
             var doanhThuNam = await _context.HoaDon
                 .Where(x => x.NgayTao >= firstDayOfYear && x.NgayTao < endOfToday)
                 .Where(x =>
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.TrangThai != TrangThaiHoaDon.DaHuy && x.TrangThai != TrangThaiHoaDon.TraHang)
                     ||
                     (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
@@ -644,7 +644,7 @@ namespace SneakFit.Application.Catalog.ThongKe
             var doanhThuNamTruoc = await _context.HoaDon
                 .Where(x => x.NgayTao >= firstDayOfYear.AddYears(-1) && x.NgayTao < firstDayOfYear)
                 .Where(x =>
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.TrangThai != TrangThaiHoaDon.DaHuy && x.TrangThai != TrangThaiHoaDon.TraHang)
                     ||
                     (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
@@ -658,7 +658,7 @@ namespace SneakFit.Application.Catalog.ThongKe
             var sanPhamNgay = await _context.HoaDonChiTiet
                 .Where(x => x.HoaDon.NgayTao.Date == today
                     && (
-                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.HoaDon.TrangThai != TrangThaiHoaDon.DaHuy && x.HoaDon.TrangThai != TrangThaiHoaDon.TraHang)
                         ||
                         (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         ||
@@ -670,7 +670,7 @@ namespace SneakFit.Application.Catalog.ThongKe
             var sanPhamNgayTruoc = await _context.HoaDonChiTiet
                 .Where(x => x.HoaDon.NgayTao.Date == today.AddDays(-1)
                     && (
-                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.HoaDon.TrangThai != TrangThaiHoaDon.DaHuy && x.HoaDon.TrangThai != TrangThaiHoaDon.TraHang)
                         ||
                         (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         ||
@@ -683,7 +683,7 @@ namespace SneakFit.Application.Catalog.ThongKe
             var sanPhamTuan = await _context.HoaDonChiTiet
                  .Where(x => x.HoaDon.NgayTao >= startOfWeek && x.HoaDon.NgayTao < endOfWeek
                      && (
-                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.HoaDon.TrangThai != TrangThaiHoaDon.DaHuy && x.HoaDon.TrangThai != TrangThaiHoaDon.TraHang)
                         ||
                         (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         ||
@@ -695,7 +695,7 @@ namespace SneakFit.Application.Catalog.ThongKe
             var sanPhamTuanTruoc = await _context.HoaDonChiTiet
                 .Where(x => x.HoaDon.NgayTao >= startOfLastWeek && x.HoaDon.NgayTao < endOfLastWeek
                     && (
-                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.HoaDon.TrangThai != TrangThaiHoaDon.DaHuy && x.HoaDon.TrangThai != TrangThaiHoaDon.TraHang)
                         ||
                         (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         ||
@@ -708,7 +708,7 @@ namespace SneakFit.Application.Catalog.ThongKe
             var sanPhamThang = await _context.HoaDonChiTiet
                 .Where(x => x.HoaDon.NgayTao >= firstDayOfMonth && x.HoaDon.NgayTao < endOfToday
                     && (
-                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.HoaDon.TrangThai != TrangThaiHoaDon.DaHuy && x.HoaDon.TrangThai != TrangThaiHoaDon.TraHang)
                         ||
                         (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         ||
@@ -720,7 +720,7 @@ namespace SneakFit.Application.Catalog.ThongKe
             var sanPhamThangTruoc = await _context.HoaDonChiTiet
                 .Where(x => x.HoaDon.NgayTao >= firstDayOfMonth.AddMonths(-1) && x.HoaDon.NgayTao < firstDayOfMonth
                     && (
-                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.HoaDon.TrangThai != TrangThaiHoaDon.DaHuy && x.HoaDon.TrangThai != TrangThaiHoaDon.TraHang)
                         ||
                         (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         ||
@@ -733,7 +733,7 @@ namespace SneakFit.Application.Catalog.ThongKe
             var sanPhamNam = await _context.HoaDonChiTiet
                  .Where(x => x.HoaDon.NgayTao >= firstDayOfYear && x.HoaDon.NgayTao < endOfToday
                      && (
-                            (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                            (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.HoaDon.TrangThai != TrangThaiHoaDon.DaHuy && x.HoaDon.TrangThai != TrangThaiHoaDon.TraHang)
                             ||
                             (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                             ||
@@ -745,7 +745,7 @@ namespace SneakFit.Application.Catalog.ThongKe
             var sanPhamNamTruoc = await _context.HoaDonChiTiet
                 .Where(x => x.HoaDon.NgayTao >= firstDayOfYear.AddYears(-1) && x.HoaDon.NgayTao < firstDayOfYear
                     && (
-                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                        (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.HoaDon.TrangThai != TrangThaiHoaDon.DaHuy && x.HoaDon.TrangThai != TrangThaiHoaDon.TraHang)
                         ||
                         (x.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && x.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                         ||
@@ -758,7 +758,7 @@ namespace SneakFit.Application.Catalog.ThongKe
             var hoaDonNgay = await _context.HoaDon.CountAsync(x =>
                 x.NgayTao.Date == today &&
                 (
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.TrangThai != TrangThaiHoaDon.DaHuy && x.TrangThai != TrangThaiHoaDon.TraHang)
                     ||
                     (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
@@ -769,7 +769,7 @@ namespace SneakFit.Application.Catalog.ThongKe
             var hoaDonNgayTruoc = await _context.HoaDon.CountAsync(x =>
                 x.NgayTao.Date == today.AddDays(-1) &&
                 (
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.TrangThai != TrangThaiHoaDon.DaHuy && x.TrangThai != TrangThaiHoaDon.TraHang)
                     ||
                     (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
@@ -780,7 +780,7 @@ namespace SneakFit.Application.Catalog.ThongKe
             var hoaDonTuan = await _context.HoaDon.CountAsync(x =>
                 x.NgayTao >= startOfWeek && x.NgayTao < endOfWeek &&
                 (
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.TrangThai != TrangThaiHoaDon.DaHuy && x.TrangThai != TrangThaiHoaDon.TraHang)
                     ||
                     (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
@@ -791,7 +791,7 @@ namespace SneakFit.Application.Catalog.ThongKe
             var hoaDonTuanTruoc = await _context.HoaDon.CountAsync(x =>
                 x.NgayTao >= startOfLastWeek && x.NgayTao < endOfLastWeek &&
                 (
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.TrangThai != TrangThaiHoaDon.DaHuy && x.TrangThai != TrangThaiHoaDon.TraHang)
                     ||
                     (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
@@ -803,7 +803,7 @@ namespace SneakFit.Application.Catalog.ThongKe
             var hoaDonThang = await _context.HoaDon.CountAsync(x =>
                 x.NgayTao >= firstDayOfMonth && x.NgayTao < endOfToday &&
                 (
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.TrangThai != TrangThaiHoaDon.DaHuy && x.TrangThai != TrangThaiHoaDon.TraHang)
                     ||
                     (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
@@ -814,7 +814,7 @@ namespace SneakFit.Application.Catalog.ThongKe
             var hoaDonThangTruoc = await _context.HoaDon.CountAsync(x =>
                 x.NgayTao >= firstDayOfMonth.AddMonths(-1) && x.NgayTao < firstDayOfMonth &&
                 (
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.TrangThai != TrangThaiHoaDon.DaHuy && x.TrangThai != TrangThaiHoaDon.TraHang)
                     ||
                     (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
@@ -826,7 +826,7 @@ namespace SneakFit.Application.Catalog.ThongKe
             var hoaDonNam = await _context.HoaDon.CountAsync(x =>
                 x.NgayTao >= firstDayOfYear && x.NgayTao < endOfToday &&
                 (
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.TrangThai != TrangThaiHoaDon.DaHuy && x.TrangThai != TrangThaiHoaDon.TraHang)
                     ||
                     (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
@@ -837,7 +837,7 @@ namespace SneakFit.Application.Catalog.ThongKe
             var hoaDonNamTruoc = await _context.HoaDon.CountAsync(x =>
                 x.NgayTao >= firstDayOfYear.AddYears(-1) && x.NgayTao < firstDayOfYear &&
                 (
-                    (x.LoaiHoaDon == LoaiHoaDon.Online && x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                    (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || x.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && x.TrangThai != TrangThaiHoaDon.DaHuy && x.TrangThai != TrangThaiHoaDon.TraHang)
                     ||
                     (x.LoaiHoaDon == LoaiHoaDon.Online && (x.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || x.PhuongThucThanhToan == PhuongThucThanhToan.COD) && x.TrangThai == TrangThaiHoaDon.ThanhCong && x.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                     ||
@@ -956,7 +956,7 @@ namespace SneakFit.Application.Catalog.ThongKe
                         where spct.SanPhamId == sanPhamId
                         && hdct.HoaDon.NgayTao >= fromDate && hdct.HoaDon.NgayTao < toDate
                         && (
-                            (hdct.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && hdct.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay && hdct.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+                            (hdct.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (hdct.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || hdct.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.MoMo) && hdct.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan && hdct.HoaDon.TrangThai != TrangThaiHoaDon.DaHuy && hdct.HoaDon.TrangThai != TrangThaiHoaDon.TraHang)
                             ||
                             (hdct.HoaDon.LoaiHoaDon == LoaiHoaDon.Online && (hdct.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.TienMat || hdct.HoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD) && hdct.HoaDon.TrangThai == TrangThaiHoaDon.ThanhCong && hdct.HoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
                             ||
