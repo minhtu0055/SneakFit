@@ -72,5 +72,24 @@ namespace SneakFit.Application.GHN
 
             return responseContent;
         }
+
+        public async Task<string> GetAvailableServicesAsync(int fromDistrict, int toDistrict)
+        {
+            var url = $"{_configuration["GhnSettings:BaseUrl"]}v2/shipping-order/available-services";
+            var requestBody = new
+            {
+                shop_id = int.Parse(_configuration["GhnSettings:ShopId"]),
+                from_district = fromDistrict,
+                to_district = toDistrict
+            };
+            var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+            var response = await _httpClient.PostAsync(url, content);
+            var responseContent = await response.Content.ReadAsStringAsync();
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"GHN API lỗi ({response.StatusCode}): {responseContent}");
+            }
+            return responseContent;
+        }
     }
 }

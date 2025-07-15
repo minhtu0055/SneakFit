@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SneakFit.ViewModels.GHN;
 
 namespace SneakFit.ApiIntegration.Services
 {
@@ -8,5 +9,7 @@ namespace SneakFit.ApiIntegration.Services
         Task<string> GetProvinces();
         Task<string> GetDistricts();
         Task<string> GetWards(int districtId);
+        Task<string> CalculateShippingFee(ShippingFeeRequest request);
+        Task<string> GetAvailableServices(AvailableServiceRequest request);
     }
 }

@@ -4,9 +4,12 @@ using SneakFit.Data.Enums;
 using SneakFit.ViewModels.Catalog.GioHang;
 using SneakFit.ViewModels.Catalog.KhuyenMai;
 using SneakFit.ViewModels.Catalog.Voucher;
+using SneakFit.ViewModels.GHN;
+using SneakFit.ViewModels.System.DiaChi;
 using SneakFit.WebClient.Models;
 using System.Collections.Generic;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace SneakFit.WebClient.Controllers
 {
@@ -19,6 +22,8 @@ namespace SneakFit.WebClient.Controllers
         private readonly IKhuyenMaiApiClient _khuyenMaiApiClient;
         private readonly IGioHangApiClient _gioHangApiClient;
         private readonly IVoucherApiClient _voucherApiClient;
+        private readonly IDiaChiApiClient _diaChiApiClient;
+        private readonly IGhnApiClient _ghnApiClient;
 
         public GioHangController(
             ISanPhamApiClient sanPhamApiClient,
@@ -27,7 +32,9 @@ namespace SneakFit.WebClient.Controllers
             IKichThuocApiClient kichThuocApiClient,
             IKhuyenMaiApiClient khuyenMaiApiClient,
             IGioHangApiClient gioHangApiClient,
-            IVoucherApiClient voucherApiClient)
+            IVoucherApiClient voucherApiClient,
+            IDiaChiApiClient diaChiApiClient,
+            IGhnApiClient ghnApiClient)
         {
             _sanPhamApiClient = sanPhamApiClient;
             _spctApiClient = spctApiClient;
@@ -36,6 +43,8 @@ namespace SneakFit.WebClient.Controllers
             _khuyenMaiApiClient = khuyenMaiApiClient;
             _gioHangApiClient = gioHangApiClient;
             _voucherApiClient = voucherApiClient;
+            _diaChiApiClient = diaChiApiClient;
+            _ghnApiClient = ghnApiClient;
         }
 
         private Guid GetUserId()
@@ -58,7 +67,6 @@ namespace SneakFit.WebClient.Controllers
                 var gioHang = await _gioHangApiClient.GetByUserId(userId);
                 if (gioHang == null)
                 {
-                    // Tạo giỏ hàng mới nếu chưa có
                     await _gioHangApiClient.TaoGioHangMoi(userId);
                     gioHang = await _gioHangApiClient.GetByUserId(userId);
                 }
@@ -74,7 +82,6 @@ namespace SneakFit.WebClient.Controllers
                     SoLuong = x.SoLuong,
                 }).ToList() ?? new List<GioHangItemViewModel>();
 
-                // Lấy danh sách khuyến mãi đang hoạt động
                 var khuyenMais = await _khuyenMaiApiClient.GetAllPaging(new PhanTrangKhuyenMai
                 {
                     PageIndex = 1,
@@ -83,7 +90,6 @@ namespace SneakFit.WebClient.Controllers
                     TrangThai = SneakFit.Data.Enums.TrangThaiGiamGia.HoatDong
                 });
 
-                // Gắn giá KM vào từng item
                 foreach (var item in list)
                 {
                     var km = khuyenMais.Items
@@ -111,11 +117,52 @@ namespace SneakFit.WebClient.Controllers
                     }
                 }
 
+                decimal shippingFee = 0m;
+                var diaChis = await _diaChiApiClient.GetAllByUser() ?? new List<DiaChiViewModel>();
+                var defaultAddress = diaChis.FirstOrDefault(x => x.MacDinh);
+                if (defaultAddress != null && !string.IsNullOrEmpty(defaultAddress.MaHuyen) && !string.IsNullOrEmpty(defaultAddress.MaXa))
+                {
+                    var request = new ShippingFeeRequest
+                    {
+                        FromDistrictId = 1452,
+                        ToDistrictId = int.TryParse(defaultAddress.MaHuyen, out int districtId) ? districtId : 0,
+                        ToWardCode = defaultAddress.MaXa ?? "",
+                        Weight = 700,
+                        Length = 33,
+                        Width = 20,
+                        Height = 12,
+                        ServiceId = 53321
+                    };
+
+                    try
+                    {
+                        var responseJson = await _ghnApiClient.CalculateShippingFee(request);
+                        if (!string.IsNullOrEmpty(responseJson))
+                        {
+                            using var jsonDoc = JsonDocument.Parse(responseJson);
+                            var root = jsonDoc.RootElement;
+                            if (root.TryGetProperty("data", out var data) && data.TryGetProperty("total", out var totalProp))
+                            {
+                                shippingFee = totalProp.GetDecimal();
+                            }
+                            else if (root.TryGetProperty("data", out data) && data.TryGetProperty("service_fee", out totalProp))
+                            {
+                                shippingFee = totalProp.GetDecimal();
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Nếu lỗi thì shippingFee giữ nguyên là 0
+                    }
+                }
+
+                ViewBag.ShippingFee = shippingFee;
                 return View(list);
             }
             catch (UnauthorizedAccessException)
             {
-                return RedirectToAction("Index", "Login"); // Chuyển hướng đến trang đăng nhập đúng controller/action
+                return RedirectToAction("Index", "Login");
             }
             catch (Exception ex)
             {
