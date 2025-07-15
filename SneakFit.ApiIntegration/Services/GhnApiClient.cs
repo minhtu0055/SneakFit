@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using SneakFit.ViewModels.GHN;
 
 namespace SneakFit.ApiIntegration.Services
 {
@@ -39,6 +40,28 @@ namespace SneakFit.ApiIntegration.Services
             var client = _httpClientFactory.CreateClient();
             client.BaseAddress = new Uri(_configuration["BaseAddress"]);
             var response = await client.GetAsync($"/api/ghn/wards/{districtId}");
+            return await response.Content.ReadAsStringAsync();
+        }
+
+        public async Task<string> CalculateShippingFee(ShippingFeeRequest request)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            
+            var json = JsonSerializer.Serialize(request);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            
+            var response = await client.PostAsync("/api/ghn/shipping-fee", content);
+            return await response.Content.ReadAsStringAsync();
+        }
+
+        public async Task<string> GetAvailableServices(AvailableServiceRequest request)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var json = JsonSerializer.Serialize(request);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync("/api/ghn/available-services", content);
             return await response.Content.ReadAsStringAsync();
         }
     }

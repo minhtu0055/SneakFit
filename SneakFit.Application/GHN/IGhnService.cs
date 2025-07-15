@@ -13,5 +13,6 @@ namespace SneakFit.Application.GHN
         Task<string> GetDistrictsAsync();
         Task<string> GetWardsAsync(int districtId);
         Task<string> CalculateShippingFeeAsync(ShippingFeeRequest request);
+        Task<string> GetAvailableServicesAsync(int fromDistrict, int toDistrict);
     }
 }
