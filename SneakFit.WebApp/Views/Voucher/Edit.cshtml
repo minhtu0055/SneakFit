@@ -19,7 +19,7 @@
     <div class="card mb-4">
         <div class="card-body">
             <div class="col-md-8 mx-auto">
-                <form asp-action="Edit" method="post" id="edit-form" class="needs-validation" novalidate>
+                <form asp-action="Edit" method="post" id="edit-form" class="needs-validation">
                     <input type="hidden" asp-for="Id" />
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
@@ -38,7 +38,6 @@
                         <label asp-for="LoaiGiamGia" class="col-sm-3 col-form-label">Loại Giảm giá <span class="text-danger">*</span></label>
                         <div class="col-sm-9">
                             <select asp-for="LoaiGiamGia" asp-items="@ViewBag.LoaiGiamGia" class="form-select">
-                                <option value="">-- Chọn loại giảm giá --</option>
                             </select>
                             <div class="invalid-feedback">
                                 Vui lòng chọn loại giảm giá
@@ -50,25 +49,47 @@
                         <label asp-for="GiaTriGiamGia" class="col-sm-3 col-form-label">Giá trị giảm giá <span class="text-danger">*</span></label>
                         <div class="col-sm-9">
                             <div class="input-group has-validation">
-                                <input asp-for="GiaTriGiamGia" class="form-control" type="number" step="0.01" />
+                                <input asp-for="GiaTriGiamGia" class="form-control" type="number" />
                                 <span class="input-group-text discount-unit"></span>
-                                <div class="invalid-feedback">
-                                    Vui lòng nhập giá trị giảm giá hợp lệ
-                                </div>
                             </div>
                             <small class="form-text text-muted discount-hint"></small>
                         </div>
                     </div>
 
                     <div class="mb-3 row">
-                        <label asp-for="DieuKienApDung" class="col-sm-3 col-form-label">Điều kiện áp dụng <span class="text-danger">*</span></label>
+                        <label asp-for="DieuKienApDung" class="col-sm-3 col-form-label">
+                            Điều kiện áp dụng <span class="text-danger">*</span>
+                        </label>
                         <div class="col-sm-9">
                             <div class="input-group has-validation">
-                                <input asp-for="DieuKienApDung" class="form-control" type="number" step="1000" />
+                                <input type="text"
+                                       id="DieuKienApDungFormatted"
+                                       class="form-control"
+                                       value="@Model.DieuKienApDung.ToString("N0", new System.Globalization.CultureInfo("vi-VN"))"
+                                       oninput="formatAndSyncInput(this)" />
                                 <span class="input-group-text">VNĐ</span>
-                                <div class="invalid-feedback">
-                                    Vui lòng nhập điều kiện áp dụng (phải là bội số của 1000)
-                                </div>
+
+                                <!-- Input thật để binding model, không hiển thị -->
+                                <input asp-for="DieuKienApDung" type="hidden" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label asp-for="GiaTriToiDa" class="col-sm-3 col-form-label">
+                            Gia Trị Tối Đa <span class="text-danger">*</span>
+                        </label>
+                        <div class="col-sm-9">
+                            <div class="input-group has-validation">
+                                <input type="text"
+                                       id="GiatritoithieuFormatted"
+                                       class="form-control"
+                                       value="@Model.GiaTriToiDa.ToString("N0", new System.Globalization.CultureInfo("vi-VN"))"
+                                       oninput="formatAndSyncInput(this)" />
+                                <span class="input-group-text">VNĐ</span>
+
+                                <!-- Input thật để binding model, không hiển thị -->
+                                <input asp-for="GiaTriToiDa" type="hidden" />
                             </div>
                         </div>
                     </div>
@@ -151,7 +172,7 @@
                             <div class="table-responsive" style=" border-radius: 8px">
                                 <table class="table table-bordered">
                                     <thead>
-                                        <tr style ="background-color: mediumpurple; color: white;">
+                                        <tr style="background-color: mediumpurple; color: white;">
                                             <th style="width: 50px;">
                                                 @* <input type="checkbox" id="selectAll" /> *@
                                             </th>
@@ -188,7 +209,7 @@
                                     </tbody>
                                 </table>
                             </div>
-        
+
                             @if (khachHangs != null && khachHangs.PageCount > 1)
                             {
                                 <div class="mt-2 d-flex justify-content-center">
@@ -223,10 +244,65 @@
 </div>
 
 @section Scripts {
+    @*  @{await Html.RenderPartialAsync("_ValidationScriptsPartial");} *@
     <script>
+
+        // //Giá trị giảm
+        // function formatAndSyncDiscount(input) {
+        //     // Lấy giá trị và làm sạch
+        //     const raw = input.value.replace(/[^\d.,]/g, '').replace(/\./g, '').replace(',', '.');
+        //     const numericValue = parseFloat(raw) || 0;
+
+        //     // Nếu là số nguyên, không hiển thị phần thập phân
+        //     const formatted = new Intl.NumberFormat('vi-VN', {
+        //         minimumFractionDigits: 0,
+        //         maximumFractionDigits: numericValue % 1 === 0 ? 0 : 2
+        //     }).format(numericValue);
+
+        //     input.value = formatted;
+
+        //     // Gán lại giá trị sạch vào input ẩn asp-for
+        //     document.querySelector('input[name="GiaTriGiamGia"]').value = numericValue;
+        // }
+
+        function formatCurrencyInput(input) {
+            // Xóa ký tự không phải số, kể cả dấu chấm
+            let value = input.value.replace(/\D/g, '');
+            if (value) {
+                input.value = Number(value).toLocaleString('vi-VN');
+            } else {
+                input.value = '';
+            }
+        }
+
+        // Trước khi submit form: bỏ dấu chấm để server nhận đúng số
+        function formatAndSyncInput(input) {
+            // Xóa ký tự không phải số
+            const raw = input.value.replace(/\D/g, '');
+
+            // Cập nhật lại input hiển thị với định dạng tiền VNĐ
+            input.value = new Intl.NumberFormat('vi-VN').format(raw);
+
+            // Đồng bộ giá trị sạch về input hidden asp-for
+            document.querySelector('input[name="DieuKienApDung"]').value = raw;
+        }
+        // Trước khi submit form: bỏ dấu chấm để server nhận đúng số
+        function formatAndSyncInput(input) {
+            // Xóa ký tự không phải số
+            const raw = input.value.replace(/\D/g, '');
+
+            // Cập nhật lại input hiển thị với định dạng tiền VNĐ
+            input.value = new Intl.NumberFormat('vi-VN').format(raw);
+
+            // Đồng bộ giá trị sạch về input hidden asp-for
+            document.querySelector('input[name="GiaTriToiDa"]').value = raw;
+        }
+
+
         var existingUserIds = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.ExistingUserIds ?? new List<Guid>()));
         var selectedUserIds = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SelectedUserIds ?? new List<Guid>()));
         $(document).ready(function () {
+
             // Hàm cập nhật đơn vị giảm giá và các thuộc tính của input giá trị giảm
             function capNhatLoaiGiamGia() {
                 var loaiGiamGia = $("#LoaiGiamGia").val();
@@ -234,8 +310,8 @@
                 $(".discount-unit").text(unit);
 
                 // Cập nhật hint text
-                var hint = loaiGiamGia == "@((int)LoaiGiamGia.PhamTram)" 
-                    ? "Giá trị giảm giá phải từ 0% đến 100%" 
+                var hint = loaiGiamGia == "@((int)LoaiGiamGia.PhamTram)"
+                    ? "Giá trị giảm giá phải từ 0% đến 100%"
                     : "Giá trị giảm giá phải lớn hơn 0 VNĐ";
                 $(".discount-hint").text(hint);
 
@@ -255,6 +331,9 @@
 
             $("#LoaiGiamGia").change(capNhatLoaiGiamGia);
             capNhatLoaiGiamGia();
+
+
+            //tìm kiếm và load danh sách
 
 
             // Handle customer search
@@ -287,8 +366,8 @@
                         pageIndex: pageIndex,
                         pageSize: 10
                     },
-                    success: function(response) {
-                        if(response.isSuccessed) {
+                    success: function (response) {
+                        if (response.isSuccessed) {
                             var customers = response.resultObj.items;
                             var tbody = $("table tbody");
                             tbody.empty();
@@ -306,19 +385,19 @@
                                 }
 
                                 var row = `
-                                    <tr class="${rowClass}">
-                                        <td><input type="checkbox" class="user-checkbox" name="SelectedUserIds" value="${customer.id}" ${checkboxAttr} /></td>
-                                        <td class="${boldClass}">${customer.hoVaTen}</td>
-                                        <td class="${boldClass}">${customer.email}</td>
-                                        <td class="${boldClass}">${customer.soDienThoai}</td>
-                                    </tr>
-                                `;
+                                            <tr class="${rowClass}">
+                                                <td><input type="checkbox" class="user-checkbox" name="SelectedUserIds" value="${customer.id}" ${checkboxAttr} /></td>
+                                                <td class="${boldClass}">${customer.hoVaTen}</td>
+                                                <td class="${boldClass}">${customer.email}</td>
+                                                <td class="${boldClass}">${customer.soDienThoai}</td>
+                                            </tr>
+                                        `;
                                 tbody.append(row);
                             });
                             renderCustomerPagination(response.resultObj.pageIndex, response.resultObj.pageCount);
                         }
                     },
-                    error: function(error) {
+                    error: function (error) {
                         toastr.error("Có lỗi xảy ra khi tìm kiếm khách hàng");
                     }
                 });
@@ -371,6 +450,8 @@
                 return true;
             }
 
+            //validate dữ liệu
+
             function validateSoLuong() {
                 var soLuong = parseInt($("#SoLuong").val());
                 if (isNaN(soLuong) || soLuong <= 0) {
@@ -390,12 +471,12 @@
                 }
 
                 if (loaiGiamGia == "@((int)LoaiGiamGia.PhamTram)") {
-                    if (giaTriGiamGia < 0 || giaTriGiamGia > 100) {
-                        errorMsg = "Giá trị giảm giá phải từ 0% đến 100% đối với loại phần trăm";
+                    if (giaTriGiamGia < 1 || giaTriGiamGia > 100) {
+                        errorMsg = "Giá trị giảm giá phải từ 1% đến 100% đối với loại phần trăm";
                     }
                 } else if (loaiGiamGia == "@((int)LoaiGiamGia.SoTien)") {
-                    if (giaTriGiamGia <= 0) {
-                        errorMsg = "Giá trị giảm giá phải lớn hơn 0 VNĐ đối với loại số tiền";
+                    if (giaTriGiamGia <= 1000) {
+                        errorMsg = "Giá trị giảm giá phải lớn hơn 1000 VNĐ đối với loại số tiền";
                     }
                 }
 
@@ -441,16 +522,31 @@
                 }
                 return true;
             }
-
-            function validateKhachHang() {
-                var loaiVoucher = "@Model.LoaiVoucher";
-                if (loaiVoucher == "@((int)LoaiVoucher.RiengTu)") {
-                    var selectedUsers = $(".user-checkbox:checked").length;
-                    if (selectedUsers === 0) {
-                        toastr.error("Vui lòng chọn ít nhất một khách hàng cho voucher riêng tư");
-                        return false;
-                    }
+            function validateGiatritoida() {
+                var giatritoida = parseFloat($("#GiaTriToiDa").val());
+                if (isNaN(giatritoida) || giatritoida <= 0) {
+                    toastr.error("Gia Trị Tối Đa phải lớn hơn 0");
+                    return false;
                 }
+                return true;
+            }
+
+            // function validateKhachHang() {
+            //     var loaiVoucher = "@Model.LoaiVoucher";
+            //     if (loaiVoucher == "@((int)LoaiVoucher.RiengTu)") {
+            //         var selectedUsers = $(".user-checkbox:checked").length;
+            //     }
+            //     return true;
+            // }
+
+            function validateLoaiVoucher() {
+                var loaiVoucher = parseInt($("#LoaiVoucher").val()); // Lấy giá trị loại voucher (int)
+                var isRiengTu = loaiVoucher === @((int)LoaiVoucher.RiengTu);
+
+                if (isRiengTu) {
+                    var selectedUsers = $("input[name='SelectedUserIds']:checked");
+                }
+
                 return true;
             }
 
@@ -461,19 +557,26 @@
             $("#ThoiGianBatDau").change(validateThoiGianBatDau);
             $("#ThoiGianKetThuc").change(validateThoiGianKetThuc);
             $("#DieuKienApDung").on('input', validateDieuKienApDung);
-            $(".user-checkbox").change(validateKhachHang);
+            $("#GiaTriToiDa").on('input', validateGiatritoida);
+            $(".user-checkbox").change(validateLoaiVoucher);
 
             // Handle form submission
-            $("#edit-form").submit(function(e) {
+            $("#edit-form").submit(function (e) {
                 e.preventDefault();
-                
+                // Gán lại selectedUserIds vào input ẩn
+                const selectedUserValues = $("input[name='SelectedUserIds']:checked").map(function () {
+                    return $(this).val();
+                }).get();
+                $("#SelectedUserIdsHidden").val(selectedUserValues.join(','));
+
                 // Validate all fields before submission
                 if (!validateSoLuong() ||
-                    !validateGiaTriGiamGia() || 
-                    !validateThoiGianBatDau() || 
-                    !validateThoiGianKetThuc() || 
+                    !validateGiaTriGiamGia() ||
+                    !validateThoiGianBatDau() ||
+                    !validateThoiGianKetThuc() ||
                     !validateDieuKienApDung() ||
-                    !validateKhachHang()) {
+                    !validateGiatritoida() ||
+                    !validateLoaiVoucher()) {
                     return false;
                 }
 
@@ -482,17 +585,17 @@
                     url: '@Url.Action("Edit", "Voucher")',
                     type: 'POST',
                     data: formData,
-                    success: function(response) {
+                    success: function (response) {
                         if (response.success) {
                             toastr.success("Cập nhật voucher thành công!");
-                            setTimeout(function() {
+                            setTimeout(function () {
                                 window.location.href = '@Url.Action("Index", "Voucher")';
                             }, 1500);
                         } else {
                             toastr.error(response.message || "Không thể cập nhật voucher. Vui lòng thử lại!");
                         }
                     },
-                    error: function(xhr) {
+                    error: function (xhr) {
                         var errorMessage = "Đã xảy ra lỗi khi cập nhật voucher. Vui lòng thử lại sau!";
                         if (xhr.responseJSON && xhr.responseJSON.message) {
                             errorMessage = xhr.responseJSON.message;

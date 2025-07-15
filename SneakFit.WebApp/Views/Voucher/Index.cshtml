@@ -64,9 +64,9 @@
                     <th>GIÁ TRỊ GIẢM</th>
                     <th>loại Voucher</th>
                     <th>ĐIỀU KIỆN</th>
+                    <th>GIÁ TRỊ TỐI ĐA</th>
                     <th>SỐ LƯỢNG</th>
-                    <th>THỜI GIAN BẮT ĐẦU</th>
-                    <th>THỜI GIAN KẾT THÚC</th>
+                    <th>THỜI GIAN</th>
                     <th>TRẠNG THÁI</th>
                     <th></th>
                 </tr>
@@ -84,24 +84,23 @@
                                 @(item.LoaiGiamGia == LoaiGiamGia.PhamTram ? "Phần trăm" : "Số tiền")
                             </td>
                             <td>
-                                @(item.LoaiGiamGia == LoaiGiamGia.PhamTram ? item.GiaTriGiamGia + "%" : item.GiaTriGiamGia.ToString("N0") + " VNĐ")
+                                @(item.LoaiGiamGia == LoaiGiamGia.PhamTram ? item.GiaTriGiamGia + "%" : item.GiaTriGiamGia.ToString("N0") + " đ")
                             </td>
                             <td>
-                                @(item.loaiVoucher ==  LoaiVoucher.CongKhai ? "Công Khai" : "Riêng Tư")
+                                @(item.loaiVoucher == LoaiVoucher.CongKhai ? "Công Khai" : "Riêng Tư")
                             </td>
                             <td>
-                                @item.DieuKienApDung.ToString("N0") VNĐ
+                                @item.DieuKienApDung.ToString("N0") đ
+                            </td>
+                            <td>
+                                @item.GiaTriToiDa.ToString("N0") đ
                             </td>
                             <td class="text-center">
                                 <span class="badge bg-label-dark">@item.SoLuong</span>
                             </td>
                             <td>
-                                @{ var tgbd = $"{item.ThoiGianBatDau:dd/MM/yyyy HH:mm}"; }
-                                @tgbd
-                            </td>
-                            <td>
-                                @{ var tgkt = $"{item.ThoiGianKetThuc:dd/MM/yyyy HH:mm}"; }
-                                @tgkt
+                                <div><i class="bx bx-calendar me-1"></i>Từ: @item.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm")</div>
+                                <div><i class="bx bx-calendar me-1"></i>Đến: @item.ThoiGianKetThuc.ToString("dd/MM/yyyy HH:mm")</div>
                             </td>
                             <td>
                                 <span class="badge bg-label-@GetStatusColor(item.TrangThai)">
@@ -116,6 +115,9 @@
                                     <div class="dropdown-menu">
                                         <a class="dropdown-item" href="@Url.Action("Edit", new { id = item.Id })">
                                             <i class="bx bx-edit-alt me-1"></i> Chỉnh sửa
+                                        </a>
+                                        <a class="dropdown-item" href="@Url.Action("Details", new { id = item.Id })">
+                                            <i class="bx bx-detail me-1"></i> Chi tiết
                                         </a>
                                     </div>
                                 </div>
@@ -138,7 +140,7 @@
 
 @section Scripts {
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             // Auto-hide alerts after 4 seconds
             setTimeout(function () {
                 $(".alert").fadeOut("slow");
