@@ -205,7 +205,6 @@ namespace SneakFit.WebClient.Controllers
         public async Task<IActionResult> Checkout(CheckoutViewModel model)
         {
             var cartJson = HttpContext.Session.GetString("SelectedCartItems");
-
             if (string.IsNullOrEmpty(cartJson) || !cartJson.Trim().StartsWith("["))
             {
                 TempData["ErrorMessage"] = "Giỏ hàng không hợp lệ hoặc trống.";
@@ -229,6 +228,7 @@ namespace SneakFit.WebClient.Controllers
                 return RedirectToAction("Index", "GioHang");
             }
 
+            // Check tồn kho (giữ nguyên)
             var invalidProducts = new List<string>();
             foreach (var item in cartItems)
             {
@@ -252,61 +252,50 @@ namespace SneakFit.WebClient.Controllers
                 return View(model);
             }
 
-            var khuyenMais = await _khuyenMaiApiClient.GetAllPaging(new PhanTrangKhuyenMai
-            {
-                PageIndex = 1,
-                PageSize = 100,
-                TrangThai = SneakFit.Data.Enums.TrangThaiGiamGia.HoatDong
-            });
+            decimal tongTienSanPham = cartItems.Sum(x => x.GiaKhuyenMai * x.SoLuong);
+            decimal giamVoucher = 0;
+            Guid? voucherId = null;
 
-            foreach (var item in cartItems)
+            // Parse voucher từ model (hidden fields)
+            if (model.VoucherId.HasValue)
             {
-                var km = khuyenMais.Items
-                    .Where(x => x.SanPhamChiTiets != null && x.SanPhamChiTiets.Any(ct => ct.SPCTId == item.SanPhamChiTietId))
-                    .OrderByDescending(x => x.ThoiGianBatDau)
-                    .FirstOrDefault();
-
-                if (km != null)
+                var voucher = await _voucherApiClient.GetById(model.VoucherId.Value);
+                if (voucher != null && tongTienSanPham >= voucher.DieuKienApDung)
                 {
-                    if (km.LoaiGiamGia == LoaiGiamGia.PhamTram)
+                    voucherId = model.VoucherId;
+                    if (voucher.LoaiGiamGia == LoaiGiamGia.PhamTram)
                     {
-                        item.GiaKhuyenMai = Math.Round(item.GiaGoc * (1 - km.GiaTriGiamGia / 100m), 0);
+                        giamVoucher = Math.Round(tongTienSanPham * (voucher.GiaTriGiamGia / 100), 0);
+                        if (voucher.GiaTriToiDa > 0 && giamVoucher > voucher.GiaTriToiDa)
+                        {
+                            giamVoucher = voucher.GiaTriToiDa;
+                        }
                     }
-                    else if (km.LoaiGiamGia == LoaiGiamGia.SoTien)
+                    else
                     {
-                        item.GiaKhuyenMai = Math.Max(0, item.GiaGoc - km.GiaTriGiamGia);
+                        giamVoucher = voucher.GiaTriGiamGia;
+                        if (giamVoucher > tongTienSanPham)
+                        {
+                            giamVoucher = tongTienSanPham;
+                        }
                     }
-                }
-                else
-                {
-                    item.GiaKhuyenMai = item.GiaGoc;
                 }
             }
 
-            if (model.PhuongThucThanhToan == null)
-            {
-                ModelState.AddModelError("PhuongThucThanhToan", "Vui lòng chọn hình thức thanh toán.");
-                model.GioHangItems = cartItems;
-                model.TongTienSanPham = cartItems.Sum(x => x.GiaKhuyenMai * x.SoLuong);
-                return View(model);
-            }
-
-            var userId = GetUserId();
-            var diaChi = !string.IsNullOrEmpty(model.DiaChiMoi) ? model.DiaChiMoi : model.DiaChi;
-
-            // Recalculate shipping fee if DiaChiMoi is provided
+            // Tính phí ship (giữ nguyên, nhưng đảm bảo parse MaHuyen đúng)
             decimal phiVanChuyen = model.PhiVanChuyen;
             if (!string.IsNullOrEmpty(model.DiaChiMoi))
             {
                 var diaChis = await _diaChiApiClient.GetAllByUser() ?? new List<DiaChiViewModel>();
-                var selectedAddress = diaChis.FirstOrDefault(x => x.TenDiaChi == model.DiaChiMoi || x.Id == model.DefaultAddressId);
-                if (selectedAddress != null && !string.IsNullOrEmpty(selectedAddress.MaHuyen) && !string.IsNullOrEmpty(selectedAddress.MaXa))
+                var selectedAddress = diaChis.FirstOrDefault(x => $"{x.TenDiaChi}, {x.TenXa}, {x.TenHuyen}, {x.TenThanhPho}" == model.DiaChiMoi);
+
+                if (selectedAddress != null && int.TryParse(selectedAddress.MaHuyen, out int toDistrictId))
                 {
                     var request = new ShippingFeeRequest
                     {
                         FromDistrictId = 1452,
-                        ToDistrictId = int.TryParse(selectedAddress.MaHuyen, out int districtId) ? districtId : 0,
-                        ToWardCode = selectedAddress.MaXa ?? "",
+                        ToDistrictId = toDistrictId,
+                        ToWardCode = selectedAddress.MaXa,
                         Weight = 700,
                         Length = 33,
                         Width = 20,
@@ -314,37 +303,32 @@ namespace SneakFit.WebClient.Controllers
                         ServiceId = 53321
                     };
 
-                    try
+                    var responseJson = await _ghnApiClient.CalculateShippingFee(request);
+                    if (!string.IsNullOrEmpty(responseJson))
                     {
-                        var responseJson = await _ghnApiClient.CalculateShippingFee(request);
-                        if (!string.IsNullOrEmpty(responseJson))
+                        using var jsonDoc = JsonDocument.Parse(responseJson);
+                        var root = jsonDoc.RootElement;
+                        if (root.TryGetProperty("data", out var data) && (data.TryGetProperty("total", out var totalProp) || data.TryGetProperty("service_fee", out totalProp)))
                         {
-                            using var jsonDoc = JsonDocument.Parse(responseJson);
-                            var root = jsonDoc.RootElement;
-                            if (root.TryGetProperty("data", out var data) && data.TryGetProperty("total", out var totalProp))
-                            {
-                                phiVanChuyen = totalProp.GetDecimal();
-                            }
+                            phiVanChuyen = totalProp.GetDecimal();
                         }
-                    }
-                    catch
-                    {
-                        // Keep old fee if recalculation fails
                     }
                 }
             }
 
-            var tongTien = cartItems.Sum(x => x.GiaKhuyenMai * x.SoLuong) + phiVanChuyen;
+            // Tính tổng đúng nghiệp vụ
+            var tongTien = tongTienSanPham - giamVoucher + phiVanChuyen;
+            if (tongTien < 0) tongTien = 0;
 
             var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? string.Empty;
             var hoaDonRequest = new ThemHoaDonClient
             {
                 TongTien = tongTien,
                 TrangThai = TrangThaiHoaDon.ChoXacNhan,
-                UserId = userId,
+                UserId = GetUserId(),
                 HoTen = model.HoTen,
                 SoDienThoai = model.SoDienThoai,
-                DiaChi = diaChi,
+                DiaChi = !string.IsNullOrEmpty(model.DiaChiMoi) ? model.DiaChiMoi : model.DiaChi,
                 PhiVanChuyen = phiVanChuyen,
                 PhuongThucThanhToan = model.PhuongThucThanhToan.Value,
                 TrangThaiThanhToan = TrangThaiThanhToan.ChuaThanhToan,
@@ -355,7 +339,8 @@ namespace SneakFit.WebClient.Controllers
                 NgayDatHang = DateTime.Now,
                 MaHoaDon = string.Empty,
                 DonViVanChuyen = string.Empty,
-                MaVanDon = string.Empty
+                MaVanDon = string.Empty,
+                VoucherId = voucherId
             };
 
             try
@@ -370,7 +355,6 @@ namespace SneakFit.WebClient.Controllers
                         SanPhamChiTietId = item.SanPhamChiTietId,
                         SoLuong = item.SoLuong,
                         GiaBan = item.GiaKhuyenMai,
-
                     });
 
                     var delta = -item.SoLuong;
@@ -382,11 +366,7 @@ namespace SneakFit.WebClient.Controllers
                 }
 
                 var sanPhamChiTietIds = cartItems.Select(x => x.SanPhamChiTietId).ToList();
-                var xoaGioHangSuccess = await _gioHangApiClient.XoaSanPhamDaMuaKhoiGioHang(userId, sanPhamChiTietIds);
-                if (!xoaGioHangSuccess)
-                {
-                    // Không dùng log, chỉ bỏ qua nếu không xóa được (có thể do không tìm thấy sản phẩm)
-                }
+                await _gioHangApiClient.XoaSanPhamDaMuaKhoiGioHang(GetUserId(), sanPhamChiTietIds);
 
                 HttpContext.Session.Remove("SelectedCartItems");
 
@@ -396,7 +376,8 @@ namespace SneakFit.WebClient.Controllers
             {
                 ModelState.AddModelError("", $"Lỗi khi đặt hàng: {ex.Message}");
                 model.GioHangItems = cartItems;
-                model.TongTienSanPham = cartItems.Sum(x => x.GiaKhuyenMai * x.SoLuong);
+                model.TongTienSanPham = tongTienSanPham;
+                model.DiscountAmount = giamVoucher;
                 return View(model);
             }
         }

@@ -44,6 +44,8 @@ namespace SneakFit.WebClient.Models
         public Guid? DefaultAddressId { get; set; }
 
         public List<VoucherViewModels> Vouchers { get; set; } = new();
+
+        public Guid? VoucherId { get; set; } // Thêm trường này để lưu id voucher đã chọn
         public CheckoutViewModel()
         {
             PhuongThucThanhToan = Data.Enums.PhuongThucThanhToan.COD;

@@ -148,7 +148,9 @@
                         </div>
                         <div class="summary-item">
                             <span class="summary-label">Phí ship</span>
-                            <span class="summary-value" id="shipping-fee">@(((decimal)ViewBag.ShippingFee).ToString("N0")) VNĐ</span>
+                            <span class="summary-value" id="shipping-fee">
+                                @(((decimal?)(ViewBag.ShippingFee) ?? 0).ToString("N0")) VNĐ
+                            </span>
                         </div>
                         <div class="summary-total">
                             <span class="summary-label">Tổng đơn hàng</span>

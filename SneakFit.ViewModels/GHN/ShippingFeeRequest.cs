@@ -23,4 +23,15 @@ namespace SneakFit.ViewModels.GHN
         public int FromDistrict { get; set; }
         public int ToDistrict { get; set; }
     }
+
+    public class ShippingFeeResponse
+    {
+        public DataResponse Data { get; set; }
+
+        public class DataResponse
+        {
+            public decimal Total { get; set; }
+            public decimal ServiceFee { get; set; }
+        }
+    }
 }

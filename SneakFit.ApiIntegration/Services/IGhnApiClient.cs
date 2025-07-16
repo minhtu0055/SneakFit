@@ -10,6 +10,6 @@ namespace SneakFit.ApiIntegration.Services
         Task<string> GetDistricts();
         Task<string> GetWards(int districtId);
         Task<string> CalculateShippingFee(ShippingFeeRequest request);
-        Task<string> GetAvailableServices(AvailableServiceRequest request);
+        Task<string> GetAvailableServicesAsync(AvailableServiceRequest request);
     }
 }
