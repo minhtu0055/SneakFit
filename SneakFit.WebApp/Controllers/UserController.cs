@@ -51,6 +51,24 @@ namespace SneakFit.Admin.Controllers
         {
             request.Roles = new List<string> { "NHÂN VIÊN" };
 
+            // Xử lý upload file ảnh
+            if (Request.Form.Files.Count > 0)
+            {
+                var file = Request.Form.Files[0];
+                if (file != null && file.Length > 0)
+                {
+                    // Lưu file tạm vào wwwroot/uploads/users
+                    var fileName = Path.GetFileName(file.FileName);
+                    var filePath = Path.Combine("wwwroot", "uploads", "users", fileName);
+                    Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+                    request.UrlHinhAnh = "/uploads/users/" + fileName;
+                }
+            }
+
             var result = await _userApiClient.Register(request);
             if (result.IsSuccessed)
             {
@@ -61,6 +79,7 @@ namespace SneakFit.Admin.Controllers
             {
                 TempData["ErrorMessage"] = result.Message;
             }
+            // Nếu có lỗi, giữ lại UrlHinhAnh để view hiển thị lại ảnh vừa upload
             return View(request);
         }
         [HttpGet]
@@ -136,7 +155,21 @@ namespace SneakFit.Admin.Controllers
                 return RedirectToAction("Index");
             }
 
-            ModelState.AddModelError("", result.Message);
+            // Nếu lỗi, giữ lại ảnh cũ nếu không upload ảnh mới
+            if (!string.IsNullOrEmpty(result.Message))
+            {
+                ModelState.AddModelError("", result.Message);
+                TempData["ErrorMessage"] = result.Message;
+
+                if (request.HinhAnh == null || request.HinhAnh.Length == 0)
+                {
+                    var user = await _userApiClient.GetById(request.Id);
+                    if (user != null && user.IsSuccessed)
+                    {
+                        request.UrlHinhAnh = user.ResultObj.UrlHinhAnh;
+                    }
+                }
+            }
             return View(request);
         }
         [AllowAnonymous]
