@@ -1,0 +1,130 @@
+<div class="modal fade" id="modalThemMoiKHForm" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content">
+      <form id="formThemMoiKH" enctype="multipart/form-data" novalidate>
+        <div class="modal-header">
+          <h5 class="modal-title">Thêm mới khách hàng</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-2">
+              <div class="mb-3 row">
+                <div class="">
+                  <label for="AnhDaiDien">
+                    <img id="previewImage" src="~/assets/img/avatars/hinhanhnew.png" alt="Ảnh" class="img-thumbnail" style="width: 200px; height: 200px; object-fit: cover; border-radius: 20px; cursor: pointer;" onclick="document.getElementById('fileInput').click();" />
+                  </label>
+                  <input id="fileInput" name="HinhAnh" type="file" accept="image/*" class="form-control d-none" onchange="previewFile(this)" />
+                </div>
+              </div>
+            </div>
+            <div class="col-md-10">
+              <div class="mb-3 row">
+                <label class="col-sm-2 col-form-label">Họ và tên <span class="text-danger">*</span></label>
+                <div class="col-sm-10">
+                  <input name="HoVaTen" class="form-control" placeholder="Vui lòng nhập Họ Tên..." required />
+                  <span class="invalid-feedback">Vui lòng nhập họ và tên</span>
+                </div>
+              </div>
+              <div class="mb-3 row">
+                <label class="col-sm-2 col-form-label">Tài khoản <span class="text-danger">*</span></label>
+                <div class="col-sm-10">
+                  <input name="UserName" class="form-control" placeholder="Nhập tài khoản..." required />
+                  <span class="invalid-feedback">Vui lòng nhập tài khoản</span>
+                </div>
+              </div>
+              <div class="mb-3 row">
+                <label class="col-sm-2 col-form-label">Email <span class="text-danger">*</span></label>
+                <div class="col-sm-10">
+                  <input name="Email" class="form-control" placeholder="Nhập Gmail..." required />
+                  <span class="invalid-feedback">Vui lòng nhập email hợp lệ</span>
+                </div>
+              </div>
+              <div class="mb-3 row">
+                <label class="col-sm-2 col-form-label">Số điện thoại <span class="text-danger">*</span></label>
+                <div class="col-sm-10">
+                  <input name="SoDienThoai" class="form-control" placeholder="Nhập số điện thoại..." required pattern="[0-9]{10}" />
+                  <span class="invalid-feedback">Vui lòng nhập số điện thoại hợp lệ (10 số)</span>
+                </div>
+              </div>
+              <div class="mb-3 row">
+                <label class="col-sm-2 col-form-label">Ngày sinh <span class="text-danger">*</span></label>
+                <div class="col-sm-10">
+                  <div class="input-group has-validation">
+                    <input name="NgaySinh" type="datetime-local" class="form-control" required />
+                    <span class="invalid-feedback">Vui lòng chọn ngày sinh</span>
+                  </div>
+                </div>
+              </div>
+              <div class="mb-3 row">
+                <label class="col-sm-2 col-form-label">Giới tính <span class="text-danger">*</span></label>
+                <div class="col-sm-10">
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="GioiTinh" id="nam" value="true" checked>
+                    <label class="form-check-label" for="nam">Nam</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="GioiTinh" id="nu" value="false">
+                    <label class="form-check-label" for="nu">Nữ</label>
+                  </div>
+                </div>
+              </div>
+              <div class="mb-3 row">
+                <label class="col-sm-2 col-form-label">Thôn/xã <span class="text-danger">*</span></label>
+                <div class="col-sm-10">
+                  <div class="input-group has-validation">
+                    <input name="DiaChi.TenDiaChi" class="form-control" placeholder="Nhập địa chỉ chi tiết..." required />
+                    <span class="invalid-feedback">Vui lòng nhập địa chỉ chi tiết</span>
+                  </div>
+                </div>
+              </div>
+              <div class="mb-3 row">
+                <label class="col-sm-2 col-form-label">Thành phố/Tỉnh <span class="text-danger">*</span></label>
+                <div class="col-sm-10">
+                  <select class="form-select province-dropdown" required>
+                    <option value="">Chọn Tỉnh/Thành phố</option>
+                  </select>
+                  <input type="hidden" name="DiaChi.TenThanhPho" id="modalProvinceName" />
+                  <input type="hidden" name="DiaChi.MaTinh" id="modalProvinceCode" />
+                  <span class="invalid-feedback">Vui lòng chọn tỉnh/thành phố</span>
+                </div>
+              </div>
+              <div class="mb-3 row">
+                <label class="col-sm-2 col-form-label">Quận/Huyện <span class="text-danger">*</span></label>
+                <div class="col-sm-10">
+                  <select class="form-select district-dropdown" required disabled>
+                    <option value="">Chọn Quận/Huyện</option>
+                  </select>
+                  <input type="hidden" name="DiaChi.TenHuyen" id="modalDistrictName" />
+                  <input type="hidden" name="DiaChi.MaHuyen" id="modalDistrictCode" />
+                  <span class="invalid-feedback">Vui lòng chọn quận/huyện</span>
+                </div>
+              </div>
+              <div class="mb-3 row">
+                <label class="col-sm-2 col-form-label">Phường/Xã <span class="text-danger">*</span></label>
+                <div class="col-sm-10">
+                  <select class="form-select ward-dropdown" required disabled>
+                    <option value="">Chọn Phường/Xã</option>
+                  </select>
+                  <input type="hidden" name="DiaChi.TenXa" id="modalWardName" />
+                  <input type="hidden" name="DiaChi.MaXa" id="modalWardCode" />
+                  <span class="invalid-feedback">Vui lòng chọn phường/xã</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">
+            <i class="bx bx-save me-1"></i> Tạo mới
+          </button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="bx bx-arrow-back me-1"></i> Đóng
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+ 

@@ -489,6 +489,66 @@ namespace SneakFit.Application.Catalog.Voucher
             return true;
         }
 
+        public async Task<List<VoucherViewModels>> GetVouchersForUser(Guid userId)
+        {
+            var now = DateTime.Now;
+            // Chỉ lấy voucher riêng tư đang hoạt động mà user này được gán
+            var privateVouchers = await (from v in _context.Voucher
+                                         join vu in _context.VoucherUser on v.Id equals vu.VoucherId
+                                         where vu.UserId == userId
+                                            && v.loaiVoucher == LoaiVoucher.RiengTu
+                                            && v.TrangThai == TrangThaiGiamGia.HoatDong
+                                            && v.SoLuong > 0
+                                            && v.ThoiGianBatDau <= now
+                                            && v.ThoiGianKetThuc >= now
+                                         select v).ToListAsync();
+
+            // Map sang ViewModel
+            var result = privateVouchers.Select(x => new VoucherViewModels
+            {
+                Id = x.Id,
+                MaVoucher = x.MaVoucher,
+                LoaiGiamGia = x.LoaiGiamGia,
+                loaiVoucher = x.loaiVoucher,
+                GiaTriGiamGia = x.GiaTriGiamGia,
+                DieuKienApDung = x.DieuKienApDung,
+                SoLuong = x.SoLuong,
+                NgayTao = x.NgayTao,
+                ThoiGianBatDau = x.ThoiGianBatDau,
+                ThoiGianKetThuc = x.ThoiGianKetThuc,
+                TrangThai = x.TrangThai
+            }).ToList();
+
+            return result;
+        }
+
+        public async Task<List<VoucherViewModels>> GetPublicVouchers()
+        {
+            var now = DateTime.Now;
+            var publicVouchers = await _context.Voucher
+                .Where(v => v.loaiVoucher == LoaiVoucher.CongKhai
+                    && v.TrangThai == TrangThaiGiamGia.HoatDong
+                    && v.SoLuong > 0
+                    && v.ThoiGianBatDau <= now
+                    && v.ThoiGianKetThuc >= now)
+                .ToListAsync();
+
+            return publicVouchers.Select(x => new VoucherViewModels
+            {
+                Id = x.Id,
+                MaVoucher = x.MaVoucher,
+                LoaiGiamGia = x.LoaiGiamGia,
+                loaiVoucher = x.loaiVoucher,
+                GiaTriGiamGia = x.GiaTriGiamGia,
+                DieuKienApDung = x.DieuKienApDung,
+                SoLuong = x.SoLuong,
+                NgayTao = x.NgayTao,
+                ThoiGianBatDau = x.ThoiGianBatDau,
+                ThoiGianKetThuc = x.ThoiGianKetThuc,
+                TrangThai = x.TrangThai
+            }).ToList();
+        }
+
         public async Task<List<VoucherUserViewModel>> GetUsersForVoucher(Guid? voucherId = null)
         {
             var query = _context.Users

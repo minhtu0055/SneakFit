@@ -193,5 +193,11 @@ namespace SneakFit.BackEndAPI.Controllers
             var count = await _sanPhamChiTetService.CreateMultiple(request);
             return Ok(new ApiSuccessResult<int>(count));
         }
+        [HttpGet("GetSPCTForModal")]
+        public async Task<IActionResult> GetAllPagings([FromQuery] PhanTrangSPCT request)
+        {
+            var products = await _sanPhamChiTetService.GetAllPagings(request);
+            return Ok(new ApiSuccessResult<PagedResult<SPCTViewModels>>(products));
+        }
     }
 }
