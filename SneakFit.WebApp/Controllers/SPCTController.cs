@@ -399,7 +399,7 @@ namespace SneakFit.Admin.Controllers
                     PageSize = pageSize
                 };
                 
-                var data = await _spctApiClient.GetAllPaging(request);
+                var data = await _spctApiClient.GetAllPagings(request);
                 
                 // Load các dữ liệu cần thiết để map tên
                 var mauSacs = await _mauSacApiClient.GetAll();
@@ -422,6 +422,8 @@ namespace SneakFit.Admin.Controllers
                         sp.SoLuong,
                         sp.Gia,
                         sp.TrangThai,
+                        sp.GiaKhuyenMai,
+                        sp.KhuyenMaiId,
                         TenSanPham = sanPhamsDict.ContainsKey(sp.SanPhamId) ? sanPhamsDict[sp.SanPhamId] : "N/A",
                         TenMauSac = mauSacsDict.ContainsKey(sp.MauSacId) ? mauSacsDict[sp.MauSacId] : "N/A",
                         TenKichThuoc = kichThuocsDict.ContainsKey(sp.KichThuocId) ? kichThuocsDict[sp.KichThuocId] : "N/A",
@@ -441,5 +443,6 @@ namespace SneakFit.Admin.Controllers
                 return Json(new { success = false, message = "Có lỗi xảy ra khi tải dữ liệu" });
             }
         }
+        
     }
 }

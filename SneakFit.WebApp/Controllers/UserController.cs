@@ -63,6 +63,7 @@ namespace SneakFit.Admin.Controllers
             }
             return View(request);
         }
+
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
         {

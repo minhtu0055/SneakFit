@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SneakFit.ApiIntegration.Services;
 using SneakFit.ViewModels.System.DiaChi;
 using SneakFit.ViewModels.System.User;
@@ -72,6 +73,58 @@ namespace SneakFit.Admin.Controllers
                 TempData["ErrorMessage"] = result.Message;
             }
             return View(request);
+        }
+        [HttpPost]
+        [Consumes("multipart/form-data")]
+        [AllowAnonymous]
+        public async Task<IActionResult> CreateKhachHang(RegisterRequest request)
+        {
+            // Xử lý file hình ảnh từ form
+            if (Request.Form.Files.Count > 0)
+            {
+                var imageFile = Request.Form.Files[0];
+                if (imageFile != null && imageFile.Length > 0)
+                {
+                    // Tạo tên file unique
+                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(imageFile.FileName);
+                    var filePath = Path.Combine("wwwroot", "uploads", "users", fileName);
+                    
+                    // Tạo thư mục nếu chưa tồn tại
+                    Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+                    
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await imageFile.CopyToAsync(stream);
+                    }
+                    request.UrlHinhAnh = "/uploads/users/" + fileName;
+                }
+            }
+
+            // Xử lý địa chỉ từ form
+            if (request.DiaChi == null)
+            {
+                request.DiaChi = new DiaChiViewModel();
+            }
+
+            request.DiaChi.TenDiaChi = Request.Form["DiaChi.TenDiaChi"].ToString();
+            request.DiaChi.TenThanhPho = Request.Form["DiaChi.TenThanhPho"].ToString();
+            request.DiaChi.TenHuyen = Request.Form["DiaChi.TenHuyen"].ToString();
+            request.DiaChi.TenXa = Request.Form["DiaChi.TenXa"].ToString();
+            request.DiaChi.SoDienThoai = Request.Form["DiaChi.SoDienThoai"].ToString();
+            request.DiaChi.TenNguoiNhan = Request.Form["DiaChi.TenNguoiNhan"].ToString();
+            request.DiaChi.MaTinh = Request.Form["DiaChi.MaTinh"].ToString();
+            request.DiaChi.MaHuyen = Request.Form["DiaChi.MaHuyen"].ToString();
+            request.DiaChi.MaXa = Request.Form["DiaChi.MaXa"].ToString();
+
+            request.Roles = new List<string> { "KHÁCH HÀNG" };
+
+            var result = await _userApiClient.Register(request);
+            if (result.IsSuccessed)
+            {
+                return Json(new { success = true, message = "Tạo khách hàng thành công", resultObj = result.ResultObj });
+            }
+            
+            return Json(new { success = false, message = result.Message});
         }
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)

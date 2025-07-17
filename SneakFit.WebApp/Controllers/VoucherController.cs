@@ -311,5 +311,33 @@ namespace SneakFit.Admin.Controllers
                 return Json(new ApiErrorResult<PagedResult<VoucherUserViewModel>>(ex.Message));
             }
         }
+
+        [HttpGet]
+        public async Task<IActionResult> PublicVouchers()
+        {
+            try
+            {
+                var vouchers = await _IvoucherCLient.GetPublicVouchers();
+                return Json(new ApiSuccessResult<List<VoucherViewModels>>(vouchers));
+            }
+            catch (Exception ex)
+            {
+                return Json(new ApiErrorResult<List<VoucherViewModels>>(ex.Message));
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> PrivateVouchers(Guid userId)
+        {
+            try
+            {
+                var vouchers = await _IvoucherCLient.GetPrivateVouchersForUser(userId);
+                return Json(new ApiSuccessResult<List<VoucherViewModels>>(vouchers));
+            }
+            catch (Exception ex)
+            {
+                return Json(new ApiErrorResult<List<VoucherViewModels>>(ex.Message));
+            }
+        }
     }
 }

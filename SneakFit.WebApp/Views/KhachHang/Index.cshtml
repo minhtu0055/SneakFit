@@ -80,6 +80,9 @@
                                     <a class="dropdown-item" href="@Url.Action("Edit","KhachHang", new {id = item.Id})">
                                         <i class="bx bx-edit-alt me-1"></i> Chỉnh sửa
                                     </a>
+                                    <a class="dropdown-item" href="@Url.Action("UserAddresses","DiaChi", new {userId = item.Id})">
+                                        <i class="bx bx-map me-1"></i> Xem địa chỉ
+                                    </a>
                                 </div>
                             </div>
                         </td>

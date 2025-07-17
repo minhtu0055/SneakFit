@@ -286,8 +286,8 @@ namespace SneakFit.Application.Catalog.SanPhamChiTiet
                 updated.Images = updated.Images.Select(img => img.StartsWith("http") ? img : $"{_baseAddress}/images/products/{img}").ToList();
             }
             return updated;
-        }   
-        
+        }
+
         // Cập nhật giá sản phẩm chi tiết
         public async Task<bool> UpdateGia(Guid id, decimal gia)
         {
@@ -345,7 +345,7 @@ namespace SneakFit.Application.Catalog.SanPhamChiTiet
             var originalFileName = file.FileName;
             var fileName = $"{Guid.NewGuid()}{Path.GetExtension(originalFileName)}";
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images/products");
-            
+
             if (!Directory.Exists(uploadsFolder))
             {
                 Directory.CreateDirectory(uploadsFolder);
@@ -394,7 +394,7 @@ namespace SneakFit.Application.Catalog.SanPhamChiTiet
                 var image = await _context.HinhAnhSanPham.FindAsync(imageId);
                 if (image == null) return 0;
 
-                try 
+                try
                 {
                     DeleteFile(image.UrlHinhAnh);
                 }
@@ -402,7 +402,7 @@ namespace SneakFit.Application.Catalog.SanPhamChiTiet
                 {
                     Console.WriteLine($"Lỗi khi xóa file {image.UrlHinhAnh}: {ex.Message}");
                 }
-                
+
                 _context.HinhAnhSanPham.Remove(image);
                 return await _context.SaveChangesAsync();
             }
@@ -450,5 +450,87 @@ namespace SneakFit.Application.Catalog.SanPhamChiTiet
             await _context.SaveChangesAsync();
             return count;
         }
+
+        public async Task<PagedResult<SPCTViewModels>> GetAllPagings(PhanTrangSPCT request)
+        {
+            var query = from spct in _context.SanPhamChiTiet
+                        join sp in _context.SanPham on spct.SanPhamId equals sp.Id
+                        join dm in _context.DanhMuc on sp.DanhMucId equals dm.Id
+                        select new { spct, sp, dm };
+
+            if (!string.IsNullOrEmpty(request.TuKhoa))
+                query = query.Where(x => x.sp.TenSanPham.Contains(request.TuKhoa));
+
+            if (request.DanhMucId.HasValue)
+                query = query.Where(x => x.sp.DanhMucId == request.DanhMucId);
+
+            if (request.GiaThapNhat.HasValue)
+                query = query.Where(x => x.spct.Gia >= request.GiaThapNhat.Value);
+
+            if (request.GiaCaoNhat.HasValue)
+                query = query.Where(x => x.spct.Gia <= request.GiaCaoNhat.Value);
+
+            if (request.LocTrangthai == true)
+                query = query.Where(x => x.spct.TrangThai == request.TrangThai);
+
+            int totalRow = await query.CountAsync();
+
+            var data = await query.Skip((request.PageIndex - 1) * request.PageSize)
+                .Take(request.PageSize)
+                .Select(x => new SPCTViewModels()
+                {
+                    Id = x.spct.ID,
+                    Gia = x.spct.Gia,
+                    SoLuong = x.spct.SoLuong,
+                    MauSacId = x.spct.MauSacId,
+                    KichThuocId = x.spct.KichThuocId,
+                    ChatLieuId = x.spct.ChatLieuId,
+                    DeGiayId = x.spct.DeGiayId,
+                    ThuongHieuId = x.spct.ThuongHieuId,
+                    SanPhamId = x.spct.SanPhamId,
+                    DanhMucId = x.sp.DanhMucId,
+                    TrangThai = x.spct.TrangThai,
+                    TenDanhMuc = x.dm.TenDanhMuc,
+                    NgayTao = x.spct.NgayTao,
+                    Images = x.spct.HinhAnhSanPham.Select(h => h.UrlHinhAnh).ToList()
+                }).ToListAsync();
+
+            // Lấy khuyến mại cho từng SPCT
+            foreach (var spct in data)
+            {
+                var kmct = await _context.KhuyenMaiChiTiet
+                    .Where(x => x.SPCTId == spct.Id)
+                    .ToListAsync();
+
+                foreach (var item in kmct)
+                {
+                    var km = await _context.KhuyenMai
+                        .FirstOrDefaultAsync(x => x.Id == item.KhuyenMaiId
+                            && x.TrangThai == TrangThaiGiamGia.HoatDong
+                            && x.ThoiGianBatDau <= DateTime.Now
+                            && x.ThoiGianKetThuc >= DateTime.Now);
+
+                    if (km != null)
+                    {
+                        spct.KhuyenMaiId = km.Id;
+                        if (km.LoaiGiamGia == LoaiGiamGia.SoTien)
+                            spct.GiaKhuyenMai = Math.Max(0, spct.Gia - km.GiaTriGiamGia);
+                        else if (km.LoaiGiamGia == LoaiGiamGia.PhamTram)
+                            spct.GiaKhuyenMai = Math.Max(0, spct.Gia * (1 - km.GiaTriGiamGia / 100));
+                        // Có thể trả về thêm object KhuyenMai nếu muốn
+                        break; // chỉ lấy 1 khuyến mại đang hoạt động
+                    }
+                }
+            }
+            var pagedResult = new PagedResult<SPCTViewModels>()
+            {
+                TotalRecords = totalRow,
+                PageSize = request.PageSize,
+                PageIndex = request.PageIndex,
+                Items = data
+            };
+            return pagedResult;
+        }
+
     }
 }
