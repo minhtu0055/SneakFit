@@ -96,9 +96,9 @@ namespace SneakFit.Admin.Controllers
             try
             {
                 var result = await _sanPhamApiClient.Create(request);
-                if (result != null)
+                if (result != null && result.Id != Guid.Empty)
                 {
-                    return Json(new { success = true });
+                    return Json(new { success = true, id = result.Id, name = result.TenSanPham });
                 }
             }
             catch (Exception ex)

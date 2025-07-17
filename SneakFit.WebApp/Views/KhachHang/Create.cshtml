@@ -10,6 +10,7 @@
 	<div class="card mb-4">
 		<div class="card-body">
 			<div class="col-md-12 mx-auto">
+				@* @Html.ValidationSummary(true, "", new { @class = "text-danger" }) *@
 				<form asp-action="Create" method="post" id="create-form" enctype="multipart/form-data" novalidate>
 					<div class="row">
 						<div class="col-md-2">
@@ -40,15 +41,15 @@
 							<div class="mb-3 row">
 								<label asp-for="Email" class="col-sm-2 col-form-label">Email <span class="text-danger">*</span></label>
 								<div class="col-sm-10">
-									<input asp-for="Email" class="form-control" placeholder="Nhập Gmail..." required />
-									<span class="invalid-feedback">Vui lòng nhập email hợp lệ</span>
+									<input asp-for="Email" class="form-control" placeholder="Nhập Gmail..." required pattern="[a-zA-Z0-9._%+-]+@@gmail\.com$" type="email" />
+									<span asp-validation-for="Email" class="text-danger"></span>
 								</div>
 							</div>
 							<div class="mb-3 row">
 								<label asp-for="SoDienThoai" class="col-sm-2 col-form-label">Số điện thoại <span class="text-danger">*</span></label>
 								<div class="col-sm-10">
-									<input asp-for="SoDienThoai" class="form-control" placeholder="Nhập số điện thoại..." required pattern="[0-9]{10}" />
-									<span class="invalid-feedback">Vui lòng nhập số điện thoại hợp lệ (10 số)</span>
+									<input asp-for="SoDienThoai" class="form-control phone-only" placeholder="Nhập số điện thoại..." required pattern="^0[0-9]{9}$" inputmode="numeric" maxlength="10" />
+									<span asp-validation-for="SoDienThoai" class="text-danger"></span>
 								</div>
 							</div>
 							<div class="mb-3 row">
@@ -285,5 +286,25 @@
 				$('#wardCode').val(wardCode || '');
 			});
 		});
+				// Chặn nhập ký tự không phải số và đảm bảo bắt đầu bằng 0, tối đa 10 số
+				$(document).ready(function () {
+			$('.phone-only').on('input', function () {
+				let val = this.value.replace(/[^0-9]/g, '').slice(0, 10);
+				// Nếu ký tự đầu không phải 0, tự động thêm 0 ở đầu
+				if (val.length > 0 && val[0] !== '0') {
+					val = '0' + val.slice(0, 9);
+				}
+				this.value = val;
+			});
+		});
+		
 	</script>
+	@if (TempData["ErrorMessage"] != null)
+	{
+		<script>
+			$(document).ready(function () {
+				toastr.error('@TempData["ErrorMessage"]');
+			});
+		</script>
+	}
 }

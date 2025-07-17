@@ -145,7 +145,22 @@ namespace SneakFit.Admin.Controllers
                 return RedirectToAction("Index");
             }
 
-            ModelState.AddModelError("", result.Message);
+            if (!string.IsNullOrEmpty(result.Message))
+            {
+                ModelState.AddModelError("", result.Message);
+                TempData["ErrorMessage"] = result.Message;
+
+                // Nếu không upload ảnh mới, giữ lại ảnh cũ
+                if (request.HinhAnh == null || request.HinhAnh.Length == 0)
+                {
+                    // Lấy lại thông tin user từ DB để lấy UrlHinhAnh cũ
+                    var user = await _userApiClient.GetById(request.Id);
+                    if (user != null && user.IsSuccessed)
+                    {
+                        request.UrlHinhAnh = user.ResultObj.UrlHinhAnh;
+                    }
+                }
+            }
             return View(request);
         }
         [HttpPost]
