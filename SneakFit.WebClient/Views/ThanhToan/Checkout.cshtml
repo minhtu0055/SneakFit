@@ -75,7 +75,9 @@
         <div class="section-box shipping-method mb-4">
             <h5>Phương thức vận chuyển</h5>
 
-            <div class="shipping-info">Phí vận chuyển mặc định: <strong>35,000 ₫</strong></div>
+            <div class="shipping-info">
+                Phí vận chuyển: <strong id="shipping-fee">@Model.PhiVanChuyen.ToString("N0") ₫</strong>
+            </div>
         </div>
 
         <!-- Chọn voucher -->
@@ -116,12 +118,12 @@
             </div>
             <div class="summary-item">
                 <span>Phí vận chuyển</span>
-                <span>35,000 ₫</span>
+                <span id="summary-shipping">@Model.PhiVanChuyen.ToString("N0") ₫</span>
             </div>
             <hr />
             <div class="summary-item fw-bold fs-5">
                 <span>Tổng thanh toán</span>
-                <span>@((Model.TongTienSanPham + 35000).ToString("N0")) ₫</span>
+                <span id="summary-total">@((Model.TongTienSanPham + Model.PhiVanChuyen).ToString("N0")) ₫</span>
             </div>
 
             <!-- Hiển thị validation errors -->
@@ -322,8 +324,76 @@
                 });
             }
 
+            // Hàm update phí ship khi địa chỉ thay đổi
+            function updateShippingFee(address) {
+                if (!address.maHuyen || !address.maXa) {
+                    alert('Địa chỉ không đầy đủ để tính phí vận chuyển.');
+                    return;
+                }
+                $.ajax({
+                    url: baseUrl + '/api/ghn/available-services',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        FromDistrictId: 1452, // mã quận shop
+                        ToDistrict: parseInt(address.maHuyen)
+                    }),
+                    success: function(serviceRes) {
+                        if (!serviceRes.data || serviceRes.data.length === 0) {
+                            alert('Địa chỉ này không nằm trong vùng giao hàng của GHN.');
+                            return;
+                        }
+                        var serviceId = serviceRes.data[0].service_id; // lấy service_id đầu tiên
+                        $.ajax({
+                            url: baseUrl + '/api/ghn/shipping-fee',
+                            type: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify({
+                                FromDistrictId: 1452,
+                                ToDistrictId: parseInt(address.maHuyen),
+                                ToWardCode: address.maXa,
+                                Weight: 700,
+                                Length: 33,
+                                Width: 20,
+                                Height: 12,
+                                ServiceId: serviceId
+                            }),
+                            success: function(response) {
+                                var json = typeof response === 'string' ? JSON.parse(response) : response;
+                                var newFee = 0;
+                                if (json && json.data && (json.data.total || json.data.service_fee)) {
+                                    newFee = json.data.total || json.data.service_fee;
+                                    // $('#shipping-fee').text(newFee.toLocaleString() + ' ₫');
+                                    // $('#summary-shipping').text(newFee.toLocaleString() + ' ₫');
+                                    // $('#PhiVanChuyenInput').val(newFee);
+                                    // // Update tổng
+                                    // var tongSanPham = @Model.TongTienSanPham;
+                                    // var tong = tongSanPham + newFee;
+                                    // $('#summary-total').text(tong.toLocaleString() + ' ₫');
+                                    $('#shipping-fee').text(newFee.toLocaleString('vi-VN') + ' ₫');
+                                    $('#summary-shipping').text(newFee.toLocaleString('vi-VN') + ' ₫');
+                                    $('input[asp-for="PhiVanChuyen"]').val(newFee);  // Update hidden input
+                                    // Recalc total
+                                    var tongSanPham = @Model.TongTienSanPham;
+                                    var tong = tongSanPham + newFee - model.DiscountAmount;  // Nếu có discount
+                                    $('#summary-total').text(tong.toLocaleString('vi-VN') + ' ₫');
+                                } else {
+                                    alert('Không lấy được phí vận chuyển cho địa chỉ này. Vui lòng thử lại hoặc chọn địa chỉ khác.');
+                                }
+                            },
+                            error: function() {
+                                alert('Không lấy được phí vận chuyển cho địa chỉ này. Vui lòng thử lại hoặc chọn địa chỉ khác.');
+                            }
+                        });
+                    },
+                    error: function() {
+                        alert('Không lấy được dịch vụ vận chuyển phù hợp cho địa chỉ này.');
+                    }
+                });
+            }
+
             // Hàm cập nhật địa chỉ nhận hàng trên giao diện Checkout
-            function setCheckoutAddress(address) {
+            function setCheckoutAddress(address, shouldUpdateShippingFee = true) {
                 const fullAddress = `${address.tenDiaChi}, ${address.tenXa}, ${address.tenHuyen}, ${address.tenThanhPho}`;
                 $('.address-box p:last').text(fullAddress);
                 $('.address-box p:first strong').text(address.tenNguoiNhan);
@@ -333,6 +403,9 @@
                 $('#DiaChiInput').val(fullAddress);
                 $('#HiddenAddressInput').val(fullAddress);
                 $('#HiddenAddressInput').data('address-id', address.id); // Lưu id vào data attribute
+                if (shouldUpdateShippingFee) {
+                    updateShippingFee(address);
+                }
             }
 
             // Đặt địa chỉ mặc định
@@ -362,7 +435,7 @@
                     type: 'GET',
                     success: function (response) {
                         const address = response.resultObj || response;
-                        setCheckoutAddress(address);
+                        setCheckoutAddress(address, true);
                         $('#changeAddressModal').modal('hide');
                         selectedAddressId = addressId; // Lưu tạm thời cho lần checkout này
                     },
@@ -513,7 +586,7 @@
                     type: 'GET',
                     success: function (response) {
                         const address = response.resultObj || response;
-                        setCheckoutAddress(address); // Hiển thị địa chỉ mặc định khi tải trang
+                        setCheckoutAddress(address, false); // Hiển thị địa chỉ mặc định khi tải trang, không gọi lại updateShippingFee
                     },
                     error: function (xhr) {
                         console.error('Lỗi khi tải địa chỉ mặc định:', xhr.status, xhr.responseText);
@@ -874,8 +947,8 @@
 
 <style>
     /* ==========================================================================
-       1. Global Styles
-       ========================================================================== */
+                   1. Global Styles
+                   ========================================================================== */
     main.main {
         padding: 20px 10px;
         background-color: #F1F5F9;
@@ -889,8 +962,8 @@
     }
 
     /* ==========================================================================
-       2. Section Boxes
-       ========================================================================== */
+                   2. Section Boxes
+                   ========================================================================== */
     .section-box {
         background-color: #FFFFFF;
         padding: 20px;
@@ -922,8 +995,8 @@
             }
 
     /* ==========================================================================
-       3. Address Section
-       ========================================================================== */
+                   3. Address Section
+                   ========================================================================== */
     .address-box {
         display: flex;
         flex-direction: column;
@@ -966,8 +1039,8 @@
     }
 
     /* ==========================================================================
-       4. Product List
-       ========================================================================== */
+                   4. Product List
+                   ========================================================================== */
     .product-list .product-item {
         display: flex;
         flex-wrap: wrap;
@@ -1023,8 +1096,8 @@
     }
 
     /* ==========================================================================
-       5. Shipping Method
-       ========================================================================== */
+                   5. Shipping Method
+                   ========================================================================== */
     .shipping-method select {
         height: calc(2.5rem + 2px);
         font-size: 1rem;
@@ -1047,8 +1120,8 @@
         }
 
     /* ==========================================================================
-       6. Voucher Section
-       ========================================================================== */
+                   6. Voucher Section
+                   ========================================================================== */
     .voucher-section {
         background-color: #FFFFFF;
         padding: 20px;
@@ -1244,8 +1317,8 @@
         }
 
     /* ==========================================================================
-       7. Payment Method
-       ========================================================================== */
+                   7. Payment Method
+                   ========================================================================== */
     .payment-method {
         padding: 15px 20px;
         border-radius: 8px;
@@ -1291,8 +1364,8 @@
         }
 
     /* ==========================================================================
-       8. Order Summary
-       ========================================================================== */
+                   8. Order Summary
+                   ========================================================================== */
     .order-summary {
         padding: 20px;
         background-color: #FFFFFF;
@@ -1328,8 +1401,8 @@
         }
 
     /* ==========================================================================
-       9. Buttons
-       ========================================================================== */
+                   9. Buttons
+                   ========================================================================== */
     .btn-change {
         min-width: 100px;
         font-size: 0.95rem;
@@ -1368,8 +1441,8 @@
         }
 
     /* ==========================================================================
-       10. Modal Common Styles
-       ========================================================================== */
+                   10. Modal Common Styles
+                   ========================================================================== */
     .modal.fade .modal-dialog {
         transition: transform 0.3s ease-out;
         transform: translate(0, -50px);
@@ -1472,8 +1545,8 @@
             }
 
     /* ==========================================================================
-       11. Change Address Modal
-       ========================================================================== */
+                   11. Change Address Modal
+                   ========================================================================== */
     #changeAddressModal .modal-dialog {
         max-width: 700px;
     }
@@ -1562,8 +1635,8 @@
         }
 
     /* ==========================================================================
-       12. Add New Address Modal
-       ========================================================================== */
+                   12. Add New Address Modal
+                   ========================================================================== */
     #addNewAddressModal .modal-dialog {
         max-width: 800px;
     }
@@ -1614,8 +1687,8 @@
     }
 
     /* ==========================================================================
-       13. Miscellaneous
-       ========================================================================== */
+                   13. Miscellaneous
+                   ========================================================================== */
     .address-item {
         transition: all 0.3s ease;
     }

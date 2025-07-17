@@ -55,5 +55,18 @@ namespace SneakFit.BackEndAPI.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
+        [HttpPost("available-services")]
+        public async Task<IActionResult> GetAvailableServices([FromBody] AvailableServiceRequest request)
+        {
+            try
+            {
+                var result = await _ghnService.GetAvailableServicesAsync(request.FromDistrict, request.ToDistrict);
+                return Ok(JsonDocument.Parse(result));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
     }
 }

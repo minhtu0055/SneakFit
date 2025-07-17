@@ -26,6 +26,10 @@ namespace SneakFit.ViewModels.Catalog.Voucher
         [Range(0, double.MaxValue, ErrorMessage = "Điều kiện áp dụng phải lớn hơn 0")]
         public decimal DieuKienApDung { get; set; }
 
+        [Required(ErrorMessage = "Giá trị tối đa không được để trống")]
+        [Range(0, double.MaxValue, ErrorMessage = "Giá trị tối đa thi phải lớn hơn 0")]
+        public decimal GiaTriToiDa { get; set; }
+
         [Required(ErrorMessage = "Số lượng không được để trống")]
         [Range(1, int.MaxValue, ErrorMessage = "Số lượng phải lớn hơn 0")]
         public int SoLuong { get; set; }
@@ -43,7 +47,7 @@ namespace SneakFit.ViewModels.Catalog.Voucher
 
         [Required(ErrorMessage = "Loại voucher không được để trống")]
         public LoaiVoucher LoaiVoucher { get; set; }
-        
-        public List<Guid>? SelectedUserIds { get; set; } 
+
+        public List<Guid>? SelectedUserIds { get; set; }
     }
 }

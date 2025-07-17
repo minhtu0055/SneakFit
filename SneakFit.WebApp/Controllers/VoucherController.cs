@@ -67,7 +67,7 @@ namespace SneakFit.Admin.Controllers
                 new SelectListItem("Giảm theo số tiền", ((int)LoaiGiamGia.SoTien).ToString())
             };
             var getUserPagingRequest = new GetUserPagingRequest
-            { 
+            {
                 PageIndex = pageIndex,
                 PageSize = pageSize,
                 Role = "KHÁCH HÀNG",
@@ -76,7 +76,7 @@ namespace SneakFit.Admin.Controllers
             // load danh sách khách hàng
             var rs = await _userApiClient.GetUsersPaging(getUserPagingRequest);
             var khachHangs = new PagedResult<UserViewModels>();
-            
+
             if (rs.IsSuccessed)
             {
                 khachHangs = rs.ResultObj;
@@ -156,6 +156,7 @@ namespace SneakFit.Admin.Controllers
                 LoaiGiamGia = result.LoaiGiamGia,
                 GiaTriGiamGia = result.GiaTriGiamGia,
                 DieuKienApDung = result.DieuKienApDung,
+                GiaTriToiDa = result.GiaTriToiDa,
                 SoLuong = result.SoLuong,
                 NgayTao = result.NgayTao,
                 ThoiGianBatDau = result.ThoiGianBatDau,
@@ -185,7 +186,7 @@ namespace SneakFit.Admin.Controllers
 
             // Load danh sách khách hàng
             var getUserPagingRequest = new GetUserPagingRequest
-            { 
+            {
                 PageIndex = 1,
                 PageSize = 10,
                 Role = "KHÁCH HÀNG"
