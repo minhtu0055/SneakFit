@@ -34,7 +34,7 @@ namespace SneakFit.ViewModels.Catalog.SanPhamChiTiet
 
 
         public decimal GiaGoc { get; set; }
-        public decimal? GiaKhuyenMai { get; set; }
+        public decimal GiaKhuyenMai { get; set; }
         public decimal KhuyenMaiPhanTram { get; set; }
         public Guid? KhuyenMaiId { get; set; }
 
