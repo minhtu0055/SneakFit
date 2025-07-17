@@ -91,6 +91,49 @@ namespace SneakFit.Application.Catalog.HoaDonClient
                 .Include(h => h.Voucher)
                 .FirstOrDefaultAsync(h => h.Id == id);
             if (hoaDon == null) return null;
+
+            // Tính tổng tiền hàng (đã áp dụng khuyến mãi SPCT nếu có)
+            decimal tongTienSanPham = 0;
+            foreach (var cthd in hoaDon.HoaDonChiTiet)
+            {
+                // Lấy khuyến mãi cho từng SPCT
+                var kmct = _context.KhuyenMaiChiTiet
+                    .Include(x => x.KhuyenMai)
+                    .FirstOrDefault(x => x.SPCTId == cthd.SanPhamChiTietId && x.KhuyenMai.ThoiGianBatDau <= hoaDon.NgayTao && x.KhuyenMai.ThoiGianKetThuc >= hoaDon.NgayTao && x.KhuyenMai.TrangThai == SneakFit.Data.Enums.TrangThaiGiamGia.HoatDong);
+                decimal giaSp = cthd.GiaBan;
+                if (kmct != null && kmct.KhuyenMai != null)
+                {
+                    if (kmct.KhuyenMai.LoaiGiamGia == SneakFit.Data.Enums.LoaiGiamGia.PhamTram)
+                    {
+                        giaSp = Math.Round(cthd.GiaBan * (1 - kmct.KhuyenMai.GiaTriGiamGia / 100), 0);
+                    }
+                    else
+                    {
+                        giaSp = Math.Max(0, cthd.GiaBan - kmct.KhuyenMai.GiaTriGiamGia);
+                    }
+                }
+                tongTienSanPham += giaSp * cthd.SoLuong;
+            }
+            decimal? voucherDiscount = null;
+            if (hoaDon.VoucherId.HasValue)
+            {
+                var voucher = await _context.Voucher.FirstOrDefaultAsync(v => v.Id == hoaDon.VoucherId);
+                if (voucher != null && tongTienSanPham >= voucher.DieuKienApDung)
+                {
+                    if (voucher.LoaiGiamGia == SneakFit.Data.Enums.LoaiGiamGia.PhamTram)
+                    {
+                        voucherDiscount = Math.Round(tongTienSanPham * (voucher.GiaTriGiamGia / 100), 0);
+                        if (voucher.GiaTriToiDa > 0 && voucherDiscount > voucher.GiaTriToiDa)
+                            voucherDiscount = voucher.GiaTriToiDa;
+                    }
+                    else
+                    {
+                        voucherDiscount = voucher.GiaTriGiamGia;
+                        if (voucherDiscount > tongTienSanPham)
+                            voucherDiscount = tongTienSanPham;
+                    }
+                }
+            }
             return new HoaDonClientViewModel
             {
                 Id = hoaDon.Id,
@@ -109,7 +152,8 @@ namespace SneakFit.Application.Catalog.HoaDonClient
                 DonViVanChuyen = hoaDon.DonViVanChuyen,
                 TrangThaiThanhToan = hoaDon.TrangThaiThanhToan,
                 VoucherId = hoaDon.VoucherId,
-                UserId = hoaDon.UserId
+                UserId = hoaDon.UserId,
+                VoucherDiscount = voucherDiscount
             };
         }
 

@@ -288,10 +288,18 @@
             $('#apply-coupon').prop('disabled', true);
             $('#coupon-message').hide();
 
+            var selectedIds = [];
+            $('.item-checkbox:checked').each(function () {
+                selectedIds.push($(this).data('id'));
+            });
+
             $.ajax({
                 url: '/GioHang/ApDungVoucher',
                 type: 'POST',
-                data: { code: code },
+                data: {
+                    code: code,
+                    selectedIds: selectedIds.join(',') // GỬI DANH SÁCH SẢN PHẨM ĐÃ CHỌN
+                },
                 success: function(response) {
                     if (response.success) {
                         appliedVoucher = response.voucher;

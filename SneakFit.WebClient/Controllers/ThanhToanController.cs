@@ -252,6 +252,45 @@ namespace SneakFit.WebClient.Controllers
                 return View(model);
             }
 
+            var khuyenMais = await _khuyenMaiApiClient.GetAllPaging(new PhanTrangKhuyenMai
+            {
+                PageIndex = 1,
+                PageSize = 100,
+                TrangThai = SneakFit.Data.Enums.TrangThaiGiamGia.HoatDong
+            });
+
+            foreach (var item in cartItems)
+            {
+                var km = khuyenMais.Items
+                    .Where(x => x.SanPhamChiTiets != null && x.SanPhamChiTiets.Any(ct => ct.SPCTId == item.SanPhamChiTietId))
+                    .OrderByDescending(x => x.ThoiGianBatDau)
+                    .FirstOrDefault();
+
+                if (km != null)
+                {
+                    if (km.LoaiGiamGia == LoaiGiamGia.PhamTram)
+                    {
+                        item.GiaKhuyenMai = Math.Round(item.GiaGoc * (1 - km.GiaTriGiamGia / 100m), 0);
+                    }
+                    else if (km.LoaiGiamGia == LoaiGiamGia.SoTien)
+                    {
+                        item.GiaKhuyenMai = Math.Max(0, item.GiaGoc - km.GiaTriGiamGia);
+                    }
+                }
+                else
+                {
+                    item.GiaKhuyenMai = item.GiaGoc;
+                }
+            }
+
+            if (model.PhuongThucThanhToan == null)
+            {
+                ModelState.AddModelError("PhuongThucThanhToan", "Vui lòng chọn hình thức thanh toán.");
+                model.GioHangItems = cartItems;
+                model.TongTienSanPham = cartItems.Sum(x => x.GiaKhuyenMai * x.SoLuong);
+                return View(model);
+            }
+
             decimal tongTienSanPham = cartItems.Sum(x => x.GiaKhuyenMai * x.SoLuong);
             decimal giamVoucher = 0;
             Guid? voucherId = null;

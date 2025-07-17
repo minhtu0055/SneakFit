@@ -857,7 +857,8 @@
 
             // Function tính toán và cập nhật order summary
             function updateOrderSummary(voucher) {
-                var tongSanPham = parseFloat($('#summary-products').text().replaceAll('.', '').replace(' ₫', '').replace(',', '')) || 0;
+                // var tongSanPham = parseFloat($('#summary-products').text().replaceAll('.', '').replace(' ₫', '').replace(',', '')) || 0;
+                var tongSanPham = parseFloat($('#summary-products').text().replace(/\./g, '').replace(/,/g, '').replace(' ₫', '')) || 0;
                 var phiVanChuyen = parseFloat($('#summary-shipping').text().replaceAll('.', '').replace(' ₫', '').replace(',', '')) || 0;
                 var discountAmount = 0;
 
@@ -1336,6 +1337,11 @@
                 transform: scale(1.05);
                 color: #FFFFFF;
             }
+
+    #voucherModal .modal-body {
+        max-height: 72vh; /* hoặc 400px, 500px tùy ý */
+        overflow-y: auto;
+    }
 
     .selected-voucher-box {
         background: #E6F0FA;

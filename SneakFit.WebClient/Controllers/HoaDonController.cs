@@ -3,6 +3,7 @@ using SneakFit.WebClient.Models;
 using SneakFit.ApiIntegration.Services;
 using System.Threading.Tasks;
 using SneakFit.ViewModels.Catalog.HoaDonClient;
+using SneakFit.ViewModels.Catalog.Voucher;
 
 namespace SneakFit.WebClient.Controllers
 {
@@ -10,11 +11,15 @@ namespace SneakFit.WebClient.Controllers
     {
         private readonly IHoaDonClientApiClient _hoaDonClientApiClient;
         private readonly IHoaDonChiTietClientApiClient _hoaDonChiTietClientApiClient;
+        private readonly IVoucherApiClient _voucherApiClient;
+        private readonly ISpctApiClient _spctApiClient;
 
-        public HoaDonController(IHoaDonClientApiClient hoaDonClientApiClient, IHoaDonChiTietClientApiClient hoaDonChiTietClientApiClient)
+        public HoaDonController(IHoaDonClientApiClient hoaDonClientApiClient, IHoaDonChiTietClientApiClient hoaDonChiTietClientApiClient, IVoucherApiClient voucherApiClient, ISpctApiClient spctApiClient)
         {
             _hoaDonClientApiClient = hoaDonClientApiClient;
             _hoaDonChiTietClientApiClient = hoaDonChiTietClientApiClient;
+            _voucherApiClient = voucherApiClient;
+            _spctApiClient = spctApiClient;
         }
         private Guid GetUserId()
         {
@@ -72,10 +77,42 @@ namespace SneakFit.WebClient.Controllers
                 }
 
                 var chiTietHoaDon = await _hoaDonChiTietClientApiClient.GetByHoaDonId(id);
+                // Lấy thông tin khuyến mãi cho từng sản phẩm chi tiết
+                foreach (var item in chiTietHoaDon)
+                {
+                    try
+                    {
+                        var spct = await _spctApiClient.GetById(item.SanPhamChiTietId);
+                        if (spct != null)
+                        {
+                            if (spct.KhuyenMaiId.HasValue && spct.GiaKhuyenMai > 0 && spct.GiaKhuyenMai < spct.Gia)
+                            {
+                                item.GiaKhuyenMai = spct.GiaKhuyenMai;
+                                item.KhuyenMaiPhanTram = spct.KhuyenMaiPhanTram;
+                                item.KhuyenMaiId = spct.KhuyenMaiId;
+                                item.TenKhuyenMai = $"Giảm {spct.KhuyenMaiPhanTram}%";
+                            }
+                            else
+                            {
+                                item.GiaKhuyenMai = null;
+                                item.KhuyenMaiPhanTram = null;
+                                item.KhuyenMaiId = null;
+                                item.TenKhuyenMai = null;
+                            }
+                        }
+                    }
+                    catch { }
+                }
+                VoucherViewModels usedVoucher = null;
+                if (hoaDon.VoucherId.HasValue)
+                {
+                    usedVoucher = await _voucherApiClient.GetById(hoaDon.VoucherId.Value);
+                }
                 var model = new OrderConfirmationViewModel
                 {
                     HoaDonClient = hoaDon,
-                    ChiTietHoaDonClient = chiTietHoaDon
+                    ChiTietHoaDonClient = chiTietHoaDon,
+                    UsedVoucher = usedVoucher
                 };
                 return View(model);
             }
