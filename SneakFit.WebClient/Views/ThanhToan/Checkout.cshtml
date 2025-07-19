@@ -925,6 +925,59 @@
                     $('#VoucherDiscountAmount').val('');
                 }
             }
+
+            // Sự kiện khi mở modal voucher: kiểm tra điều kiện và sắp xếp
+            $('#voucherModal').on('show.bs.modal', function () {
+                var tongSanPham = parseFloat($('#summary-products').text().replace(/\./g, '').replace(/,/g, '').replace(' ₫', '')) || 0;
+                var voucherCards = [];
+                $('#voucherList .voucher-card').each(function () {
+                    var $card = $(this);
+                    var $btn = $card.find('.btn-apply-voucher');
+                    var condition = parseFloat($btn.data('voucher-condition')) || 0;
+                    var type = parseInt($btn.data('voucher-type'));
+                    var value = parseFloat($btn.data('voucher-value')) || 0;
+                    var max = parseFloat($btn.data('voucher-max')) || 0;
+                    var discount = 0;
+
+                    // Kiểm tra điều kiện
+                    if (tongSanPham < condition) {
+                        $btn.prop('disabled', true);
+                        $card.addClass('disabled');
+                        $card.css('opacity', 0.5);
+                        discount = 0;
+                    } else {
+                        $btn.prop('disabled', false);
+                        $card.removeClass('disabled');
+                        $card.css('opacity', 1);
+                        // Tính số tiền giảm thực tế
+                        if (type === 0) { // %
+                            discount = tongSanPham * value / 100;
+                            if (max > 0 && discount > max) discount = max;
+                        } else { // Tiền cố định
+                            discount = value;
+                            if (discount > tongSanPham) discount = tongSanPham;
+                        }
+                    }
+                    voucherCards.push({ card: $card, discount: discount });
+                });
+
+                // Sắp xếp voucher đủ điều kiện theo discount giảm dần
+                voucherCards.sort(function (a, b) {
+                    return b.discount - a.discount;
+                });
+
+                // Đưa các voucher đủ điều kiện lên đầu
+                var $voucherList = $('#voucherList');
+                var colWrappers = [];
+                voucherCards.forEach(function (item) {
+                    // .voucher-card nằm trong .col-md-6
+                    colWrappers.push(item.card.closest('.col-md-6'));
+                });
+                $voucherList.empty();
+                colWrappers.forEach(function ($col) {
+                    $voucherList.append($col);
+                });
+            });
         });
     </script>
 }
@@ -1449,6 +1502,12 @@
             flex-direction: column;
             justify-content: space-between;
             height: 100%;
+        }
+
+        .voucher-card .disabled {
+            pointer-events: none;
+            filter: grayscale(0.7);
+            opacity: 0.5;
         }
 
     .voucher-code {

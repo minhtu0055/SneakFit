@@ -53,7 +53,10 @@ namespace SneakFit.WebClient.Controllers
                     return View(new List<HoaDonClientViewModel>());
                 }
                 // Chỉ hiển thị hóa đơn của userId hiện tại (phòng trường hợp API trả về nhiều user)
-                var filtered = hoaDons.Items.Where(x => x.UserId == userId).ToList();
+                var filtered = hoaDons.Items
+                    .Where(x => x.UserId == userId)
+                    .OrderByDescending(x => x.NgayTao) // Xếp ngày tạo mới nhất lên đầu
+                    .ToList();
                 return View(filtered);
             }
             catch (Exception ex)

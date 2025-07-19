@@ -371,8 +371,9 @@ namespace SneakFit.WebClient.Controllers
                 PhiVanChuyen = phiVanChuyen,
                 PhuongThucThanhToan = model.PhuongThucThanhToan.Value,
                 TrangThaiThanhToan = TrangThaiThanhToan.ChuaThanhToan,
-                LoaiHoaDon = (model.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || model.PhuongThucThanhToan == PhuongThucThanhToan.MoMo)
-                    ? LoaiHoaDon.Online : LoaiHoaDon.Online,
+                //LoaiHoaDon = (model.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || model.PhuongThucThanhToan == PhuongThucThanhToan.MoMo)
+                //    ? LoaiHoaDon.Online : LoaiHoaDon.TaiQuay, // nếu thanh toán tại quầy = hóa đơn tại quầy
+                LoaiHoaDon = LoaiHoaDon.Online,
                 Email = email,
                 GhiChu = model.GhiChu,
                 NgayDatHang = DateTime.Now,
