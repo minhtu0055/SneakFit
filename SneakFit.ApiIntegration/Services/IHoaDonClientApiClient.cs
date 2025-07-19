@@ -10,7 +10,7 @@ namespace SneakFit.ApiIntegration.Services
         Task<HoaDonClientViewModel> GetById(Guid id);
         Task<HoaDonClientViewModel> Create(ThemHoaDonClient request);
         Task<HoaDonClientViewModel> Update(SuaHoaDonClient request);
-        Task<bool> UpdateStatus(Guid id, TrangThaiHoaDon trangThai);
+        Task<bool> UpdateStatus(Guid id, SneakFit.Data.Enums.TrangThaiHoaDon newStatus);
         Task<Dictionary<string, int>> GetCountByStatusAsync();
     }
 }

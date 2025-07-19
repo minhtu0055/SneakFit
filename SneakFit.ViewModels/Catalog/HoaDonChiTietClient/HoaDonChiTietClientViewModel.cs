@@ -22,5 +22,6 @@ namespace SneakFit.ViewModels.Catalog.HoaDonChiTietClient
         public decimal? KhuyenMaiPhanTram { get; set; }
         public string TenKhuyenMai { get; set; }
         public Guid? KhuyenMaiId { get; set; }
+        public decimal? GiaGoc { get; set; } // Giá gốc chưa giảm
     }
 }

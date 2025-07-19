@@ -372,7 +372,7 @@ namespace SneakFit.WebClient.Controllers
                 PhuongThucThanhToan = model.PhuongThucThanhToan.Value,
                 TrangThaiThanhToan = TrangThaiThanhToan.ChuaThanhToan,
                 LoaiHoaDon = (model.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || model.PhuongThucThanhToan == PhuongThucThanhToan.MoMo)
-                    ? LoaiHoaDon.Online : LoaiHoaDon.TaiQuay,
+                    ? LoaiHoaDon.Online : LoaiHoaDon.Online,
                 Email = email,
                 GhiChu = model.GhiChu,
                 NgayDatHang = DateTime.Now,
@@ -439,10 +439,17 @@ namespace SneakFit.WebClient.Controllers
                     chiTietHoaDon = new List<HoaDonChiTietClientViewModel>();
                 }
 
+                VoucherViewModels usedVoucher = null;
+                if (hoaDon.VoucherId.HasValue)
+                {
+                    usedVoucher = await _voucherApiClient.GetById(hoaDon.VoucherId.Value);
+                }
+
                 var model = new OrderConfirmationViewModel
                 {
                     HoaDonClient = hoaDon,
-                    ChiTietHoaDonClient = chiTietHoaDon
+                    ChiTietHoaDonClient = chiTietHoaDon,
+                    UsedVoucher = usedVoucher
                 };
 
                 return View(model);
@@ -452,6 +459,20 @@ namespace SneakFit.WebClient.Controllers
                 TempData["ErrorMessage"] = $"Lỗi khi tải thông tin hóa đơn: {ex.Message}";
                 return RedirectToAction("Index", "Home");
             }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CancelOrder(Guid id)
+        {
+            await _hoaDonClientApiClient.UpdateStatus(id, SneakFit.Data.Enums.TrangThaiHoaDon.DaHuy);
+            return RedirectToAction("Details", "HoaDon", new { id });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ReturnOrder(Guid id)
+        {
+            await _hoaDonClientApiClient.UpdateStatus(id, SneakFit.Data.Enums.TrangThaiHoaDon.TraHang);
+            return RedirectToAction("Details", "HoaDon", new { id });
         }
     }
 }

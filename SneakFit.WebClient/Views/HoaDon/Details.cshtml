@@ -74,15 +74,15 @@
                                 <small class="text-muted" style="font-weight: bold; font-size: 15px">Số lượng: @item.SoLuong</small>
                             </div>
                             <div class="product-price ms-auto" style="margin-right: 10px;">
-                                @if (item.KhuyenMaiId != null && item.GiaKhuyenMai.HasValue && item.GiaKhuyenMai.Value > 0 && item.GiaKhuyenMai.Value < item.GiaBan)
+                                @if (item.KhuyenMaiId != null && item.GiaKhuyenMai.HasValue && item.GiaKhuyenMai.Value > 0 && item.GiaKhuyenMai.Value < item.GiaGoc)
                                 {
-                                    <span class="text-danger">@((item.GiaKhuyenMai.Value * item.SoLuong).ToString("N0")) ₫</span>
+                                    <span class="text-danger">@item.GiaKhuyenMai.Value.ToString("N0") ₫</span>
                                     <br />
-                                    <span class="text-muted text-decoration-line-through">@((item.GiaBan * item.SoLuong).ToString("N0")) ₫</span>
+                                    <span class="text-muted text-decoration-line-through">@item.GiaGoc.Value.ToString("N0") ₫</span>
                                 }
                                 else
                                 {
-                                    <span>@((item.GiaBan * item.SoLuong).ToString("N0")) ₫</span>
+                                    <span>@item.GiaGoc?.ToString("N0") ₫</span>
                                 }
                             </div>
                         </div>
@@ -142,7 +142,7 @@
                 <h5 style="color: #1E3A8A; border-bottom: 2px solid #60A5FA; padding-bottom: 10px;">Tóm tắt thanh toán</h5>
                 <div class="summary-item">
                     <span>Tổng tiền hàng</span>
-                    <span id="summary-products">@((Model.HoaDonClient.TongTienSanPham ?? 0).ToString("N0")) ₫</span>
+                    <span id="summary-products">@Model.HoaDonClient.TongTienSanPham.ToString("N0") ₫</span>
                 </div>
                 @if (Model.HoaDonClient.VoucherDiscount.HasValue && Model.HoaDonClient.VoucherDiscount.Value > 0)
                 {
@@ -165,6 +165,18 @@
             <!-- Hành động -->
             <div class="section-box actions text-center">
                 <a href="@Url.Action("Index", "HoaDon")" class="btn btn-primary">Quay về danh sách</a>
+                @if ((int)Model.HoaDonClient.TrangThai == 0) // ChoXacNhan
+                {
+                    <form method="post" action="@Url.Action("CancelOrder", "ThanhToan", new { id = Model.HoaDonClient.Id })" style="display:inline-block;">
+                        <button type="submit" class="btn btn-warning" onclick="return confirm('Bạn có chắc chắn muốn hủy hóa đơn này?');">Hủy hóa đơn</button>
+                    </form>
+                }
+                @if ((int)Model.HoaDonClient.TrangThai == 5) // ThanhCong
+                {
+                    <form method="post" action="@Url.Action("ReturnOrder", "ThanhToan", new { id = Model.HoaDonClient.Id })" style="display:inline-block;">
+                        <button type="submit" class="btn btn-warning" onclick="return confirm('Bạn có chắc chắn muốn trả hàng cho hóa đơn này?');">Trả hàng</button>
+                    </form>
+                }
             </div>
         }
     </div>
@@ -329,6 +341,19 @@
             background: linear-gradient(90deg, #3B82F6, #163172);
             box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3);
             transform: translateY(-2px);
+        }
+
+    .btn-warning {
+        background: linear-gradient(90deg, #60A5FA, #1E3A8A);
+        border: none;
+        color: #FFFFFF;
+    }
+
+        .btn-warning:hover {
+            background: linear-gradient(90deg, #163172, #3B82F6);
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3);
+            transform: translateY(-2px);
+            color: #FFFFFF;
         }
 
     .discount {

@@ -29,6 +29,7 @@ namespace SneakFit.ViewModels.Catalog.HoaDonClient
         public Guid? VoucherId { get; set; }
         public Guid? UserId { get; set; }
         public decimal? VoucherDiscount { get; set; } // Số tiền giảm từ voucher
-        public decimal? TongTienSanPham => TongTien > 0 && PhiVanChuyen > 0 ? TongTien - PhiVanChuyen : TongTien;
+        // Sửa lại: property này để service set đúng tổng tiền sản phẩm (đã áp dụng khuyến mãi, chưa trừ voucher, chưa cộng phí ship)
+        public decimal TongTienSanPham { get; set; }
     }
 }

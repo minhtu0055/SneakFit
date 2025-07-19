@@ -72,13 +72,62 @@
                 }
             </div>
 
+            @if (Model.UsedVoucher != null)
+            {
+                <div class="section-box order-info mb-4">
+                    <h5 class="voucher-info-title">
+                        <i class="bi bi-ticket-perforated voucher-icon me-2"></i>Voucher đã sử dụng
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p>
+                                <strong>Mã voucher:</strong>
+                                <span class="order-info-value">@Model.UsedVoucher.MaVoucher</span>
+                            </p>
+                            <p>
+                                <strong>Loại giảm giá:</strong>
+                                <span class="order-info-value">@(Model.UsedVoucher.LoaiGiamGia == SneakFit.Data.Enums.LoaiGiamGia.PhamTram ? "Phần trăm" : "Số tiền")</span>
+                            </p>
+                            <p>
+                                <strong>Giá trị giảm:</strong>
+                                <span class="order-info-value">
+                                    @(Model.UsedVoucher.LoaiGiamGia == SneakFit.Data.Enums.LoaiGiamGia.PhamTram ?
+                                        ($"{Model.UsedVoucher.GiaTriGiamGia}%") : ($"{Model.UsedVoucher.GiaTriGiamGia:N0} ₫"))
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p>
+                                <strong>Điều kiện áp dụng:</strong>
+                                <span class="order-info-value">@Model.UsedVoucher.DieuKienApDung.ToString("N0") ₫</span>
+                            </p>
+                            <p>
+                                <strong>Giá trị tối đa:</strong>
+                                <span class="order-info-value">@(Model.UsedVoucher.GiaTriToiDa > 0 ? Model.UsedVoucher.GiaTriToiDa.ToString("N0") + " ₫" : "Không giới hạn")</span>
+                            </p>
+                            <p>
+                                <strong>Hiệu lực:</strong>
+                                <span class="order-info-value">@Model.UsedVoucher.ThoiGianBatDau.ToString("dd/MM/yyyy") - @Model.UsedVoucher.ThoiGianKetThuc.ToString("dd/MM/yyyy")</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
+
             <!-- Tóm tắt thanh toán -->
             <div class="section-box order-summary mb-4">
                 <h5>Tóm tắt thanh toán</h5>
                 <div class="summary-item">
                     <span>Tổng tiền hàng</span>
-                    <span>@(Model.HoaDonClient.TongTienSanPham?.ToString("N0") ?? "0") ₫</span>
+                    <span>@(Model.HoaDonClient.TongTienSanPham.ToString("N0") ?? "0") ₫</span>
                 </div>
+                @if (Model.HoaDonClient.VoucherDiscount.HasValue && Model.HoaDonClient.VoucherDiscount.Value > 0)
+                {
+                    <div class="summary-item" id="summary-voucher">
+                        <span>Áp dụng voucher</span>
+                        <span class="text-danger" id="summary-voucher-amount">-@((Model.HoaDonClient.VoucherDiscount ?? 0).ToString("N0")) ₫</span>
+                    </div>
+                }
                 <div class="summary-item">
                     <span>Phí vận chuyển</span>
                     <span>@Model.HoaDonClient.PhiVanChuyen.ToString("N0") ₫</span>

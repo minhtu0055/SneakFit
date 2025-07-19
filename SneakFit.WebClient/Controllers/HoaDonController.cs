@@ -85,6 +85,7 @@ namespace SneakFit.WebClient.Controllers
                         var spct = await _spctApiClient.GetById(item.SanPhamChiTietId);
                         if (spct != null)
                         {
+                            item.GiaGoc = spct.Gia; // Đảm bảo luôn truyền giá gốc
                             if (spct.KhuyenMaiId.HasValue && spct.GiaKhuyenMai > 0 && spct.GiaKhuyenMai < spct.Gia)
                             {
                                 item.GiaKhuyenMai = spct.GiaKhuyenMai;

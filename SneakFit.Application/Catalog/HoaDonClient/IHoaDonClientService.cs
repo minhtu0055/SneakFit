@@ -17,5 +17,6 @@ namespace SneakFit.Application.Catalog.HoaDonClient
         Task<HoaDonClientViewModel> Create(ThemHoaDonClient request);
         Task<HoaDonClientViewModel> Update(SuaHoaDonClient request);
         Task<Dictionary<TrangThaiHoaDon, int>> GetCountByStatusAsync();
+        Task<bool> UpdateStatus(Guid id, SneakFit.Data.Enums.TrangThaiHoaDon newStatus);
     }
 }
