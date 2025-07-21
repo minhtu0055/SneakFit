@@ -314,11 +314,11 @@ namespace SneakFit.Admin.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> PublicVouchers()
+        public async Task<IActionResult> PublicVouchers(decimal tongTienHoaDon)
         {
             try
             {
-                var vouchers = await _IvoucherCLient.GetPublicVouchers();
+                var vouchers = await _IvoucherCLient.GetPublicVouchers(tongTienHoaDon);
                 return Json(new ApiSuccessResult<List<VoucherViewModels>>(vouchers));
             }
             catch (Exception ex)
@@ -328,17 +328,28 @@ namespace SneakFit.Admin.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> PrivateVouchers(Guid userId)
+        public async Task<IActionResult> PrivateVouchers(Guid userId, decimal tongTienHoaDon)
         {
             try
             {
-                var vouchers = await _IvoucherCLient.GetPrivateVouchersForUser(userId);
+                var vouchers = await _IvoucherCLient.GetPrivateVouchersForUser(userId, tongTienHoaDon);
                 return Json(new ApiSuccessResult<List<VoucherViewModels>>(vouchers));
             }
             catch (Exception ex)
             {
                 return Json(new ApiErrorResult<List<VoucherViewModels>>(ex.Message));
             }
+        }
+
+        [HttpGet("GetById")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            var result = await _IvoucherCLient.GetById(id);
+            if (result == null)
+            {
+                return Json(new { success = false, message = "Không tìm thấy voucher." });
+            }
+            return Json(result);
         }
     }
 }

@@ -51,7 +51,7 @@ namespace SneakFit.Admin.Controllers
                         userPrincipal,
                         authProperties);
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "ThongKe");
         }
 
         private ClaimsPrincipal ValidateToken(string jwtToken)

@@ -43,7 +43,7 @@ namespace SneakFit.Application.Catalog.HoaDon
             {
                 query = query.Where(h => h.NgayTao >= request.NgayBatDau.Value && h.NgayTao <= request.NgayKetThuc.Value);
             }
-             if (!string.IsNullOrEmpty(request.NguoiTao))
+            if (!string.IsNullOrEmpty(request.NguoiTao))
             {
                 query = query.Where(h => h.NguoiTao == request.NguoiTao);
             }
@@ -68,7 +68,7 @@ namespace SneakFit.Application.Catalog.HoaDon
                     MaHoaDon = h.MaHoaDon,
                     PhiVanChuyen = h.PhiVanChuyen,
                     TrangThaiThanhToan = h.TrangThaiThanhToan,
-                    TienKhachDua = h.TienKhachDua,
+                    TienKhachDua = h.TienKhachDua,                  
                 }).ToListAsync();
             var pagedResult = new PagedResult<HoaDonViewModel>()
             {
@@ -108,12 +108,19 @@ namespace SneakFit.Application.Catalog.HoaDon
                 TrangThaiThanhToan = hoaDon.TrangThaiThanhToan,
                 VoucherId = hoaDon.VoucherId,
                 TienKhachDua = hoaDon.TienKhachDua,
+                MaTinh = _context.DiaChi.Where(dc => dc.UserId == hoaDon.UserId && dc.Mac_Dinh).Select(dc => dc.MaTinh).FirstOrDefault(),
+                TenTinh = _context.DiaChi.Where(dc => dc.UserId == hoaDon.UserId && dc.Mac_Dinh).Select(dc => dc.TenThanhPho).FirstOrDefault(),
+                MaHuyen = _context.DiaChi.Where(dc => dc.UserId == hoaDon.UserId && dc.Mac_Dinh).Select(dc => dc.MaHuyen).FirstOrDefault(),
+                TenHuyen = _context.DiaChi.Where(dc => dc.UserId == hoaDon.UserId && dc.Mac_Dinh).Select(dc => dc.TenHuyen).FirstOrDefault(),
+                MaXa = _context.DiaChi.Where(dc => dc.UserId == hoaDon.UserId && dc.Mac_Dinh).Select(dc => dc.MaXa).FirstOrDefault(),
+                TenXa = _context.DiaChi.Where(dc => dc.UserId == hoaDon.UserId && dc.Mac_Dinh).Select(dc => dc.TenXa).FirstOrDefault(),
+                TenDiaChi = _context.DiaChi.Where(dc => dc.UserId == hoaDon.UserId && dc.Mac_Dinh).Select(dc => dc.TenDiaChi).FirstOrDefault()
             };
         }
 
         public async Task<HoaDonViewModel> Create(ThemHoaDon request, string tenNguoiTao)
         {
-            var maHoaDon = $"HD{DateTime.Now:yyyyMMddHHmmss}{new Random().Next(1000, 9999)}";
+            var maHoaDon = $"HD{DateTime.Now:MMddHHmmss}{new Random().Next(1000, 9999)}";
             var hoaDon = new Data.Entities.HoaDon
             {
                 Id = Guid.NewGuid(),
@@ -167,6 +174,29 @@ namespace SneakFit.Application.Catalog.HoaDon
             hoaDon.TienKhachDua = request.TienKhachDua;
 
             await _context.SaveChangesAsync();
+
+            // Sau khi cập nhật hóa đơn, kiểm tra và trừ số lượng voucher nếu cần
+            if (hoaDon.VoucherId != null && hoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+            {
+                var voucher = await _context.Voucher.FindAsync(hoaDon.VoucherId);
+                if (voucher != null)
+                {
+                    if (voucher.SoLuong > 0)
+                    {
+                        voucher.SoLuong--;
+                        if (voucher.SoLuong == 0)
+                            voucher.TrangThai = TrangThaiGiamGia.HetHan;
+                        await _context.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        // Có thể trả về lỗi: Voucher đã hết lượt sử dụng!
+                        // return null hoặc throw exception tùy logic của bạn
+                        return null;
+                    }
+                }
+            }
+
             return await GetById(hoaDon.Id);
         }
 
@@ -212,6 +242,13 @@ namespace SneakFit.Application.Catalog.HoaDon
                     TrangThaiThanhToan = h.TrangThaiThanhToan,
                     VoucherId = h.VoucherId,
                     TienKhachDua = h.TienKhachDua,
+                    MaTinh = _context.DiaChi.Where(dc => dc.UserId == h.UserId && dc.Mac_Dinh).Select(dc => dc.MaTinh).FirstOrDefault(),
+                    TenTinh = _context.DiaChi.Where(dc => dc.UserId == h.UserId && dc.Mac_Dinh).Select(dc => dc.TenThanhPho).FirstOrDefault(),
+                    MaHuyen = _context.DiaChi.Where(dc => dc.UserId == h.UserId && dc.Mac_Dinh).Select(dc => dc.MaHuyen).FirstOrDefault(),
+                    TenHuyen = _context.DiaChi.Where(dc => dc.UserId == h.UserId && dc.Mac_Dinh).Select(dc => dc.TenHuyen).FirstOrDefault(),
+                    MaXa = _context.DiaChi.Where(dc => dc.UserId == h.UserId && dc.Mac_Dinh).Select(dc => dc.MaXa).FirstOrDefault(),
+                    TenXa = _context.DiaChi.Where(dc => dc.UserId == h.UserId && dc.Mac_Dinh).Select(dc => dc.TenXa).FirstOrDefault(),
+                    TenDiaChi = _context.DiaChi.Where(dc => dc.UserId == h.UserId && dc.Mac_Dinh).Select(dc => dc.TenDiaChi).FirstOrDefault()
                 }).ToListAsync();
 
             return data;

@@ -1,5 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using SneakFit.Application.Catalog.HoaDon;
+using SneakFit.Application.Payments;
+using SneakFit.Data.Enums;
+using SneakFit.ViewModels.Catalog.HoaDon;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -11,72 +15,17 @@ namespace SneakFit.Application.Catalog.ThanhToan
     {
         private readonly IConfiguration _config;
         private readonly IHttpContextAccessor _httpContextAccessor; // Thêm để lấy IP thực tế
-        public ThanhToanService(IConfiguration config, IHttpContextAccessor httpContextAccessor)
+        private readonly IHoaDonService _hoaDonService;
+
+        public ThanhToanService(
+            IConfiguration config,
+            IHttpContextAccessor httpContextAccessor,
+            IHoaDonService hoaDonService)
         {
             _config = config;
             _httpContextAccessor = httpContextAccessor;
+            _hoaDonService = hoaDonService;
         }
-
-        public string CreateVNPayPaymentUrl(VNPayPaymentRequest request)
-        {
-            // Lấy cấu hình từ appsettings.json
-            var vnp_Url = _config["VNPay:BaseUrl"];
-            var vnp_TmnCode = _config["VNPay:TmnCode"];
-            var vnp_HashSecret = _config["VNPay:HashSecret"];
-
-            if (string.IsNullOrEmpty(vnp_Url) || string.IsNullOrEmpty(vnp_TmnCode) || string.IsNullOrEmpty(vnp_HashSecret))
-                throw new InvalidOperationException("Thiếu cấu hình VNPay.");
-
-            // Kiểm tra dữ liệu đầu vào
-            if (request.Amount <= 0)
-                throw new ArgumentException("Số tiền phải lớn hơn 0.");
-            if (string.IsNullOrEmpty(request.OrderId))
-                throw new ArgumentException("OrderId không được để trống.");
-            if (string.IsNullOrEmpty(request.ReturnUrl))
-                throw new ArgumentException("ReturnUrl không được để trống.");
-
-            // Lấy IP thực tế của client
-            var ipAddr = _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString() ?? "127.0.0.1";
-
-            // Tạo danh sách tham số, không mã hóa URL trước
-            var vnp_Params = new SortedDictionary<string, string>
-            {
-                { "vnp_Version", "2.1.0" },
-                { "vnp_Command", "pay" },
-                { "vnp_TmnCode", vnp_TmnCode },
-                { "vnp_Amount", ((int)(request.Amount * 100)).ToString() },
-                { "vnp_CreateDate", DateTime.UtcNow.AddHours(7).ToString("yyyyMMddHHmmss") }, // Sử dụng GMT+7
-                { "vnp_CurrCode", "VND" },
-                { "vnp_IpAddr", ipAddr },
-                { "vnp_Locale", "vn" },
-                { "vnp_OrderInfo", request.OrderDescription }, // Không mã hóa trước
-                { "vnp_OrderType", "other" },
-                { "vnp_ReturnUrl", request.ReturnUrl }, // Không mã hóa trước
-                { "vnp_TxnRef", request.OrderId },
-                { "vnp_ExpireDate", DateTime.UtcNow.AddHours(7).AddMinutes(15).ToString("yyyyMMddHHmmss") }
-            };
-
-            // Tạo chuỗi ký
-            var signData = string.Join("&", vnp_Params.Select(kvp => $"{kvp.Key}={HttpUtility.UrlEncode(kvp.Value)}"));
-
-            // Tạo chữ ký HMAC-SHA512
-            string vnp_SecureHash;
-            using (var hmac = new HMACSHA512(Encoding.UTF8.GetBytes(vnp_HashSecret)))
-            {
-                byte[] hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(signData));
-                vnp_SecureHash = BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
-            }
-
-            // Thêm chữ ký vào tham số
-            vnp_Params.Add("vnp_SecureHash", vnp_SecureHash);
-
-            // Tạo query string cho URL
-            var queryString = string.Join("&", vnp_Params.Select(kvp => $"{kvp.Key}={HttpUtility.UrlEncode(kvp.Value)}"));
-            var paymentUrl = $"{vnp_Url}?{queryString}";
-
-            return paymentUrl;
-        }
-
         public async Task<string> CreateMomoPaymentUrl(MomoPaymentRequest request)
         {
             var endpoint = _config["Momo:Endpoint"];
@@ -132,6 +81,127 @@ namespace SneakFit.Application.Catalog.ThanhToan
                 return payUrlElement.GetString();
             }
             throw new Exception("Không lấy được payUrl từ Momo. Response: " + responseString);
+        }
+        public async Task<string> CreateVnPayPaymentUrl(VNPayPaymentRequest request)
+        {
+            // 1. Cập nhật hóa đơn sang trạng thái chờ thanh toán và trạng thái thanh toán = 1 (Chưa thanh toán)
+            if (Guid.TryParse(request.OrderId, out var hoaDonId))
+            {
+                var hoaDon = await _hoaDonService.GetById(hoaDonId);
+                if (hoaDon != null)
+                {
+                  
+                    hoaDon.TrangThai = TrangThaiHoaDon.ChoXacNhan; // Chờ xác nhận (string)
+                    hoaDon.TrangThaiThanhToan = TrangThaiThanhToan.ChuaThanhToan; // Chưa thanh toán (string)
+                    hoaDon.PhuongThucThanhToan = PhuongThucThanhToan.VnPay; // Chuyển khoản (string)
+                    hoaDon.NgayThanhToan = null;
+                    // Cập nhật các trường khác nếu cần
+                    await _hoaDonService.Update(new SuaHoaDon
+                    {
+                        Id = hoaDon.Id,
+                        TongTien = request.Amount,
+                        TrangThai = hoaDon.TrangThai,
+                        DiaChi = hoaDon.DiaChi,
+                        SoDienThoai = hoaDon.SoDienThoai,
+                        Email = hoaDon.Email,
+                        HoTen = hoaDon.HoTen,
+                        UserId = hoaDon.UserId,
+                        GiaoHang = hoaDon.GiaoHang,
+                        GhiChu = hoaDon.GhiChu,
+                        PhuongThucThanhToan = hoaDon.PhuongThucThanhToan,
+                        LoaiHoaDon = hoaDon.LoaiHoaDon,
+                        NgayThanhToan = hoaDon.NgayThanhToan,
+                        MaHoaDon = hoaDon.MaHoaDon,
+                        PhiVanChuyen = hoaDon.PhiVanChuyen,
+                        TrangThaiThanhToan = hoaDon.TrangThaiThanhToan,
+                        VoucherId = hoaDon.VoucherId,
+                        TienKhachDua = hoaDon.TienKhachDua
+                    });
+                }
+            }
+            // 2. Tạo link VNPay như cũ
+            var vnp_TmnCode = _config["VnPay:vnp_TmnCode"];
+            var vnp_HashSecret = _config["VnPay:vnp_HashSecret"];
+            var vnp_Url = _config["VnPay:BaseUrl"];
+
+            if (string.IsNullOrEmpty(vnp_TmnCode) || string.IsNullOrEmpty(vnp_HashSecret) || string.IsNullOrEmpty(vnp_Url))
+                throw new InvalidOperationException("Thiếu cấu hình VNPay.");
+
+            var vnpay = new VnPayLibrary();
+            vnpay.AddRequestData("vnp_Version", VnPayLibrary.VERSION);
+            vnpay.AddRequestData("vnp_Command", "pay");
+            vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode);
+            vnpay.AddRequestData("vnp_Amount", ((int)(request.Amount * 100)).ToString());
+            vnpay.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));
+            vnpay.AddRequestData("vnp_CurrCode", "VND");
+            vnpay.AddRequestData("vnp_IpAddr", Utils.GetIpAddress(_httpContextAccessor.HttpContext));
+            vnpay.AddRequestData("vnp_Locale", "vn");
+            vnpay.AddRequestData("vnp_OrderInfo", request.OrderInfo);
+            vnpay.AddRequestData("vnp_OrderType", "other");
+            vnpay.AddRequestData("vnp_ReturnUrl", request.ReturnUrl);
+            vnpay.AddRequestData("vnp_TxnRef", request.OrderId);
+
+            var paymentUrl = vnpay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
+            return paymentUrl;
+        }
+
+        public async Task<bool> XuLyVnPayCallbackAsync(Dictionary<string, string> vnp_Params)
+        {
+            // 2. Lấy mã đơn hàng
+            var orderId = vnp_Params.ContainsKey("vnp_TxnRef") ? vnp_Params["vnp_TxnRef"] : null;
+            if (string.IsNullOrEmpty(orderId))
+                return false;
+
+            // 3. Lấy hóa đơn từ DB
+            var hoaDon = await _hoaDonService.GetById(Guid.Parse(orderId));
+            if (hoaDon == null)
+                return false;
+
+            // 4. Kiểm tra trạng thái giao dịch thành công
+            var responseCode = vnp_Params.ContainsKey("vnp_ResponseCode") ? vnp_Params["vnp_ResponseCode"] : null;
+            if (responseCode == "00")
+            {
+                if (hoaDon.GiaoHang == true) {                 
+                    hoaDon.TrangThai = TrangThaiHoaDon.DaXacNhan; // Đã thanh toán                   
+                }
+                else
+                {
+                    hoaDon.TrangThai = TrangThaiHoaDon.ThanhCong; // Đã thanh toán    
+                }
+                hoaDon.GhiChu = vnp_Params.ContainsKey("vnp_TransactionNo") ? vnp_Params["vnp_TransactionNo"] : null;
+                hoaDon.NgayThanhToan = DateTime.Now;
+                hoaDon.TrangThaiThanhToan = TrangThaiThanhToan.DaThanhToan; // Đã thanh toán
+                var suaHoaDon = new SuaHoaDon
+                {
+                    Id = hoaDon.Id,
+                    TongTien = hoaDon.TongTien - hoaDon.PhiVanChuyen,
+                    TrangThai = hoaDon.TrangThai,
+                    DiaChi = hoaDon.DiaChi,
+                    SoDienThoai = hoaDon.SoDienThoai,
+                    Email = hoaDon.Email,
+                    HoTen = hoaDon.HoTen,
+                    UserId = hoaDon.UserId,
+                    GiaoHang = hoaDon.GiaoHang,
+                    GhiChu = hoaDon.GhiChu,
+                    PhuongThucThanhToan = hoaDon.PhuongThucThanhToan,
+                    LoaiHoaDon = hoaDon.LoaiHoaDon,
+                    NgayThanhToan = hoaDon.NgayThanhToan,
+                    MaHoaDon = hoaDon.MaHoaDon,
+                    PhiVanChuyen = hoaDon.PhiVanChuyen,
+                    TrangThaiThanhToan = hoaDon.TrangThaiThanhToan,
+                    VoucherId = hoaDon.VoucherId,
+                    TienKhachDua = hoaDon.TienKhachDua
+                };
+                await _hoaDonService.Update(suaHoaDon);
+                return true;
+            }
+            else
+            {
+                // Có thể cập nhật trạng thái thất bại nếu muốn
+                // hoaDon.TrangThaiThanhToan = 3;
+                // await _hoaDonService.UpdateAsync(hoaDon);
+                return false;
+            }
         }
     }
 }

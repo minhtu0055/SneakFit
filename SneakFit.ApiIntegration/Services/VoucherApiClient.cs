@@ -317,7 +317,7 @@ namespace SneakFit.ApiIntegration.Services
             }
         }
 
-        public async Task<List<VoucherViewModels>> GetPublicVouchers()
+        public async Task<List<VoucherViewModels>> GetPublicVouchers(decimal tongTienHoaDon)
         {
             try
             {
@@ -326,7 +326,7 @@ namespace SneakFit.ApiIntegration.Services
                 var sessions = _contextAccessor.HttpContext.Session.GetString("Token");
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
 
-                var response = await client.GetAsync("/api/voucher/public");
+                var response = await client.GetAsync($"/api/voucher/public?tongTienHoaDon={tongTienHoaDon}");
                 var body = await response.Content.ReadAsStringAsync();
                 if (response.IsSuccessStatusCode)
                 {
@@ -341,7 +341,7 @@ namespace SneakFit.ApiIntegration.Services
             }
         }
 
-        public async Task<List<VoucherViewModels>> GetPrivateVouchersForUser(Guid userId)
+        public async Task<List<VoucherViewModels>> GetPrivateVouchersForUser(Guid userId, decimal tongTienHoaDon)
         {
             try
             {
@@ -350,7 +350,7 @@ namespace SneakFit.ApiIntegration.Services
                 var sessions = _contextAccessor.HttpContext.Session.GetString("Token");
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
 
-                var response = await client.GetAsync($"/api/voucher/private/{userId}");
+                var response = await client.GetAsync($"/api/voucher/private/{userId}?tongTienHoaDon={tongTienHoaDon}");
                 var body = await response.Content.ReadAsStringAsync();
                 if (response.IsSuccessStatusCode)
                 {

@@ -79,8 +79,7 @@ namespace SneakFit.BackEndAPI.Controllers
 
             var updated = await _hoaDonService.Update(request);
             if (updated == null)
-                return NotFound(new { success = false, message = "Không tìm thấy hóa đơn" });
-
+                return BadRequest(new { success = false, message = "Voucher đã hết lượt sử dụng hoặc hóa đơn không tồn tại!" });
             return Ok(new { success = true });
         }
 

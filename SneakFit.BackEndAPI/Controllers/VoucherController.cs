@@ -145,19 +145,19 @@ namespace SneakFit.BackEndAPI.Controllers
 
         // API lấy danh sách voucher công khai đang hoạt động
         [HttpGet("public")]
-        public async Task<IActionResult> GetPublicVouchers()    
+        public async Task<IActionResult> GetPublicVouchers([FromQuery] decimal tongTienHoaDon)
         {
-            var result = await _voucherService.GetPublicVouchers();
+            var result = await _voucherService.GetPublicVouchers(tongTienHoaDon);
             return Ok(new ApiSuccessResult<List<VoucherViewModels>>(result));
         }
 
         // API lấy danh sách voucher riêng tư đang hoạt động cho user
         [HttpGet("private/{userId}")]
-        public async Task<IActionResult> GetPrivateVouchersForUser(Guid userId)
+        public async Task<IActionResult> GetPrivateVouchersForUser(Guid userId, [FromQuery] decimal tongTienHoaDon)
         {
-            var allVouchers = await _voucherService.GetVouchersForUser(userId);
+            var privateVouchers = await _voucherService.GetVouchersForUser(userId, tongTienHoaDon);
             // Chỉ lấy voucher riêng tư
-            var privateVouchers = allVouchers.Where(x => x.loaiVoucher == LoaiVoucher.RiengTu).ToList();
+            privateVouchers = privateVouchers.Where(x => x.loaiVoucher == LoaiVoucher.RiengTu).ToList();
             return Ok(new ApiSuccessResult<List<VoucherViewModels>>(privateVouchers));
         }
 

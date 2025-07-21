@@ -427,7 +427,7 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Phí vận chuyển: </label>
-                            <p class="form-control-static">@Model.PhiVanChuyen</p>
+                            <p class="form-control-static">@Model.PhiVanChuyen.ToString("N0") VNĐ</p>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Tổng tiền: </label>
@@ -452,46 +452,38 @@
                             <tr>
                                 <th style="width: 80px">Ảnh</th>
                                 <th>Sản phẩm</th>
+                                <th>Màu sắc</th>
+                                <th>Kích thức</th>
                                 <th>Số lượng</th>
                                 <th>Giá bán</th>
                                 <th>Tổng tiền</th>
-                                <th>Màu sắc</th>
+                           
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var item in Model.HoaDonChiTiet)
                             {
                                 <tr>
-                                   @*  <td>
-                                        @if (item.IsCombo)
-                                        {
-                                            <img src="@(item.ComboImage ?? "/img/no-image.png")" 
-                                                 class="rounded" 
-                                                 style="width: 60px; height: 60px; object-fit: cover;" 
-                                                 alt="@item.ProductName" />
-                                        }
-                                        else
-                                        {
-                                            <img src="@(item.ProductImage ?? "/img/no-image.png")" 
-                                                 class="rounded" 
-                                                 style="width: 60px; height: 60px; object-fit: cover;" 
-                                                 alt="@item.ProductName" />
-                                        }
+                                    <td>                                
+                                           @item.SanPhamChiTietId
+                                        
                                     </td>
                                     <td>
                                         <div class="d-flex flex-column">
-                                            <span class="fw-semibold">@item.ProductName</span>
+                                            <span class="fw-semibold">@item.TenSanPham</span>
                                         </div>
-                                    </td> *@
-                                    <td>@item.GiaBan.ToString("N0") VNĐ</td>
+                                    </td>
+                                    <td>@item.MauSac</td>
+                                    <td>@item.KichThuoc</td>
                                     <td>@item.SoLuong</td>
+                                    <td>@item.GiaBan.ToString("N0") VNĐ</td>                                  
                                     <td>@((item.GiaBan * item.SoLuong).ToString("N0")) VNĐ</td>
                                 </tr>
                             }
                         </tbody>
                         <tfoot>
                             <tr>
-                                <td colspan="4" class="text-end fw-bold">Tổng cộng:</td>
+                                <td colspan="6" class="text-end fw-bold">Tổng cộng:</td>
                                 <td class="fw-bold">@Model.TongTien.ToString("N0") VNĐ</td>
                             </tr>
                         </tfoot>
