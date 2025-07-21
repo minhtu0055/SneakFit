@@ -44,10 +44,12 @@ namespace SneakFit.Admin.Controllers
 
             try
             {
+                // Giả định rằng _kichThuocApiClient.Create trả về đối tượng KichThuocViewModels
                 var result = await _kichThuocApiClient.Create(request);
-                if (result != null)
+                if (result != null && result.Id != Guid.Empty)
                 {
-                    return Json(new { success = true });
+                    // Trả về JSON với thuộc tính 'name' để Javascript sử dụng
+                    return Json(new { success = true, id = result.Id, name = result.MaKichThuoc });
                 }
             }
             catch (Exception ex)

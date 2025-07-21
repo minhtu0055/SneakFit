@@ -1582,40 +1582,111 @@
             $("#modalThemMoiKHForm").modal("show");
         });
 
-        // Xử lý form thêm mới khách hàng
-        $("#formThemMoiKH").submit(function(e) {
-            e.preventDefault();
+        // // Xử lý form thêm mới khách hàng
+        // $("#formThemMoiKH").submit(function(e) {
+        //     e.preventDefault();
             
-            // Kiểm tra validation
+        //     // Kiểm tra validation
+        //     let isValid = true;
+        //     $(this).find('input[required], select[required]').each(function() {
+        //         if (!$(this).val().trim()) {
+        //             $(this).addClass('is-invalid');
+        //             isValid = false;
+        //         } else {
+        //             $(this).removeClass('is-invalid');
+        //         }
+        //     });
+            
+        //     if (!isValid) {
+        //         toastr.warning("Vui lòng điền đầy đủ thông tin bắt buộc!");
+        //         return false;
+        //     }
+            
+        //     // Tạo FormData để gửi file
+        //     const formData = new FormData(this);
+            
+        //     $.ajax({
+        //         url: '/KhachHang/CreateKhachHang',
+        //         type: 'POST',
+        //         data: formData,
+        //         processData: false,
+        //         contentType: false,
+        //         success: function(response) {
+        //             if (response && response.success) {
+        //                 toastr.success("Tạo khách hàng thành công!");
+        //                 $("#modalThemMoiKHForm").modal("hide");
+                        
+        //                 // Tự động chọn khách hàng vừa tạo
+        //                 if (response.resultObj) {
+        //                     chonKhachHang(response.resultObj);
+        //                 }
+        //             } else {
+        //                 toastr.error(response.message || "Tạo khách hàng thất bại!");
+        //             }
+        //         },
+        //         error: function(xhr) {
+        //             toastr.error("Lỗi khi tạo khách hàng: " + (xhr.responseJSON?.message || xhr.statusText));
+        //         }
+        //     });
+        // });
+
+        // Xử lý form thêm mới khách hàng
+        $('#formThemMoiKH').submit(function (e) {
+            e.preventDefault();
+            const form = this;
+
+            // Xóa các thông báo lỗi cũ
+            $(form).find('.is-invalid').removeClass('is-invalid');
+
             let isValid = true;
-            $(this).find('input[required], select[required]').each(function() {
-                if (!$(this).val().trim()) {
+
+            // Kiểm tra từng input và select required
+            $(form).find('input[required], select[required]').each(function () {
+                if (!this.value.trim()) {
                     $(this).addClass('is-invalid');
                     isValid = false;
-                } else {
-                    $(this).removeClass('is-invalid');
                 }
             });
-            
+
+            // Kiểm tra email
+            const emailInput = $(form).find('input[name="Email"]')[0];
+            if (emailInput && !emailInput.checkValidity()) {
+                $(emailInput).addClass('is-invalid');
+                isValid = false;
+            }
+
+            // Kiểm tra số điện thoại
+            const phoneInput = $(form).find('input[name="SoDienThoai"]')[0];
+            if (phoneInput && !phoneInput.checkValidity()) {
+                $(phoneInput).addClass('is-invalid');
+                isValid = false;
+            }
+
             if (!isValid) {
-                toastr.warning("Vui lòng điền đầy đủ thông tin bắt buộc!");
+                toastr.warning("Vui lòng điền đầy đủ và đúng định dạng các thông tin bắt buộc!");
                 return false;
             }
-            
-            // Tạo FormData để gửi file
-            const formData = new FormData(this);
-            
+
+            // Nếu hợp lệ, tiến hành gửi AJAX
+            const formData = new FormData(form);
+
+            const $submitButton = $(form).find('button[type="submit"]');
+            const originalButtonText = $submitButton.html();
+            $submitButton.prop('disabled', true).html('<i class="bx bx-loader-alt bx-spin"></i> Đang xử lý...');
+
             $.ajax({
                 url: '/KhachHang/CreateKhachHang',
                 type: 'POST',
                 data: formData,
                 processData: false,
                 contentType: false,
-                success: function(response) {
+                success: function (response) {
                     if (response && response.success) {
                         toastr.success("Tạo khách hàng thành công!");
                         $("#modalThemMoiKHForm").modal("hide");
-                        
+                        form.reset(); // Reset form sau khi thành công
+                        $('#previewImage').attr('src', '/assets/img/avatars/hinhanhnew.png');
+
                         // Tự động chọn khách hàng vừa tạo
                         if (response.resultObj) {
                             chonKhachHang(response.resultObj);
@@ -1624,10 +1695,20 @@
                         toastr.error(response.message || "Tạo khách hàng thất bại!");
                     }
                 },
-                error: function(xhr) {
+                error: function (xhr) {
                     toastr.error("Lỗi khi tạo khách hàng: " + (xhr.responseJSON?.message || xhr.statusText));
+                },
+                complete: function() {
+                        $submitButton.prop('disabled', false).html(originalButtonText);
                 }
             });
+        });
+
+        // Thêm sự kiện để xóa validation error khi người dùng nhập liệu
+        $('#formThemMoiKH').on('input', 'input, select', function() {
+            if (this.checkValidity()) {
+                $(this).removeClass('is-invalid');
+            }
         });
 
         // Highlight từ khóa tìm kiếm
@@ -2381,6 +2462,14 @@
         $(".voucher-action").click(function() {
             $("#modalChonVoucher").modal("show");
             loadDanhSachVoucher();
+        });
+
+        $('.phone-only').on('input', function () {
+            let val = this.value.replace(/[^0-9]/g, '').slice(0, 10);
+            if (val.length > 0 && val[0] !== '0') {
+                val = '0' + val.slice(0, 9);
+            }
+            this.value = val;
         });
     </script>
 }
