@@ -16,6 +16,7 @@ namespace SneakFit.ViewModels.Catalog.HoaDonClient
         public string SoDienThoai { get; set; }
         public string Email { get; set; }
         public string HoTen { get; set; }
+        public Guid? UserId { get; set; }
         public string GhiChu { get; set; }
         public PhuongThucThanhToan PhuongThucThanhToan { get; set; }
         public LoaiHoaDon LoaiHoaDon { get; set; }
@@ -25,6 +26,6 @@ namespace SneakFit.ViewModels.Catalog.HoaDonClient
         public string DonViVanChuyen { get; set; }
         public string MaVanDon { get; set; }
         public TrangThaiThanhToan TrangThaiThanhToan { get; set; }
-        public Guid VoucherId { get; set; }
+        public Guid? VoucherId { get; set; }
     }
 }

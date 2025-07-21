@@ -14,10 +14,61 @@ namespace SneakFit.BackEndAPI.Controllers
         }
 
         [HttpPost("vnpay")]
-        public IActionResult CreateVNPay([FromBody] VNPayPaymentRequest request)
+        public async Task<IActionResult> CreateVnPay([FromBody] VNPayPaymentRequest request)
         {
-            var url = _thanhToanService.CreateVNPayPaymentUrl(request);
+            // Cập nhật hóa đơn sang trạng thái chờ thanh toán trước khi tạo link VNPay
+            // (Chỉ cập nhật các trường cần thiết, không để client tự cập nhật)
+            // Có thể gọi service hóa đơn ở đây nếu cần, hoặc chuyển logic này vào ThanhToanService
+            // Ví dụ:
+            // await _hoaDonService.UpdateTrangThaiChoThanhToan(request.OrderId);
+
+            var url = await _thanhToanService.CreateVnPayPaymentUrl(request);
             return Ok(new { paymentUrl = url });
+        }
+        [HttpGet("vnpay-return")]
+        public async Task<IActionResult> VnPayReturn()
+        {
+            var vnp_Params = new Dictionary<string, string>();
+            foreach (var key in Request.Query.Keys)
+            {
+                vnp_Params[key] = Request.Query[key];
+            }
+            var result = await _thanhToanService.XuLyVnPayCallbackAsync(vnp_Params);
+            if (result)
+            {
+                return Redirect("https://localhost:7039/BanHang/Index?payment=success");
+            }
+            else
+            {
+                return Redirect("https://localhost:7039/BanHang/Index?payment=fail");
+            }
+        }
+
+        [HttpPost("vnpay-client")]
+        public async Task<IActionResult> CreateVnPayClient([FromBody] VNPayPaymentRequest request)
+        {
+            var url = await _thanhToanService.CreateVnPayPaymentUrlClient(request);
+            return Ok(new { paymentUrl = url });
+        }
+
+        [HttpGet("vnpay-callback-client")]
+        public async Task<IActionResult> VnPayCallbackClient()
+        {
+            var vnp_Params = new Dictionary<string, string>();
+            foreach (var key in Request.Query.Keys)
+            {
+                vnp_Params[key] = Request.Query[key];
+            }
+            var result = await _thanhToanService.XuLyVnPayCallBackClientAsync(vnp_Params);
+            var orderId = vnp_Params.ContainsKey("vnp_TxnRef") ? vnp_Params["vnp_TxnRef"] : null;
+            if (result && !string.IsNullOrEmpty(orderId))
+            {
+                return Redirect($"https://localhost:7211/ThanhToan/OrderConfirmation/{orderId}");
+            }
+            else
+            {
+                return Redirect("https://localhost:7211/ThanhToan/OrderConfirmation?payment=fail");
+            }
         }
 
         [HttpPost("momo")]
@@ -25,6 +76,20 @@ namespace SneakFit.BackEndAPI.Controllers
         {
             var url = await _thanhToanService.CreateMomoPaymentUrl(request);
             return Ok(new { paymentUrl = url });
+        }
+
+        [HttpPost("momo-callback-client")]
+        public async Task<IActionResult> MomoCallbackClient([FromBody] Dictionary<string, string> momoParams)
+        {
+            var result = await _thanhToanService.XuLyMomoCallBackClientAsync(momoParams);
+            if (result)
+            {
+                return Ok(new { success = true });
+            }
+            else
+            {
+                return BadRequest(new { success = false });
+            }
         }
     }
 }

@@ -30,6 +30,12 @@
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
+    
+    <style>
+        #qr-video {
+            transform: scaleX(-1);
+        }
+    </style>
 </head>
 
 <body class="index-page">
@@ -53,6 +59,9 @@
                             <input type="text" class="form-control" placeholder="Search for products">
                             <button class="btn" type="submit">
                                 <i class="bi bi-search"></i>
+                            </button>
+                            <button class="btn" type="button" id="qrScanBtn" title="Quét mã QR">
+                                <i class="bi bi-upc-scan"></i>
                             </button>
                         </div>
                     </form>
@@ -348,6 +357,144 @@
         });
     </script>
     @RenderSection("Scripts", required: false)
+
+    <!-- Modal Quét QR -->
+    <div class="modal fade" id="qrScanModal" tabindex="-1" aria-labelledby="qrScanModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="qrScanModalLabel">Quét mã QR sản phẩm</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div id="qr-video-container" style="position:relative;">
+                        <video id="qr-video" width="100%" height="240" style="border:1px solid #ccc; background:#000;" autoplay></video>
+                        <canvas id="qr-canvas" style="display:none;"></canvas>
+                    </div>
+                    <div id="qr-result" class="mt-2 text-success fw-bold"></div>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-primary" id="startCameraBtn">Mở camera</button>
+                    <button type="button" class="btn btn-secondary" id="stopCameraBtn">Tắt camera</button>
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thư viện jsQR và Instascan -->
+    <script src="https://unpkg.com/jsqr/dist/jsQR.js"></script>
+    <script src="https://unpkg.com/instascan@1.0.0/dist/instascan.min.js"></script>
+    <script>
+        let video = document.getElementById('qr-video');
+        let canvas = document.getElementById('qr-canvas');
+        let ctx = canvas ? canvas.getContext('2d') : null;
+        let scanning = false;
+        let stream = null;
+        let scanInterval = null;
+        let lastResult = null;
+        let modal = null;
+
+        function showToast(msg, isSuccess = true) {
+            // Đơn giản: alert, có thể thay bằng toast đẹp hơn
+            alert(msg);
+        }
+
+        function stopCamera() {
+            scanning = false;
+            if (scanInterval) clearInterval(scanInterval);
+            if (video) video.pause();
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+        }
+
+        function startCamera() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                showToast('Trình duyệt không hỗ trợ camera!', false);
+                return;
+            }
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                .then(function (s) {
+                    stream = s;
+                    video.srcObject = stream;
+                    video.setAttribute('playsinline', true);
+                    video.play();
+                    scanning = true;
+                    scanInterval = setInterval(scanFrame, 500);
+                })
+                .catch(function (err) {
+                    showToast('Không thể truy cập camera: ' + err, false);
+                });
+        }
+
+        function scanFrame() {
+            if (!scanning || !video || video.readyState !== video.HAVE_ENOUGH_DATA) return;
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            let code = jsQR(imageData.data, imageData.width, imageData.height);
+            if (code && code.data) {
+                if (code.data !== lastResult) {
+                    lastResult = code.data;
+                    handleQRResult(code.data);
+                }
+            }
+        }
+
+        function handleQRResult(data) {
+            // Giả định mã QR là GUID của SPCT
+            if (!data || !/^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$/.test(data)) {
+                showToast('Mã QR không hợp lệ!', false);
+                return;
+            }
+            // Gọi API thêm vào giỏ hàng
+            $.ajax({
+                url: '/SanPham/AddToCart',
+                type: 'POST',
+                data: { sanPhamChiTietId: data, soLuong: 1 },
+                success: function (res) {
+                    if (res.success) {
+                        $('#qr-result').text('Đã thêm vào giỏ hàng!');
+                        showToast('Đã thêm vào giỏ hàng!', true);
+                        stopCamera();
+                    } else if (res.requireLogin) {
+                        showToast('Bạn cần đăng nhập để mua hàng!', false);
+                        stopCamera();
+                        window.location.href = '/Login/Index';
+                    } else {
+                        showToast(res.message || 'Có lỗi!', false);
+                    }
+                },
+                error: function () {
+                    showToast('Có lỗi khi thêm vào giỏ hàng!', false);
+                }
+            });
+        }
+
+        $(function () {
+            // Mở modal khi bấm nút QR
+            $('#qrScanBtn').on('click', function () {
+                $('#qrScanModal').modal('show');
+                $('#qr-result').text('');
+                lastResult = null;
+            });
+            // Mở camera
+            $('#startCameraBtn').on('click', function () {
+                startCamera();
+            });
+            // Tắt camera
+            $('#stopCameraBtn').on('click', function () {
+                stopCamera();
+            });
+            // Khi đóng modal thì tắt camera luôn
+            $('#qrScanModal').on('hidden.bs.modal', function () {
+                stopCamera();
+            });
+        });
+    </script>
 </body>
 
 </html>

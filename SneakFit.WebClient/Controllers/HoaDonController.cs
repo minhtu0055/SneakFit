@@ -32,14 +32,14 @@ namespace SneakFit.WebClient.Controllers
         }
 
         // Hiển thị danh sách hóa đơn
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int pageIndex = 1)
         {
             try
             {
                 var userId = GetUserId();
                 var request = new PhanTrangHoaDonClient
                 {
-                    PageIndex = 1,
+                    PageIndex = pageIndex,
                     PageSize = 10,
                     Keyword = "",
                     Trangthaihoadon = null,
@@ -48,14 +48,16 @@ namespace SneakFit.WebClient.Controllers
                     UserId = userId // Thêm lọc theo userId
                 };
                 var hoaDons = await _hoaDonClientApiClient.GetAllPaging(request);
+                ViewBag.PageIndex = pageIndex;
+                ViewBag.PageSize = request.PageSize;
+                ViewBag.TotalRecords = hoaDons?.TotalRecords ?? 0;
                 if (hoaDons == null || hoaDons.Items == null)
                 {
                     return View(new List<HoaDonClientViewModel>());
                 }
-                // Chỉ hiển thị hóa đơn của userId hiện tại (phòng trường hợp API trả về nhiều user)
                 var filtered = hoaDons.Items
                     .Where(x => x.UserId == userId)
-                    .OrderByDescending(x => x.NgayTao) // Xếp ngày tạo mới nhất lên đầu
+                    .OrderByDescending(x => x.NgayTao)
                     .ToList();
                 return View(filtered);
             }

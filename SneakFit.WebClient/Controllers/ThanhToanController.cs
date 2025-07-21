@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SneakFit.ApiIntegration.Services;
+using SneakFit.Application.Catalog.ThanhToan;
 using SneakFit.Data.Enums;
 using SneakFit.ViewModels.Catalog.HoaDon;
 using SneakFit.ViewModels.Catalog.HoaDonChiTiet;
@@ -25,6 +26,7 @@ namespace SneakFit.WebClient.Controllers
         private readonly IVoucherApiClient _voucherApiClient;
         private readonly IDiaChiApiClient _diaChiApiClient;
         private readonly IGhnApiClient _ghnApiClient;
+        private readonly IThanhToanApiClient _thanhToanApiClient;
 
         public ThanhToanController(IHoaDonClientApiClient hoaDonClientApiClient,
                                    IGioHangApiClient gioHangApiClient,
@@ -34,7 +36,8 @@ namespace SneakFit.WebClient.Controllers
                                    IKhuyenMaiApiClient khuyenMaiApiClient,
                                    IVoucherApiClient voucherApiClient,
                                    IDiaChiApiClient diaChiApiClient,
-                                   IGhnApiClient ghnApiClient)
+                                   IGhnApiClient ghnApiClient,
+                                   IThanhToanApiClient thanhToanApiClient)
         {
             _hoaDonClientApiClient = hoaDonClientApiClient;
             _gioHangApiClient = gioHangApiClient;
@@ -45,6 +48,7 @@ namespace SneakFit.WebClient.Controllers
             _voucherApiClient = voucherApiClient;
             _diaChiApiClient = diaChiApiClient;
             _ghnApiClient = ghnApiClient;
+            _thanhToanApiClient = thanhToanApiClient;
         }
 
         private Guid GetUserId()
@@ -410,7 +414,40 @@ namespace SneakFit.WebClient.Controllers
 
                 HttpContext.Session.Remove("SelectedCartItems");
 
-                return RedirectToAction("OrderConfirmation", new { id = hoaDon.Id });
+                // Xử lý redirect theo phương thức thanh toán
+                if (model.PhuongThucThanhToan == PhuongThucThanhToan.VnPay)
+                {
+                    var vnpRequest = new VNPayPaymentRequest
+                    {
+                        Amount = tongTien,
+                        OrderId = hoaDon.Id.ToString(),
+                        OrderInfo = $"Thanh toán đơn hàng {hoaDon.MaHoaDon}",
+                        ReturnUrl = "https://localhost:7277/api/thanhtoan/vnpay-callback-client", // <-- Sửa dòng này
+                        NotifyUrl = ""
+                    };
+                    var paymentUrlJson = await _thanhToanApiClient.CreateVnPayPaymentUrlClient(vnpRequest);
+                    var paymentUrl = System.Text.Json.JsonDocument.Parse(paymentUrlJson).RootElement.TryGetProperty("paymentUrl", out var urlProp) ? urlProp.GetString() : paymentUrlJson;
+                    return Redirect(paymentUrl);
+                }
+                else if (model.PhuongThucThanhToan == PhuongThucThanhToan.MoMo)
+                {
+                    var momoRequest = new MomoPaymentRequest
+                    {
+                        Amount = tongTien,
+                        OrderId = hoaDon.Id.ToString(),
+                        OrderInfo = $"Thanh toán đơn hàng {hoaDon.MaHoaDon}",
+                        ReturnUrl = "https://localhost:7277/api/thanhtoan/momo-callback-client",
+                        NotifyUrl = ""
+                    };
+                    var paymentUrlJson = await _thanhToanApiClient.CreateMomoPaymentUrl(momoRequest);
+                    var paymentUrl = System.Text.Json.JsonDocument.Parse(paymentUrlJson).RootElement.TryGetProperty("paymentUrl", out var urlProp) ? urlProp.GetString() : paymentUrlJson;
+                    return Redirect(paymentUrl);
+                }
+                else
+                {
+                    // COD
+                    return RedirectToAction("OrderConfirmation", new { id = hoaDon.Id });
+                }
             }
             catch (Exception ex)
             {
