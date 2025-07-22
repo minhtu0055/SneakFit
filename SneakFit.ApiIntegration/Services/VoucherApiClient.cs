@@ -316,5 +316,17 @@ namespace SneakFit.ApiIntegration.Services
                 throw new Exception($"Lỗi khi lấy mã voucher tiếp theo: {ex.Message}");
             }
         }
+
+        public async Task<bool> GiamSoLuongVoucher(Guid id, int soLuong)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _contextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var response = await client.PostAsync($"/api/voucher/giam-soluong/{id}?soLuong={soLuong}", null);
+            return response.IsSuccessStatusCode;
+        }
     }
 }

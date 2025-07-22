@@ -156,5 +156,14 @@ namespace SneakFit.BackEndAPI.Controllers
                 return BadRequest(new ApiErrorResult<string>(ex.Message));
             }
         }
+
+        [HttpPost("giam-soluong/{id}")]
+        public async Task<IActionResult> GiamSoLuongVoucher(Guid id, [FromQuery] int soLuong = 1)
+        {
+            var result = await _voucherService.GiamSoLuongVoucher(id, soLuong);
+            if (result)
+                return Ok(new { success = true });
+            return BadRequest(new { success = false, message = "Không thể giảm số lượng voucher." });
+        }
     }
 }

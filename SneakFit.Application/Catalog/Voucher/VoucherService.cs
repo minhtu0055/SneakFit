@@ -145,7 +145,14 @@ namespace SneakFit.Application.Catalog.Voucher
             foreach (var voucher in vouchers)
             {
                 var newStatus = GetVoucherStatus(voucher.ThoiGianBatDau, voucher.ThoiGianKetThuc);
-                if (voucher.TrangThai != newStatus)
+                // Nếu số lượng <= 0 thì luôn là HếtHạn
+                if (voucher.SoLuong <= 0)
+                {
+                    voucher.SoLuong = 0;
+                    if (voucher.TrangThai != TrangThaiGiamGia.HetHan)
+                        voucher.TrangThai = TrangThaiGiamGia.HetHan;
+                }
+                else if (voucher.TrangThai != newStatus)
                 {
                     voucher.TrangThai = newStatus;
                 }
@@ -480,11 +487,27 @@ namespace SneakFit.Application.Catalog.Voucher
             voucher.SoLuong--;
 
             // ✅ Nếu hết số lượng thì cập nhật trạng thái
-            if (voucher.SoLuong == 0)
+            if (voucher.SoLuong <= 0)
             {
+                voucher.SoLuong = 0;
                 voucher.TrangThai = TrangThaiGiamGia.HetHan;
             }
 
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> GiamSoLuongVoucher(Guid id, int soLuong)
+        {
+            var voucher = await _context.Voucher.FindAsync(id);
+            if (voucher == null) return false;
+            if (voucher.SoLuong < soLuong) return false;
+            voucher.SoLuong -= soLuong;
+            if (voucher.SoLuong <= 0)
+            {
+                voucher.SoLuong = 0;
+                voucher.TrangThai = TrangThaiGiamGia.HetHan;
+            }
             await _context.SaveChangesAsync();
             return true;
         }

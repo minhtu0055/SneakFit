@@ -391,6 +391,12 @@ namespace SneakFit.WebClient.Controllers
             {
                 var hoaDon = await _hoaDonClientApiClient.Create(hoaDonRequest);
 
+                // Giảm số lượng voucher nếu có sử dụng
+                if (voucherId.HasValue)
+                {
+                    await _voucherApiClient.GiamSoLuongVoucher(voucherId.Value, 1);
+                }
+
                 foreach (var item in cartItems)
                 {
                     await _hoaDonChiTietClientApiClient.Create(new ThemHoaDonChiTietClient

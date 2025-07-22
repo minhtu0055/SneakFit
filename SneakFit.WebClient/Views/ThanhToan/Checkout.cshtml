@@ -1123,40 +1123,45 @@
                 <div id="voucherList" class="row g-3 voucher-grid">
                     @if (Model.Vouchers != null && Model.Vouchers.Any())
                     {
-                        foreach (var voucher in Model.Vouchers)
+                        var validVouchers = Model.Vouchers.Where(v => v.SoLuong > 0 && v.TrangThai == SneakFit.Data.Enums.TrangThaiGiamGia.HoatDong).ToList();
+                        if (validVouchers.Any())
                         {
-                            var giaTriGiamGiaFormatted = voucher.GiaTriGiamGia.ToString("#,##0").Replace(",", ".");
-                            var giaTriToiDaFormatted = voucher.GiaTriToiDa > 0 ? voucher.GiaTriToiDa.ToString("#,##0").Replace(",", ".") : null;
-                            <div class="col-md-6">
-                                <div class="voucher-card mb-3" data-voucher-id="@voucher.Id">
-                                    <div class="card-body d-flex flex-column justify-content-between h-100">
-                                        <div>
-                                            <h6 class="card-title mb-2 voucher-code">@voucher.MaVoucher</h6>
-                                            <p class="mb-2 voucher-value">Giảm: <strong>@giaTriGiamGiaFormatted @(voucher.LoaiGiamGia == SneakFit.Data.Enums.LoaiGiamGia.PhamTram ? "%" : "₫")</strong></p>
-                                            @if (giaTriToiDaFormatted != null && voucher.LoaiGiamGia == SneakFit.Data.Enums.LoaiGiamGia.PhamTram)
-                                            {
-                                                <p class="mb-2 voucher-max">Giá trị tối đa: @giaTriToiDaFormatted ₫</p>
-                                            }
-                                            <p class="mb-2 voucher-condition">Điều kiện: Đơn từ @voucher.DieuKienApDung.ToString("#,##0").Replace(",", ".") ₫</p>
-                                            <p class="mb-2 voucher-expiry">HSD: @voucher.ThoiGianKetThuc.ToString("dd/MM/yyyy")</p>
-                                        </div>
-                                        <div class="text-end">
-                                            @* <button type="button" class="btn btn-primary btn-apply-voucher" data-voucher-id="@voucher.Id" data-voucher-name="@voucher.MaVoucher" 
-                                            data-voucher-code="@voucher.MaVoucher" data-voucher-percent="@giaTriGiamGiaFormatted" data-voucher-type="@((int)voucher.LoaiGiamGia)" 
-                                            data-voucher-max="@giaTriToiDaFormatted" data-voucher-condition="@voucher.DieuKienApDung" >Chọn</button> *@
-                                            <button type="button" class="btn btn-primary btn-apply-voucher"
-                                                    data-voucher-id="@voucher.Id"
-                                                    data-voucher-name="@voucher.MaVoucher"
-                                                    data-voucher-value="@voucher.GiaTriGiamGia"
-                                                    data-voucher-type="@((int)voucher.LoaiGiamGia)"
-                                                    data-voucher-max="@voucher.GiaTriToiDa"
-                                                    data-voucher-condition="@voucher.DieuKienApDung">
-                                                Chọn
-                                            </button>
+                            foreach (var voucher in validVouchers)
+                            {
+                                var giaTriGiamGiaFormatted = voucher.GiaTriGiamGia.ToString("#,##0").Replace(",", ".");
+                                var giaTriToiDaFormatted = voucher.GiaTriToiDa > 0 ? voucher.GiaTriToiDa.ToString("#,##0").Replace(",", ".") : null;
+                                <div class="col-md-6">
+                                    <div class="voucher-card mb-3" data-voucher-id="@voucher.Id">
+                                        <div class="card-body d-flex flex-column justify-content-between h-100">
+                                            <div>
+                                                <h6 class="card-title mb-2 voucher-code">@voucher.MaVoucher</h6>
+                                                <p class="mb-2 voucher-value">Giảm: <strong>@giaTriGiamGiaFormatted @(voucher.LoaiGiamGia == SneakFit.Data.Enums.LoaiGiamGia.PhamTram ? "%" : "₫")</strong></p>
+                                                @if (giaTriToiDaFormatted != null && voucher.LoaiGiamGia == SneakFit.Data.Enums.LoaiGiamGia.PhamTram)
+                                                {
+                                                    <p class="mb-2 voucher-max">Giá trị tối đa: @giaTriToiDaFormatted ₫</p>
+                                                }
+                                                <p class="mb-2 voucher-condition">Điều kiện: Đơn từ @voucher.DieuKienApDung.ToString("#,##0").Replace(",", ".") ₫</p>
+                                                <p class="mb-2 voucher-expiry">HSD: @voucher.ThoiGianKetThuc.ToString("dd/MM/yyyy")</p>
+                                            </div>
+                                            <div class="text-end">
+                                                <button type="button" class="btn btn-primary btn-apply-voucher"
+                                                        data-voucher-id="@voucher.Id"
+                                                        data-voucher-name="@voucher.MaVoucher"
+                                                        data-voucher-value="@voucher.GiaTriGiamGia"
+                                                        data-voucher-type="@((int)voucher.LoaiGiamGia)"
+                                                        data-voucher-max="@voucher.GiaTriToiDa"
+                                                        data-voucher-condition="@voucher.DieuKienApDung">
+                                                    Chọn
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="col-12"><p>Không có voucher nào khả dụng.</p></div>
                         }
                     }
                     else

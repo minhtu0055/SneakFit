@@ -29,6 +29,7 @@ namespace SneakFit.Application.Catalog.HoaDonClient
                 .ThenInclude(hdc => hdc.SanPhamChiTiet)
                 .Include(h => h.User)
                 .Include(h => h.Voucher)
+                .OrderByDescending(h => h.NgayTao)
                 .AsQueryable();
             if (!string.IsNullOrEmpty(request.Keyword))
             {
