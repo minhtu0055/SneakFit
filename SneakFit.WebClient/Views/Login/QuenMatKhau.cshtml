@@ -19,6 +19,7 @@
             <form asp-action="QuenMatKhau" asp-controller="Login" method="post" novalidate>
               @Html.AntiForgeryToken()
               <div class="row gy-2 overflow-hidden">
+
                 <div class="col-12">
                   <div class="form-floating">
                     <input asp-for="Email" class="form-control" placeholder="name@example.com" required />
@@ -28,7 +29,7 @@
                 </div>
                 <div class="col-12">
                   <div class="d-grid my-3">
-                    <button class="btn btn-primary btn-lg" type="submit">Lấy lại mật khẩu</button>
+                    <button class="btn-primary w-100" type="submit">Lấy lại mật khẩu</button>
                   </div>
                 </div>
                 <div class="col-12">
@@ -56,3 +57,21 @@
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
 } 
+<style>
+    .btn-primary {
+        background: linear-gradient(to right, #183578, #5cb4ff); /* xanh đậm → xanh nhạt */
+        color: white;
+        border: none;
+        padding: 0.75rem 1.25rem;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 500;
+        transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .btn-primary:hover {
+            background: linear-gradient(to right, #183578, #4aaeff); /* hover tối hơn chút */
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* bóng đổ nhẹ */
+        }
+</style>
