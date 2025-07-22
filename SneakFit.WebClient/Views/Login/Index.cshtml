@@ -43,10 +43,10 @@
 
                             <!-- Login Form -->
                             <div class="tab-pane fade @(ViewBag.ActiveTab == "register" ? "" : "show active")" id="login-register-login-form" role="tabpanel">
-                                @if (TempData["ErrorMessages"] != null)
+                                @if (TempData["ErrorMessage"] != null)
                                 {
                                     <div class="alert alert-danger">
-                                        @TempData["ErrorMessages"]
+                                        @TempData["ErrorMessage"]
                                     </div>
                                 }
                                 <form asp-action="Index" asp-controller="Login" method="post">
@@ -59,7 +59,12 @@
 
                                     <div class="mb-4">
                                         <label for="login-register-login-password" class="form-label">Mật Khẩu</label>
-                                        <input asp-for="Login.Password" type="password" class="form-control" id="login-register-login-password" required />
+                                        <div class="input-group">
+                                            <input asp-for="Login.Password" type="password" class="form-control" id="login-register-login-password" required />
+                                            <span class="input-group-text" id="togglePassword" style="cursor:pointer;">
+                                                <i class="bi bi-eye-slash" id="togglePasswordIcon"></i>
+                                            </span>
+                                        </div>
                                         <span asp-validation-for="Login.Password" class="text-danger"></span>
                                     </div>
 
@@ -68,7 +73,7 @@
                                             <input asp-for="Login.RememberMe" type="checkbox" class="form-check-input" id="login-register-remember-me" />
                                             <label class="form-check-label" for="login-register-remember-me">Remember me</label>
                                         </div>
-                                        <a href="#" class="forgot-password">Forgot Password?</a>
+                                        <a asp-action="QuenMatKhau" asp-controller="Login" class="forgot-password">Quên mật khẩu?</a>
                                     </div>
 
                                     <div class="d-grid">
@@ -108,46 +113,44 @@
                                                 <div class="row align-items-center">
                                                     <div class="col-md-6">
                                                         <div class="mb-3 row">
-                                                            <label asp-for="Register.HoVaTen" class="col-sm-2 col-form-label">Họ và tên <span class="text-danger">*</span></label>
+                                                            <label asp-for="Register.HoVaTen" class="form-label">Họ và tên <span class="text-danger">*</span></label>
                                                             <div class="col-sm-10">
                                                                 <input asp-for="Register.HoVaTen" class="form-control" placeholder="Vui lòng nhập Họ Tên..." required />
                                                                 <span class="invalid-feedback">Vui lòng nhập họ và tên</span>
                                                             </div>
                                                         </div>
                                                         <div class="mb-3 row">
-                                                            <label asp-for="Register.UserName" class="col-sm-2 col-form-label">Tài khoản <span class="text-danger">*</span></label>
+                                                            <label asp-for="Register.UserName" class="form-label">Tài khoản <span class="text-danger">*</span></label>
                                                             <div class="col-sm-10">
                                                                 <input asp-for="Register.UserName" class="form-control" placeholder="Nhập tài khoản..." required />
                                                                 <span class="invalid-feedback">Vui lòng nhập tài khoản</span>
                                                             </div>
                                                         </div>
                                                         <div class="mb-3 row">
-                                                            <label asp-for="Register.Email" class="col-sm-2 col-form-label">Email <span class="text-danger">*</span></label>
+                                                            <label asp-for="Register.Email" class="form-label">Email <span class="text-danger">*</span></label>
                                                             <div class="col-sm-10">
                                                                 <input asp-for="Register.Email" class="form-control" placeholder="Nhập Gmail..." required />
                                                                 <span class="invalid-feedback">Vui lòng nhập email hợp lệ</span>
                                                             </div>
                                                         </div>
                                                         <div class="mb-3 row">
-                                                            <label asp-for="Register.SoDienThoai" class="col-sm-2 col-form-label">Số điện thoại <span class="text-danger">*</span></label>
+                                                            <label asp-for="Register.SoDienThoai" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
                                                             <div class="col-sm-10">
                                                                 <input asp-for="Register.SoDienThoai" class="form-control" placeholder="Nhập số điện thoại..." required pattern="[0-9]{10}" />
                                                                 <span class="invalid-feedback">Vui lòng nhập số điện thoại hợp lệ (10 số)</span>
                                                             </div>
                                                         </div>
-                                                        <div class="mb-3 row">
-                                                            <label asp-for="Register.NgaySinh" class="col-sm-2 col-form-label">Ngày sinh <span class="text-danger">*</span></label>
-                                                            <div class="col-sm-10">
-                                                                <div class="input-group has-validation">
-                                                                    <input asp-for="Register.NgaySinh" type="datetime-local" class="form-control" required />
-                                                                    <span class="invalid-feedback">Vui lòng chọn ngày sinh</span>
-                                                                </div>
+                                                        <div class="mb-3">
+                                                            <label asp-for="Register.NgaySinh" class="form-label">Ngày sinh <span class="text-danger">*</span></label>
+                                                            <div class="input-group">
+                                                                <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+                                                                <input asp-for="Register.NgaySinh" type="date" class="form-control" required />
                                                             </div>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <div class="mb-3 row">
-                                                            <label asp-for="Register.GioiTinh" class="col-sm-2 col-form-label">Giới tính <span class="text-danger">*</span></label>
+                                                            <label asp-for="Register.GioiTinh" class="form-label">Giới tính <span class="text-danger">*</span></label>
                                                             <div class="col-sm-10">
                                                                 <div class="form-check form-check-inline">
                                                                     <input class="form-check-input" type="radio" asp-for="Register.GioiTinh" id="nam" value="true" checked>
@@ -160,7 +163,7 @@
                                                             </div>
                                                         </div>
                                                         <div class="mb-3 row">
-                                                            <label asp-for="Register.DiaChi.TenDiaChi" class="col-sm-2 col-form-label"><span class="text-danger">*</span></label>
+                                                            <label asp-for="Register.DiaChi.TenDiaChi" class="form-label">Địa chỉ cụ thể<span class="text-danger">*</span></label>
                                                             <div class="col-sm-10">
                                                                 <div class="input-group has-validation">
                                                                     <input asp-for="Register.DiaChi.TenDiaChi" class="form-control" placeholder="Nhập địa chỉ chi tiết..." required />
@@ -169,7 +172,7 @@
                                                             </div>
                                                         </div>
                                                         <div class="mb-3 row">
-                                                            <label asp-for="Register.DiaChi.TenThanhPho" class="col-sm-2 col-form-label">Thành phố/Tỉnh <span class="text-danger">*</span></label>
+                                                            <label asp-for="Register.DiaChi.TenThanhPho" class="form-label">Thành phố/Tỉnh <span class="text-danger">*</span></label>
                                                             <div class="col-sm-10">
                                                                 <select id="province" class="form-select" required>
                                                                     <option value="">Chọn Tỉnh/Thành phố</option>
@@ -180,7 +183,7 @@
                                                             </div>
                                                         </div>
                                                         <div class="mb-3 row">
-                                                            <label asp-for="Register.DiaChi.TenHuyen" class="col-sm-2 col-form-label"><span class="text-danger">*</span></label>
+                                                            <label asp-for="Register.DiaChi.TenHuyen" class="form-label">Quận/Huyện<span class="text-danger">*</span></label>
                                                             <div class="col-sm-10">
                                                                 <select id="district" class="form-select" required disabled>
                                                                     <option value="">Chọn Quận/Huyện</option>
@@ -191,7 +194,7 @@
                                                             </div>
                                                         </div>
                                                         <div class="mb-3 row">
-                                                            <label asp-for="Register.DiaChi.TenXa" class="col-sm-2 col-form-label"><span class="text-danger">*</span></label>
+                                                            <label asp-for="Register.DiaChi.TenXa" class="form-label">Thôn/Xã<span class="text-danger">*</span></label>
                                                             <div class="col-sm-10">
                                                                 <select id="ward" class="form-select" required disabled>
                                                                     <option value="">Chọn Phường/Xã</option>
@@ -218,7 +221,7 @@
                                         const file = input.files[0];
                                         if (file) {
                                             const reader = new FileReader();
-                                            reader.onload = function(e) {
+                                            reader.onload = function (e) {
                                                 document.getElementById('registerPreviewImage').src = e.target.result;
                                                 document.getElementById('registerPreviewImage').style.display = 'block';
                                                 document.getElementById('registerCameraIcon').style.display = 'none';
@@ -233,8 +236,6 @@
 
                     </div>
                 </div>
-
-
             </div>
 
         </div>
@@ -243,14 +244,14 @@
 
 </main>
 @section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
     <partial name="_ValidationScriptsPartial" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
         $(document).ready(function () {
 
+            // THÔNG BÁO LỖI
             // Hiển thị toast nếu có TempData
             var loginSuccess = '@TempData["LoginSuccess"]';
             if (loginSuccess && loginSuccess !== '') {
@@ -275,6 +276,98 @@
                 toastr.error(errorMessage);
             }
 
+            // Toastr cho lỗi đăng nhập
+            if (errorMessage) {
+                toastr.error(errorMessage);
+            }
+
+            // Toastr cho lỗi đăng ký (ModelState)
+            var registerErrors = [];
+        @if (ViewBag.ActiveTab == "register" && !ViewData.ModelState.IsValid)
+        {
+            foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <text>registerErrors.push('@error.ErrorMessage'); </text>
+            }
+        }
+                    if (registerErrors.length > 0) {
+                registerErrors.forEach(function (msg) {
+                    toastr.error(msg);
+                });
+            }
+
+            //SUBMIT LOGIN
+            $("#loginForm").submit(function (e) {
+                e.preventDefault();
+
+                if (!$(this).valid()) {
+                    return false;
+                }
+
+                var formData = {
+                    "Login.UserName": $("#Login_UserName").val(),
+                    "Login.Password": $("#Login_Password").val(),
+                    submitType: "login"
+                };
+
+                $.ajax({
+                    url: '@Url.Action("Index", "Login")',
+                    type: 'POST',
+                    data: formData,
+                    success: function (result) {
+                        if (result.success) {
+                            toastr.success("Đăng nhập thành công!");
+                            setTimeout(function () {
+                                window.location.href = result.redirectUrl;
+                            }, 1000);
+                        } else {
+                            toastr.error(result.message || "Sai tài khoản hoặc mật khẩu");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("Đã xảy ra lỗi khi đăng nhập");
+                    }
+                });
+            });
+
+
+            //SUNMIT ĐĂNG KÍ
+            $("#registerForm").submit(function (e) {
+                e.preventDefault();
+
+                var formData = new FormData(this);
+
+                $.ajax({
+                    url: '@Url.Action("Register", "Login")',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (res) {
+                        if (res.success) {
+                            toastr.success(res.message);
+                            setTimeout(() => {
+                                window.location.href = '@Url.Action("Index", "Login")';
+                            }, 1500);
+                        } else {
+                            toastr.error(res.message);
+                        }
+                    },
+                    error: function () {
+                        toastr.error("Đăng kí thất bại. Vui lòng thử lại.");
+                    }
+                });
+            });
+
+
+
+
+
+
+
+
+
+            // API ĐỊA CHỈ
             // Khi chọn tỉnh/thành phố
             $('#province').change(function () {
                 const provinceId = $(this).val();
@@ -294,7 +387,7 @@
                     $('#district').prop('disabled', false);
                     // Load quận/huyện
                     $.ajax({
-                        url: 'https://localhost:7277/api/ghn/districts',  // Thêm BaseAddress vào
+                        url: 'https://localhost:7277/api/Ghn/districts',  // Thêm BaseAddress vào
                         type: 'GET',
                         success: function (response) {
                             const districts = response.data.filter(d => d.ProvinceID == provinceId);
@@ -331,7 +424,7 @@
                     $('#ward').prop('disabled', false);
                     // Load phường/xã
                     $.ajax({
-                        url: `https://localhost:7277/api/ghn/wards/${districtId}`,  // Thêm BaseAddress vào
+                        url: `https://localhost:7277/api/Ghn/wards/${districtId}`,  // Thêm BaseAddress vào
                         type: 'GET',
                         success: function (response) {
                             const wards = response.data;
@@ -357,8 +450,40 @@
                 $('#wardName').val(wardName);
                 $('#wardCode').val(wardName.split('/')[0]);
             });
+
+            $.ajax({
+                url: 'https://localhost:7277/api/Ghn/provinces', // Đúng với backend (Ghn viết hoa)
+                type: 'GET',
+                success: function (response) {
+                    console.log("API provinces response:", response); // Thêm dòng này
+                    const provinces = response.data;
+                    let options = '<option value="">Chọn Tỉnh/Thành phố</option>';
+                    provinces.forEach(function (province) {
+                        options += `<option value="${province.ProvinceID}" data-name="${province.ProvinceName}">${province.ProvinceName}</option>`;
+                    });
+                    $('#province').html(options);
+                },
+                error: function (error) {
+                    console.error('Lỗi khi tải danh sách tỉnh/thành phố:', error);
+                    toastr.error('Không thể tải danh sách tỉnh/thành phố');
+                }
+            });
+
+            // Toggle password visibility
+            $('#togglePassword').on('click', function () {
+                var passwordInput = $('#login-register-login-password');
+                var icon = $('#togglePasswordIcon');
+                if (passwordInput.attr('type') === 'password') {
+                    passwordInput.attr('type', 'text');
+                    icon.removeClass('bi-eye-slash').addClass('bi-eye');
+                } else {
+                    passwordInput.attr('type', 'password');
+                    icon.removeClass('bi-eye').addClass('bi-eye-slash');
+                }
+            });
         });
 
 
     </script>
 }
+

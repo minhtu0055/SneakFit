@@ -477,7 +477,7 @@ namespace SneakFit.Application.System.User
                 }
 
                 // Chuẩn bị nội dung email
-                var emailSubject = "Mật khẩu mới cho tài khoản GoFood của bạn";
+                var emailSubject = "Mật khẩu mới cho tài khoản SneakFit của bạn";
                 var emailBody = $@"
                     <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
                         <h2>Xin chào {user.HoVaTen},</h2>
@@ -486,7 +486,7 @@ namespace SneakFit.Application.System.User
                         <p style='color: #dc3545;'><strong>Lưu ý:</strong> Vui lòng copy chính xác mật khẩu, kể cả các ký tự đặc biệt.</p>
                         <p>Vì lý do bảo mật, vui lòng đăng nhập và đổi mật khẩu ngay sau khi nhận được email này.</p>
                         <p style='color: #7f8c8d;'>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng liên hệ với chúng tôi ngay.</p>
-                        <p>Trân trọng,<br>GoFood Team</p>
+                        <p>Trân trọng,<br>SneakFit Team</p>
                     </div>";
 
                 // Gửi email
