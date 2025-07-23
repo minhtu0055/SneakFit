@@ -157,6 +157,59 @@
             if (errorMessage) {
                 toastr.error(errorMessage);
             }
+
+                    $(document).on('submit', '#createThuongHieuForm', function (e) {
+            // 1. Ngăn chặn hành vi submit mặc định của trình duyệt
+            e.preventDefault();
+            var form = $(this);
+
+            $.ajax({
+                url: form.attr('action'),
+                type: 'POST',
+                data: form.serialize(),
+                success: function (response) {
+                    if (response.success) {
+                        // 2. Đóng modal thêm mới
+                        $('#taoThuongHieuModal').modal('hide');
+
+                        // 3. Hiển thị thông báo thành công (sử dụng toastr cho nhất quán)
+                        toastr.success('Thêm mới thương hiệu thành công!');
+
+                        // 4. Tạo HTML cho một hàng mới trong bảng
+                        var newRow = `
+                            <tr>
+                                <td>${response.name}</td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                            <i class="bx bx-dots-vertical-rounded"></i>
+                                        </button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item edit-thuonghieu" href="javascript:void(0)" data-id="${response.id}" data-bs-toggle="modal" data-bs-target="#editThuongHieuModal">
+                                                <i class="bx bx-edit-alt me-1"></i> Sửa
+                                            </a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>`;
+
+                        // 5. Thêm hàng mới vào đầu bảng để người dùng thấy ngay lập tức
+                        $('.table-border-bottom-0').prepend(newRow);
+
+                    } else {
+                        // Hiển thị lỗi nếu server trả về success = false
+                        toastr.error(response.message || 'Thêm mới thất bại.');
+                    }
+                },
+                error: function () {
+                    // Hiển thị lỗi nếu gọi AJAX thất bại
+                    toastr.error('Có lỗi xảy ra khi gửi yêu cầu.');
+                }
+            });
         });
+        });
+
+       
+
     </script>
 }

@@ -1613,16 +1613,30 @@
                 }
             });
         });
+
         function reloadThuongHieuDropdown(newId, newName) {
-            $.get('/ThuongHieu/GetAll', function(list) {
-                var $select = $('select[name="ThuongHieuId"]');
-                $select.empty();
-                $select.append('<option value="">-- Chọn thương hiệu --</option>');
-                list.forEach(function(item) {
-                    $select.append(`<option value="${item.id}" ${item.id == newId ? 'selected' : ''}>${item.tenThuongHieu}</option>`);
-                });
-            });
+            var $select = $('select[name="ThuongHieuId"]');
+            if ($select.find(`option[value="${newId}"]`).length === 0) {
+                $select.append(`<option value="${newId}">${newName}</option>`);
+            }
+            $select.val(newId);
+            $select.trigger('change');
         }
+
+
+        //                function reloadThuongHieuDropdown(newId, newName) {
+        //     var $select = $('select[name="ThuongHieuId"]');
+        //     if ($select.find(`option[value="${newId}"]`).length === 0) {
+        //         $select.append(`<option value="${newId}">${newName}</option>`);
+        //     }
+        //     $.get('/api/ThuongHieu/GetAll', function(list) { //// Thay /GetAll thành /getall
+        //         $select.empty();
+        //         $select.append('<option value="">-- Chọn thương hiệu --</option>');
+        //         list.forEach(function(item) {
+        //             $select.append(`<option value="${item.id}">${item.tenThuongHieu}</option>`);
+        //         });
+        //     });
+        // }
 
         // Tương tự cho Chất liệu
         $(document).on('submit', '#createChatLieuForm', function(e) {
@@ -1642,15 +1656,14 @@
                 }
             });
         });
+
         function reloadChatLieuDropdown(newId, newName) {
-            $.get('/ChatLieu/GetAll', function(list) {
-                var $select = $('select[name="ChatLieuId"]');
-                $select.empty();
-                $select.append('<option value="">-- Chọn chất liệu --</option>');
-                list.forEach(function(item) {
-                    $select.append(`<option value="${item.id}" ${item.id == newId ? 'selected' : ''}>${item.tenChatLieu}</option>`);
-                });
-            });
+            var $select = $('select[name="ChatLieuId"]');
+            if ($select.find(`option[value="${newId}"]`).length === 0) {
+                $select.append(`<option value="${newId}">${newName}</option>`);
+            }
+            $select.val(newId);
+            $select.trigger('change');
         }
 
         // Tương tự cho Đế giày
@@ -1671,15 +1684,15 @@
                 }
             });
         });
+
+
         function reloadDeGiayDropdown(newId, newName) {
-            $.get('/DeGiay/GetAll', function(list) {
-                var $select = $('select[name="DeGiayId"]');
-                $select.empty();
-                $select.append('<option value="">-- Chọn đế giày --</option>');
-                list.forEach(function(item) {
-                    $select.append(`<option value="${item.id}" ${item.id == newId ? 'selected' : ''}>${item.tenDeGiay}</option>`);
-                });
-            });
+            var $select = $('select[name="DeGiayId"]');
+            if ($select.find(`option[value="${newId}"]`).length === 0) {
+                $select.append(`<option value="${newId}">${newName}</option>`);
+            }
+            $select.val(newId);
+            $select.trigger('change');
         }
 
         // Tương tự cho Sản phẩm
@@ -1700,15 +1713,15 @@
                 }
             });
         });
+
+
         function reloadSanPhamDropdown(newId, newName) {
-            $.get('/SanPham/GetAll', function(list) {
-                var $select = $('select[name="SanPhamId"]');
-                $select.empty();
-                $select.append('<option value="">-- Chọn sản phẩm --</option>');
-                list.forEach(function(item) {
-                    $select.append(`<option value="${item.id}" ${item.id == newId ? 'selected' : ''}>${item.tenSanPham}</option>`);
-                });
-            });
+            var $select = $('select[name="SanPhamId"]');
+            if ($select.find(`option[value="${newId}"]`).length === 0) {
+                $select.append(`<option value="${newId}">${newName}</option>`);
+            }
+            $select.val(newId);
+            $select.trigger('change');
         }
     </script>
 }

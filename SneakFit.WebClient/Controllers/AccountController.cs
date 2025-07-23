@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SneakFit.ViewModels.System.User;
 using SneakFit.ApiIntegration.Services;
+using SneakFit.WebClient.Models;
 using System.Security.Claims;
 using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
@@ -19,74 +20,63 @@ namespace SneakFit.WebClient.Controllers
             _userApiClient = userApiClient;
         }
 
-        [AllowAnonymous]
-        public IActionResult Login() => View();
-
-        [HttpPost]
-        [AllowAnonymous]
-        public async Task<IActionResult> Login(LoginRequest model)
+        [Authorize]
+        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+        public async Task<IActionResult> MyProfile()
         {
-            if (!ModelState.IsValid) return View(model);
-
-            var result = await _userApiClient.Authenticate(model);
-            if (!result.IsSuccessed)
-            {
-                ModelState.AddModelError("", result.Message);
-                return View(model);
-            }
-
-            // Lưu token vào session
-            HttpContext.Session.SetString("Token", result.ResultObj);
-
-            // Tách JWT để lấy Id người dùng
-            var handler = new JwtSecurityTokenHandler();
-            var token = handler.ReadJwtToken(result.ResultObj);
-            var userId = token.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
-
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
             {
-                ModelState.AddModelError("", "Không thể lấy thông tin người dùng từ token.");
-                return View(model);
+                return RedirectToAction("Index", "Login"); // fallback nếu session hỏng
             }
 
-            // Gọi API lấy thông tin chi tiết user
+            var model = new AccountViewModel();
             var userInfo = await _userApiClient.GetById(Guid.Parse(userId));
-            if (!userInfo.IsSuccessed)
+
+            if (userInfo.IsSuccessed)
             {
-                ModelState.AddModelError("", "Không thể lấy thông tin người dùng.");
-                return View(model);
+                model.User = userInfo.ResultObj;
+            }
+            else
+            {
+                TempData["error"] = "Không thể lấy thông tin người dùng.";
             }
 
-            var user = userInfo.ResultObj;
-
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.HoVaTen),
-                new Claim("AvatarUrl", user.UrlHinhAnh ?? "/assets/img/default-avatar.png"),
-                new Claim(ClaimTypes.Email, user.Email),
-            };
-
-            foreach (var role in user.Roles)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, role));
-            }
-
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var principal = new ClaimsPrincipal(identity);
-
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-
-            return RedirectToAction("MyProfile");
+            return View(model); ; // Views/Account/MyProfile.cshtml
         }
 
         [Authorize]
-        [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
-        public IActionResult MyProfile()
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DoiMatKhau(AccountViewModel model)
         {
-            ViewBag.HoVaTen = User.FindFirstValue(ClaimTypes.Name) ?? "KHÁCH HÀNG";
-            ViewBag.AnhDaiDien = User.FindFirstValue("AvatarUrl") ?? "/assets/img/default-avatar.png";
-            return View(); // Views/Account/MyProfile.cshtml
+            //if (!ModelState.IsValid)
+            //{
+            //    // Không cần load lại thông tin user nữa
+            //    TempData["error"] = "Vui lòng kiểm tra lại thông tin nhập.";
+            //    return RedirectToAction("MyProfile");
+            //}
+
+            var uid = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(uid))
+            {
+                TempData["error"] = "Không thể xác định người dùng.";
+                return RedirectToAction("MyProfile", "Account");
+            }
+
+            var result = await _userApiClient.DoiMatKhau(Guid.Parse(uid), model.DoiMatKhauRequest);
+
+            if (result.IsSuccessed)
+            {
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                HttpContext.Session.Remove("Token");
+                TempData["SuccessMessage"] = "Đổi mật khẩu thành công. Vui lòng đăng nhập lại.";
+                return RedirectToAction("MyProfile", "Account");
+            }
+
+            // Nếu đổi mật khẩu thất bại
+            TempData["error"] = result.Message ?? "Đổi mật khẩu thất bại.";
+            return RedirectToAction("MyProfile");
         }
 
         [Authorize]
