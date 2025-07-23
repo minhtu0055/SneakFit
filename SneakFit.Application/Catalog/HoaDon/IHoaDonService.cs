@@ -1,5 +1,6 @@
 ﻿using SneakFit.Data.Enums;
 using SneakFit.ViewModels.Catalog.HoaDon;
+using SneakFit.ViewModels.Catalog.LichSuHoaDon;
 using SneakFit.ViewModels.Common;
 using System;
 using System.Collections.Generic;
@@ -18,5 +19,9 @@ namespace SneakFit.Application.Catalog.HoaDon
         Task<Dictionary<TrangThaiHoaDon, int>> GetCountByStatusAsync();
         Task<List<HoaDonViewModel>> GetHoaDonChoByNguoiTao(string nguoiTao);
         Task<bool> Delete(Guid id);
+        Task<bool> RevertToPreviousStatusAsync(Guid hoaDonId, string nguoiThucHien);
+        // Lịch sử hóa đơn
+        Task<List<LichSuHoaDonViewModel>> GetByHoaDonIdAsync(Guid hoaDonId);
+        Task<Guid> CreateAsync(CreateLichSuHoaDonRequest request);
     }
 }

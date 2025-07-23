@@ -262,7 +262,7 @@ namespace SneakFit.Data.Migrations
                             NgaySinh = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NormalizedEmail = "tupmph49568@gmail.com",
                             NormalizedUserName = "Admin",
-                            PasswordHash = "AQAAAAIAAYagAAAAEBMoLL01H+U9u+6iQc4trYXC1ltVKDfSFDcx01KbLchi217ejjv2Q2QiC5X/zUldVg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAENy+2RzJ8ik/akyLSI5dPxLUvBU9XvYQlRAhV5DkpEiE51tQRJnegegStzsynrvzCw==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
                             TrangThai = true,
@@ -294,6 +294,7 @@ namespace SneakFit.Data.Migrations
                             Id = new Guid("69bd714f-9576-45ba-b5b7-f01649be00de"),
                             AccessFailedCount = 0,
                             ConcurrencyStamp = "2dca5f13-507f-4d7b-9209-b1be388613f8",
+
                             Email = "kiet@gmail.com",
                             EmailConfirmed = true,
                             GioiTinh = false,
@@ -552,7 +553,9 @@ namespace SneakFit.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+
                     b.Property<DateTime>("NgayThanhToan")
+
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("NgayThanhToan")
@@ -646,7 +649,9 @@ namespace SneakFit.Data.Migrations
                     b.Property<DateTime?>("NgaySuaDoi")
                         .HasColumnType("datetime2");
 
+
                     b.Property<DateTime>("NgayThanhToan")
+
                         .HasColumnType("datetime2");
 
                     b.Property<string>("TenKhuyenMai")
@@ -730,7 +735,9 @@ namespace SneakFit.Data.Migrations
                     b.Property<DateTime>("NgayChinhSua")
                         .HasColumnType("datetime2");
 
+
                     b.Property<DateTime>("NgayThanhToan")
+
                         .HasColumnType("datetime2");
 
                     b.Property<string>("NguoiChinhSua")
@@ -841,7 +848,9 @@ namespace SneakFit.Data.Migrations
                     b.Property<Guid>("MauSacId")
                         .HasColumnType("uniqueidentifier");
 
+
                     b.Property<DateTime>("NgayThanhToan")
+
                         .HasColumnType("datetime2");
 
                     b.Property<Guid>("SanPhamId")
@@ -923,6 +932,7 @@ namespace SneakFit.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
 
                     b.Property<DateTime>("NgayThanhToan")
                         .HasColumnType("datetime2");

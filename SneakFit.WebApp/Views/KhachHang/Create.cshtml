@@ -183,12 +183,11 @@
 		// Xử lý load dữ liệu tỉnh/huyện/xã từ GHN API
 		$(document).ready(function() {
 			// Load tỉnh/thành phố
-
+			debugger
 			$.ajax({
 				url: 'https://localhost:7277/api/ghn/provinces',  // Thêm BaseAddress vào
 				type: 'GET',
 				success: function(response) {
-					debugger
 					const provinces = response.data;
 					let options = '<option value="">Chọn Tỉnh/Thành phố</option>';
 					provinces.forEach(function(province) {

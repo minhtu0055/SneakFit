@@ -9,8 +9,9 @@ namespace SneakFit.Application.Catalog.ThanhToan
     public class VNPayPaymentRequest
     {
         public decimal Amount { get; set; }
-        public string OrderDescription { get; set; }
         public string OrderId { get; set; }
+        public string OrderInfo { get; set; }
         public string ReturnUrl { get; set; }
+        public string NotifyUrl { get; set; }
     }
 }

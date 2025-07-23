@@ -8,7 +8,8 @@ namespace SneakFit.Application.Catalog.ThanhToan
 {
     public interface IThanhToanService
     {
-        string CreateVNPayPaymentUrl(VNPayPaymentRequest request);
         Task<string> CreateMomoPaymentUrl(MomoPaymentRequest request);
+        Task<string> CreateVnPayPaymentUrl(VNPayPaymentRequest request);
+        Task<bool> XuLyVnPayCallbackAsync(Dictionary<string, string> vnp_Params);
     }
 }

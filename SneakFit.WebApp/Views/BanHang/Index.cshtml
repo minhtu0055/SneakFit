@@ -82,7 +82,7 @@
     }
 
     .modal-header {
-        padding: 20px 20px 16px;
+        padding: 6px 20px 6px;
         border-bottom: 1px solid #f0f0f0;
         display: flex;
         justify-content: space-between;
@@ -487,8 +487,20 @@
                                 </div>
                                 <div class="d-flex justify-content-between mb-2">
                                     <span>Giảm giá:</span>
-                                    <span class="fw-bold">0 VNĐ</span>
+                                    <span id="giamGiaValue" class="fw-bold">0 VNĐ</span>
                                 </div>
+                                
+                                <!-- Thông báo voucher đã áp dụng -->
+                                <div id="voucherAppliedNotification" class="d-none mb-3">
+                                    <div class="alert alert-success d-flex align-items-center justify-content-between" style="background-color: #d4edda; border-color: #c3e6cb; color: #155724;">
+                                        <div>
+                                            <div class="fw-bold" id="voucherAppliedText">Áp dụng thành công phiếu giảm giá <span id="voucherName" class="fw-bold"></span></div>
+                                            <div class="small" id="voucherDetails">Giảm <span id="voucherDiscountValue" class="text-danger fw-bold"></span> đơn tối thiểu <span id="voucherMinOrder" class="text-danger fw-bold"></span></div>
+                                        </div>
+                                        <button type="button" class="btn-close" onclick="removeVoucher()" ></button>
+                                    </div>
+                                </div>
+                                
                                 <hr>
                                 <div class="d-flex justify-content-between mb-3">
                                     <span class="fw-bold" title="Tổng tiền = Tạm tính + Phí vận chuyển (nếu có) - Giảm giá (nếu có)">Tổng tiền:</span>
@@ -589,7 +601,7 @@
     </div>
 
     <div class="modal fade" id="modalChonVoucher" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
+        <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h3 class="modal-title">Chọn phiếu giảm giá</h3>
@@ -603,26 +615,11 @@
 
                     <div class="section-title">Phiếu giảm giá dành riêng cho bạn</div>
 
-                    <div class="empty-state">
-                        <div class="empty-icon"></div>
-                        <div class="empty-text">Danh sách phiếu giảm giá trống</div>
-                    </div>
+                    <div id="private-voucher-list"></div>
 
                     <div class="voucher-section">
                         <div class="voucher-section-title">Các phiếu giảm giá khác</div>
-
-                        <div class="voucher-item" data-voucher="TVDGON1" onclick="selectVoucher(this)">
-                            <div class="voucher-badge">x10</div>
-                            <div class="voucher-code">TVDGON1</div>
-                            <div class="voucher-info">
-                                <div class="voucher-name">Kim Chi</div>
-                                <div class="voucher-details">Đơn tối thiểu: 100.000 đ<br>Ngày kết thúc: 02:58:00 13/01/2024</div>
-                            </div>
-                            <div class="voucher-discount">10%</div>
-                            <div class="radio-container">
-                                <div class="radio-btn"></div>
-                            </div>
-                        </div>
+                        <div id="public-voucher-list"></div>
                     </div>
                 </div>
             </div>
@@ -714,10 +711,12 @@
                                         // Set province, district, ward
                                         $('#province').val(diaChiMacDinh.maTinh).trigger('change');
 
-                                        // Khi load xong district (trong success của AJAX load district)
-                                        $('#district').one('ajaxDistrictLoaded', function() {
+                                        // Sử dụng setTimeout để đảm bảo district được load trước khi set value
+                                        setTimeout(function() {
                                             $('#district').val(diaChiMacDinh.maHuyen).trigger('change');
-                                            $('#ward').one('ajaxWardLoaded', function() {
+                                            
+                                            // Sử dụng setTimeout để đảm bảo ward được load trước khi set value
+                                            setTimeout(function() {
                                                 $('#ward').val(diaChiMacDinh.maXa).trigger('change');
                                                 // Sau khi đã set ward, nếu đủ thông tin thì tính phí vận chuyển
                                                 setTimeout(function() {
@@ -725,8 +724,8 @@
                                                         tinhPhiVanChuyen();
                                                     }
                                                 }, 300); // Đợi dropdown cập nhật xong
-                                            });
-                                        });
+                                            }, 500);
+                                        }, 500);
 
                                         $('#provinceName').val(diaChiMacDinh.tenThanhPho || '');
                                         $('#provinceCode').val(diaChiMacDinh.maTinh || '');
@@ -743,6 +742,10 @@
                     $('#giaoHangDiaChiSection').hide();
                     $('#phiVanChuyenRow').addClass('d-none');
                     $('#btnChonDiaChi').addClass('d-none');
+                    if (hoaDonHienTai) {
+                        hoaDonHienTai.phiVanChuyen = 0; // Reset phí ship
+                        capNhatHoaDonHienTai();         // Cập nhật lại tổng tiền
+                    }
                 }
             }
             // Khi bật/tắt giao hàng
@@ -760,7 +763,7 @@
                     SoDienThoai: hoaDonHienTai.khachHang.soDienThoai || "",
                     Email: hoaDonHienTai.khachHang.email || "",
                     UserId: hoaDonHienTai.khachHang.id || null,
-                    TongTien: hoaDonHienTai.tongTien,
+                    TongTien: Math.max(hoaDonHienTai.tongTien - (hoaDonHienTai.giamGia || 0), 0),
                     TrangThai: hoaDonHienTai.trangThai || 0,
                     DiaChi: hoaDonHienTai.diaChi || "",
                     GhiChu: hoaDonHienTai.ghiChu || "",
@@ -792,15 +795,15 @@
             $('#hoVaTen, #soDienThoai, #province, #district, #ward, #diaChiCuThe').on('change input', function() {
                 if (hoaDonHienTai) {
                     hoaDonHienTai.diaChiGiaoHang = {
-                        hoVaTen: $('#hoVaTen').val(),
-                        soDienThoai: $('#soDienThoai').val(),
-                        province: $('#province').val(),
-                        provinceName: $('#provinceName').val(),
-                        district: $('#district').val(),
-                        districtName: $('#districtName').val(),
-                        ward: $('#ward').val(),
-                        wardName: $('#wardName').val(),
-                        diaChiCuThe: $('#diaChiCuThe').val()
+                        hoVaTen: $('#hoVaTen').val() || '',
+                        soDienThoai: $('#soDienThoai').val() || '',
+                        province: $('#province').val() || '',
+                        provinceName: $('#provinceName').val() || '',
+                        district: $('#district').val() || '',
+                        districtName: $('#districtName').val() || '',
+                        ward: $('#ward').val() || '',
+                        wardName: $('#wardName').val() || '',
+                        diaChiCuThe: $('#diaChiCuThe').val() || ''
                     };
                     
                     // Tính phí vận chuyển khi thay đổi địa chỉ và đang bật giao hàng
@@ -819,7 +822,7 @@
                 toastr.warning(`Bạn chỉ có thể tạo tối đa ${MAX_HOA_DON} hóa đơn chờ`);
                 return;
             }
-
+            resetKhachHang();
             const khachHangId = $("#khachHangId").val();
             const hoTen = $("#customerName").text() || "Khách hàng lẻ";
             const soDienThoai = $("#customerPhone").text() !== "-" ? $("#customerPhone").text() : null;
@@ -938,6 +941,7 @@
             $.ajax({
                 url: '/HoaDon/GetHoaDonCho',
                 type: 'GET',
+                   
                 success: function (result) {
                     if (result && result.length > 0) {
                         // Lấy chi tiết sản phẩm cho từng hóa đơn
@@ -946,6 +950,7 @@
                                 url: '/HoaDonChiTiet/GetByHoaDonId',
                                 type: 'GET',
                                 data: { id: hd.id }
+                         
                             }).then(spList => ({
                                 id: hd.id,
                                 tenHoaDon: hd.maHoaDon,
@@ -958,17 +963,19 @@
                                     email: hd.email || ''
                                 },
                                 isGiaoHang: hd.giaoHang,
-                                diaChiGiaoHang: {
-                                hoVaTen: hd.tenNguoiNhan,
-                                soDienThoai: hd.soDienThoai,
-                                province: hd.maTinh,
-                                provinceName: hd.tenThanhPho,
-                                district: hd.maHuyen,
-                                districtName: hd.tenHuyen,
-                                ward: hd.maXa,
-                                wardName: hd.tenXa,
-                                diaChiCuThe: hd.tenDiaChi
-                            }
+                                diaChiGiaoHang: {                                      
+                                    hoVaTen: hd.tenNguoiNhan || '',
+                                    soDienThoai: hd.soDienThoai || '',
+                                    province: hd.maTinh || '',
+                                    provinceName: hd.tenTinh || '',
+                                    district: hd.maHuyen || '',
+                                    districtName: hd.tenHuyen || '',
+                                    ward: hd.maXa || '',
+                                    wardName: hd.tenXa || '',
+                                    diaChiCuThe: hd.tenDiaChi || ''
+                                },
+                                voucherId: hd.voucherId || null,
+                                phiVanChuyen: hd.phiVanChuyen || 0
                             }))
                         );
                        
@@ -1137,6 +1144,38 @@
             let phiVanChuyen = hoaDonHienTai.phiVanChuyen || 0;
             let giamGia = hoaDonHienTai.giamGia || 0;
 
+            // Cập nhật hiển thị giảm giá và thông báo voucher
+            $('#giamGiaValue').text(formatCurrency(giamGia));
+            
+            // Hiển thị thông báo voucher nếu có voucher được áp dụng
+            if (giamGia > 0 && hoaDonHienTai.maVoucherDaChon) {
+                // Tìm voucher trong danh sách để lấy thông tin chi tiết
+                let voucherInfo = null;
+                $('.voucher-item').each(function() {
+                    if ($(this).data('voucher') === hoaDonHienTai.maVoucherDaChon) {
+                        voucherInfo = {
+                            name: $(this).find('.voucher-code').text(),
+                            loaiGiamGia: parseInt($(this).data('loaigiamgia')),
+                            giaTriGiamGia: parseInt($(this).data('giatri')),
+                            dieuKienApDung: parseInt($(this).data('dieukienapdung'))
+                        };
+                        return false; // break loop
+                    }
+                });
+                
+                if (voucherInfo) {
+                    let discountText = voucherInfo.loaiGiamGia === 0 ? voucherInfo.giaTriGiamGia + '%' : formatCurrency(voucherInfo.giaTriGiamGia);
+                    let minOrderText = formatCurrency(voucherInfo.dieuKienApDung);
+                    
+                    $('#voucherName').text(voucherInfo.name);
+                    $('#voucherDiscountValue').text(discountText);
+                    $('#voucherMinOrder').text(minOrderText);
+                    $('#voucherAppliedNotification').removeClass('d-none');
+                }
+            } else {
+                $('#voucherAppliedNotification').addClass('d-none');
+            }
+
             // Tổng tiền thanh toán cuối cùng
             let tongTienThanhToan = tongTien + phiVanChuyen - giamGia;
             if (tongTienThanhToan < 0) tongTienThanhToan = 0;
@@ -1145,49 +1184,115 @@
 
             capNhatTienThua();
 
-            // RESET các trường địa chỉ giao hàng trước khi fill mới
-            $('#hoVaTen').val('');
-            $('#soDienThoai').val('');
-            $('#province').val('').trigger('change');
-            $('#district').html('<option value=\"\">Chọn Quận/Huyện</option>').prop('disabled', true);
-            $('#ward').html('<option value=\"\">Chọn Phường/Xã</option>').prop('disabled', true);
-            $('#diaChiCuThe').val('');
-            $('#provinceName').val('');
-            $('#provinceCode').val('');
-            $('#districtName').val('');
-            $('#districtCode').val('');
-            $('#wardName').val('');
-            $('#wardCode').val('');
-
-            // Set lại trạng thái checkbox giao hàng
+            // Set lại trạng thái checkbox giao hàng trước
             $('#toggleGiaoHang').prop('checked', hoaDonHienTai.isGiaoHang || false);
 
             // Nếu isGiaoHang == true thì show địa chỉ giao hàng
             if (hoaDonHienTai.isGiaoHang) {
                 $('#giaoHangDiaChiSection').show();
                 $('#phiVanChuyenRow').removeClass('d-none');
-                // Fill lại địa chỉ giao hàng nếu có
-                if (hoaDonHienTai.diaChiGiaoHang) {
-                    $('#hoVaTen').val(hoaDonHienTai.diaChiGiaoHang.hoVaTen || '');
-                    $('#soDienThoai').val(hoaDonHienTai.diaChiGiaoHang.soDienThoai || '');
-                    $('#province').val(hoaDonHienTai.diaChiGiaoHang.province || '').trigger('change');
-                    $('#district').one('ajaxDistrictLoaded', function() {
-                        $('#district').val(hoaDonHienTai.diaChiGiaoHang.district).trigger('change');
-                        $('#ward').one('ajaxWardLoaded', function() {
-                            $('#ward').val(hoaDonHienTai.diaChiGiaoHang.ward).trigger('change');
-                        });
-                    });
-                    $('#provinceName').val(hoaDonHienTai.diaChiGiaoHang.provinceName || '');
-                    $('#provinceCode').val(hoaDonHienTai.diaChiGiaoHang.province || '');
-                    $('#districtName').val(hoaDonHienTai.diaChiGiaoHang.districtName || '');
-                    $('#districtCode').val(hoaDonHienTai.diaChiGiaoHang.district || '');
-                    $('#wardName').val(hoaDonHienTai.diaChiGiaoHang.wardName || '');
-                    $('#wardCode').val(hoaDonHienTai.diaChiGiaoHang.ward || '');
-                    $('#diaChiCuThe').val(hoaDonHienTai.diaChiGiaoHang.diaChiCuThe || '');
+                $('#btnChonDiaChi').removeClass('d-none');
+                // Reset tất cả các trường địa chỉ trước khi load dữ liệu mới
+                $('#hoVaTen').val('');
+                $('#soDienThoai').val('');
+                resetDiaChiDropdowns();
+                $('#diaChiCuThe').val('');
+                // Nếu là hóa đơn chờ (chưa có địa chỉ cụ thể) và có khách hàng, lấy địa chỉ mặc định từ bảng địa chỉ khách hàng
+                if (!hoaDonHienTai.diaChiGiaoHang || !hoaDonHienTai.diaChiGiaoHang.district || hoaDonHienTai.diaChiGiaoHang.district === '') {
+                    if (hoaDonHienTai.khachHang && hoaDonHienTai.khachHang.id) {
+                        // Thêm delay nhỏ để đảm bảo reset hoàn tất trước khi load dữ liệu mới
+                        setTimeout(function() {
+                            $.ajax({
+                                url: '/BanHang/GetDiaChiByUser',
+                                type: 'GET',
+                                data: { userId: hoaDonHienTai.khachHang.id },
+                                success: function(response) {
+                                    if (response && response.isSuccessed && response.resultObj && response.resultObj.length > 0) {
+                                        var diaChiMacDinh = response.resultObj.find(dc => dc.isDefault === true || dc.macDinh === true) || response.resultObj[0];
+                                        if (diaChiMacDinh) {
+                                            $('#hoVaTen').val(diaChiMacDinh.tenNguoiNhan || '');
+                                            $('#soDienThoai').val(diaChiMacDinh.soDienThoai || '');
+                                            $('#province').val(diaChiMacDinh.maTinh || '').trigger('change');
+                                            
+                                            // Sử dụng setTimeout để đảm bảo district được load trước khi set value
+                                            setTimeout(function() {
+                                                if (diaChiMacDinh.maHuyen && diaChiMacDinh.maHuyen !== '') {
+                                                    $('#district').val(diaChiMacDinh.maHuyen).trigger('change');
+                                                    
+                                                    // Sử dụng setTimeout để đảm bảo ward được load trước khi set value
+                                                    setTimeout(function() {
+                                                        if (diaChiMacDinh.maXa && diaChiMacDinh.maXa !== '') {
+                                                            $('#ward').val(diaChiMacDinh.maXa).trigger('change');
+                                                        }
+                                                        // Sau khi set ward, nếu đủ thông tin thì tính phí vận chuyển
+                                                        setTimeout(function() {
+                                                            if ($('#toggleGiaoHang').is(':checked') && $('#province').val() && $('#district').val() && $('#ward').val()) {
+                                                                tinhPhiVanChuyen();
+                                                            }
+                                                        }, 300); // Đợi dropdown cập nhật xong
+                                                    }, 500);
+                                                }
+                                            }, 500);
+                                            $('#provinceName').val(diaChiMacDinh.tenThanhPho || '');
+                                            $('#provinceCode').val(diaChiMacDinh.maTinh || '');
+                                            $('#districtName').val(diaChiMacDinh.tenHuyen || '');
+                                            $('#districtCode').val(diaChiMacDinh.maHuyen || '');
+                                            $('#wardName').val(diaChiMacDinh.tenXa || '');
+                                            $('#wardCode').val(diaChiMacDinh.maXa || '');
+                                            $('#diaChiCuThe').val(diaChiMacDinh.tenDiaChi || '');
+                                        }
+                                    }
+                                }
+                            });
+                        }, 100); // Delay nhỏ để đảm bảo reset hoàn tất
+                    }
+                } else {
+                    // Nếu hóa đơn đã có địa chỉ cụ thể (ví dụ hóa đơn đã xác nhận), fill như cũ
+                    if (hoaDonHienTai.diaChiGiaoHang) {
+                        // Thêm delay nhỏ để đảm bảo reset hoàn tất trước khi load dữ liệu mới
+                        setTimeout(function() {
+                            $('#hoVaTen').val(hoaDonHienTai.diaChiGiaoHang.hoVaTen || '');
+                            $('#soDienThoai').val(hoaDonHienTai.diaChiGiaoHang.soDienThoai || '');
+                            $('#province').val(hoaDonHienTai.diaChiGiaoHang.province || '').trigger('change');
+                            
+                            // Sử dụng setTimeout để đảm bảo district được load trước khi set value
+                            setTimeout(function() {
+                                if (hoaDonHienTai.diaChiGiaoHang && hoaDonHienTai.diaChiGiaoHang.district && hoaDonHienTai.diaChiGiaoHang.district !== '') {
+                                    $('#district').val(hoaDonHienTai.diaChiGiaoHang.district).trigger('change');
+                                    
+                                    // Sử dụng setTimeout để đảm bảo ward được load trước khi set value
+                                    setTimeout(function() {
+                                        if (hoaDonHienTai.diaChiGiaoHang && hoaDonHienTai.diaChiGiaoHang.ward && hoaDonHienTai.diaChiGiaoHang.ward !== '') {
+                                            $('#ward').val(hoaDonHienTai.diaChiGiaoHang.ward).trigger('change');
+                                        }
+                                        // Sau khi set ward, nếu đủ thông tin thì tính phí vận chuyển
+                                        setTimeout(function() {
+                                            if ($('#toggleGiaoHang').is(':checked') && $('#province').val() && $('#district').val() && $('#ward').val()) {
+                                                tinhPhiVanChuyen();
+                                            }
+                                        }, 300); // Đợi dropdown cập nhật xong
+                                    }, 500);
+                                }
+                            }, 500);
+                            
+                            $('#provinceName').val(hoaDonHienTai.diaChiGiaoHang.provinceName || '');
+                            $('#provinceCode').val(hoaDonHienTai.diaChiGiaoHang.province || '');
+                            $('#districtName').val(hoaDonHienTai.diaChiGiaoHang.districtName || '');
+                            $('#districtCode').val(hoaDonHienTai.diaChiGiaoHang.district || '');
+                            $('#wardName').val(hoaDonHienTai.diaChiGiaoHang.wardName || '');
+                            $('#wardCode').val(hoaDonHienTai.diaChiGiaoHang.ward || '');
+                            $('#diaChiCuThe').val(hoaDonHienTai.diaChiGiaoHang.diaChiCuThe || '');
+                        }, 100); // Delay nhỏ để đảm bảo reset hoàn tất
+                    }
                 }
             } else {
                 $('#giaoHangDiaChiSection').hide();
                 $('#phiVanChuyenRow').addClass('d-none');
+                // Reset các trường địa chỉ khi không giao hàng
+                $('#hoVaTen').val('');
+                $('#soDienThoai').val('');
+                resetDiaChiDropdowns();
+                $('#diaChiCuThe').val('');
             }
 
             // Set lại giá trị tiền khách đưa cho đúng hóa đơn hiện tại
@@ -1329,7 +1434,7 @@
                         SoDienThoai: hoaDonHienTai.khachHang.soDienThoai || "",
                         Email: hoaDonHienTai.khachHang.email || "",
                         UserId: hoaDonHienTai.khachHang.id || null,
-                        TongTien: hoaDonHienTai.tongTien,
+                        TongTien: Math.max(hoaDonHienTai.tongTien - (hoaDonHienTai.giamGia || 0), 0),
                         TrangThai: hoaDonHienTai.trangThai || 0,
                         DiaChi: hoaDonHienTai.diaChi || "",
                         GhiChu: hoaDonHienTai.ghiChu || "",
@@ -1855,7 +1960,7 @@
                         SoDienThoai: customer.soDienThoai,
                         Email: customer.email,
                         UserId: customer.id,
-                        TongTien: hoaDonHienTai.tongTien,
+                        TongTien: Math.max(hoaDonHienTai.tongTien - (hoaDonHienTai.giamGia || 0), 0),
                         TrangThai: hoaDonHienTai.trangThai || 0,
                         DiaChi: hoaDonHienTai.diaChi || "",
                         GhiChu: hoaDonHienTai.ghiChu || "",
@@ -1921,12 +2026,27 @@
             $("#giaoHangDiaChiSection").hide();
             $("#toggleGiaoHang").prop("checked", false);
             $("#phiVanChuyenRow").addClass("d-none");
+            $("#btnChonDiaChi").addClass("d-none");
             // Reset trong biến dữ liệu nếu có
             if (hoaDonHienTai) {
                 hoaDonHienTai.isGiaoHang = false;
                 hoaDonHienTai.diaChiGiaoHang = null;
                 hoaDonHienTai.khachHang = { id: null, hoTen: "", soDienThoai: "", email: "" };
+                hoaDonHienTai.phiVanChuyen = 0;
             }
+        }
+
+        // Reset các dropdown địa chỉ
+        function resetDiaChiDropdowns() {
+            $('#province').val('').trigger('change');
+            $('#district').html('<option value="">Chọn Quận/Huyện</option>').prop('disabled', true);
+            $('#ward').html('<option value="">Chọn Phường/Xã</option>').prop('disabled', true);
+            $('#provinceName').val('');
+            $('#provinceCode').val('');
+            $('#districtName').val('');
+            $('#districtCode').val('');
+            $('#wardName').val('');
+            $('#wardCode').val('');
         }
 
         // Thêm sự kiện cho nút xóa khách hàng đã chọn
@@ -1938,11 +2058,11 @@
                     contentType: 'application/json',
                     data: JSON.stringify({
                         Id: hoaDonHienTai.id,
-                        HoTen: "",
+                        HoTen: "Khách hàng lẻ",
                         SoDienThoai: "",
                         Email: "",
                         UserId: null,
-                        TongTien: hoaDonHienTai.tongTien,
+                        TongTien: Math.max(hoaDonHienTai.tongTien - (hoaDonHienTai.giamGia || 0), 0),
                         TrangThai: hoaDonHienTai.trangThai || 0,
                         DiaChi: hoaDonHienTai.diaChi || "",
                         GhiChu: hoaDonHienTai.ghiChu || "",
@@ -1950,15 +2070,26 @@
                         LoaiHoaDon: hoaDonHienTai.loaiHoaDon || 2,
                         NgayThanhToan: hoaDonHienTai.ngayThanhToan || null,
                         MaHoaDon: hoaDonHienTai.tenHoaDon || "",
-                        PhiVanChuyen: hoaDonHienTai.phiVanChuyen || 0,
+                        PhiVanChuyen: 0, // Đảm bảo reset phí ship
                         TrangThaiThanhToan: hoaDonHienTai.trangThaiThanhToan || 1,
                         VoucherId: hoaDonHienTai.voucherId || null,
-                        GiaoHang: hoaDonHienTai.isGiaoHang || false,
-                        TienKhachDua: parseInt($("#tienKhachDua").val().replace(/[^0-9]/g, "")) || 0
+                        GiaoHang: false, // Đảm bảo tắt giao hàng
+                        TienKhachDua: 0,
+                        // Nếu có các trường địa chỉ giao hàng riêng, truyền rỗng hết
+                        TenNguoiNhan: "",
+                        SoDienThoaiNhan: "",
+                        MaTinh: "",
+                        TenThanhPho: "",
+                        MaHuyen: "",
+                        TenHuyen: "",
+                        MaXa: "",
+                        TenXa: "",
+                        TenDiaChi: ""
                     }),
                     success: function(res) {
                         if (res && res.success) {
                             resetKhachHang();
+                            capNhatHoaDonHienTai(); 
                             $("#selectedCustomerTag").addClass("d-none");
                             toastr.success("Đã xóa thông tin khách hàng khỏi hóa đơn!");
                         } else {
@@ -2072,7 +2203,7 @@
                                     SoDienThoai: hoaDonHienTai.khachHang.soDienThoai || "",
                                     Email: hoaDonHienTai.khachHang.email || "",
                                     UserId: hoaDonHienTai.khachHang.id || null,
-                                    TongTien: hoaDonHienTai.tongTien,
+                                    TongTien: Math.max(hoaDonHienTai.tongTien - (hoaDonHienTai.giamGia || 0), 0),
                                     TrangThai: hoaDonHienTai.trangThai || 0,
                                     DiaChi: hoaDonHienTai.diaChi || "",
                                     GhiChu: hoaDonHienTai.ghiChu || "",
@@ -2230,7 +2361,7 @@
                 return;
             }
 
-            let phuongThucThanhToan = $("#tienMat").is(":checked") ? 1 : 2; // 1: Tiền mặt, 2: Chuyển khoản
+            let phuongThucThanhToan = $("#tienMat").is(":checked") ? 1 : 3; // 1: Tiền mặt, 3: Chuyển khoản
             let tongTienThanhToan = hoaDonHienTai.tongTien + (hoaDonHienTai.phiVanChuyen || 0) - (hoaDonHienTai.giamGia || 0);
             if (tongTienThanhToan < 0) tongTienThanhToan = 0;
 
@@ -2250,7 +2381,7 @@
             // Lấy các trường cần thiết từ hoaDonHienTai
             let data = {
                 Id: hoaDonHienTai.id,
-                TongTien: hoaDonHienTai.tongTien,
+                TongTien: Math.max(hoaDonHienTai.tongTien - (hoaDonHienTai.giamGia || 0), 0),
                 UserId: hoaDonHienTai.khachHang?.id || null,
                 DiaChi: hoaDonHienTai.diaChi || "",
                 SoDienThoai: hoaDonHienTai.khachHang?.soDienThoai || "",
@@ -2267,7 +2398,17 @@
                 GiaoHang: hoaDonHienTai.isGiaoHang || false,
                 TienKhachDua: parseInt($("#tienKhachDua").val().replace(/[^0-9]/g, "")) || 0
             };
+            let diaChiCuThe = $('#diaChiCuThe').val() || '';
+            let ward = $('#ward option:selected').text() || '';
+            let district = $('#district option:selected').text() || '';
+            let province = $('#province option:selected').text() || '';
 
+            let diaChiDayDu = [diaChiCuThe, ward, district, province]
+                .filter(x => x && x !== 'Chọn Phường/Xã' && x !== 'Chọn Quận/Huyện' && x !== 'Chọn Tỉnh/Thành phố')
+                .join(', ');
+
+            // Gán vào data gửi lên server
+            data.DiaChi = diaChiDayDu;
             Swal.fire({
                 title: 'Xác nhận thanh toán',
                 text: 'Bạn có chắc chắn muốn thanh toán hóa đơn này?',
@@ -2277,33 +2418,60 @@
                 cancelButtonText: 'Hủy'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    $.ajax({
-                        url: '/HoaDon/ThanhToan',
-                        type: 'POST',
-                        contentType: 'application/json',
-                        data: JSON.stringify(data),
-                        success: function (res) {
-                            if (res && res.success) {
-                                toastr.success("Thanh toán thành công!");
-                                // Xóa hóa đơn đã thanh toán khỏi danh sách local
-                                danhSachHoaDon = danhSachHoaDon.filter(hd => hd.id !== hoaDonHienTai.id);
-                                if (danhSachHoaDon.length === 0) {
-                                    taoHoaDonMoi();
+                    if (phuongThucThanhToan === 3) {
+                        // Gọi API tạo link VNPay, không tự cập nhật hóa đơn ở client
+                        $.ajax({
+                            url: 'https://localhost:7277/api/thanhtoan/vnpay',
+                            type: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify({
+                                amount: tongTienThanhToan,
+                                orderId: hoaDonHienTai.id,
+                                orderInfo: 'Thanh toán hóa đơn tại quầy',
+                                returnUrl: 'https://localhost:7277/api/thanhtoan/vnpay-return',
+                                notifyUrl: 'https://localhost:7277/api/thanhtoan/vnpay-return'
+                            }),
+                            success: function(res) {
+                                if (res && res.paymentUrl) {
+                                    window.location.href = res.paymentUrl;
                                 } else {
-                                    hoaDonHienTai = danhSachHoaDon[0];
-                                    capNhatTabHoaDon();
-                                    capNhatHoaDonHienTai();
+                                    toastr.error('Không lấy được link thanh toán VNPay!');
                                 }
-                                // Có thể gọi lại loadHoaDonCho() để đồng bộ với server nếu muốn
-                                // loadHoaDonCho();
-                            } else {
-                                toastr.error(res.message || "Thanh toán thất bại!");
+                            },
+                            error: function(xhr) {
+                                toastr.error('Lỗi khi tạo link thanh toán VNPay: ' + (xhr.responseJSON?.message || xhr.statusText));
                             }
-                        },
-                        error: function (xhr) {
-                            toastr.error("Lỗi khi thanh toán: " + (xhr.responseJSON?.message || xhr.statusText));
-                        }
-                    });
+                        });
+                    } else {
+                        // Tiền mặt - xử lý như cũ
+                        $.ajax({
+                            url: '/HoaDon/ThanhToan',
+                            type: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify(data),
+                            success: function (res) {
+                                if (res && res.success) {
+                                    toastr.success("Thanh toán thành công!");
+                                    // Xóa hóa đơn đã thanh toán khỏi danh sách local
+                                    danhSachHoaDon = danhSachHoaDon.filter(hd => hd.id !== hoaDonHienTai.id);
+                                    if (danhSachHoaDon.length === 0) {
+                                        taoHoaDonMoi();
+                                    } else {
+                                        hoaDonHienTai = danhSachHoaDon[0];
+                                        capNhatTabHoaDon();
+                                        capNhatHoaDonHienTai();
+                                    }
+                                    // Có thể gọi lại loadHoaDonCho() để đồng bộ với server nếu muốn
+                                    // loadHoaDonCho();
+                                } else {
+                                    toastr.error(res.message || "Thanh toán thất bại!");
+                                }
+                            },
+                            error: function (xhr) {
+                                toastr.error("Lỗi khi thanh toán: " + (xhr.responseJSON?.message || xhr.statusText));
+                            }
+                        });
+                    }
                 }
             });
         });
@@ -2319,7 +2487,18 @@
                 reader.readAsDataURL(file);
             }
         }
-
+$(document).ready(function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const paymentStatus = urlParams.get('payment');
+    if (paymentStatus === 'success') {
+        toastr.success('Thanh toán VNPay thành công!');
+        // Xóa query string để tránh toast lặp lại khi reload
+        window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (paymentStatus === 'fail') {
+        toastr.error('Thanh toán VNPay thất bại!');
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+});
         // Xử lý form validation
         function initFormValidation() {
             const form = document.getElementById('formThemMoiKH');
@@ -2460,9 +2639,281 @@
         });
 
         $(".voucher-action").click(function() {
+            // Xóa voucher cũ
+            $('#private-voucher-list').empty();
+            $('#public-voucher-list').empty();
+            $('.empty-state').show();
+
+            let userId = hoaDonHienTai && hoaDonHienTai.khachHang ? hoaDonHienTai.khachHang.id : null;
+            let tongTien = hoaDonHienTai && hoaDonHienTai.tongTien ? hoaDonHienTai.tongTien : 0;
+
+            if (userId) {
+                loadPrivateVouchers(userId, tongTien);
+            } else {
+                // Nếu chưa chọn khách hàng thì không gọi riêng tư
+                $('#private-voucher-list').html('<div class="empty-text">Vui lòng chọn khách hàng để xem voucher riêng tư</div>');
+            }
+            loadPublicVouchers(tongTien);
+
             $("#modalChonVoucher").modal("show");
-            loadDanhSachVoucher();
         });
+
+        function loadPrivateVouchers(userId, tongTienHoaDon) {
+            $.ajax({
+                url: '/Voucher/PrivateVouchers',
+                type: 'GET',
+                data: { userId: userId, tongTienHoaDon: tongTienHoaDon },
+                success: function (res) {
+                    if (res && res.isSuccessed && res.resultObj && res.resultObj.length > 0) {
+                        let html = '';
+                        res.resultObj.forEach(function (voucher) {
+                            let isSelected = hoaDonHienTai.maVoucherDaChon === voucher.maVoucher;
+                            html += `
+                                <div class="voucher-item${isSelected ? ' selected' : ''}"
+                                     data-id="${voucher.id}"
+                                     data-voucher="${voucher.maVoucher}"
+                                     data-dieukienapdung="${voucher.dieuKienApDung}"
+                                     data-giatri="${voucher.giaTriGiamGia}"
+                                     data-loaigiamgia="${voucher.loaiGiamGia}"
+                                     onclick="selectVoucher(this)">
+                                    <div class="voucher-badge">x${voucher.soLuong}</div>
+                                    <div class="voucher-code">${voucher.maVoucher}</div>
+                                    <div class="voucher-info">
+                                        <div class="voucher-name">${voucher.loaiVoucher === 1 ? 'Riêng tư' : 'Công khai'}</div>
+                                        <div class="voucher-details">Đơn tối thiểu: ${voucher.dieuKienApDung.toLocaleString()} đ<br>Ngày kết thúc: ${moment(voucher.thoiGianKetThuc).format('HH:mm:ss DD/MM/YYYY')}</div>
+                                    </div>
+                                    <div class="voucher-discount">${voucher.loaiGiamGia === 0 ? voucher.giaTriGiamGia + '%' : voucher.giaTriGiamGia.toLocaleString() + ' đ'}</div>
+                                    <div class="radio-container">
+                                        <input type="radio" name="voucherRadio" style="display:none;" ${isSelected ? 'checked' : ''}>
+                                        <div class="radio-btn${isSelected ? ' selected' : ''}"></div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        $('.empty-state').hide();
+                        $('#private-voucher-list').html(html);
+
+                        // GỌI LẠI selectVoucher nếu có voucher đã chọn
+                        if (hoaDonHienTai.voucherId) {
+                            let selected = $(`#private-voucher-list .voucher-item[data-id='${hoaDonHienTai.voucherId}']`);
+                            if (selected.length) {
+                                selectVoucher(selected[0]);
+                            }
+                        }
+                    } else {
+                        $('#private-voucher-list').html('<div class="empty-text">Danh sách phiếu giảm giá trống</div>');
+                    }
+                }
+            });
+        }
+
+        function loadPublicVouchers(tongTienHoaDon) {
+            $.ajax({
+                url: '/Voucher/PublicVouchers',
+                type: 'GET',
+                data: { tongTienHoaDon: tongTienHoaDon },
+                success: function (res) {
+                    if (res && res.isSuccessed && res.resultObj && res.resultObj.length > 0) {
+                        let html = '';
+                        res.resultObj.forEach(function (voucher) {
+                            html += `
+                                <div class="voucher-item"
+                                     data-id="${voucher.id}"
+                                     data-voucher="${voucher.maVoucher}"
+                                     data-dieukienapdung="${voucher.dieuKienApDung}"
+                                     data-giatri="${voucher.giaTriGiamGia}"
+                                     data-loaigiamgia="${voucher.loaiGiamGia}"
+                                     onclick="selectVoucher(this)">
+                                    <div class="voucher-badge">x${voucher.soLuong}</div>
+                                    <div class="voucher-code">${voucher.maVoucher}</div>
+                                    <div class="voucher-info">
+                                        <div class="voucher-name">${voucher.loaiVoucher === 1 ? 'Riêng tư' : 'Công khai'}</div>
+                                        <div class="voucher-details">Đơn tối thiểu: ${voucher.dieuKienApDung.toLocaleString()} đ<br>Ngày kết thúc: ${moment(voucher.thoiGianKetThuc).format('HH:mm:ss DD/MM/YYYY')}</div>
+                                    </div>
+                                    <div class="voucher-discount">${voucher.loaiGiamGia === 0 ? voucher.giaTriGiamGia + '%' : voucher.giaTriGiamGia.toLocaleString() + ' đ'}</div>
+                                    <div class="radio-container">
+                                        <input type="radio" name="voucherRadio" style="display:none;">
+                                        <div class="radio-btn"></div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        $('#public-voucher-list').html(html);
+                        // GỌI LẠI selectVoucher nếu có voucher đã chọn
+                        if (hoaDonHienTai.voucherId) {
+                            let selected = $(`#public-voucher-list .voucher-item[data-id='${hoaDonHienTai.voucherId}']`);
+                            if (selected.length) {
+                                selectVoucher(selected[0]);
+                            }
+                        }
+                    } else {
+                        $('#public-voucher-list').html('<div class="empty-text">Danh sách phiếu giảm giá trống</div>');
+                    }
+                }
+            });
+        }
+
+        function selectVoucher(element) {
+            $('.voucher-item').removeClass('selected');
+            $('.voucher-item .radio-btn').removeClass('selected');
+            $('.voucher-item input[type=radio]').prop('checked', false);
+            $(element).addClass('selected');
+            $(element).find('.radio-btn').addClass('selected');
+            $(element).find('input[type=radio]').prop('checked', true);
+
+            let maVoucher = $(element).data('voucher');
+            let voucherId = $(element).data('id');
+            hoaDonHienTai.maVoucherDaChon = maVoucher;
+            hoaDonHienTai.voucherId = voucherId;
+
+            // Lấy thông tin giảm giá từ data attribute
+            let voucher = {
+                loaiGiamGia: parseInt($(element).data('loaigiamgia')),
+                giaTriGiamGia: parseInt($(element).data('giatri')) || 0,
+                dieuKienApDung: parseInt($(element).data('dieukienapdung')) || 0
+            };
+
+            // Tính giảm giá thực tế
+            let tongTien = hoaDonHienTai.tongTien || 0;
+            let giamGia = 0;
+            if (tongTien >= voucher.dieuKienApDung) {
+                if (voucher.loaiGiamGia === 0) {
+                    giamGia = Math.floor(tongTien * voucher.giaTriGiamGia / 100);
+                } else {
+                    giamGia = voucher.giaTriGiamGia;
+                }
+            }
+            hoaDonHienTai.giamGia = giamGia;
+
+                // Hiển thị giá trị giảm giá trong modal
+    $('#giamGiaValue').text(formatCurrency(giamGia));
+
+    // Hiển thị thông báo voucher đã áp dụng
+    if (giamGia > 0) {
+        let voucherName = $(element).find('.voucher-code').text();
+        let discountText = voucher.loaiGiamGia === 0 ? voucher.giaTriGiamGia + '%' : formatCurrency(voucher.giaTriGiamGia);
+        let minOrderText = formatCurrency(voucher.dieuKienApDung);
+        
+        $('#voucherName').text(voucherName);
+        $('#voucherDiscountValue').text(discountText);
+        $('#voucherMinOrder').text(minOrderText);
+        $('#voucherAppliedNotification').removeClass('d-none');
+    } else {
+        $('#voucherAppliedNotification').addClass('d-none');
+    }
+
+    // Cập nhật tổng tiền thanh toán trong modal
+    let phiVanChuyen = hoaDonHienTai.phiVanChuyen || 0;
+    let tongTienThanhToan = tongTien + phiVanChuyen - giamGia;
+    if (tongTienThanhToan < 0) tongTienThanhToan = 0;
+    $('#tongTienThanhToan').text(formatCurrency(tongTienThanhToan));
+
+            // Gọi API cập nhật hóa đơn
+            if (hoaDonHienTai && hoaDonHienTai.id) {
+                $.ajax({
+                    url: '/HoaDon/UpdateHoaDonCho',
+                    type: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        Id: hoaDonHienTai.id,
+                        HoTen: hoaDonHienTai.khachHang.hoTen || "",
+                        SoDienThoai: hoaDonHienTai.khachHang.soDienThoai || "",
+                        Email: hoaDonHienTai.khachHang.email || "",
+                        UserId: hoaDonHienTai.khachHang.id || null,
+                        TongTien: Math.max(hoaDonHienTai.tongTien - (hoaDonHienTai.giamGia || 0), 0),
+                        TrangThai: hoaDonHienTai.trangThai || 0,
+                        DiaChi: hoaDonHienTai.diaChi || "",
+                        GhiChu: hoaDonHienTai.ghiChu || "",
+                        PhuongThucThanhToan: hoaDonHienTai.phuongThucThanhToan || 1,
+                        LoaiHoaDon: hoaDonHienTai.loaiHoaDon || 2,
+                        NgayThanhToan: hoaDonHienTai.ngayThanhToan || null,
+                        MaHoaDon: hoaDonHienTai.tenHoaDon || "",
+                        PhiVanChuyen: hoaDonHienTai.phiVanChuyen || 0,
+                        TrangThaiThanhToan: hoaDonHienTai.trangThaiThanhToan || 1,
+                        VoucherId: voucherId,
+                        GiaoHang: hoaDonHienTai.isGiaoHang || false,
+                        TienKhachDua: parseInt($("#tienKhachDua").val().replace(/[^0-9]/g, "")) || 0,
+                        GiamGia: giamGia
+                    }),
+                    success: function(res) {
+                        if (!res || !res.success) {
+                            toastr.warning("Không thể cập nhật voucher cho hóa đơn!");
+                        } else {
+                            // Sau khi cập nhật thành công, cập nhật lại UI ngoài modal
+                            capNhatHoaDonHienTai();
+                        }
+                    },
+                    error: function(xhr) {
+                        toastr.error("Lỗi khi cập nhật voucher: " + (xhr.responseJSON?.message || xhr.statusText));
+                    }
+                });
+            }
+        }
+
+        function removeVoucher() {
+            // Bỏ chọn voucher
+            $('.voucher-item').removeClass('selected');
+            $('.voucher-item .radio-btn').removeClass('selected');
+            $('.voucher-item input[type=radio]').prop('checked', false);
+            
+            // Reset voucher trong hóa đơn
+            hoaDonHienTai.maVoucherDaChon = null;
+            hoaDonHienTai.voucherId = null;
+            hoaDonHienTai.giamGia = 0;
+            
+            // Ẩn thông báo voucher
+            $('#voucherAppliedNotification').addClass('d-none');
+            
+            // Cập nhật hiển thị
+            $('#giamGiaValue').text(formatCurrency(0));
+            
+            // Cập nhật tổng tiền thanh toán
+            let tongTien = hoaDonHienTai.tongTien || 0;
+            let phiVanChuyen = hoaDonHienTai.phiVanChuyen || 0;
+            let tongTienThanhToan = tongTien + phiVanChuyen;
+            $('#tongTienThanhToan').text(formatCurrency(tongTienThanhToan));
+            
+            // Cập nhật hóa đơn trên server
+            if (hoaDonHienTai && hoaDonHienTai.id) {
+                $.ajax({
+                    url: '/HoaDon/UpdateHoaDonCho',
+                    type: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        Id: hoaDonHienTai.id,
+                        HoTen: hoaDonHienTai.khachHang.hoTen || "",
+                        SoDienThoai: hoaDonHienTai.khachHang.soDienThoai || "",
+                        Email: hoaDonHienTai.khachHang.email || "",
+                        UserId: hoaDonHienTai.khachHang.id || null,
+                        TongTien: Math.max(hoaDonHienTai.tongTien - (hoaDonHienTai.giamGia || 0), 0),
+                        TrangThai: hoaDonHienTai.trangThai || 0,
+                        DiaChi: hoaDonHienTai.diaChi || "",
+                        GhiChu: hoaDonHienTai.ghiChu || "",
+                        PhuongThucThanhToan: hoaDonHienTai.phuongThucThanhToan || 1,
+                        LoaiHoaDon: hoaDonHienTai.loaiHoaDon || 2,
+                        NgayThanhToan: hoaDonHienTai.ngayThanhToan || null,
+                        MaHoaDon: hoaDonHienTai.tenHoaDon || "",
+                        PhiVanChuyen: hoaDonHienTai.phiVanChuyen || 0,
+                        TrangThaiThanhToan: hoaDonHienTai.trangThaiThanhToan || 1,
+                        VoucherId: null,
+                        GiaoHang: hoaDonHienTai.isGiaoHang || false,
+                        TienKhachDua: parseInt($("#tienKhachDua").val().replace(/[^0-9]/g, "")) || 0,
+                        GiamGia: 0
+                    }),
+                    success: function(res) {
+                        if (!res || !res.success) {
+                            toastr.warning("Không thể xóa voucher khỏi hóa đơn!");
+                        } else {
+                            capNhatHoaDonHienTai();
+                        }
+                    },
+                    error: function(xhr) {
+                        toastr.error("Lỗi khi xóa voucher: " + (xhr.responseJSON?.message || xhr.statusText));
+                    }
+                });
+            }
+        }
+
 
         $('.phone-only').on('input', function () {
             let val = this.value.replace(/[^0-9]/g, '').slice(0, 10);
@@ -2471,6 +2922,7 @@
             }
             this.value = val;
         });
+
     </script>
 }
 @await Html.PartialAsync("~/Views/KhachHang/_CreateModal.cshtml")
