@@ -41,7 +41,7 @@
 								<label asp-for="Email" class="col-sm-2 col-form-label">Email <span class="text-danger">*</span></label>
 								<div class="col-sm-10">
 									<input asp-for="Email" class="form-control" placeholder="Nhập Gmail..." required pattern="[a-zA-Z0-9._%+-]+@@gmail\.com$" type="email" />
-									<span asp-validation-for="Email" class="text-danger"></span>
+									<span class="invalid-feedback">Vui lòng nhập email</span>
 								</div>
 							</div>
 							<div class="mb-3 row">
@@ -306,6 +306,25 @@
 				}
 				this.value = val;
 			});
+		});
+					// Realtime validation cho email
+				const emailInput = document.querySelector('input[name="Email"]');
+		const emailFeedback = emailInput.parentElement.querySelector('.invalid-feedback');
+
+		emailInput.addEventListener('input', function () {
+			const value = emailInput.value.trim();
+			const regex = /^[a-zA-Z0-9._%+-]+@@gmail\.com$/;
+
+			if (!value) {
+				emailInput.classList.add('is-invalid');
+				emailFeedback.textContent = 'Vui lòng nhập email';
+			} else if (!regex.test(value)) {
+				emailInput.classList.add('is-invalid');
+				emailFeedback.textContent = 'Email phải đúng định dạng và kết thúc bằng @@gmail.com';
+			} else {
+				emailInput.classList.remove('is-invalid');
+				emailFeedback.textContent = '';
+			}
 		});
 	</script>
 }

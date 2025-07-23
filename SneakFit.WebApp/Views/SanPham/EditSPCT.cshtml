@@ -519,6 +519,22 @@
                 }
             }
 
+            // Hàm chung để cập nhật dropdown trong modal chi tiết sản phẩm
+            function reloadDropdownInModal(selectName, newId, newName) {
+                // Tìm đến thẻ select trong modal chính dựa vào thuộc tính `name`
+                var $select = $(`#productDetailModal select[name='${selectName}']`);
+
+                // Kiểm tra xem lựa chọn mới đã tồn tại chưa
+                if ($select.find(`option[value='${newId}']`).length === 0) {
+                    // Nếu chưa, thêm nó vào cuối danh sách
+                    $select.append(`<option value='${newId}'>${newName}</option>`);
+                }
+
+                // Tự động chọn giá trị vừa thêm
+                $select.val(newId);
+                $select.trigger('change'); // Kích hoạt sự kiện change nếu cần
+            }
+
             // Chỉ cho nhập số và tự động format giá bán
             $(document).on('input', '.gia-ban', function() {
                 let value = $(this).val().replace(/\D/g, '');
@@ -1012,69 +1028,184 @@
                 }
             });
 
-            // Xử lý việc gửi biểu mẫu cho các phương thức khác
-            $(document).on('submit', '#formAddThuongHieu', function(e) {
-                e.preventDefault();
-                const formData = $(this).serialize();
-                $.post('/SanPham/AddThuongHieu', formData, function(response) {
-                    if (response.success) {
-                        $('#modalAddThuongHieu').modal('hide');
-                        location.reload();
-                    } else {
-                        toastr.error('Có lỗi xảy ra: ' + response.message);
+            // // Xử lý việc gửi biểu mẫu cho các phương thức khác
+            // $(document).on('submit', '#formAddThuongHieu', function(e) {
+            //     e.preventDefault();
+            //     const formData = $(this).serialize();
+            //     $.post('/SanPham/AddThuongHieu', formData, function(response) {
+            //         if (response.success) {
+            //             $('#modalAddThuongHieu').modal('hide');
+            //             location.reload();
+            //         } else {
+            //             toastr.error('Có lỗi xảy ra: ' + response.message);
+            //         }
+            //     });
+            // });
+
+            // $(document).on('submit', '#formAddChatLieu', function(e) {
+            //     e.preventDefault();
+            //     const formData = $(this).serialize();
+            //     $.post('/SanPham/AddChatLieu', formData, function(response) {
+            //         if (response.success) {
+            //             $('#modalAddChatLieu').modal('hide');
+            //             location.reload();
+            //         } else {
+            //             toastr.error('Có lỗi xảy ra: ' + response.message);
+            //         }
+            //     });
+            // });
+
+            // $(document).on('submit', '#formAddDeGiay', function(e) {
+            //     e.preventDefault();
+            //     const formData = $(this).serialize();
+            //     $.post('/SanPham/AddDeGiay', formData, function(response) {
+            //         if (response.success) {
+            //             $('#modalAddDeGiay').modal('hide');
+            //             location.reload();
+            //         } else {
+            //             toastr.error('Có lỗi xảy ra: ' + response.message);
+            //         }
+            //     });
+            // });
+
+            // $(document).on('submit', '#formAddKichThuoc', function(e) {
+            //     e.preventDefault();
+            //     const formData = $(this).serialize();
+            //     $.post('/SanPham/AddKichThuoc', formData, function(response) {
+            //         if (response.success) {
+            //             $('#modalAddKichThuoc').modal('hide');
+            //             location.reload();
+            //         } else {
+            //             toastr.error('Có lỗi xảy ra: ' + response.message);
+            //         }
+            //     });
+            // });
+
+            // $(document).on('submit', '#formAddMauSac', function(e) {
+            //     e.preventDefault();
+            //     const formData = $(this).serialize();
+            //     $.post('/SanPham/AddMauSac', formData, function(response) {
+            //         if (response.success) {
+            //             $('#modalAddMauSac').modal('hide');
+            //             // Reset form should be handled by the loaded partial view's script or reload
+            //             location.reload();
+            //         } else {
+            //             toastr.error('Có lỗi xảy ra: ' + response.message);
+            //         }
+            //     });
+            // });
+
+            // Xử lý submit form trong modal thêm thương hiệu
+            $(document).on('submit', '#modalAddThuongHieu form', function(e) {
+                e.preventDefault(); // Ngăn form submit mặc định
+                var form = $(this);
+                $.ajax({
+                    url: '/ThuongHieu/Create', // URL đến action Create của ThuongHieuController
+                    type: 'POST',
+                    data: form.serialize(),
+                    success: function(res) {
+                        if (res.success) {
+                            $('#modalAddThuongHieu').modal('hide'); // Đóng modal thêm mới
+                            reloadDropdownInModal('ThuongHieuId', res.id, res.name); // Cập nhật dropdown
+                            toastr.success('Thêm thương hiệu thành công!');
+                        } else {
+                            toastr.error(res.message || 'Không thể thêm thương hiệu');
+                        }
+                    },
+                    error: function() {
+                        toastr.error('Có lỗi xảy ra khi gửi yêu cầu!');
                     }
                 });
             });
 
-            $(document).on('submit', '#formAddChatLieu', function(e) {
+            // Xử lý submit form trong modal thêm chất liệu
+            $(document).on('submit', '#modalAddChatLieu form', function(e) {
                 e.preventDefault();
-                const formData = $(this).serialize();
-                $.post('/SanPham/AddChatLieu', formData, function(response) {
-                    if (response.success) {
-                        $('#modalAddChatLieu').modal('hide');
-                        location.reload();
-                    } else {
-                        toastr.error('Có lỗi xảy ra: ' + response.message);
+                var form = $(this);
+                $.ajax({
+                    url: '/ChatLieu/Create',
+                    type: 'POST',
+                    data: form.serialize(),
+                    success: function(res) {
+                        if (res.success) {
+                            $('#modalAddChatLieu').modal('hide');
+                            reloadDropdownInModal('ChatLieuId', res.id, res.name);
+                            toastr.success('Thêm chất liệu thành công!');
+                        } else {
+                            toastr.error(res.message || 'Không thể thêm chất liệu');
+                        }
+                    },
+                    error: function() {
+                        toastr.error('Có lỗi xảy ra khi gửi yêu cầu!');
                     }
                 });
             });
 
-            $(document).on('submit', '#formAddDeGiay', function(e) {
+            // Xử lý submit form trong modal thêm đế giày
+            $(document).on('submit', '#modalAddDeGiay form', function(e) {
                 e.preventDefault();
-                const formData = $(this).serialize();
-                $.post('/SanPham/AddDeGiay', formData, function(response) {
-                    if (response.success) {
-                        $('#modalAddDeGiay').modal('hide');
-                        location.reload();
-                    } else {
-                        toastr.error('Có lỗi xảy ra: ' + response.message);
+                var form = $(this);
+                $.ajax({
+                    url: '/DeGiay/Create',
+                    type: 'POST',
+                    data: form.serialize(),
+                    success: function(res) {
+                        if (res.success) {
+                            $('#modalAddDeGiay').modal('hide');
+                            reloadDropdownInModal('DeGiayId', res.id, res.name);
+                            toastr.success('Thêm đế giày thành công!');
+                        } else {
+                            toastr.error(res.message || 'Không thể thêm đế giày');
+                        }
+                    },
+                    error: function() {
+                        toastr.error('Có lỗi xảy ra khi gửi yêu cầu!');
                     }
                 });
             });
 
-            $(document).on('submit', '#formAddKichThuoc', function(e) {
+            // Xử lý submit form trong modal thêm kích thước
+            $(document).on('submit', '#modalAddKichThuoc form', function(e) {
                 e.preventDefault();
-                const formData = $(this).serialize();
-                $.post('/SanPham/AddKichThuoc', formData, function(response) {
-                    if (response.success) {
-                        $('#modalAddKichThuoc').modal('hide');
-                        location.reload();
-                    } else {
-                        toastr.error('Có lỗi xảy ra: ' + response.message);
+                var form = $(this);
+                $.ajax({
+                    url: '/KichThuoc/Create',
+                    type: 'POST',
+                    data: form.serialize(),
+                    success: function(res) {
+                        if (res.success) {
+                            $('#modalAddKichThuoc').modal('hide');
+                            reloadDropdownInModal('KichThuocId', res.id, res.name); // <--- SỬA THÀNH res.name
+                            toastr.success('Thêm kích thước thành công!');
+                        } else {
+                            toastr.error(res.message || 'Không thể thêm kích thước');
+                        }
+                    },
+                    error: function() {
+                        toastr.error('Có lỗi xảy ra khi gửi yêu cầu!');
                     }
                 });
             });
 
-            $(document).on('submit', '#formAddMauSac', function(e) {
+            // Xử lý submit form trong modal thêm màu sắc
+            $(document).on('submit', '#modalAddMauSac form', function(e) {
                 e.preventDefault();
-                const formData = $(this).serialize();
-                $.post('/SanPham/AddMauSac', formData, function(response) {
-                    if (response.success) {
-                        $('#modalAddMauSac').modal('hide');
-                        // Reset form should be handled by the loaded partial view's script or reload
-                        location.reload();
-                    } else {
-                        toastr.error('Có lỗi xảy ra: ' + response.message);
+                var form = $(this);
+                $.ajax({
+                    url: '/MauSac/Create',
+                    type: 'POST',
+                    data: form.serialize(),
+                    success: function(res) {
+                        if (res.success) {
+                            $('#modalAddMauSac').modal('hide');
+                          reloadDropdownInModal('MauSacId', res.id, res.name); // <--- SỬA THÀNH res.name
+                            toastr.success('Thêm màu sắc thành công!');
+                        } else {
+                            toastr.error(res.message || 'Không thể thêm màu sắc');
+                        }
+                    },
+                    error: function() {
+                        toastr.error('Có lỗi xảy ra khi gửi yêu cầu!');
                     }
                 });
             });
