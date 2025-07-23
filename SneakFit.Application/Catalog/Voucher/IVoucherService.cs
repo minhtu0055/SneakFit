@@ -22,6 +22,7 @@ namespace SneakFit.Application.Catalog.Voucher
         Task<List<VoucherUserViewModel>> GetUsersForVoucher(Guid? voucherId = null);
         Task<PagedResult<VoucherUserViewModel>> GetUsersForVoucherPaging(GetVoucherUserPagingRequest request); // lấy danh sách khách hàng phân trang
         Task<string> GetNextVoucherCode();
+        Task<bool> GiamSoLuongVoucher(Guid id, int soLuong);
         Task<List<VoucherViewModels>> GetPublicVouchers(decimal tongTienHoaDon);
     }
 }

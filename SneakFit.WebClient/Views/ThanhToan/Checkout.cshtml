@@ -102,8 +102,12 @@
                     <span>Thanh toán khi nhận hàng (COD)</span>
                 </label>
                 <label class="payment-btn">
-                    <input type="radio" name="HinhThucThanhToan" id="online" value="Online">
-                    <span>Thanh toán online</span>
+                    <input type="radio" name="HinhThucThanhToan" id="VnPay" value="VnPay">
+                    <span>Thanh toán VnPay</span>
+                </label>
+                <label class="payment-btn">
+                    <input type="radio" name="HinhThucThanhToan" id="MoMo" value="MoMo">
+                    <span>Thanh toán MoMo</span>
                 </label>
                 <span id="paymentError" class="text-danger" style="display:none;">Vui lòng chọn một hình thức thanh toán.</span>
             </div>
@@ -114,16 +118,19 @@
             <h5>Tóm tắt đơn hàng</h5>
             <div class="summary-item">
                 <span>Tổng tiền hàng</span>
-                <span>@(Model.TongTienSanPham.ToString("N0")) ₫</span>
+                <span id="summary-products">@Model.TongTienSanPham.ToString("N0") ₫</span>
+            </div>
+            <div class="summary-item" id="summary-voucher" style="display:@((Model.VoucherId != null && Model.DiscountAmount > 0) ? "flex" : "none")">
+                <span>Áp dụng voucher</span>
+                <span class="text-danger" id="summary-voucher-amount">-@((Model.DiscountAmount ?? 0).ToString("N0")) ₫</span>
             </div>
             <div class="summary-item">
                 <span>Phí vận chuyển</span>
                 <span id="summary-shipping">@Model.PhiVanChuyen.ToString("N0") ₫</span>
             </div>
-            <hr />
             <div class="summary-item fw-bold fs-5">
                 <span>Tổng thanh toán</span>
-                <span id="summary-total">@((Model.TongTienSanPham + Model.PhiVanChuyen).ToString("N0")) ₫</span>
+                <span id="summary-total">@((Model.TongTienSanPham + Model.PhiVanChuyen - (Model.DiscountAmount ?? 0)).ToString("N0")) ₫</span>
             </div>
 
             <!-- Hiển thị validation errors -->
@@ -146,12 +153,21 @@
                 <input type="hidden" asp-for="HoTen" id="HoTenInput" value="@Model.HoTen" />
                 <input type="hidden" asp-for="SoDienThoai" id="SoDienThoaiInput" value="@Model.SoDienThoai" />
                 @* <input type="hidden" asp-for="Email" value="@Model.Email" /> *@
+                <input type="hidden" asp-for="VoucherId" />
+                <input type="hidden" asp-for="DiscountAmount" />
                 <input type="hidden" asp-for="DiaChi" id="DiaChiInput" value="@Model.DiaChi" />
                 <input type="hidden" asp-for="GhiChu" value="@Model.GhiChu ?? string.Empty" />
                 <input type="hidden" asp-for="PhiVanChuyen" value="@Model.PhiVanChuyen" />
                 <input type="hidden" asp-for="TongTienSanPham" value="@Model.TongTienSanPham" />
                 <input type="hidden" asp-for="DiaChiMoi" id="HiddenAddressInput" value="@Model.DiaChiMoi ?? string.Empty" />
                 <input type="hidden" asp-for="PhuongThucThanhToan" id="selectedPayment" value="@(Model.PhuongThucThanhToan?.ToString())" />
+                <!-- Hidden voucher fields -->
+                <input type="hidden" name="VoucherId" id="VoucherId" />
+                <input type="hidden" name="VoucherCode" id="VoucherCode" />
+                <input type="hidden" name="VoucherType" id="VoucherType" />
+                <input type="hidden" name="VoucherValue" id="VoucherValue" />
+                <input type="hidden" name="VoucherMax" id="VoucherMax" />
+                <input type="hidden" name="VoucherDiscountAmount" id="VoucherDiscountAmount" />
                 <button type="submit" class="btn btn-danger btn-checkout mt-3" id="submitBtn">Đặt hàng</button>
             </form>
         </div>
@@ -166,6 +182,7 @@
         const userId = '@User.FindFirst("UserId")?.Value' || '@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value';
         const defaultAddressId = '@Model.DefaultAddressId'; // Thêm biến từ model
         let selectedAddressId = null; // Biến để theo dõi địa chỉ được chọn tạm thời trong checkout
+        let selectedVoucher = null;
 
         $(document).ready(function () {
             // Xóa dữ liệu cũ trong sessionStorage khi load trang để đảm bảo chọn địa chỉ mới
@@ -324,7 +341,7 @@
                 });
             }
 
-            // Hàm update phí ship khi địa chỉ thay đổi
+            // Hàm cập nhật phí vận chuyển theo địa chỉ mới
             function updateShippingFee(address) {
                 if (!address.maHuyen || !address.maXa) {
                     alert('Địa chỉ không đầy đủ để tính phí vận chuyển.');
@@ -335,7 +352,7 @@
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify({
-                        FromDistrictId: 1452, // mã quận shop
+                        FromDistrictId: 1452, // Địa chỉ shop
                         ToDistrict: parseInt(address.maHuyen)
                     }),
                     success: function(serviceRes) {
@@ -343,7 +360,7 @@
                             alert('Địa chỉ này không nằm trong vùng giao hàng của GHN.');
                             return;
                         }
-                        var serviceId = serviceRes.data[0].service_id; // lấy service_id đầu tiên
+                        var serviceId = serviceRes.data[0].service_id;
                         $.ajax({
                             url: baseUrl + '/api/ghn/shipping-fee',
                             type: 'POST',
@@ -363,34 +380,41 @@
                                 var newFee = 0;
                                 if (json && json.data && (json.data.total || json.data.service_fee)) {
                                     newFee = json.data.total || json.data.service_fee;
-                                    // $('#shipping-fee').text(newFee.toLocaleString() + ' ₫');
-                                    // $('#summary-shipping').text(newFee.toLocaleString() + ' ₫');
-                                    // $('#PhiVanChuyenInput').val(newFee);
-                                    // // Update tổng
-                                    // var tongSanPham = @Model.TongTienSanPham;
-                                    // var tong = tongSanPham + newFee;
-                                    // $('#summary-total').text(tong.toLocaleString() + ' ₫');
                                     $('#shipping-fee').text(newFee.toLocaleString('vi-VN') + ' ₫');
                                     $('#summary-shipping').text(newFee.toLocaleString('vi-VN') + ' ₫');
-                                    $('input[asp-for="PhiVanChuyen"]').val(newFee);  // Update hidden input
-                                    // Recalc total
+                                    $('input[asp-for="PhiVanChuyen"]').val(newFee); // Update lại hidden input
                                     var tongSanPham = @Model.TongTienSanPham;
-                                    var tong = tongSanPham + newFee - model.DiscountAmount;  // Nếu có discount
+                                    var tong = tongSanPham + newFee;
                                     $('#summary-total').text(tong.toLocaleString('vi-VN') + ' ₫');
-                                } else {
-                                    alert('Không lấy được phí vận chuyển cho địa chỉ này. Vui lòng thử lại hoặc chọn địa chỉ khác.');
+
+                                    // Cập nhật lại summary sau khi thay đổi phí vận chuyển
+                                    updateOrderSummary(selectedVoucher);
                                 }
-                            },
-                            error: function() {
-                                alert('Không lấy được phí vận chuyển cho địa chỉ này. Vui lòng thử lại hoặc chọn địa chỉ khác.');
                             }
                         });
-                    },
-                    error: function() {
-                        alert('Không lấy được dịch vụ vận chuyển phù hợp cho địa chỉ này.');
                     }
                 });
             }
+
+            // Hàm khi chọn "Xác nhận" địa chỉ mặc định trong modal
+            $('#confirm-address').click(function () {
+                if (!selectedAddressId) {
+                    alert('Vui lòng chọn một địa chỉ.');
+                    return;
+                }
+                $.ajax({
+                    url: `/DiaChi/GetById?id=${selectedAddressId}`,
+                    type: 'GET',
+                    success: function(response) {
+                        const address = response.resultObj || response;
+                        setCheckoutAddress(address, true); // Cập nhật địa chỉ trong checkout và tính phí vận chuyển
+                        $('#changeAddressModal').modal('hide');
+                    },
+                    error: function(xhr) {
+                        alert('Lỗi khi cập nhật địa chỉ.');
+                    }
+                });
+            });
 
             // Hàm cập nhật địa chỉ nhận hàng trên giao diện Checkout
             function setCheckoutAddress(address, shouldUpdateShippingFee = true) {
@@ -565,12 +589,15 @@
                     data: JSON.stringify(updatedAddress),
                     success: function (response) {
                         if (isDefault) {
-                            setDefaultAddress(addressId); // Chỉ set default nếu checkbox được chọn
+                            setDefaultAddress(addressId);
+                            updateCheckoutAddress(addressId);
                         }
-                        loadUserAddresses();
-                        $('#editAddressModal').modal('hide');
-                        if (selectedAddressId === addressId) {
-                            updateCheckoutAddress(addressId); // Cập nhật nếu địa chỉ này đang được chọn
+                        loadUserAddresses(function () {
+                            $('#editAddressModal').modal('hide');
+                            $('#changeAddressModal').modal('show');
+                        });
+                        if (selectedAddressId === addressId && !isDefault) {
+                            updateCheckoutAddress(addressId);
                         }
                     },
                     error: function (xhr) {
@@ -679,13 +706,13 @@
             });
 
             // Click "Xác nhận" trong changeAddressModal
-            $('#confirm-address').click(function () {
-                if (!selectedAddressId) {
-                    alert('Vui lòng chọn một địa chỉ.');
-                    return;
-                }
-                updateCheckoutAddress(selectedAddressId); // Cập nhật tạm thời cho checkout
-            });
+            // $('#confirm-address').click(function () {
+            //     if (!selectedAddressId) {
+            //         alert('Vui lòng chọn một địa chỉ.');
+            //         return;
+            //     }
+            //     updateCheckoutAddress(selectedAddressId); // Cập nhật tạm thời cho checkout
+            // });
 
             // Click "Lưu địa chỉ" trong addNewAddressModal
             $('#save-new-address').click(function () {
@@ -729,33 +756,88 @@
 
             // Xử lí chọn Voucher
             let selectedVoucher = null;
+            // $(document).on('click', '.btn-apply-voucher', function () {
+            //     const voucherId = $(this).data('voucher-id');
+            //     const voucherName = $(this).data('voucher-name');
+            //     const voucherValue = parseFloat($(this).data('voucher-percent').toString().replaceAll('.', '').replaceAll(',', ''));
+            //     const voucherType = $(this).data('voucher-type'); // 0: %, 1: tiền
+            //     const voucherMax = $(this).data('voucher-max') ? parseFloat($(this).data('voucher-max').toString().replaceAll('.', '').replaceAll(',', '')) : null;
+            //     const voucherCondition = parseFloat($(this).data('voucher-condition'));
+            //     const voucherExpiry = $(this).closest('.card-body').find('p.voucher-expiry').text();
+            //     selectedVoucher = {
+            //         id: voucherId,
+            //         maVoucher: voucherName,
+            //         value: voucherValue,
+            //         type: voucherType,
+            //         max: voucherMax,
+            //         condition: voucherCondition,
+            //         expiry: voucherExpiry
+            //     };
+
+            //     // Sửa lại hiển thị giảm giá
+            //     let valueDisplay = voucherType == 0 ? voucherValue + '%' : Number(voucherValue).toLocaleString('vi-VN') + ' ₫';
+            //     let html = `
+            //         <div class="selected-voucher-box" data-voucher-id="${voucherId}">
+            //             <div class="selected-voucher-content">
+            //                 <div class="selected-voucher-header">
+            //                     <span class="selected-voucher-code">${voucherName}</span>
+            //                     <span class="selected-voucher-value">Giảm: <strong>${valueDisplay}</strong></span>
+            //                 </div>
+            //                 <div class="selected-voucher-details">
+            //                     ${voucherType == 0 && voucherMax ? `<p class='selected-voucher-max'>Giá trị tối đa: ${voucherMax.toLocaleString('vi-VN')} ₫</p>` : ''}
+            //                     <p class="selected-voucher-condition">Điều kiện: Đơn từ ${voucherCondition.toLocaleString('vi-VN')} ₫</p>
+            //                     <p class="selected-voucher-expiry">HSD: ${voucherExpiry}</p>
+            //                 </div>
+            //                 <button type="button" class="btn btn-outline-secondary btn-remove-voucher" data-voucher-id="${voucherId}">Xóa</button>
+            //             </div>
+            //         </div>
+            //     `;
+            //     $('#selectedVoucherText').html(html);
+            //     $('#voucherModal').modal('hide');
+
+            //     // Tính toán giảm giá và cập nhật summary
+            //     updateOrderSummary(selectedVoucher);
+
+            //     // Thêm sự kiện xóa voucher
+            //     $('.btn-remove-voucher').on('click', function () {
+            //         selectedVoucher = null;
+            //         $('#selectedVoucherText').html('<span>Chưa chọn voucher</span>');
+            //         setVoucherHiddenFields(null, 0); // Reset hidden fields
+            //         updateOrderSummary(null); // Reset summary
+            //     });
+            // });
             $(document).on('click', '.btn-apply-voucher', function () {
                 const voucherId = $(this).data('voucher-id');
                 const voucherName = $(this).data('voucher-name');
-                const voucherCode = $(this).data('voucher-code');
-                const voucherValue = $(this).data('voucher-percent');
-                const voucherType = $(this).data('voucher-type');
-                const voucherCondition = $(this).closest('.card-body').find('p.voucher-condition').text();
+                const voucherValue = parseFloat($(this).data('voucher-value')); // Parse gốc
+                const voucherType = $(this).data('voucher-type'); // 0: %, 1: tiền
+                const voucherMax = $(this).data('voucher-max') ? parseFloat($(this).data('voucher-max')) : null;
+                const voucherCondition = parseFloat($(this).data('voucher-condition'));
                 const voucherExpiry = $(this).closest('.card-body').find('p.voucher-expiry').text();
+
                 selectedVoucher = {
                     id: voucherId,
                     maVoucher: voucherName,
                     value: voucherValue,
                     type: voucherType,
+                    max: voucherMax,
                     condition: voucherCondition,
                     expiry: voucherExpiry
                 };
 
-                // Tạo giao diện đẹp hơn cho selected-voucher-box với nút Xóa ở góc dưới bên phải
+                // Hiển thị value đúng định dạng
+                let valueDisplay = voucherType === 0 ? voucherValue + '%' : voucherValue.toLocaleString('vi-VN') + ' ₫';
+
                 let html = `
                     <div class="selected-voucher-box" data-voucher-id="${voucherId}">
                         <div class="selected-voucher-content">
                             <div class="selected-voucher-header">
                                 <span class="selected-voucher-code">${voucherName}</span>
-                                <span class="selected-voucher-value">Giảm: <strong>${voucherValue}${voucherType === '0' ? '%' : '₫'}</strong></span>
+                                <span class="selected-voucher-value">Giảm: <strong>${valueDisplay}</strong></span>
                             </div>
                             <div class="selected-voucher-details">
-                                <p class="selected-voucher-condition">${voucherCondition}</p>
+                                ${voucherType === 0 && voucherMax ? `<p class='selected-voucher-max'>Giá trị tối đa: ${voucherMax.toLocaleString('vi-VN')} ₫</p>` : ''}
+                                <p class="selected-voucher-condition">Điều kiện: Đơn từ ${voucherCondition.toLocaleString('vi-VN')} ₫</p>
                                 <p class="selected-voucher-expiry">HSD: ${voucherExpiry}</p>
                             </div>
                             <button type="button" class="btn btn-outline-secondary btn-remove-voucher" data-voucher-id="${voucherId}">Xóa</button>
@@ -765,10 +847,139 @@
                 $('#selectedVoucherText').html(html);
                 $('#voucherModal').modal('hide');
 
-                // Thêm sự kiện xóa voucher
+                // Cập nhật summary
+                updateOrderSummary(selectedVoucher);
+
+                // Xóa voucher
                 $('.btn-remove-voucher').on('click', function () {
                     selectedVoucher = null;
                     $('#selectedVoucherText').html('<span>Chưa chọn voucher</span>');
+                    setVoucherHiddenFields(null, 0);
+                    updateOrderSummary(null);
+                });
+            });
+
+            // Function tính toán và cập nhật order summary
+            function updateOrderSummary(voucher) {
+                // var tongSanPham = parseFloat($('#summary-products').text().replaceAll('.', '').replace(' ₫', '').replace(',', '')) || 0;
+                var tongSanPham = parseFloat($('#summary-products').text().replace(/\./g, '').replace(/,/g, '').replace(' ₫', '')) || 0;
+                var phiVanChuyen = parseFloat($('#summary-shipping').text().replaceAll('.', '').replace(' ₫', '').replace(',', '')) || 0;
+                var discountAmount = 0;
+
+                if (voucher) {
+                    var value = parseFloat(voucher.value) || 0;
+                    var max = voucher.max ? parseFloat(voucher.max) : null;
+                    var condition = parseFloat(voucher.condition) || 0;
+
+                    if (tongSanPham < condition) {
+                        alert('Đơn hàng chưa đủ điều kiện áp dụng voucher.');
+                        setVoucherHiddenFields(null, 0);
+                        $('#summary-voucher').hide();
+                        $('#summary-total').text((tongSanPham + phiVanChuyen).toLocaleString('vi-VN') + ' ₫');
+                        return;
+                    }
+
+                    if (voucher.type == 0) { // %
+                        discountAmount = (tongSanPham * value) / 100;
+                        if (max && discountAmount > max) {
+                            discountAmount = max;
+                        }
+                    } else { // Tiền cố định
+                        discountAmount = value;
+                        if (discountAmount > tongSanPham) {
+                            discountAmount = tongSanPham;
+                        }
+                    }
+
+                    setVoucherHiddenFields(voucher, discountAmount);
+                } else {
+                    setVoucherHiddenFields(null, 0);
+                }
+
+                if (discountAmount > 0) {
+                    $('#summary-voucher-amount').text('-' + discountAmount.toLocaleString('vi-VN') + ' ₫');
+                    $('#summary-voucher').show();
+                } else {
+                    $('#summary-voucher').hide();
+                }
+
+                var tongThanhToan = tongSanPham - discountAmount + phiVanChuyen;
+                if (tongThanhToan < 0) tongThanhToan = 0;
+                $('#summary-total').text(tongThanhToan.toLocaleString('vi-VN') + ' ₫');
+
+                $('#VoucherId').val(voucher ? voucher.id : '');
+                $('#DiscountAmount').val(discountAmount);
+            }
+
+            // Function set hidden fields (đã có sẵn, giữ nguyên)
+            function setVoucherHiddenFields(voucher, discountAmount) {
+                if (voucher) {
+                    $('#VoucherId').val(voucher.id);
+                    $('#VoucherCode').val(voucher.maVoucher);
+                    $('#VoucherType').val(voucher.type);
+                    $('#VoucherValue').val(voucher.value);
+                    $('#VoucherMax').val(voucher.max || '');
+                    $('#VoucherDiscountAmount').val(discountAmount || 0);
+                } else {
+                    $('#VoucherId').val('');
+                    $('#VoucherCode').val('');
+                    $('#VoucherType').val('');
+                    $('#VoucherValue').val('');
+                    $('#VoucherMax').val('');
+                    $('#VoucherDiscountAmount').val('');
+                }
+            }
+
+            // Sự kiện khi mở modal voucher: kiểm tra điều kiện và sắp xếp
+            $('#voucherModal').on('show.bs.modal', function () {
+                var tongSanPham = parseFloat($('#summary-products').text().replace(/\./g, '').replace(/,/g, '').replace(' ₫', '')) || 0;
+                var voucherCards = [];
+                $('#voucherList .voucher-card').each(function () {
+                    var $card = $(this);
+                    var $btn = $card.find('.btn-apply-voucher');
+                    var condition = parseFloat($btn.data('voucher-condition')) || 0;
+                    var type = parseInt($btn.data('voucher-type'));
+                    var value = parseFloat($btn.data('voucher-value')) || 0;
+                    var max = parseFloat($btn.data('voucher-max')) || 0;
+                    var discount = 0;
+
+                    // Kiểm tra điều kiện
+                    if (tongSanPham < condition) {
+                        $btn.prop('disabled', true);
+                        $card.addClass('disabled');
+                        $card.css('opacity', 0.5);
+                        discount = 0;
+                    } else {
+                        $btn.prop('disabled', false);
+                        $card.removeClass('disabled');
+                        $card.css('opacity', 1);
+                        // Tính số tiền giảm thực tế
+                        if (type === 0) { // %
+                            discount = tongSanPham * value / 100;
+                            if (max > 0 && discount > max) discount = max;
+                        } else { // Tiền cố định
+                            discount = value;
+                            if (discount > tongSanPham) discount = tongSanPham;
+                        }
+                    }
+                    voucherCards.push({ card: $card, discount: discount });
+                });
+
+                // Sắp xếp voucher đủ điều kiện theo discount giảm dần
+                voucherCards.sort(function (a, b) {
+                    return b.discount - a.discount;
+                });
+
+                // Đưa các voucher đủ điều kiện lên đầu
+                var $voucherList = $('#voucherList');
+                var colWrappers = [];
+                voucherCards.forEach(function (item) {
+                    // .voucher-card nằm trong .col-md-6
+                    colWrappers.push(item.card.closest('.col-md-6'));
+                });
+                $voucherList.empty();
+                colWrappers.forEach(function ($col) {
+                    $voucherList.append($col);
                 });
             });
         });
@@ -912,24 +1123,45 @@
                 <div id="voucherList" class="row g-3 voucher-grid">
                     @if (Model.Vouchers != null && Model.Vouchers.Any())
                     {
-                        foreach (var voucher in Model.Vouchers)
+                        var validVouchers = Model.Vouchers.Where(v => v.SoLuong > 0 && v.TrangThai == SneakFit.Data.Enums.TrangThaiGiamGia.HoatDong).ToList();
+                        if (validVouchers.Any())
                         {
-                            var giaTriGiamGiaFormatted = voucher.GiaTriGiamGia.ToString("#,##0").Replace(",", ".");
-                            <div class="col-md-6">
-                                <div class="voucher-card mb-3" data-voucher-id="@voucher.Id">
-                                    <div class="card-body d-flex flex-column justify-content-between h-100">
-                                        <div>
-                                            <h6 class="card-title mb-2 voucher-code">@voucher.MaVoucher</h6>
-                                            <p class="mb-2 voucher-value">Giảm: <strong>@giaTriGiamGiaFormatted @(voucher.LoaiGiamGia == SneakFit.Data.Enums.LoaiGiamGia.PhamTram ? "%" : "₫")</strong></p>
-                                            <p class="mb-2 voucher-condition">Điều kiện: Đơn từ @voucher.DieuKienApDung.ToString("#,##0").Replace(",", ".") ₫</p>
-                                            <p class="mb-2 voucher-expiry">HSD: @voucher.ThoiGianKetThuc.ToString("dd/MM/yyyy")</p>
-                                        </div>
-                                        <div class="text-end">
-                                            <button type="button" class="btn btn-primary btn-apply-voucher" data-voucher-id="@voucher.Id" data-voucher-name="@voucher.MaVoucher" data-voucher-code="@voucher.MaVoucher" data-voucher-percent="@giaTriGiamGiaFormatted" data-voucher-type="@voucher.LoaiGiamGia">Chọn</button>
+                            foreach (var voucher in validVouchers)
+                            {
+                                var giaTriGiamGiaFormatted = voucher.GiaTriGiamGia.ToString("#,##0").Replace(",", ".");
+                                var giaTriToiDaFormatted = voucher.GiaTriToiDa > 0 ? voucher.GiaTriToiDa.ToString("#,##0").Replace(",", ".") : null;
+                                <div class="col-md-6">
+                                    <div class="voucher-card mb-3" data-voucher-id="@voucher.Id">
+                                        <div class="card-body d-flex flex-column justify-content-between h-100">
+                                            <div>
+                                                <h6 class="card-title mb-2 voucher-code">@voucher.MaVoucher</h6>
+                                                <p class="mb-2 voucher-value">Giảm: <strong>@giaTriGiamGiaFormatted @(voucher.LoaiGiamGia == SneakFit.Data.Enums.LoaiGiamGia.PhamTram ? "%" : "₫")</strong></p>
+                                                @if (giaTriToiDaFormatted != null && voucher.LoaiGiamGia == SneakFit.Data.Enums.LoaiGiamGia.PhamTram)
+                                                {
+                                                    <p class="mb-2 voucher-max">Giá trị tối đa: @giaTriToiDaFormatted ₫</p>
+                                                }
+                                                <p class="mb-2 voucher-condition">Điều kiện: Đơn từ @voucher.DieuKienApDung.ToString("#,##0").Replace(",", ".") ₫</p>
+                                                <p class="mb-2 voucher-expiry">HSD: @voucher.ThoiGianKetThuc.ToString("dd/MM/yyyy")</p>
+                                            </div>
+                                            <div class="text-end">
+                                                <button type="button" class="btn btn-primary btn-apply-voucher"
+                                                        data-voucher-id="@voucher.Id"
+                                                        data-voucher-name="@voucher.MaVoucher"
+                                                        data-voucher-value="@voucher.GiaTriGiamGia"
+                                                        data-voucher-type="@((int)voucher.LoaiGiamGia)"
+                                                        data-voucher-max="@voucher.GiaTriToiDa"
+                                                        data-voucher-condition="@voucher.DieuKienApDung">
+                                                    Chọn
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="col-12"><p>Không có voucher nào khả dụng.</p></div>
                         }
                     }
                     else
@@ -1168,6 +1400,11 @@
                 color: #FFFFFF;
             }
 
+    #voucherModal .modal-body {
+        max-height: 72vh; /* hoặc 400px, 500px tùy ý */
+        overflow-y: auto;
+    }
+
     .selected-voucher-box {
         background: #E6F0FA;
         border: 2px solid #60A5FA;
@@ -1220,6 +1457,7 @@
         margin-top: 5px;
     }
 
+    .selected-voucher-max,
     .selected-voucher-condition,
     .selected-voucher-expiry {
         color: #4B5563;
@@ -1273,6 +1511,12 @@
             flex-direction: column;
             justify-content: space-between;
             height: 100%;
+        }
+
+        .voucher-card .disabled {
+            pointer-events: none;
+            filter: grayscale(0.7);
+            opacity: 0.5;
         }
 
     .voucher-code {

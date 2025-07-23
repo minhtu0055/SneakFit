@@ -51,25 +51,40 @@
                 {
                     @foreach (var item in Model.ChiTietHoaDonClient)
                     {
-                        <div class="product-item d-flex align-items-center mb-3">
-                            @* <img src="@($"{baseUrl}/images/Default_Logo.png")" class="product-img" style="margin-left: 10px;" /> *@
+                        <div class="product-item d-flex align-items-center mb-3" style="border-radius: 10px;">
                             @{
                                 var defaultImage = $"{baseUrl}/images/Default_Logo.png";
                                 string imageUrl = defaultImage;
-
                                 if (!string.IsNullOrEmpty(item.AnhSanPham) && item.AnhSanPham != "/images/Default_Logo.png")
                                 {
                                     imageUrl = $"{baseUrl}{item.AnhSanPham}";
                                 }
                             }
                             <img src="@imageUrl" class="product-img" style="margin-left: 10px;" onerror="this.src='@defaultImage'" />
-                            <div class="product-info">
-                                <p class="mb-1">
-                                    @(string.IsNullOrEmpty(item.TenSanPham) ? "Tên sản phẩm không xác định" : item.TenSanPham) ( @item.TenMauSac, @item.MaKichThuoc )
-                                </p>
-                                <small class="text-muted">Số lượng: @item.SoLuong</small>
+                            <div class="product-info" style="align-items: center;">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <p class="mb-0 fw-semibold">
+                                        <span style="font-weight: bold; color: #1E3A8A;">@(string.IsNullOrEmpty(item.TenSanPham) ? "Tên sản phẩm không xác định" : item.TenSanPham)</span> ( @item.TenMauSac, @item.MaKichThuoc )
+                                    </p>
+                                    @if (item.KhuyenMaiId != null && item.GiaKhuyenMai.HasValue && item.GiaKhuyenMai.Value > 0 && item.GiaKhuyenMai.Value < item.GiaBan)
+                                    {
+                                        <span class="discount" style="font-size: 0.85rem; margin-bottom: 1.5px;">Giảm @item.KhuyenMaiPhanTram%</span>
+                                    }
+                                </div>
+                                <small class="text-muted" style="font-weight: bold; font-size: 15px">Số lượng: @item.SoLuong</small>
                             </div>
-                            <div class="product-price ms-auto" style="margin-right: 10px;">@((item.GiaBan * item.SoLuong).ToString("N0")) ₫</div>
+                            <div class="product-price ms-auto" style="margin-right: 10px;">
+                                @if (item.KhuyenMaiId != null && item.GiaKhuyenMai.HasValue && item.GiaKhuyenMai.Value > 0 && item.GiaKhuyenMai.Value < item.GiaGoc)
+                                {
+                                    <span class="text-danger">@item.GiaKhuyenMai.Value.ToString("N0") ₫</span>
+                                    <br />
+                                    <span class="text-muted text-decoration-line-through">@item.GiaGoc.Value.ToString("N0") ₫</span>
+                                }
+                                else
+                                {
+                                    <span>@item.GiaGoc?.ToString("N0") ₫</span>
+                                }
+                            </div>
                         </div>
                     }
                 }
@@ -79,27 +94,89 @@
                 }
             </div>
 
-            <!-- Tóm tắt thanh toán -->
+            <!-- Voucher đã sử dụng (section-box style) -->
+            @if (Model.UsedVoucher != null)
+            {
+                <div class="section-box order-info mb-4">
+                    <h5 class="voucher-info-title">
+                        <i class="bi bi-ticket-perforated voucher-icon me-2"></i>Voucher đã sử dụng
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p>
+                                <strong>Mã voucher:</strong>
+                                <span class="order-info-value">@Model.UsedVoucher.MaVoucher</span>
+                            </p>
+                            <p>
+                                <strong>Loại giảm giá:</strong>
+                                <span class="order-info-value">@(Model.UsedVoucher.LoaiGiamGia == SneakFit.Data.Enums.LoaiGiamGia.PhamTram ? "Phần trăm" : "Số tiền")</span>
+                            </p>
+                            <p>
+                                <strong>Giá trị giảm:</strong>
+                                <span class="order-info-value">
+                                    @(Model.UsedVoucher.LoaiGiamGia == SneakFit.Data.Enums.LoaiGiamGia.PhamTram ?
+                                        ($"{Model.UsedVoucher.GiaTriGiamGia}%") : ($"{Model.UsedVoucher.GiaTriGiamGia:N0} ₫"))
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p>
+                                <strong>Điều kiện áp dụng:</strong>
+                                <span class="order-info-value">@Model.UsedVoucher.DieuKienApDung.ToString("N0") ₫</span>
+                            </p>
+                            <p>
+                                <strong>Giá trị tối đa:</strong>
+                                <span class="order-info-value">@(Model.UsedVoucher.GiaTriToiDa > 0 ? Model.UsedVoucher.GiaTriToiDa.ToString("N0") + " ₫" : "Không giới hạn")</span>
+                            </p>
+                            <p>
+                                <strong>Hiệu lực:</strong>
+                                <span class="order-info-value">@Model.UsedVoucher.ThoiGianBatDau.ToString("dd/MM/yyyy") - @Model.UsedVoucher.ThoiGianKetThuc.ToString("dd/MM/yyyy")</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Tóm tắt thanh toán (giống Checkout) -->
             <div class="section-box order-summary mb-4">
-                <h5>Tóm tắt thanh toán</h5>
+                <h5 style="color: #1E3A8A; border-bottom: 2px solid #60A5FA; padding-bottom: 10px;">Tóm tắt thanh toán</h5>
                 <div class="summary-item">
                     <span>Tổng tiền hàng</span>
-                    <span>@(Model.HoaDonClient.TongTienSanPham?.ToString("N0") ?? "0") ₫</span>
+                    <span id="summary-products">@Model.HoaDonClient.TongTienSanPham.ToString("N0") ₫</span>
                 </div>
+                @if (Model.HoaDonClient.VoucherDiscount.HasValue && Model.HoaDonClient.VoucherDiscount.Value > 0)
+                {
+                    <div class="summary-item" id="summary-voucher">
+                        <span>Áp dụng voucher</span>
+                        <span class="text-danger" id="summary-voucher-amount">-@((Model.HoaDonClient.VoucherDiscount ?? 0).ToString("N0")) ₫</span>
+                    </div>
+                }
                 <div class="summary-item">
                     <span>Phí vận chuyển</span>
-                    <span>@Model.HoaDonClient.PhiVanChuyen.ToString("N0") ₫</span>
+                    <span id="summary-shipping">@(Model.HoaDonClient.PhiVanChuyen.ToString("N0")) ₫</span>
                 </div>
                 <hr />
                 <div class="summary-item fw-bold fs-5">
                     <span>Tổng thanh toán</span>
-                    <span>@Model.HoaDonClient.TongTien.ToString("N0") ₫</span>
+                    <span id="summary-total" style="color: #1E3A8A;">@(Model.HoaDonClient.TongTien.ToString("N0")) ₫</span>
                 </div>
             </div>
 
             <!-- Hành động -->
             <div class="section-box actions text-center">
                 <a href="@Url.Action("Index", "HoaDon")" class="btn btn-primary">Quay về danh sách</a>
+                @if ((int)Model.HoaDonClient.TrangThai == 0) // ChoXacNhan
+                {
+                    <form method="post" action="@Url.Action("CancelOrder", "ThanhToan", new { id = Model.HoaDonClient.Id })" style="display:inline-block;">
+                        <button type="submit" class="btn btn-warning" onclick="return confirm('Bạn có chắc chắn muốn hủy hóa đơn này?');">Hủy hóa đơn</button>
+                    </form>
+                }
+                @if ((int)Model.HoaDonClient.TrangThai == 5) // ThanhCong
+                {
+                    <form method="post" action="@Url.Action("ReturnOrder", "ThanhToan", new { id = Model.HoaDonClient.Id })" style="display:inline-block;">
+                        <button type="submit" class="btn btn-warning" onclick="return confirm('Bạn có chắc chắn muốn trả hàng cho hóa đơn này?');">Trả hàng</button>
+                    </form>
+                }
             </div>
         }
     </div>
@@ -107,6 +184,7 @@
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 }
 
 <style>
@@ -264,4 +342,152 @@
             box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3);
             transform: translateY(-2px);
         }
+
+    .btn-warning {
+        background: linear-gradient(90deg, #60A5FA, #1E3A8A);
+        border: none;
+        color: #FFFFFF;
+    }
+
+        .btn-warning:hover {
+            background: linear-gradient(90deg, #163172, #3B82F6);
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3);
+            transform: translateY(-2px);
+            color: #FFFFFF;
+        }
+
+    .discount {
+        display: inline-block;
+        background: #ffe4e0;
+        color: #ef5854;
+        font-weight: bold;
+        border-radius: 6px;
+        padding: 2px 8px;
+        margin-left: 8px;
+        vertical-align: middle;
+    }
+
+    .text-danger {
+        color: #e11d48 !important;
+        font-weight: bold;
+    }
+
+    .text-muted.text-decoration-line-through {
+        color: #9ca3af !important;
+    }
+    /* Voucher Used Section Custom Style */
+    .voucher-used-box {
+        border: 1.5px solid #60A5FA;
+        background: #f7fbff;
+        box-shadow: 0 2px 8px rgba(96, 165, 250, 0.08);
+    }
+
+    .voucher-title {
+        font-weight: 700;
+        color: #1E3A8A;
+        font-size: 1.4rem;
+        border-bottom: 2px solid #60A5FA;
+        padding-bottom: 10px;
+        width: 100%;
+        margin-bottom: 0;
+    }
+
+    .voucher-used-box .row {
+        margin-top: 10px;
+    }
+
+    .voucher-label {
+        font-size: 1.08rem;
+        color: #1E3A8A;
+        font-weight: 500;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+    }
+
+        .voucher-label span:first-child {
+            min-width: 130px;
+            color: #2563eb;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+    .voucher-badge {
+        background: linear-gradient(90deg, #1E3A8A, #60A5FA);
+        color: #fff;
+        font-weight: 700;
+        border-radius: 8px;
+        padding: 3px 16px;
+        font-size: 1.08rem;
+        letter-spacing: 1px;
+        box-shadow: 0 2px 8px rgba(30, 58, 138, 0.08);
+        margin-left: 2px;
+        display: inline-block;
+    }
+
+    .voucher-value {
+        color: #2563eb;
+        font-weight: 600;
+        font-size: 1.08rem;
+    }
+
+    .voucher-discount {
+        color: #e11d48;
+        font-weight: 700;
+        font-size: 1.08rem;
+        letter-spacing: 1px;
+    }
+
+    .voucher-info-box {
+        background: #fff;
+        border: 1.5px solid #60A5FA;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 8px rgba(96, 165, 250, 0.08);
+    }
+
+    .voucher-info-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1E3A8A;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        border-bottom: 2px solid #60A5FA;
+        padding-bottom: 10px;
+        margin-bottom: 18px;
+    }
+
+    .voucher-icon {
+        font-size: 2rem;
+        color: #22c55e;
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    .voucher-info-row {
+        margin-bottom: 10px;
+        font-size: 1.08rem;
+    }
+
+    .voucher-info-label {
+        font-weight: 600;
+        color: #1E3A8A;
+        min-width: 140px;
+        display: inline-block;
+    }
+
+    .voucher-info-value {
+        color: #2563eb;
+        font-weight: 500;
+        word-break: break-word;
+        margin-left: 4px;
+    }
+
+    .order-info-value {
+        color: #4B5563;
+        font-weight: 500;
+        margin-left: 4px;
+    }
 </style>

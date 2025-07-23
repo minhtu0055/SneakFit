@@ -724,7 +724,8 @@
 
                 // Tạo QR code mới
                 new QRCode(document.getElementById("qrCodePreview"), {
-                    text: `${window.location.origin}/SanPham/Details/${id}`, // URL sản phẩm
+                    // text: `${window.location.origin}/SanPham/Details/${id}`, // URL sản phẩm
+                    text: id,
                     width: 100,
                     height: 100,
                     colorDark: "#000000",

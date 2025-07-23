@@ -49,6 +49,26 @@
                 </div>
             </div>
         }
+        @if (ViewBag.TotalRecords > ViewBag.PageSize)
+        {
+            var totalPages = (int)Math.Ceiling((double)ViewBag.TotalRecords / ViewBag.PageSize);
+            <nav aria-label="Page navigation example" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item @(ViewBag.PageIndex == 1 ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { pageIndex = ViewBag.PageIndex - 1 })">&laquo;</a>
+                    </li>
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        <li class="page-item @(i == ViewBag.PageIndex ? "active" : "")">
+                            <a class="page-link" href="@Url.Action("Index", new { pageIndex = i })">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(ViewBag.PageIndex == totalPages ? "disabled" : "")">
+                        <a class="page-link" href="@Url.Action("Index", new { pageIndex = ViewBag.PageIndex + 1 })">&raquo;</a>
+                    </li>
+                </ul>
+            </nav>
+        }
     </div>
 </main>
 
@@ -177,4 +197,45 @@
             box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3);
             transform: translateY(-2px);
         }
+
+    /* PHÂN TRANG TÙY CHỈNH */
+    .pagination {
+        margin-top: 24px;
+        margin-bottom: 0;
+    }
+    .pagination .page-item {
+        margin: 0 2px;
+    }
+    .pagination .page-link {
+        color: #1E3A8A;
+        border: 1.5px solid #60A5FA;
+        border-radius: 6px;
+        font-weight: 500;
+        background: #fff;
+        transition: all 0.2s;
+        min-width: 38px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(30,58,138,0.04);
+    }
+    .pagination .page-link:hover {
+        background: linear-gradient(90deg, #1E3A8A, #60A5FA);
+        color: #fff;
+        border-color: #1E3A8A;
+        transform: translateY(-2px) scale(1.07);
+    }
+    .pagination .active .page-link {
+        background: linear-gradient(90deg, #1E3A8A, #60A5FA);
+        color: #fff;
+        border-color: #1E3A8A;
+        font-weight: 700;
+        box-shadow: 0 4px 15px rgba(30,58,138,0.10);
+        pointer-events: none;
+    }
+    .pagination .disabled .page-link {
+        color: #A0AEC0;
+        background: #F1F5F9;
+        border-color: #E2E8F0;
+        pointer-events: none;
+        box-shadow: none;
+    }
 </style>

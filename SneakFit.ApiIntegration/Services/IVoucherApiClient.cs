@@ -16,6 +16,7 @@ namespace SneakFit.ApiIntegration.Services
         Task<List<VoucherUserViewModel>> GetUsersForVoucher(Guid? voucherId = null);
         Task<PagedResult<VoucherUserViewModel>> GetUsersForVoucherPaging(GetVoucherUserPagingRequest request);
         Task<string> GetNextVoucherCode();
+        Task<bool> GiamSoLuongVoucher(Guid id, int soLuong);
         Task<List<VoucherViewModels>> GetPublicVouchers(decimal tongTienHoaDon);
         Task<List<VoucherViewModels>> GetPrivateVouchersForUser(Guid userId, decimal tongTienHoaDon);
     }

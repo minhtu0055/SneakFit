@@ -46,6 +46,7 @@ builder.Services.AddScoped<IHoaDonChiTietClientApiClient, HoaDonChiTietClientApi
 builder.Services.AddScoped<IGhnApiClient, GhnApiClient>();
 builder.Services.AddScoped<IUserApiClient, UserApiClient>();
 builder.Services.AddScoped<IDiaChiApiClient, DiaChiApiClient>();
+builder.Services.AddScoped<IThanhToanApiClient, ThanhToanApiClient>();
 
 
 

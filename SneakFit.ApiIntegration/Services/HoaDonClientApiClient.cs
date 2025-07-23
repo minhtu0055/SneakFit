@@ -92,28 +92,17 @@ namespace SneakFit.ApiIntegration.Services
             return JsonConvert.DeserializeObject<HoaDonClientViewModel>(await response.Content.ReadAsStringAsync());
         }
 
-        public async Task<bool> UpdateStatus(Guid id, TrangThaiHoaDon trangThai)
+        public async Task<bool> UpdateStatus(Guid id, SneakFit.Data.Enums.TrangThaiHoaDon newStatus)
         {
             var client = _httpClientFactory.CreateClient();
             client.BaseAddress = new Uri(_configuration["BaseAddress"]);
             var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
             if (!string.IsNullOrEmpty(sessions))
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+                client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", sessions);
 
-            var response = await client.PutAsync($"/api/HoaDonClient/{id}/status/{trangThai}", null);
-            var result = await response.Content.ReadAsStringAsync();
-            if (response.IsSuccessStatusCode)
-            {
-                var settings = new JsonSerializerSettings
-                {
-                    NullValueHandling = NullValueHandling.Ignore,
-                    MissingMemberHandling = MissingMemberHandling.Ignore
-                };
-                var apiResult = JsonConvert.DeserializeObject<ApiSuccessResult<bool>>(result, settings);
-                return apiResult?.ResultObj ?? false;
-            }
-
-            throw new Exception($"Không thể cập nhật trạng thái hóa đơn. Error: {result}");
+            var content = new StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(newStatus), Encoding.UTF8, "application/json");
+            var response = await client.PatchAsync($"/api/HoaDonClient/{id}/trangthai", content);
+            return response.IsSuccessStatusCode;
         }
         public async Task<Dictionary<string, int>> GetCountByStatusAsync()
         {

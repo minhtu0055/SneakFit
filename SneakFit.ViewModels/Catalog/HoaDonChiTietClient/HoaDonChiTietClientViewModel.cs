@@ -18,5 +18,10 @@ namespace SneakFit.ViewModels.Catalog.HoaDonChiTietClient
         public string TenMauSac { get; set; }
         public string MaKichThuoc { get; set; }
         public string AnhSanPham { get; set; }
+        public decimal? GiaKhuyenMai { get; set; }
+        public decimal? KhuyenMaiPhanTram { get; set; }
+        public string TenKhuyenMai { get; set; }
+        public Guid? KhuyenMaiId { get; set; }
+        public decimal? GiaGoc { get; set; } // Giá gốc chưa giảm
     }
 }

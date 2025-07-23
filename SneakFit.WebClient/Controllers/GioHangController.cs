@@ -382,25 +382,35 @@ namespace SneakFit.WebClient.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ApDungVoucher(string code)
+        public async Task<IActionResult> ApDungVoucher(string code, string selectedIds)
         {
             try
             {
-                if (string.IsNullOrEmpty(code))
+                var selectedIdList = new List<Guid>();
+                if (!string.IsNullOrEmpty(selectedIds))
                 {
-                    return Json(new { success = false, message = "Vui lòng nhập mã voucher!" });
+                    foreach (var id in selectedIds.Split(','))
+                    {
+                        if (Guid.TryParse(id, out Guid guid))
+                            selectedIdList.Add(guid);
+                    }
                 }
 
                 var userId = GetUserId();
-
-                // Lấy giỏ hàng để tính tổng tiền
                 var gioHang = await _gioHangApiClient.GetByUserId(userId);
                 if (gioHang == null || !gioHang.GioHangChiTiets.Any())
                 {
                     return Json(new { success = false, message = "Giỏ hàng trống, không thể áp dụng voucher!" });
                 }
 
-                // Tính tổng tiền giỏ hàng (chưa tính giảm giá voucher)
+                // Lấy các sản phẩm đã chọn
+                var selectedItems = gioHang.GioHangChiTiets.Where(x => selectedIdList.Contains(x.SanPhamChiTietId)).ToList();
+                if (!selectedItems.Any())
+                {
+                    return Json(new { success = false, message = "Vui lòng chọn sản phẩm để áp dụng voucher!" });
+                }
+
+                // Tính subtotal chỉ trên selectedItems
                 var khuyenMais = await _khuyenMaiApiClient.GetAllPaging(new PhanTrangKhuyenMai
                 {
                     PageIndex = 1,
@@ -426,7 +436,7 @@ namespace SneakFit.WebClient.Controllers
                     return sp.DonGia;
                 }
 
-                var subtotal = gioHang.GioHangChiTiets.Sum(sp => GetGiaKhuyenMai(sp) * sp.SoLuong);
+                var subtotal = selectedItems.Sum(sp => GetGiaKhuyenMai(sp) * sp.SoLuong);
 
                 // Lấy danh sách voucher đang hoạt động để kiểm tra
                 var voucherPagingRequest = new GetVoucherPagingRequest

@@ -79,15 +79,53 @@ namespace SneakFit.Application.Catalog.HoaDonChiTietClientClient
                     .ThenInclude(spct => spct.HinhAnhSanPham)
                 .ToListAsync();
 
-            return chiTiets.Select(hoaDonChiTietClient => new HoaDonChiTietClientViewModel()
-            {
-                Id = hoaDonChiTietClient.Id,
-                SoLuong = hoaDonChiTietClient.SoLuong,
-                GiaBan = hoaDonChiTietClient.GiaBan,
-                TenSanPham = hoaDonChiTietClient.SanPhamChiTiet?.SanPham?.TenSanPham ?? "Không xác định",
-                TenMauSac = hoaDonChiTietClient.SanPhamChiTiet?.MauSac?.TenMauSac ?? "Không xác định",
-                MaKichThuoc = hoaDonChiTietClient.SanPhamChiTiet?.KichThuoc?.MaKichThuoc.ToString() ?? "Không xác định",
-                AnhSanPham = hoaDonChiTietClient.SanPhamChiTiet?.HinhAnhSanPham?.FirstOrDefault()?.UrlHinhAnh ?? "/images/Default_Logo.png"
+            return chiTiets.Select(hoaDonChiTietClient => {
+                var thoiGianDatHang = hoaDonChiTietClient.HoaDon?.NgayTao ?? DateTime.Now;
+                var spct = hoaDonChiTietClient.SanPhamChiTiet;
+                var giaGoc = spct?.Gia ?? hoaDonChiTietClient.GiaBan; // Giá gốc tại thời điểm đặt hàng
+                var giaBan = hoaDonChiTietClient.GiaBan; // Giá thực tế đã trả
+                decimal? giaKhuyenMai = null;
+                decimal? khuyenMaiPhanTram = null;
+                Guid? khuyenMaiId = null;
+                string tenKhuyenMai = null;
+
+                // Lấy khuyến mãi cho từng SPCT tại thời điểm đặt hàng
+                var kmct = _context.KhuyenMaiChiTiet
+                    .Include(x => x.KhuyenMai)
+                    .FirstOrDefault(x => x.SPCTId == hoaDonChiTietClient.SanPhamChiTietId && x.KhuyenMai.ThoiGianBatDau <= thoiGianDatHang && x.KhuyenMai.ThoiGianKetThuc >= thoiGianDatHang && x.KhuyenMai.TrangThai == SneakFit.Data.Enums.TrangThaiGiamGia.HoatDong);
+
+                if (kmct != null && kmct.KhuyenMai != null && giaBan < giaGoc)
+                {
+                    khuyenMaiId = kmct.KhuyenMaiId;
+                    tenKhuyenMai = kmct.KhuyenMai.TenKhuyenMai;
+                    if (kmct.KhuyenMai.LoaiGiamGia == SneakFit.Data.Enums.LoaiGiamGia.PhamTram)
+                    {
+                        khuyenMaiPhanTram = kmct.KhuyenMai.GiaTriGiamGia;
+                    }
+                    giaKhuyenMai = giaBan;
+                }
+                else
+                {
+                    giaKhuyenMai = null;
+                    khuyenMaiPhanTram = null;
+                    khuyenMaiId = null;
+                    tenKhuyenMai = null;
+                }
+                return new HoaDonChiTietClientViewModel()
+                {
+                    Id = hoaDonChiTietClient.Id,
+                    SoLuong = hoaDonChiTietClient.SoLuong,
+                    GiaBan = giaBan,
+                    TenSanPham = spct?.SanPham?.TenSanPham ?? "Không xác định",
+                    TenMauSac = spct?.MauSac?.TenMauSac ?? "Không xác định",
+                    MaKichThuoc = spct?.KichThuoc?.MaKichThuoc.ToString() ?? "Không xác định",
+                    AnhSanPham = spct?.HinhAnhSanPham?.FirstOrDefault()?.UrlHinhAnh ?? "/images/Default_Logo.png",
+                    GiaKhuyenMai = giaKhuyenMai,
+                    KhuyenMaiPhanTram = khuyenMaiPhanTram,
+                    KhuyenMaiId = khuyenMaiId,
+                    TenKhuyenMai = tenKhuyenMai,
+                    GiaGoc = giaGoc
+                };
             }).ToList();
         }
 

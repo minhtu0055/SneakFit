@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SneakFit.ApiIntegration.Services;
+using SneakFit.Application.Catalog.ThanhToan;
 using SneakFit.Data.Enums;
 using SneakFit.ViewModels.Catalog.HoaDon;
 using SneakFit.ViewModels.Catalog.HoaDonChiTiet;
@@ -25,6 +26,7 @@ namespace SneakFit.WebClient.Controllers
         private readonly IVoucherApiClient _voucherApiClient;
         private readonly IDiaChiApiClient _diaChiApiClient;
         private readonly IGhnApiClient _ghnApiClient;
+        private readonly IThanhToanApiClient _thanhToanApiClient;
 
         public ThanhToanController(IHoaDonClientApiClient hoaDonClientApiClient,
                                    IGioHangApiClient gioHangApiClient,
@@ -34,7 +36,8 @@ namespace SneakFit.WebClient.Controllers
                                    IKhuyenMaiApiClient khuyenMaiApiClient,
                                    IVoucherApiClient voucherApiClient,
                                    IDiaChiApiClient diaChiApiClient,
-                                   IGhnApiClient ghnApiClient)
+                                   IGhnApiClient ghnApiClient,
+                                   IThanhToanApiClient thanhToanApiClient)
         {
             _hoaDonClientApiClient = hoaDonClientApiClient;
             _gioHangApiClient = gioHangApiClient;
@@ -45,6 +48,7 @@ namespace SneakFit.WebClient.Controllers
             _voucherApiClient = voucherApiClient;
             _diaChiApiClient = diaChiApiClient;
             _ghnApiClient = ghnApiClient;
+            _thanhToanApiClient = thanhToanApiClient;
         }
 
         private Guid GetUserId()
@@ -205,7 +209,6 @@ namespace SneakFit.WebClient.Controllers
         public async Task<IActionResult> Checkout(CheckoutViewModel model)
         {
             var cartJson = HttpContext.Session.GetString("SelectedCartItems");
-
             if (string.IsNullOrEmpty(cartJson) || !cartJson.Trim().StartsWith("["))
             {
                 TempData["ErrorMessage"] = "Giỏ hàng không hợp lệ hoặc trống.";
@@ -229,6 +232,7 @@ namespace SneakFit.WebClient.Controllers
                 return RedirectToAction("Index", "GioHang");
             }
 
+            // Check tồn kho (giữ nguyên)
             var invalidProducts = new List<string>();
             foreach (var item in cartItems)
             {
@@ -291,22 +295,50 @@ namespace SneakFit.WebClient.Controllers
                 return View(model);
             }
 
-            var userId = GetUserId();
-            var diaChi = !string.IsNullOrEmpty(model.DiaChiMoi) ? model.DiaChiMoi : model.DiaChi;
+            decimal tongTienSanPham = cartItems.Sum(x => x.GiaKhuyenMai * x.SoLuong);
+            decimal giamVoucher = 0;
+            Guid? voucherId = null;
 
-            // Recalculate shipping fee if DiaChiMoi is provided
+            // Parse voucher từ model (hidden fields)
+            if (model.VoucherId.HasValue)
+            {
+                var voucher = await _voucherApiClient.GetById(model.VoucherId.Value);
+                if (voucher != null && tongTienSanPham >= voucher.DieuKienApDung)
+                {
+                    voucherId = model.VoucherId;
+                    if (voucher.LoaiGiamGia == LoaiGiamGia.PhamTram)
+                    {
+                        giamVoucher = Math.Round(tongTienSanPham * (voucher.GiaTriGiamGia / 100), 0);
+                        if (voucher.GiaTriToiDa > 0 && giamVoucher > voucher.GiaTriToiDa)
+                        {
+                            giamVoucher = voucher.GiaTriToiDa;
+                        }
+                    }
+                    else
+                    {
+                        giamVoucher = voucher.GiaTriGiamGia;
+                        if (giamVoucher > tongTienSanPham)
+                        {
+                            giamVoucher = tongTienSanPham;
+                        }
+                    }
+                }
+            }
+
+            // Tính phí ship (giữ nguyên, nhưng đảm bảo parse MaHuyen đúng)
             decimal phiVanChuyen = model.PhiVanChuyen;
             if (!string.IsNullOrEmpty(model.DiaChiMoi))
             {
                 var diaChis = await _diaChiApiClient.GetAllByUser() ?? new List<DiaChiViewModel>();
-                var selectedAddress = diaChis.FirstOrDefault(x => x.TenDiaChi == model.DiaChiMoi || x.Id == model.DefaultAddressId);
-                if (selectedAddress != null && !string.IsNullOrEmpty(selectedAddress.MaHuyen) && !string.IsNullOrEmpty(selectedAddress.MaXa))
+                var selectedAddress = diaChis.FirstOrDefault(x => $"{x.TenDiaChi}, {x.TenXa}, {x.TenHuyen}, {x.TenThanhPho}" == model.DiaChiMoi);
+
+                if (selectedAddress != null && int.TryParse(selectedAddress.MaHuyen, out int toDistrictId))
                 {
                     var request = new ShippingFeeRequest
                     {
                         FromDistrictId = 1452,
-                        ToDistrictId = int.TryParse(selectedAddress.MaHuyen, out int districtId) ? districtId : 0,
-                        ToWardCode = selectedAddress.MaXa ?? "",
+                        ToDistrictId = toDistrictId,
+                        ToWardCode = selectedAddress.MaXa,
                         Weight = 700,
                         Length = 33,
                         Width = 20,
@@ -314,53 +346,56 @@ namespace SneakFit.WebClient.Controllers
                         ServiceId = 53321
                     };
 
-                    try
+                    var responseJson = await _ghnApiClient.CalculateShippingFee(request);
+                    if (!string.IsNullOrEmpty(responseJson))
                     {
-                        var responseJson = await _ghnApiClient.CalculateShippingFee(request);
-                        if (!string.IsNullOrEmpty(responseJson))
+                        using var jsonDoc = JsonDocument.Parse(responseJson);
+                        var root = jsonDoc.RootElement;
+                        if (root.TryGetProperty("data", out var data) && (data.TryGetProperty("total", out var totalProp) || data.TryGetProperty("service_fee", out totalProp)))
                         {
-                            using var jsonDoc = JsonDocument.Parse(responseJson);
-                            var root = jsonDoc.RootElement;
-                            if (root.TryGetProperty("data", out var data) && data.TryGetProperty("total", out var totalProp))
-                            {
-                                phiVanChuyen = totalProp.GetDecimal();
-                            }
+                            phiVanChuyen = totalProp.GetDecimal();
                         }
-                    }
-                    catch
-                    {
-                        // Keep old fee if recalculation fails
                     }
                 }
             }
 
-            var tongTien = cartItems.Sum(x => x.GiaKhuyenMai * x.SoLuong) + phiVanChuyen;
+            // Tính tổng đúng nghiệp vụ
+            var tongTien = tongTienSanPham - giamVoucher + phiVanChuyen;
+            if (tongTien < 0) tongTien = 0;
 
             var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? string.Empty;
             var hoaDonRequest = new ThemHoaDonClient
             {
                 TongTien = tongTien,
                 TrangThai = TrangThaiHoaDon.ChoXacNhan,
-                UserId = userId,
+                UserId = GetUserId(),
                 HoTen = model.HoTen,
                 SoDienThoai = model.SoDienThoai,
-                DiaChi = diaChi,
+                DiaChi = !string.IsNullOrEmpty(model.DiaChiMoi) ? model.DiaChiMoi : model.DiaChi,
                 PhiVanChuyen = phiVanChuyen,
                 PhuongThucThanhToan = model.PhuongThucThanhToan.Value,
                 TrangThaiThanhToan = TrangThaiThanhToan.ChuaThanhToan,
-                LoaiHoaDon = (model.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || model.PhuongThucThanhToan == PhuongThucThanhToan.MoMo)
-                    ? LoaiHoaDon.Online : LoaiHoaDon.TaiQuay,
+                //LoaiHoaDon = (model.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || model.PhuongThucThanhToan == PhuongThucThanhToan.MoMo)
+                //    ? LoaiHoaDon.Online : LoaiHoaDon.TaiQuay, // nếu thanh toán tại quầy = hóa đơn tại quầy
+                LoaiHoaDon = LoaiHoaDon.Online,
                 Email = email,
                 GhiChu = model.GhiChu,
                 NgayDatHang = DateTime.Now,
                 MaHoaDon = string.Empty,
                 DonViVanChuyen = string.Empty,
-                MaVanDon = string.Empty
+                MaVanDon = string.Empty,
+                VoucherId = voucherId
             };
 
             try
             {
                 var hoaDon = await _hoaDonClientApiClient.Create(hoaDonRequest);
+
+                // Giảm số lượng voucher nếu có sử dụng
+                if (voucherId.HasValue)
+                {
+                    await _voucherApiClient.GiamSoLuongVoucher(voucherId.Value, 1);
+                }
 
                 foreach (var item in cartItems)
                 {
@@ -370,7 +405,6 @@ namespace SneakFit.WebClient.Controllers
                         SanPhamChiTietId = item.SanPhamChiTietId,
                         SoLuong = item.SoLuong,
                         GiaBan = item.GiaKhuyenMai,
-
                     });
 
                     var delta = -item.SoLuong;
@@ -382,21 +416,51 @@ namespace SneakFit.WebClient.Controllers
                 }
 
                 var sanPhamChiTietIds = cartItems.Select(x => x.SanPhamChiTietId).ToList();
-                var xoaGioHangSuccess = await _gioHangApiClient.XoaSanPhamDaMuaKhoiGioHang(userId, sanPhamChiTietIds);
-                if (!xoaGioHangSuccess)
-                {
-                    // Không dùng log, chỉ bỏ qua nếu không xóa được (có thể do không tìm thấy sản phẩm)
-                }
+                await _gioHangApiClient.XoaSanPhamDaMuaKhoiGioHang(GetUserId(), sanPhamChiTietIds);
 
                 HttpContext.Session.Remove("SelectedCartItems");
 
-                return RedirectToAction("OrderConfirmation", new { id = hoaDon.Id });
+                // Xử lý redirect theo phương thức thanh toán
+                if (model.PhuongThucThanhToan == PhuongThucThanhToan.VnPay)
+                {
+                    var vnpRequest = new VNPayPaymentRequest
+                    {
+                        Amount = tongTien,
+                        OrderId = hoaDon.Id.ToString(),
+                        OrderInfo = $"Thanh toán đơn hàng {hoaDon.MaHoaDon}",
+                        ReturnUrl = "https://localhost:7277/api/thanhtoan/vnpay-callback-client", // <-- Sửa dòng này
+                        NotifyUrl = ""
+                    };
+                    var paymentUrlJson = await _thanhToanApiClient.CreateVnPayPaymentUrlClient(vnpRequest);
+                    var paymentUrl = System.Text.Json.JsonDocument.Parse(paymentUrlJson).RootElement.TryGetProperty("paymentUrl", out var urlProp) ? urlProp.GetString() : paymentUrlJson;
+                    return Redirect(paymentUrl);
+                }
+                else if (model.PhuongThucThanhToan == PhuongThucThanhToan.MoMo)
+                {
+                    var momoRequest = new MomoPaymentRequest
+                    {
+                        Amount = tongTien,
+                        OrderId = hoaDon.Id.ToString(),
+                        OrderInfo = $"Thanh toán đơn hàng {hoaDon.MaHoaDon}",
+                        ReturnUrl = "https://localhost:7277/api/thanhtoan/momo-callback-client",
+                        NotifyUrl = ""
+                    };
+                    var paymentUrlJson = await _thanhToanApiClient.CreateMomoPaymentUrl(momoRequest);
+                    var paymentUrl = System.Text.Json.JsonDocument.Parse(paymentUrlJson).RootElement.TryGetProperty("paymentUrl", out var urlProp) ? urlProp.GetString() : paymentUrlJson;
+                    return Redirect(paymentUrl);
+                }
+                else
+                {
+                    // COD
+                    return RedirectToAction("OrderConfirmation", new { id = hoaDon.Id });
+                }
             }
             catch (Exception ex)
             {
                 ModelState.AddModelError("", $"Lỗi khi đặt hàng: {ex.Message}");
                 model.GioHangItems = cartItems;
-                model.TongTienSanPham = cartItems.Sum(x => x.GiaKhuyenMai * x.SoLuong);
+                model.TongTienSanPham = tongTienSanPham;
+                model.DiscountAmount = giamVoucher;
                 return View(model);
             }
         }
@@ -419,10 +483,17 @@ namespace SneakFit.WebClient.Controllers
                     chiTietHoaDon = new List<HoaDonChiTietClientViewModel>();
                 }
 
+                VoucherViewModels usedVoucher = null;
+                if (hoaDon.VoucherId.HasValue)
+                {
+                    usedVoucher = await _voucherApiClient.GetById(hoaDon.VoucherId.Value);
+                }
+
                 var model = new OrderConfirmationViewModel
                 {
                     HoaDonClient = hoaDon,
-                    ChiTietHoaDonClient = chiTietHoaDon
+                    ChiTietHoaDonClient = chiTietHoaDon,
+                    UsedVoucher = usedVoucher
                 };
 
                 return View(model);
@@ -432,6 +503,20 @@ namespace SneakFit.WebClient.Controllers
                 TempData["ErrorMessage"] = $"Lỗi khi tải thông tin hóa đơn: {ex.Message}";
                 return RedirectToAction("Index", "Home");
             }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CancelOrder(Guid id)
+        {
+            await _hoaDonClientApiClient.UpdateStatus(id, SneakFit.Data.Enums.TrangThaiHoaDon.DaHuy);
+            return RedirectToAction("Details", "HoaDon", new { id });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ReturnOrder(Guid id)
+        {
+            await _hoaDonClientApiClient.UpdateStatus(id, SneakFit.Data.Enums.TrangThaiHoaDon.TraHang);
+            return RedirectToAction("Details", "HoaDon", new { id });
         }
     }
 }
