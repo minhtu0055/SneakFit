@@ -72,7 +72,7 @@
                             </button>
                             <div class="dropdown-menu">
                                 <div class="dropdown-header">
-                                    <h6>Welcome to <span class="sitename">eStore</span></h6>
+                                    <h6>Welcome to <span class="sitename">SneakFit</span></h6>
                                     <p class="mb-0">Access account &amp; manage orders</p>
                                 </div>
                                 <div class="dropdown-body">
@@ -80,22 +80,23 @@
                                         <i class="bi bi-person-circle me-2"></i>
                                         <span>My Profile</span>
                                     </a>
-                                    <a class="dropdown-item d-flex align-items-center" href="account.html">
-                                        <i class="bi bi-bag-check me-2"></i>
-                                        <span>My Orders</span>
-                                    </a>
-                                    <a class="dropdown-item d-flex align-items-center" href="account.html">
-                                        <i class="bi bi-heart me-2"></i>
-                                        <span>My Wishlist</span>
-                                    </a>
-                                    <a class="dropdown-item d-flex align-items-center" href="account.html">
-                                        <i class="bi bi-gear me-2"></i>
-                                        <span>Settings</span>
+                                     <a class="dropdown-item d-flex align-items-center" href="account.html">
+                                    <i class="bi bi-bag-check me-2"></i>
+                                    <span>My Orders</span>
                                     </a>
                                 </div>
                                 <div class="dropdown-footer">
-                                    <a asp-action="Index" asp-controller="Login" class="btn btn-primary w-100 mb-2">Sign In</a>
-                                    <a href="login-register.html" class="btn btn-outline-primary w-100">Register</a>
+                                    @if (User.Identity.IsAuthenticated)
+                                    {
+                                        <form asp-action="Logout" asp-controller="Account" method="post">
+                                            <button type="submit" class="btn btn-primary w-100 mb-2">Logout</button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <a asp-action="Index" asp-controller="Login" class="btn btn-primary w-100 mb-2">Đăng Nhập</a>
+                                        <a asp-action="Index" asp-controller="Login" class="btn btn-outline-primary w-100">Register</a>
+                                    }
                                 </div>
                             </div>
                         </div>

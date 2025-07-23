@@ -5,5 +5,7 @@ namespace SneakFit.WebClient.Models
     public class AccountViewModel
     {
         public UserViewModels User { get; set; }
+        public LoginRequest LoginRequest { get; set; }
+        public DoiMatKhauRequest DoiMatKhauRequest { get; set; } = new DoiMatKhauRequest();
     }
 }

@@ -6,5 +6,6 @@ namespace SneakFit.WebClient.Models
     {
         public LoginRequest Login { get; set; } = new LoginRequest();
         public RegisterRequest Register { get; set; } = new RegisterRequest();
+        public QuenMatKhauRequest quenMatKhau { get; set; }
     }
 }
