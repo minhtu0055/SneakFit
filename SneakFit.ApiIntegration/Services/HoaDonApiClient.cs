@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using SneakFit.Data.Enums;
 using SneakFit.ViewModels.Catalog.HoaDon;
+using SneakFit.ViewModels.Catalog.LichSuHoaDon;
 using SneakFit.ViewModels.Common;
 using System.Net.Http.Headers;
 using System.Text;
@@ -185,6 +186,56 @@ namespace SneakFit.ApiIntegration.Services
                 return result.success == true;
             }
             return false;
+        }
+
+        public async Task<Guid> CreateHistory(CreateLichSuHoaDonRequest request)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var json = JsonConvert.SerializeObject(request);
+            var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await client.PostAsync("/api/HoaDon/history", httpContent);
+            var body = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                return JsonConvert.DeserializeObject<Guid>(body);
+            }
+            throw new Exception($"Tạo lịch sử hóa đơn thất bại: {body}");
+        }
+
+        public async Task<List<LichSuHoaDonViewModel>> GetHistoryByHoaDonId(Guid hoaDonId)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var response = await client.GetAsync($"/api/HoaDon/{hoaDonId}/history");
+            var body = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                var result = JsonConvert.DeserializeObject<List<LichSuHoaDonViewModel>>(body);
+                return result ?? new List<LichSuHoaDonViewModel>();
+            }
+            throw new Exception($"Không thể lấy lịch sử hóa đơn: {body}");
+        }
+
+        public async Task<bool> RevertToPreviousStatus(Guid hoaDonId)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var response = await client.PostAsync($"/api/HoaDon/{hoaDonId}/revert", null);
+            return response.IsSuccessStatusCode;
         }
     }
 }

@@ -3,6 +3,21 @@
 @{
     ViewData["Title"] = "Chi tiết đơn hàng";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var isTaiQuay = (int)Model.LoaiHoaDon == 2 && (Model.GiaoHang != true);
+    var steps = isTaiQuay
+        ? new[] {
+            new { Status = TrangThaiHoaDon.ChoXacNhan, Color = "royal-blue", Icon = "icon-file", Title = "Chờ xác nhận", Time = "17:52:50 21/12/2023" },
+            new { Status = TrangThaiHoaDon.ThanhCong, Color = "emerald", Icon = "icon-check", Title = "Thành công", Time = "18:16:01 22/12/2023" }
+        }
+        : new[] {
+            new { Status = TrangThaiHoaDon.ChoXacNhan, Color = "royal-blue", Icon = "icon-file", Title = "Chờ xác nhận", Time = "17:52:50 21/12/2023" },
+            new { Status = TrangThaiHoaDon.DaXacNhan, Color = "indigo", Icon = "icon-truck", Title = "Đã xác nhận", Time = "18:14:48 21/12/2023" },
+            new { Status = TrangThaiHoaDon.ChoVanChuyen, Color = "purple", Icon = "icon-delivery", Title = "Chờ vận chuyển", Time = "18:15:40 21/12/2023" },
+            new { Status = TrangThaiHoaDon.DangVanChuyen, Color = "orange", Icon = "icon-payment", Title = "Đang vận chuyển", Time = "18:15:57 21/12/2023" },
+            new { Status = TrangThaiHoaDon.DaThanhToan, Color = "emerald", Icon = "icon-check", Title = "Đã thanh toán", Time = "18:16:01 21/12/2023" },
+            new { Status = TrangThaiHoaDon.ThanhCong, Color = "emerald", Icon = "icon-check", Title = "Thành công", Time = "18:16:01 22/12/2023" }
+        };
+    var visibleSteps = steps.Where(s => (int)s.Status <= (int)Model.TrangThai).ToList();
 }
 <head>
     <style>
@@ -195,6 +210,15 @@
         .step-connector.emerald {
             background-color: #10b981;
         }
+        .step-icon.inactive {
+            background-color: #e0e0e0 !important;
+            color: #bdbdbd !important;
+            opacity: 0.6;
+        }
+        .step-connector.inactive {
+            background-color: #e0e0e0 !important;
+            opacity: 0.6;
+        }
 
         .step-title {
             font-weight: 600;
@@ -203,7 +227,7 @@
             margin-bottom: 8px;
             text-align: center;
             white-space: nowrap;
-            margin-top: 60px;
+            margin-top: 40px;
         }
 
         .step-description {
@@ -336,64 +360,46 @@
                 <div class="progress-timeline">
                     <!-- Mũi tên progress bar với màu sắc mới -->
                     <div class="arrow-progress">
-                        <div class="arrow-segment royal-blue">
-                            <div class="arrow-dot"></div>
-                        </div>
-                        <div class="arrow-segment indigo">
-                            <div class="arrow-dot"></div>
-                        </div>
-                        <div class="arrow-segment purple">
-                            <div class="arrow-dot"></div>
-                        </div>
-                        <div class="arrow-segment orange">
-                            <div class="arrow-dot"></div>
-                        </div>
-                        <div class="arrow-segment emerald">
-                            <div class="arrow-dot"></div>
-                        </div>
+                        @foreach (var step in visibleSteps)
+                        {
+                            <div class="arrow-segment @step.Color">
+                                <div class="arrow-dot"></div>
+                            </div>
+                        }
                     </div>
 
                     <!-- Các bước với màu sắc và connector tương ứng -->
-                    <div class="progress-step">
-                        <div class="step-icon royal-blue icon-file"></div>
-                        <div class="step-connector royal-blue"></div>
-                        <div class="step-title">Tạo đơn hàng</div>
-                        <div class="step-description">Tạo đơn hàng</div>
-                        <div class="step-time">17:52:50 21/12/2023</div>
-                    </div>
-
-                    <div class="progress-step">
-                        <div class="step-icon indigo icon-truck"></div>
-                        <div class="step-connector indigo"></div>
-                        <div class="step-title">Chờ giao</div>
-                        <div class="step-description">Chờ giao</div>
-                        <div class="step-time">18:14:48 21/12/2023</div>
-                    </div>
-
-                    <div class="progress-step">
-                        <div class="step-icon purple icon-delivery"></div>
-                        <div class="step-connector purple"></div>
-                        <div class="step-title">Đang giao</div>
-                        <div class="step-description">Đã bàn giao cho đơn vị vận chuyển</div>
-                        <div class="step-time">18:15:40 21/12/2023</div>
-                    </div>
-
-                    <div class="progress-step">
-                        <div class="step-icon orange icon-payment"></div>
-                        <div class="step-connector orange"></div>
-                        <div class="step-title">Xác nhận thanh toán</div>
-                        <div class="step-description">Đã thanh toán đủ tiền</div>
-                        <div class="step-time">18:15:57 21/12/2023</div>
-                    </div>
-
-                    <div class="progress-step">
-                        <div class="step-icon emerald icon-check"></div>
-                        <div class="step-connector emerald"></div>
-                        <div class="step-title">Hoàn thành</div>
-                        <div class="step-description">Đơn hàng đã được giao thành công</div>
-                        <div class="step-time">18:16:01 21/12/2023</div>
-                    </div>
-                </div>          
+                    @foreach (var step in visibleSteps)
+                    {
+                        <div class="progress-step">
+                            <div class="step-icon @step.Color @step.Icon"></div>
+                            <div class="step-connector @step.Color"></div>
+                            <div class="step-title">@step.Title</div>
+                            <div class="step-time">@step.Time</div>
+                        </div>
+                    }
+                </div>  
+                <div class="d-flex justify-content-between align-items-center mt-4">
+                <div>
+                    @if (
+                        Model.TrangThai == TrangThaiHoaDon.ChoXacNhan ||
+                        Model.TrangThai == TrangThaiHoaDon.DaXacNhan ||
+                        Model.TrangThai == TrangThaiHoaDon.ChoVanChuyen ||
+                        Model.TrangThai == TrangThaiHoaDon.DangVanChuyen
+                    )
+                    {
+                        <button class="btn btn-primary me-2" id="btnXacNhan">Xác nhận</button>
+                        <button class="btn btn-warning me-2" id="btnQuayLai">Quay lại</button>
+                    }
+                    @if (Model.TrangThai == TrangThaiHoaDon.ChoXacNhan)
+                    {
+                        <button class="btn btn-danger" id="btnHuy">Hủy</button>
+                    }
+                </div>
+                <div>
+                    <button class="btn btn-primary" id="btnLichSu">Lịch sử</button>
+                </div>
+            </div>      
         </div>
     </div>
     <div class="row">
@@ -407,7 +413,7 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Trạng thái: </label>
-                            <p class="form-control-static">@Model.TrangThai</p>
+                            <p class="form-control-static">@GetStatusDisplayName(Model.TrangThai)</p>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Tên khách hàng: </label>
@@ -417,7 +423,7 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label class="form-label">Loại: </label>
-                            <p class="form-control-static">@Model.LoaiHoaDon</p>
+                            <p class="form-control-static">	@GetStatusName(Model.LoaiHoaDon)</p>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Số điện thoại: </label>
@@ -494,6 +500,36 @@
     </div>
 </div>
 
+<!-- Modal Lịch Sử Hóa Đơn -->
+<div class="modal fade" id="lichSuModal" tabindex="-1" aria-labelledby="lichSuModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="lichSuModalLabel">Lịch sử hóa đơn</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Thời gian</th>
+              <th>Người chỉnh sửa</th>
+              <th>Trạng thái cũ</th>
+              <th>Trạng thái mới</th>
+            </tr>
+          </thead>
+          <tbody id="lichSuTableBody">
+            <!-- Lịch sử sẽ được render ở đây -->
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 @section Scripts {
     <script>
         // Show success/error messages
@@ -509,6 +545,151 @@
             toastr.error('@TempData["error"]');
             </text>
         }
+
+        // Xử lý nút Lịch sử
+        $(document).ready(function () {
+            $('#btnLichSu').on('click', function () {
+                var hoaDonId = '@Model.Id';
+                $('#lichSuTableBody').html('<tr><td colspan="4">Đang tải...</td></tr>');
+                $.ajax({
+                    url: '/HoaDon/GetHistoryByHoaDonId?hoaDonId=' + hoaDonId,
+                    method: 'GET',
+                    success: function (data) {
+                        if (data && data.length > 0) {
+                            var rows = '';
+                            data.forEach(function (item) {
+                                rows += '<tr>' +
+                                    '<td>' + formatDateTime(item.ngayTao) + '</td>' +
+                                    '<td>' + (item.nguoiChinhSua || '') + '</td>' +
+                                    '<td>' + getStatusName(item.trangThaiCu) + '</td>' +
+                                    '<td>' + getStatusName(item.trangThaiMoi) + '</td>' +
+                                    '</tr>';
+                            });
+                            $('#lichSuTableBody').html(rows);
+                        } else {
+                            $('#lichSuTableBody').html('<tr><td colspan="4">Không có lịch sử.</td></tr>');
+                        }
+                        $('#lichSuModal').modal('show');
+                    },
+                    error: function () {
+                        $('#lichSuTableBody').html('<tr><td colspan="4">Lỗi khi tải lịch sử.</td></tr>');
+                        $('#lichSuModal').modal('show');
+                    }
+                });
+            });
+
+            // Xử lý nút Xác nhận (chuyển trạng thái tiếp theo)
+            $('#btnXacNhan').on('click', function () {
+                var hoaDonId = '@Model.Id';
+                $.ajax({
+                    url: '/HoaDon/UpdateStatus',
+                    method: 'POST',
+                    data: { hoaDonId: hoaDonId },
+                    success: function (res) {
+                        if (res.success) {
+                            toastr.success('Cập nhật trạng thái thành công!');
+                            setTimeout(function () { location.reload(); }, 1000);
+                        } else {
+                            toastr.error(res.message || 'Có lỗi xảy ra!');
+                        }
+                    },
+                    error: function () {
+                        toastr.error('Có lỗi xảy ra!');
+                    }
+                });
+            });
+
+            // Xử lý nút Quay lại (hoàn tác trạng thái)
+            $('#btnQuayLai').on('click', function () {
+                var hoaDonId = '@Model.Id';
+                $.ajax({
+                    url: '/HoaDon/RevertToPreviousStatus',
+                    method: 'POST',
+                    data: { hoaDonId: hoaDonId },
+                    success: function (res) {
+                        if (res.success) {
+                            toastr.success('Hoàn tác trạng thái thành công!');
+                            setTimeout(function () { location.reload(); }, 1000);
+                        } else {
+                            toastr.error(res.message || 'Không thể hoàn tác trạng thái!');
+                        }
+                    },
+                    error: function () {
+                        toastr.error('Có lỗi xảy ra!');
+                    }
+                });
+            });
+        });
+        // Hàm chuyển enum sang tên tiếng Việt
+        function getStatusName(status) {
+            switch (status) {
+                case 0: return 'Chờ xác nhận';
+                case 1: return 'Đã xác nhận';
+                case 2: return 'Chờ vận chuyển';
+                case 3: return 'Đang vận chuyển';
+                case 4: return 'Đã thanh toán';
+                case 5: return 'Thành Công';
+                case 6: return 'Đã hủy';
+                case 7: return 'Trả hàng';
+                default: return status;
+            }
+        }
+        // Hàm định dạng ngày giờ
+        function formatDateTime(dateStr) {
+            var d = new Date(dateStr);
+            if (isNaN(d)) return '';
+            return d.toLocaleString('vi-VN');
+        }
     </script>
+}
+@functions {
+    string GetStatusName(LoaiHoaDon status)
+    {
+        switch (status)
+        {
+            case LoaiHoaDon.Online:
+                return "Online";
+            case LoaiHoaDon.TaiQuay:
+                return "Tại Quầy";
+            default:
+                return status.ToString();
+        }
+    }
+    string GetStatusColor(LoaiHoaDon status)
+    {
+        switch (status)
+        {
+            case LoaiHoaDon.Online:
+                return "success";
+            case LoaiHoaDon.TaiQuay:
+                return "warning";
+            default:
+                return "danger";
+        }
+    }
+    string GetStatusDisplayName(object trangThai)
+    {
+        switch (trangThai.ToString())
+        {
+            case "ChoXacNhan":
+                return "Chờ xác nhận";
+            case "ThanhCong":
+                return "Thành Công";
+            case "DaHuy":
+                return "Đã hủy";
+            case "TraHang":
+                return "Trả hàng";
+            case "DaXacNhan":
+                return "Đã xác nhận";
+            case "ChoVanChuyen":
+                return "Chờ vận chuyển";
+            case "DangVanChuyen":
+                return "Đang vận chuyển";
+            case "DaThanhToan":
+                return "Đã thanh toán";
+            default:
+                return trangThai.ToString();
+        }
+    }
 }
     

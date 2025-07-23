@@ -4,6 +4,7 @@ using SneakFit.Data.Enums;
 using SneakFit.ViewModels.Catalog.HoaDon;
 using SneakFit.ViewModels.Catalog.HoaDonChiTiet;
 using SneakFit.ViewModels.Catalog.KhuyenMai;
+using SneakFit.ViewModels.Catalog.LichSuHoaDon;
 using SneakFit.ViewModels.Common;
 using System;
 using System.Collections.Generic;
@@ -281,6 +282,74 @@ namespace SneakFit.Application.Catalog.HoaDon
             _context.HoaDon.Remove(hoaDon);
             await _context.SaveChangesAsync();
             return true;
+        }
+        public async Task<bool> RevertToPreviousStatusAsync(Guid hoaDonId, string nguoiThucHien)
+        {
+            var lastHistory = await _context.LichSuHoaDon
+                .Where(x => x.HoaDonId == hoaDonId)
+                .OrderByDescending(x => x.NgayTao)
+                .FirstOrDefaultAsync();
+
+            if (lastHistory == null)
+                return false;
+
+            var hoaDon = await _context.HoaDon.FindAsync(hoaDonId);
+            if (hoaDon == null)
+                return false;
+
+            // Cập nhật trạng thái hóa đơn về trạng thái cũ
+            TrangThaiHoaDon trangThaiHienTai = hoaDon.TrangThai;
+            hoaDon.TrangThai = lastHistory.TrangThaiCu;
+
+            // Ghi lại lịch sử thao tác quay lại
+            var revertHistory = new Data.Entities.LichSuHoaDon
+            {
+                Id = Guid.NewGuid(),
+                HoaDonId = hoaDonId,
+                TrangThaiCu = trangThaiHienTai,
+                TrangThaiMoi = lastHistory.TrangThaiCu,
+                NgayTao = DateTime.Now,
+                NguoiChinhSua = nguoiThucHien,
+                UserId = lastHistory.UserId // hoặc truyền vào nếu cần
+            };
+            _context.LichSuHoaDon.Add(revertHistory);
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        public async Task<List<LichSuHoaDonViewModel>> GetByHoaDonIdAsync(Guid hoaDonId)
+        {
+            var query = _context.LichSuHoaDon
+                .Where(x => x.HoaDonId == hoaDonId)
+                .OrderByDescending(x => x.NgayTao)
+                .Select(x => new LichSuHoaDonViewModel
+                {
+                    Id = x.Id,
+                    HoaDonId = x.HoaDonId,
+                    TrangThaiCu = x.TrangThaiCu,
+                    TrangThaiMoi = x.TrangThaiMoi,
+                    NgayTao = x.NgayTao,
+                    NguoiChinhSua = x.NguoiChinhSua
+                });
+
+            return await query.ToListAsync();
+        }
+
+        public async Task<Guid> CreateAsync(CreateLichSuHoaDonRequest request)
+        {
+            var entity = new Data.Entities.LichSuHoaDon
+            {
+                Id = Guid.NewGuid(),
+                HoaDonId = request.HoaDonId,
+                TrangThaiCu = request.TrangThaiCu,
+                TrangThaiMoi = request.TrangThaiMoi,
+                NgayTao = DateTime.Now,
+                NguoiChinhSua = request.NguoiChinhSua,
+                UserId = request.UserId
+            };
+            _context.LichSuHoaDon.Add(entity);
+            await _context.SaveChangesAsync();
+            return entity.Id;
         }
     }
 }

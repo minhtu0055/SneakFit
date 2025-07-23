@@ -1,5 +1,6 @@
 ﻿using SneakFit.Data.Enums;
 using SneakFit.ViewModels.Catalog.HoaDon;
+using SneakFit.ViewModels.Catalog.LichSuHoaDon;
 using SneakFit.ViewModels.Common;
 
 namespace SneakFit.ApiIntegration.Services
@@ -15,5 +16,9 @@ namespace SneakFit.ApiIntegration.Services
         Task<List<HoaDonViewModel>> GetHoaDonChoByNguoiTao(string nguoiTao);
         Task<bool> Delete(Guid id);
         Task<bool> ThanhToan(SuaHoaDon request);
+
+        Task<List<LichSuHoaDonViewModel>> GetHistoryByHoaDonId(Guid hoaDonId);
+        Task<bool> RevertToPreviousStatus(Guid hoaDonId);
+        Task<Guid> CreateHistory(CreateLichSuHoaDonRequest request);
     }
 }

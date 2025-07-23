@@ -5,6 +5,7 @@ using SneakFit.Application.Catalog.HoaDon;
 using SneakFit.Data.Entities;
 using SneakFit.Data.Enums;
 using SneakFit.ViewModels.Catalog.HoaDon;
+using SneakFit.ViewModels.Catalog.LichSuHoaDon;
 
 namespace SneakFit.BackEndAPI.Controllers
 {
@@ -89,6 +90,38 @@ namespace SneakFit.BackEndAPI.Controllers
             var result = await _hoaDonService.Delete(id);
             if (!result)
                 return NotFound();
+            return Ok(new { success = true });
+        }
+
+        [HttpGet("{hoaDonId}/history")]
+        public async Task<IActionResult> GetHistoryByHoaDonId(Guid hoaDonId)
+        {
+            var result = await _hoaDonService.GetByHoaDonIdAsync(hoaDonId);
+            return Ok(result);
+        }
+
+        [HttpPost("history")]
+        public async Task<IActionResult> CreateHistory(CreateLichSuHoaDonRequest request)
+        {
+            var result = await _hoaDonService.CreateAsync(request);
+            if (result == Guid.Empty)
+            {
+                return BadRequest();
+            }
+            return Ok(result);
+        }
+
+        [HttpPost("{hoaDonId}/revert")]
+        public async Task<IActionResult> RevertStatus(Guid hoaDonId)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var nguoiThucHien = user?.HoVaTen ?? User.Identity.Name;
+
+            var result = await _hoaDonService.RevertToPreviousStatusAsync(hoaDonId, nguoiThucHien);
+            if (!result)
+            {
+                return BadRequest("Không thể quay lại trạng thái trước đó.");
+            }
             return Ok(new { success = true });
         }
     }

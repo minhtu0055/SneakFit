@@ -6,6 +6,7 @@ using SneakFit.ViewModels.Catalog.SanPham;
 using SneakFit.ViewModels.Common;
 using System.Globalization;
 using System.Security.Claims;
+using SneakFit.ViewModels.Catalog.LichSuHoaDon;
 
 namespace SneakFit.Admin.Controllers
 {
@@ -148,5 +149,62 @@ namespace SneakFit.Admin.Controllers
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
+        [HttpGet]
+        public async Task<IActionResult> GetHistoryByHoaDonId(Guid hoaDonId)
+        {
+            try
+            {
+                var result = await _hoaDonApiClient.GetHistoryByHoaDonId(hoaDonId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+        [HttpPost]
+        public async Task<IActionResult> CreateHistory([FromBody] CreateLichSuHoaDonRequest request)
+        {
+            try
+            {
+                var result = await _hoaDonApiClient.CreateHistory(request);
+                return Ok(new { success = true, id = result });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+        [HttpPost]
+        public async Task<IActionResult> RevertToPreviousStatus(Guid hoaDonId)
+        {
+            try
+            {
+                var result = await _hoaDonApiClient.RevertToPreviousStatus(hoaDonId);
+                if (result)
+                    return Ok(new { success = true });
+                return BadRequest(new { success = false, message = "Không thể hoàn tác trạng thái hóa đơn!" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+        [HttpPost]
+        public async Task<IActionResult> UpdateStatus(Guid hoaDonId, TrangThaiHoaDon trangThai)
+        {
+            try
+            {
+                var result = await _hoaDonApiClient.UpdateStatus(hoaDonId, trangThai);
+                if (result)
+                    return Ok(new { success = true });
+                return BadRequest(new { success = false, message = "Không thể cập nhật trạng thái hóa đơn!" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+        
     }
 }
