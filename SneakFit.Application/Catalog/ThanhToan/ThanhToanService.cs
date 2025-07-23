@@ -95,7 +95,6 @@ namespace SneakFit.Application.Catalog.ThanhToan
                 var hoaDon = await _hoaDonService.GetById(hoaDonId);
                 if (hoaDon != null)
                 {
-
                     hoaDon.TrangThai = TrangThaiHoaDon.ChoXacNhan; // Chờ xác nhận (string)
                     hoaDon.TrangThaiThanhToan = TrangThaiThanhToan.ChuaThanhToan; // Chưa thanh toán (string)
                     hoaDon.PhuongThucThanhToan = PhuongThucThanhToan.VnPay; // Chuyển khoản (string)
@@ -128,7 +127,6 @@ namespace SneakFit.Application.Catalog.ThanhToan
             var vnp_TmnCode = _config["VNPay:TmnCode"];
             var vnp_HashSecret = _config["VNPay:HashSecret"];
             var vnp_Url = _config["VNPay:BaseUrl"];
-
             if (string.IsNullOrEmpty(vnp_TmnCode) || string.IsNullOrEmpty(vnp_HashSecret) || string.IsNullOrEmpty(vnp_Url))
                 throw new InvalidOperationException("Thiếu cấu hình VNPay.");
 
@@ -166,8 +164,7 @@ namespace SneakFit.Application.Catalog.ThanhToan
             var responseCode = vnp_Params.ContainsKey("vnp_ResponseCode") ? vnp_Params["vnp_ResponseCode"] : null;
             if (responseCode == "00")
             {
-                if (hoaDon.GiaoHang == true)
-                {
+                if (hoaDon.GiaoHang == true) {                 
                     hoaDon.TrangThai = TrangThaiHoaDon.DaXacNhan; // Đã thanh toán                   
                 }
                 else

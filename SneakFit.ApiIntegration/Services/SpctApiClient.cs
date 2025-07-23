@@ -434,5 +434,43 @@ namespace SneakFit.ApiIntegration.Services
             catch { }
             throw new Exception(errorMsg);
         }
+        public async Task<PagedResult<SPCTViewModels>> GetAllPagings(PhanTrangSPCT request)
+        {
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+                var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+                var response = await client.GetAsync($"/api/spct/GetSPCTForModal?pageIndex={request.PageIndex}" +
+                    $"&pageSize={request.PageSize}" +
+                    $"&tuKhoa={request.TuKhoa}" +
+                    $"&danhMucId={request.DanhMucId}" +
+                    $"&giaThapNhat={request.GiaThapNhat}" +
+                    $"&giaCaoNhat={request.GiaCaoNhat}" +
+                    $"&locTrangThai={request.LocTrangthai}" +
+                    $"&trangThai={request.TrangThai}"
+                );
+                var body = await response.Content.ReadAsStringAsync();
+                if (response.IsSuccessStatusCode)
+                {
+                    var settings = new JsonSerializerSettings
+                    {
+                        NullValueHandling = NullValueHandling.Ignore,
+                        MissingMemberHandling = MissingMemberHandling.Ignore
+                    };
+                    var apiResult = JsonConvert.DeserializeObject<ApiSuccessResult<PagedResult<SPCTViewModels>>>(body, settings);
+                    var pagedResult = apiResult?.ResultObj ?? new PagedResult<SPCTViewModels>();
+                    pagedResult.Items = pagedResult.Items ?? new List<SPCTViewModels>();
+                    return pagedResult;
+                }
+                throw new Exception("Không thể lấy danh sách sản phẩm chi tiết phân trang");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi khi lấy danh sách sản phẩm chi tiết phân trang: {ex.Message}");
+            }
+        }
     }
 }

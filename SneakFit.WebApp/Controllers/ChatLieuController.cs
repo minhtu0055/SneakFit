@@ -44,9 +44,9 @@ namespace SneakFit.Admin.Controllers
             try
             {
                 var result = await _chatLieuApiClient.Create(request);
-                if (result != null)
+                if (result != null && result.Id != Guid.Empty)
                 {
-                    return Json(new { success = true });
+                    return Json(new { success = true, id = result.Id, name = result.TenChatLieu });
                 }
             }
             catch (Exception ex)

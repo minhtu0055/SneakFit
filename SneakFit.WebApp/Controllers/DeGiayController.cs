@@ -44,9 +44,9 @@ namespace SneakFit.Admin.Controllers
             try
             {
                 var result = await _deGiayApiClient.Create(request);
-                if (result != null)
+                if (result != null && result.Id != Guid.Empty)
                 {
-                    return Json(new { success = true });
+                    return Json(new { success = true, id = result.Id, name = result.TenDeGiay });
                 }
             }
             catch (Exception ex)

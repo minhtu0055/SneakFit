@@ -4,6 +4,7 @@ using SneakFit.Data.Enums;
 using SneakFit.ViewModels.Catalog.HoaDon;
 using SneakFit.ViewModels.Catalog.HoaDonChiTiet;
 using SneakFit.ViewModels.Catalog.KhuyenMai;
+using SneakFit.ViewModels.Catalog.LichSuHoaDon;
 using SneakFit.ViewModels.Common;
 using System;
 using System.Collections.Generic;
@@ -43,7 +44,7 @@ namespace SneakFit.Application.Catalog.HoaDon
             {
                 query = query.Where(h => h.NgayTao >= request.NgayBatDau.Value && h.NgayTao <= request.NgayKetThuc.Value);
             }
-             if (!string.IsNullOrEmpty(request.NguoiTao))
+            if (!string.IsNullOrEmpty(request.NguoiTao))
             {
                 query = query.Where(h => h.NguoiTao == request.NguoiTao);
             }
@@ -68,7 +69,7 @@ namespace SneakFit.Application.Catalog.HoaDon
                     MaHoaDon = h.MaHoaDon,
                     PhiVanChuyen = h.PhiVanChuyen,
                     TrangThaiThanhToan = h.TrangThaiThanhToan,
-                    TienKhachDua = h.TienKhachDua,
+                    TienKhachDua = h.TienKhachDua,                  
                 }).ToListAsync();
             var pagedResult = new PagedResult<HoaDonViewModel>()
             {
@@ -108,12 +109,19 @@ namespace SneakFit.Application.Catalog.HoaDon
                 TrangThaiThanhToan = hoaDon.TrangThaiThanhToan,
                 VoucherId = hoaDon.VoucherId,
                 TienKhachDua = hoaDon.TienKhachDua,
+                MaTinh = _context.DiaChi.Where(dc => dc.UserId == hoaDon.UserId && dc.Mac_Dinh).Select(dc => dc.MaTinh).FirstOrDefault(),
+                TenTinh = _context.DiaChi.Where(dc => dc.UserId == hoaDon.UserId && dc.Mac_Dinh).Select(dc => dc.TenThanhPho).FirstOrDefault(),
+                MaHuyen = _context.DiaChi.Where(dc => dc.UserId == hoaDon.UserId && dc.Mac_Dinh).Select(dc => dc.MaHuyen).FirstOrDefault(),
+                TenHuyen = _context.DiaChi.Where(dc => dc.UserId == hoaDon.UserId && dc.Mac_Dinh).Select(dc => dc.TenHuyen).FirstOrDefault(),
+                MaXa = _context.DiaChi.Where(dc => dc.UserId == hoaDon.UserId && dc.Mac_Dinh).Select(dc => dc.MaXa).FirstOrDefault(),
+                TenXa = _context.DiaChi.Where(dc => dc.UserId == hoaDon.UserId && dc.Mac_Dinh).Select(dc => dc.TenXa).FirstOrDefault(),
+                TenDiaChi = _context.DiaChi.Where(dc => dc.UserId == hoaDon.UserId && dc.Mac_Dinh).Select(dc => dc.TenDiaChi).FirstOrDefault()
             };
         }
 
         public async Task<HoaDonViewModel> Create(ThemHoaDon request, string tenNguoiTao)
         {
-            var maHoaDon = $"HD{DateTime.Now:yyyyMMddHHmmss}{new Random().Next(1000, 9999)}";
+            var maHoaDon = $"HD{DateTime.Now:MMddHHmmss}{new Random().Next(1000, 9999)}";
             var hoaDon = new Data.Entities.HoaDon
             {
                 Id = Guid.NewGuid(),
@@ -167,6 +175,29 @@ namespace SneakFit.Application.Catalog.HoaDon
             hoaDon.TienKhachDua = request.TienKhachDua;
 
             await _context.SaveChangesAsync();
+
+            // Sau khi cập nhật hóa đơn, kiểm tra và trừ số lượng voucher nếu cần
+            if (hoaDon.VoucherId != null && hoaDon.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan)
+            {
+                var voucher = await _context.Voucher.FindAsync(hoaDon.VoucherId);
+                if (voucher != null)
+                {
+                    if (voucher.SoLuong > 0)
+                    {
+                        voucher.SoLuong--;
+                        if (voucher.SoLuong == 0)
+                            voucher.TrangThai = TrangThaiGiamGia.HetHan;
+                        await _context.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        // Có thể trả về lỗi: Voucher đã hết lượt sử dụng!
+                        // return null hoặc throw exception tùy logic của bạn
+                        return null;
+                    }
+                }
+            }
+
             return await GetById(hoaDon.Id);
         }
 
@@ -212,6 +243,13 @@ namespace SneakFit.Application.Catalog.HoaDon
                     TrangThaiThanhToan = h.TrangThaiThanhToan,
                     VoucherId = h.VoucherId,
                     TienKhachDua = h.TienKhachDua,
+                    MaTinh = _context.DiaChi.Where(dc => dc.UserId == h.UserId && dc.Mac_Dinh).Select(dc => dc.MaTinh).FirstOrDefault(),
+                    TenTinh = _context.DiaChi.Where(dc => dc.UserId == h.UserId && dc.Mac_Dinh).Select(dc => dc.TenThanhPho).FirstOrDefault(),
+                    MaHuyen = _context.DiaChi.Where(dc => dc.UserId == h.UserId && dc.Mac_Dinh).Select(dc => dc.MaHuyen).FirstOrDefault(),
+                    TenHuyen = _context.DiaChi.Where(dc => dc.UserId == h.UserId && dc.Mac_Dinh).Select(dc => dc.TenHuyen).FirstOrDefault(),
+                    MaXa = _context.DiaChi.Where(dc => dc.UserId == h.UserId && dc.Mac_Dinh).Select(dc => dc.MaXa).FirstOrDefault(),
+                    TenXa = _context.DiaChi.Where(dc => dc.UserId == h.UserId && dc.Mac_Dinh).Select(dc => dc.TenXa).FirstOrDefault(),
+                    TenDiaChi = _context.DiaChi.Where(dc => dc.UserId == h.UserId && dc.Mac_Dinh).Select(dc => dc.TenDiaChi).FirstOrDefault()
                 }).ToListAsync();
 
             return data;
@@ -244,6 +282,74 @@ namespace SneakFit.Application.Catalog.HoaDon
             _context.HoaDon.Remove(hoaDon);
             await _context.SaveChangesAsync();
             return true;
+        }
+        public async Task<bool> RevertToPreviousStatusAsync(Guid hoaDonId, string nguoiThucHien)
+        {
+            var lastHistory = await _context.LichSuHoaDon
+                .Where(x => x.HoaDonId == hoaDonId)
+                .OrderByDescending(x => x.NgayTao)
+                .FirstOrDefaultAsync();
+
+            if (lastHistory == null)
+                return false;
+
+            var hoaDon = await _context.HoaDon.FindAsync(hoaDonId);
+            if (hoaDon == null)
+                return false;
+
+            // Cập nhật trạng thái hóa đơn về trạng thái cũ
+            TrangThaiHoaDon trangThaiHienTai = hoaDon.TrangThai;
+            hoaDon.TrangThai = lastHistory.TrangThaiCu;
+
+            // Ghi lại lịch sử thao tác quay lại
+            var revertHistory = new Data.Entities.LichSuHoaDon
+            {
+                Id = Guid.NewGuid(),
+                HoaDonId = hoaDonId,
+                TrangThaiCu = trangThaiHienTai,
+                TrangThaiMoi = lastHistory.TrangThaiCu,
+                NgayTao = DateTime.Now,
+                NguoiChinhSua = nguoiThucHien,
+                UserId = lastHistory.UserId // hoặc truyền vào nếu cần
+            };
+            _context.LichSuHoaDon.Add(revertHistory);
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        public async Task<List<LichSuHoaDonViewModel>> GetByHoaDonIdAsync(Guid hoaDonId)
+        {
+            var query = _context.LichSuHoaDon
+                .Where(x => x.HoaDonId == hoaDonId)
+                .OrderByDescending(x => x.NgayTao)
+                .Select(x => new LichSuHoaDonViewModel
+                {
+                    Id = x.Id,
+                    HoaDonId = x.HoaDonId,
+                    TrangThaiCu = x.TrangThaiCu,
+                    TrangThaiMoi = x.TrangThaiMoi,
+                    NgayTao = x.NgayTao,
+                    NguoiChinhSua = x.NguoiChinhSua
+                });
+
+            return await query.ToListAsync();
+        }
+
+        public async Task<Guid> CreateAsync(CreateLichSuHoaDonRequest request)
+        {
+            var entity = new Data.Entities.LichSuHoaDon
+            {
+                Id = Guid.NewGuid(),
+                HoaDonId = request.HoaDonId,
+                TrangThaiCu = request.TrangThaiCu,
+                TrangThaiMoi = request.TrangThaiMoi,
+                NgayTao = DateTime.Now,
+                NguoiChinhSua = request.NguoiChinhSua,
+                UserId = request.UserId
+            };
+            _context.LichSuHoaDon.Add(entity);
+            await _context.SaveChangesAsync();
+            return entity.Id;
         }
     }
 }

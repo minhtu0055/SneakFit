@@ -317,6 +317,7 @@ namespace SneakFit.ApiIntegration.Services
             }
         }
 
+
         public async Task<bool> GiamSoLuongVoucher(Guid id, int soLuong)
         {
             var client = _httpClientFactory.CreateClient();
@@ -327,6 +328,53 @@ namespace SneakFit.ApiIntegration.Services
 
             var response = await client.PostAsync($"/api/voucher/giam-soluong/{id}?soLuong={soLuong}", null);
             return response.IsSuccessStatusCode;
+        }
+        public async Task<List<VoucherViewModels>> GetPublicVouchers(decimal tongTienHoaDon)
+        {
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+                var sessions = _contextAccessor.HttpContext.Session.GetString("Token");
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+                var response = await client.GetAsync($"/api/voucher/public?tongTienHoaDon={tongTienHoaDon}");
+                var body = await response.Content.ReadAsStringAsync();
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = JsonConvert.DeserializeObject<ApiSuccessResult<List<VoucherViewModels>>>(body);
+                    return result?.ResultObj ?? new List<VoucherViewModels>();
+                }
+                throw new Exception("Không thể lấy danh sách voucher công khai");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi khi lấy voucher công khai: {ex.Message}");
+            }
+        }
+
+        public async Task<List<VoucherViewModels>> GetPrivateVouchersForUser(Guid userId, decimal tongTienHoaDon)
+        {
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+                var sessions = _contextAccessor.HttpContext.Session.GetString("Token");
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+                var response = await client.GetAsync($"/api/voucher/private/{userId}?tongTienHoaDon={tongTienHoaDon}");
+                var body = await response.Content.ReadAsStringAsync();
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = JsonConvert.DeserializeObject<ApiSuccessResult<List<VoucherViewModels>>>(body);
+                    return result?.ResultObj ?? new List<VoucherViewModels>();
+                }
+                throw new Exception("Không thể lấy danh sách voucher riêng tư");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi khi lấy voucher riêng tư: {ex.Message}");
+            }
         }
     }
 }

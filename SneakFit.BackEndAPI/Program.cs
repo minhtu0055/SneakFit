@@ -18,8 +18,8 @@ using SneakFit.Application.Catalog.KichThuoc;
 using SneakFit.Application.Catalog.MauSac;
 using SneakFit.Application.Catalog.SanPham;
 using SneakFit.Application.Catalog.SanPhamChiTiet;
-using SneakFit.Application.Catalog.ThongKe;
 using SneakFit.Application.Catalog.ThanhToan;
+using SneakFit.Application.Catalog.ThongKe;
 using SneakFit.Application.Catalog.ThuongHieu;
 using SneakFit.Application.Catalog.Voucher;
 using SneakFit.Application.Email;
@@ -181,13 +181,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-// app.UseCors();
+app.UseCors();
+app.UseCors("AllowSpecificOrigin");
 app.UseStaticFiles();
 
 app.UseHttpsRedirection();
-
-app.UseCors("AllowSpecificOrigin");
-
 app.UseAuthentication();
 app.UseAuthorization();
 

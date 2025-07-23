@@ -45,9 +45,10 @@ namespace SneakFit.Admin.Controllers
             try
             {
                 var result = await _thuongHieuApiClient.Create(request);
-                if (result != null)
+                if (result != null && result.Id != Guid.Empty)
                 {
-                    return Json(new { success = true });
+                    // Trả về id và tên để JS có thể chọn lại dropdown
+                    return Json(new { success = true, id = result.Id, name = result.TenThuongHieu });
                 }
             }
             catch (Exception ex)

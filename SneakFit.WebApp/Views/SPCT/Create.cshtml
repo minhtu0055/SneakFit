@@ -170,8 +170,6 @@
 
 @section Scripts {
     <!-- Thêm thư viện color picker -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-minicolors/2.3.6/jquery.minicolors.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-minicolors/2.3.6/jquery.minicolors.min.js"></script>
 
     <style>
         .selected-item {
@@ -1595,6 +1593,135 @@
                     showPage(currentPage);
                 }
             });
+        }
+
+                // Thêm mới Thương hiệu bằng AJAX
+        $(document).on('submit', '#createThuongHieuForm', function(e) {
+            e.preventDefault();
+            var formData = $(this).serialize();
+            $.ajax({
+                url: '/ThuongHieu/Create',
+                type: 'POST',
+                data: formData,
+                success: function(res) {
+                    if(res.success) {
+                        $('#modalAddThuongHieu').modal('hide');
+                        reloadThuongHieuDropdown(res.id, res.name);
+                    } else {
+                        Swal.fire('Lỗi', res.message || 'Không thể thêm thương hiệu');
+                    }
+                }
+            });
+        });
+
+        function reloadThuongHieuDropdown(newId, newName) {
+            var $select = $('select[name="ThuongHieuId"]');
+            if ($select.find(`option[value="${newId}"]`).length === 0) {
+                $select.append(`<option value="${newId}">${newName}</option>`);
+            }
+            $select.val(newId);
+            $select.trigger('change');
+        }
+
+
+        //                function reloadThuongHieuDropdown(newId, newName) {
+        //     var $select = $('select[name="ThuongHieuId"]');
+        //     if ($select.find(`option[value="${newId}"]`).length === 0) {
+        //         $select.append(`<option value="${newId}">${newName}</option>`);
+        //     }
+        //     $.get('/api/ThuongHieu/GetAll', function(list) { //// Thay /GetAll thành /getall
+        //         $select.empty();
+        //         $select.append('<option value="">-- Chọn thương hiệu --</option>');
+        //         list.forEach(function(item) {
+        //             $select.append(`<option value="${item.id}">${item.tenThuongHieu}</option>`);
+        //         });
+        //     });
+        // }
+
+        // Tương tự cho Chất liệu
+        $(document).on('submit', '#createChatLieuForm', function(e) {
+            e.preventDefault();
+            var formData = $(this).serialize();
+            $.ajax({
+                url: '/ChatLieu/Create',
+                type: 'POST',
+                data: formData,
+                success: function(res) {
+                    if(res.success) {
+                        $('#modalAddChatLieu').modal('hide');
+                        reloadChatLieuDropdown(res.id, res.name);
+                    } else {
+                        Swal.fire('Lỗi', res.message || 'Không thể thêm chất liệu');
+                    }
+                }
+            });
+        });
+
+        function reloadChatLieuDropdown(newId, newName) {
+            var $select = $('select[name="ChatLieuId"]');
+            if ($select.find(`option[value="${newId}"]`).length === 0) {
+                $select.append(`<option value="${newId}">${newName}</option>`);
+            }
+            $select.val(newId);
+            $select.trigger('change');
+        }
+
+        // Tương tự cho Đế giày
+        $(document).on('submit', '#createDeGiayForm', function(e) {
+            e.preventDefault();
+            var formData = $(this).serialize();
+            $.ajax({
+                url: '/DeGiay/Create',
+                type: 'POST',
+                data: formData,
+                success: function(res) {
+                    if(res.success) {
+                        $('#modalAddDeGiay').modal('hide');
+                        reloadDeGiayDropdown(res.id, res.name);
+                    } else {
+                        Swal.fire('Lỗi', res.message || 'Không thể thêm đế giày');
+                    }
+                }
+            });
+        });
+
+
+        function reloadDeGiayDropdown(newId, newName) {
+            var $select = $('select[name="DeGiayId"]');
+            if ($select.find(`option[value="${newId}"]`).length === 0) {
+                $select.append(`<option value="${newId}">${newName}</option>`);
+            }
+            $select.val(newId);
+            $select.trigger('change');
+        }
+
+        // Tương tự cho Sản phẩm
+        $(document).on('submit', '#createSanPhamForm', function(e) {
+            e.preventDefault();
+            var formData = $(this).serialize();
+            $.ajax({
+                url: '/SanPham/Create',
+                type: 'POST',
+                data: formData,
+                success: function(res) {
+                    if(res.success) {
+                        $('#modalAddSanPham').modal('hide');
+                        reloadSanPhamDropdown(res.id, res.name);
+                    } else {
+                        Swal.fire('Lỗi', res.message || 'Không thể thêm sản phẩm');
+                    }
+                }
+            });
+        });
+
+
+        function reloadSanPhamDropdown(newId, newName) {
+            var $select = $('select[name="SanPhamId"]');
+            if ($select.find(`option[value="${newId}"]`).length === 0) {
+                $select.append(`<option value="${newId}">${newName}</option>`);
+            }
+            $select.val(newId);
+            $select.trigger('change');
         }
     </script>
 }
