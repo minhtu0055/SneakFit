@@ -1192,7 +1192,7 @@
                     DeGiayId: $tr.data('degiay-id') || deGiayId,
                     MauSacId: $tr.data('mausac-id'),
                     KichThuocId: $tr.data('kichthuoc-id'),
-                    SoLuong: parseInt($tr.find('.quantity-input').val()) || 0,
+                    SoLuong: parseInt($tr.find('.quantity-input').val().replace(/\./g, '')) || 0,
                     Gia: parseInt($tr.find('.price-input').val().replace(/\./g, '')) || 0,
                     TrangThai: $('#trangThaiSelect').val() === "true"
                 };
