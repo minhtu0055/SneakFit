@@ -14,7 +14,13 @@ namespace SneakFit.ViewModels.System.User
         public Guid Id { get; set; }
         public string HoVaTen { get; set; }
         public bool GioiTinh { get; set; }
+
+        [Required(ErrorMessage = "Vui lòng nhập email")]
+        [RegularExpression(@"^[a-zA-Z0-9._%+-]+@gmail\.com$", ErrorMessage = "Email phải đúng định dạng và kết thúc bằng @gmail.com")]
         public string Email { get; set; }
+
+        [Required(ErrorMessage = "Vui lòng nhập số điện thoại")]
+        [RegularExpression(@"^0[0-9]{9}$", ErrorMessage = "Số điện thoại phải bắt đầu bằng số 0 và gồm đúng 10 chữ số, không chứa ký tự khác.")]
         public string? SoDienThoai { get; set; }
         public string? UrlHinhAnh { get; set; }
         public IFormFile? HinhAnh { get; set; }

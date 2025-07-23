@@ -321,6 +321,19 @@ namespace SneakFit.Application.System.User
             var user = await _userManager.FindByIdAsync(request.Id.ToString());
             if (user == null)
                 return new ApiErrorResult<bool>("Tài khoản không tồn tại");
+            // Kiểm tra email đã được sử dụng bởi user khác chưa
+            var userByEmail = await _userManager.FindByEmailAsync(request.Email);
+            if (userByEmail != null && userByEmail.Id != user.Id)
+            {
+                return new ApiErrorResult<bool>("Email đã được sử dụng");
+            }
+
+            // Kiểm tra số điện thoại đã được sử dụng bởi user khác chưa
+            var userByPhone = await _userManager.Users.FirstOrDefaultAsync(x => x.PhoneNumber == request.SoDienThoai && x.Id != user.Id);
+            if (userByPhone != null)
+            {
+                return new ApiErrorResult<bool>("Số điện thoại đã được sử dụng");
+            }
             if (request.HinhAnh != null)
             {
                 string uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "users");

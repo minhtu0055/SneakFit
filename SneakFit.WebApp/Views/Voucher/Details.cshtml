@@ -1,0 +1,241 @@
+﻿@model SneakFit.ViewModels.Catalog.Voucher.VoucherViewModels
+@using SneakFit.Data.Enums
+@using SneakFit.ViewModels.Common
+@using SneakFit.ViewModels.System.User
+@{
+    var khachHangs = ViewBag.KhachHangs as PagedResult<UserViewModels>;
+    ViewData["Title"] = "Chi tiết Voucher";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="/">Voucher</a></li>
+            <li class="breadcrumb-item active">Chi tiết Voucher</li>
+        </ol>
+        <div>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary me-2">
+                <i class="bx bx-edit-alt me-1"></i> Chỉnh sửa
+            </a>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="bx bx-arrow-back me-1"></i> Quay lại
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0">Thông tin khuyến mãi</h5>
+                    <small class="text-muted float-end">
+                        @switch (Model.TrangThai)
+                        {
+                            case TrangThaiGiamGia.HoatDong:
+                                <span class="badge bg-label-success">Đang hoạt động</span>
+                                break;
+                            case TrangThaiGiamGia.KhongHoatDong:
+                                <span class="badge bg-label-warning">Không hoạt động</span>
+                                break;
+                            case TrangThaiGiamGia.HetHan:
+                                <span class="badge bg-label-danger">Đã hết hạn</span>
+                                break;
+                        }
+                    </small>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Mã voucher:</label>
+                                <div class="form-control-plaintext"><strong>@Model.MaVoucher</strong></div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Loại giảm giá:</label>
+                                <div class="form-control-plaintext">
+                                    <strong>
+                                        @{
+                                            var loaiGiam = Model.LoaiGiamGia == LoaiGiamGia.PhamTram ? "Phần trăm" : "Số tiền";
+                                        }
+                                        @loaiGiam
+                                    </strong>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Giá trị giảm:</label>
+                                <div class="form-control-plaintext" style="color: red">
+                                    <strong>
+                                        @((Model.LoaiGiamGia == LoaiGiamGia.PhamTram)
+                                            ? ($"{Model.GiaTriGiamGia:0}%")
+                                            : ($"{Model.GiaTriGiamGia:N0}đ"))
+                                    </strong>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Điều kiện áp dụng:</label>
+                                <div class="form-control-plaintext"><strong>@Model.DieuKienApDung.ToString("N0") đ</strong></div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Giá Trị Tối Đa</label>
+                                <div class="form-control-plaintext"><strong>@Model.GiaTriToiDa.ToString("N0") đ</strong></div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Loại voucher:</label>
+                                <div class="form-control-plaintext">
+                                    <strong>
+                                        @{
+                                            var loaiVoucher = Model.loaiVoucher == LoaiVoucher.RiengTu ? "Riêng tư" : "Công khai";
+                                        }
+                                        @loaiVoucher
+                                    </strong>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Số lượng:</label>
+                                <div class="form-control-plaintext"><strong>@Model.SoLuong</strong></div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Ngày Tạo:</label>
+                                <div class="form-control-plaintext">@Model.NgayTao.ToString("dd/MM/yyyy HH:mm")</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Thời gian bắt đầu:</label>
+                                <div class="form-control-plaintext">@Model.ThoiGianBatDau.ToString("dd/MM/yyyy HH:mm")</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Thời gian kết thúc:</label>
+                                <div class="form-control-plaintext">@Model.ThoiGianKetThuc.ToString("dd/MM/yyyy HH:mm")</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (Model.loaiVoucher == LoaiVoucher.RiengTu)
+            {
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Danh sách sản phẩm áp dụng</h5>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <input type="text" id="searchCustomer" class="form-control" placeholder="Tìm kiếm theo tên, email hoặc số điện thoại...">
+                                <button class="btn btn-primary" type="button" id="btnSearchCustomer">
+                                    <i class="bx bx-search"></i> Tìm
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive" style=" border-radius: 8px">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr style="background-color: mediumpurple; color: white;">
+                                    <th>Họ và tên</th>
+                                    <th>Email</th>
+                                    <th>Số điện thoại</th>
+                                </tr>
+                            </thead>
+                            <tbody id="customerTableBody" style="background-color: white;">
+                                <!-- Dữ liệu khách hàng sẽ được load bằng AJAX -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="customerPagination" class="mt-2 d-flex justify-content-center"></div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            const voucherId = "@Model.Id";
+
+            // Gọi ngay khi trang load
+            loadCustomersForVoucher();
+
+            // Tìm kiếm khi bấm nút hoặc nhấn Enter
+            $("#btnSearchCustomer").click(loadCustomersForVoucher);
+            $("#searchCustomer").keypress(function (e) {
+                if (e.which == 13) loadCustomersForVoucher();
+            });
+
+            // Tự load lại khi người dùng xóa từ khóa
+            $("#searchCustomer").on('input', function () {
+                if ($(this).val().length === 0) {
+                    loadCustomersForVoucher();
+                }
+            });
+
+            function loadCustomersForVoucher(pageIndex = 1) {
+                var keyword = $("#searchCustomer").val();
+                var voucherId = "@Model.Id";
+
+                $.ajax({
+                    url: '/Voucher/GetUsersForVoucherPaging',
+                    type: 'GET',
+                    data: {
+                        keyword: keyword,
+                        pageIndex: pageIndex,
+                        pageSize: 10,
+                        VoucherId: voucherId   // 👈 truyền voucherId để lọc
+                    },
+                    success: function (response) {
+                        if (response.isSuccessed) {
+                            var customers = response.resultObj.items;
+                            var tbody = $("#customerTableBody");
+                            tbody.empty();
+
+                            customers.forEach(function (user) {
+                                var row = `
+                                                <tr>
+                                                    <td>${user.hoVaTen}</td>
+                                                    <td>${user.email}</td>
+                                                    <td>${user.soDienThoai}</td>
+                                                </tr>
+                                    `;
+                                tbody.append(row);
+                            });
+
+                            renderCustomerPagination(response.resultObj.pageIndex, response.resultObj.pageCount);
+                        } else {
+                            toastr.error("Không thể tải danh sách khách hàng.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("Đã xảy ra lỗi khi tải dữ liệu.");
+                    }
+                });
+            }
+
+
+            function renderCustomerPagination(currentPage, totalPages) {
+                var container = $("#customerPagination");
+                container.empty();
+
+                if (totalPages <= 1) return;
+
+                for (let i = 1; i <= totalPages; i++) {
+                    let btn = $(`<button class="btn btn-sm ${i === currentPage ? 'btn-primary' : 'btn-light'} mx-1">${i}</button>`);
+                    btn.click(() => loadCustomersForVoucher(i));
+                    container.append(btn);
+                }
+            }
+        });
+    </script>
+}
+

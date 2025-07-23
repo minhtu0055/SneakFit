@@ -67,7 +67,7 @@ namespace SneakFit.Admin.Controllers
                 new SelectListItem("Giảm theo số tiền", ((int)LoaiGiamGia.SoTien).ToString())
             };
             var getUserPagingRequest = new GetUserPagingRequest
-            { 
+            {
                 PageIndex = pageIndex,
                 PageSize = pageSize,
                 Role = "KHÁCH HÀNG",
@@ -76,7 +76,7 @@ namespace SneakFit.Admin.Controllers
             // load danh sách khách hàng
             var rs = await _userApiClient.GetUsersPaging(getUserPagingRequest);
             var khachHangs = new PagedResult<UserViewModels>();
-            
+
             if (rs.IsSuccessed)
             {
                 khachHangs = rs.ResultObj;
@@ -156,6 +156,7 @@ namespace SneakFit.Admin.Controllers
                 LoaiGiamGia = result.LoaiGiamGia,
                 GiaTriGiamGia = result.GiaTriGiamGia,
                 DieuKienApDung = result.DieuKienApDung,
+                GiaTriToiDa = result.GiaTriToiDa,
                 SoLuong = result.SoLuong,
                 NgayTao = result.NgayTao,
                 ThoiGianBatDau = result.ThoiGianBatDau,
@@ -185,7 +186,7 @@ namespace SneakFit.Admin.Controllers
 
             // Load danh sách khách hàng
             var getUserPagingRequest = new GetUserPagingRequest
-            { 
+            {
                 PageIndex = 1,
                 PageSize = 10,
                 Role = "KHÁCH HÀNG"
@@ -309,6 +310,34 @@ namespace SneakFit.Admin.Controllers
             catch (Exception ex)
             {
                 return Json(new ApiErrorResult<PagedResult<VoucherUserViewModel>>(ex.Message));
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> PublicVouchers()
+        {
+            try
+            {
+                var vouchers = await _IvoucherCLient.GetPublicVouchers();
+                return Json(new ApiSuccessResult<List<VoucherViewModels>>(vouchers));
+            }
+            catch (Exception ex)
+            {
+                return Json(new ApiErrorResult<List<VoucherViewModels>>(ex.Message));
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> PrivateVouchers(Guid userId)
+        {
+            try
+            {
+                var vouchers = await _IvoucherCLient.GetPrivateVouchersForUser(userId);
+                return Json(new ApiSuccessResult<List<VoucherViewModels>>(vouchers));
+            }
+            catch (Exception ex)
+            {
+                return Json(new ApiErrorResult<List<VoucherViewModels>>(ex.Message));
             }
         }
     }

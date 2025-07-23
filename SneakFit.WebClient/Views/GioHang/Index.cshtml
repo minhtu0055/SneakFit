@@ -148,11 +148,11 @@
                         </div>
                         <div class="summary-item">
                             <span class="summary-label">Phí ship</span>
-                            <span class="summary-value">35,000 VNĐ</span>
+                            <span class="summary-value" id="shipping-fee">@(((decimal)ViewBag.ShippingFee).ToString("N0")) VNĐ</span>
                         </div>
                         <div class="summary-total">
                             <span class="summary-label">Tổng đơn hàng</span>
-                            <span class="summary-value" id="total">35,000 VNĐ</span>
+                            <span class="summary-value" id="total">0 VNĐ</span> <!-- JS sẽ tính bao gồm shipping -->
                         </div>
                         <div class="checkout-button">
                             @* <a href="@Url.Action("Checkout", "ThanhToan")" class="btn btn-accent w-100">
@@ -203,10 +203,7 @@
             $('.item-checkbox:checked').each(function () {
                 subtotal += parseFloat($(this).data('price')) || 0;
             });
-            const shipping = 35000; // Giá vận chuyển cố định 35,000 VNĐ
-            // const total = subtotal + shipping;
-            // $('#subtotal').text(subtotal.toLocaleString() + ' VNĐ');
-            // $('#total').text(total.toLocaleString() + ' VNĐ');
+            const shipping = parseFloat($('#shipping-fee').text().replace(/[^0-9]/g, '')) || 0;
             let total = subtotal + shipping - discountAmount;
             if (total < 0) total = 0; // Tổng tiền không âm
             $('#subtotal').text(subtotal.toLocaleString() + ' VNĐ');

@@ -17,4 +17,10 @@ namespace SneakFit.ViewModels.GHN
         public int Width { get; set; } = 20;
         public int Height { get; set; } = 12;
     }
+
+    public class AvailableServiceRequest
+    {
+        public int FromDistrict { get; set; }
+        public int ToDistrict { get; set; }
+    }
 }

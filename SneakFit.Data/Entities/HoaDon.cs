@@ -21,7 +21,7 @@ namespace SneakFit.Data.Entities
         public string? Email { get; set; }
         public string? DiaChi { get; set; }
         // Người tạo hóa đơn
-        public string NguoiTao { get; set; }
+        public string? NguoiTao { get; set; }
         public string? MaHoaDon { get; set; }
         public decimal PhiVanChuyen { get; set; }
         public TrangThaiThanhToan TrangThaiThanhToan { get; set; }

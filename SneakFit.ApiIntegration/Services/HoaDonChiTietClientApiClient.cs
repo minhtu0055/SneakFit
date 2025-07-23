@@ -1,6 +1,4 @@
 ﻿using Newtonsoft.Json;
-using SneakFit.Data.Enums;
-using SneakFit.ViewModels.Catalog.HoaDonClient;
 using SneakFit.ViewModels.Catalog.HoaDonChiTietClient;
 using SneakFit.ViewModels.Common;
 using System.Net.Http.Headers;

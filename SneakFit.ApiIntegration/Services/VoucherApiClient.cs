@@ -316,5 +316,53 @@ namespace SneakFit.ApiIntegration.Services
                 throw new Exception($"Lỗi khi lấy mã voucher tiếp theo: {ex.Message}");
             }
         }
+
+        public async Task<List<VoucherViewModels>> GetPublicVouchers()
+        {
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+                var sessions = _contextAccessor.HttpContext.Session.GetString("Token");
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+                var response = await client.GetAsync("/api/voucher/public");
+                var body = await response.Content.ReadAsStringAsync();
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = JsonConvert.DeserializeObject<ApiSuccessResult<List<VoucherViewModels>>>(body);
+                    return result?.ResultObj ?? new List<VoucherViewModels>();
+                }
+                throw new Exception("Không thể lấy danh sách voucher công khai");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi khi lấy voucher công khai: {ex.Message}");
+            }
+        }
+
+        public async Task<List<VoucherViewModels>> GetPrivateVouchersForUser(Guid userId)
+        {
+            try
+            {
+                var client = _httpClientFactory.CreateClient();
+                client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+                var sessions = _contextAccessor.HttpContext.Session.GetString("Token");
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+                var response = await client.GetAsync($"/api/voucher/private/{userId}");
+                var body = await response.Content.ReadAsStringAsync();
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = JsonConvert.DeserializeObject<ApiSuccessResult<List<VoucherViewModels>>>(body);
+                    return result?.ResultObj ?? new List<VoucherViewModels>();
+                }
+                throw new Exception("Không thể lấy danh sách voucher riêng tư");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Lỗi khi lấy voucher riêng tư: {ex.Message}");
+            }
+        }
     }
 }

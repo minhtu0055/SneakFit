@@ -1,0 +1,220 @@
+@model SneakFit.ViewModels.System.DiaChi.ThemDiaChiViewModel
+@{
+    ViewData["Title"] = "Thêm địa chỉ cho khách hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0">Thêm địa chỉ mới cho khách hàng</h4>
+    <a href="@Url.Action("UserAddresses", "DiaChi", new { userId = ViewBag.UserId })" class="btn btn-secondary">
+        <i class="bx bx-arrow-back me-1"></i> Quay lại
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Thông tin địa chỉ</h5>
+    </div>
+    <div class="card-body">
+        <form asp-action="CreateForUser" method="post">
+            <input type="hidden" name="userId" value="@ViewBag.UserId" />
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="TenNguoiNhan" class="form-label">Tên người nhận <span class="text-danger">*</span></label>
+                        <input asp-for="TenNguoiNhan" class="form-control" placeholder="Tên người nhận hàng" />
+                        <span asp-validation-for="TenNguoiNhan" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="SoDienThoai" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                        <input asp-for="SoDienThoai" class="form-control" placeholder="Số điện thoại người nhận" />
+                        <span asp-validation-for="SoDienThoai" class="text-danger"></span>
+                    </div>
+                </div>    
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="TenDiaChi" class="form-label">Thôn/xóm <span class="text-danger">*</span></label>
+                        <input asp-for="TenDiaChi" class="form-control" placeholder="VD: Xóm 2, Ngọc Bài..." />
+                        <span asp-validation-for="TenDiaChi" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label">Tỉnh/Thành phố <span class="text-danger">*</span></label>
+                        <select class="form-select province-dropdown" id="province" required>
+                            <option value="">Chọn Tỉnh/Thành phố</option>
+                        </select>
+                        <input type="hidden" asp-for="TenThanhPho" id="provinceName" />
+                        <input type="hidden" asp-for="MaTinh" id="provinceCode" />
+                        <span class="invalid-feedback">Vui lòng chọn tỉnh/thành phố</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="MaHuyen" class="form-label">Quận/Huyện <span class="text-danger">*</span></label>
+                        <select class="form-select" id="district" disabled>
+                            <option value="">Chọn quận/huyện</option>
+                        </select>
+                        <input type="hidden" asp-for="TenHuyen" id="districtName" />
+                        <input type="hidden" asp-for="MaHuyen" id="districtCode" />
+                        <span class="invalid-feedback">Vui lòng chọn quận/huyện</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="MaXa" class="form-label">Phường/Xã <span class="text-danger">*</span></label>
+                        <select class="form-select" id="ward" disabled>
+                            <option value="">Chọn phường/xã</option>
+                        </select>
+                        <input type="hidden" asp-for="TenXa" id="wardName" />
+                        <input type="hidden" asp-for="MaXa" id="wardCode" />
+                        <span class="invalid-feedback">Vui lòng chọn phường/xã</span>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <div class="form-check">
+                    <input asp-for="MacDinh" class="form-check-input" type="checkbox" />
+                    <label asp-for="MacDinh" class="form-check-label">
+                        Đặt làm địa chỉ mặc định
+                    </label>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+                <a href="@Url.Action("UserAddresses", "DiaChi", new { userId = ViewBag.UserId })" class="btn btn-secondary">
+                    <i class="bx bx-x me-1"></i> Hủy
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bx bx-save me-1"></i> Lưu địa chỉ
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+@section Scripts{
+    <script>
+					$(document).ready(function() {
+						var errorMessage = '@TempData["Error"]';
+            if (errorMessage) {
+                toastr.error(errorMessage, 'Lỗi!', {
+                    closeButton: true,
+                    progressBar: true,
+                    timeOut: 7000,
+                    extendedTimeOut: 2000,
+                    preventDuplicates: true
+                });
+            }
+				// Load tỉnh/thành phố
+
+				$.ajax({
+					url: 'https://localhost:7277/api/ghn/provinces',  // Thêm BaseAddress vào
+					type: 'GET',
+					success: function(response) {
+						const provinces = response.data;
+						let options = '<option value="">Chọn Tỉnh/Thành phố</option>';
+						provinces.forEach(function(province) {
+							options += `<option value="${province.ProvinceID}" data-name="${province.ProvinceName}">${province.ProvinceName}</option>`;
+						});
+						$('#province').html(options);
+					},
+					error: function(error) {
+						console.error('Lỗi khi tải danh sách tỉnh/thành phố:', error);
+						toastr.error('Không thể tải danh sách tỉnh/thành phố');
+					}
+				});
+
+				// Khi chọn tỉnh/thành phố
+				$('#province').change(function() {
+					const provinceId = $(this).val();
+					const provinceName = $(this).find('option:selected').data('name');
+					$('#provinceName').val(provinceName);
+					$('#provinceCode').val(provinceId);
+
+					// Reset quận/huyện và phường/xã
+					$('#district').html('<option value="">Chọn Quận/Huyện</option>');
+					$('#ward').html('<option value="">Chọn Phường/Xã</option>');
+					$('#districtName').val('');
+					$('#districtCode').val('');
+					$('#wardName').val('');
+					$('#wardCode').val('');
+
+					if (provinceId) {
+						$('#district').prop('disabled', false);
+						// Load quận/huyện
+						$.ajax({
+							url: 'https://localhost:7277/api/ghn/districts',  // Thêm BaseAddress vào
+							type: 'GET',
+							success: function(response) {
+								const districts = response.data.filter(d => d.ProvinceID == provinceId);
+								let options = '<option value="">Chọn Quận/Huyện</option>';
+								districts.forEach(function(district) {
+									options += `<option value="${district.DistrictID}" data-name="${district.DistrictName}">${district.DistrictName}</option>`;
+								});
+								$('#district').html(options);
+							},
+							error: function(error) {
+								console.error('Lỗi khi tải danh sách quận/huyện:', error);
+								toastr.error('Không thể tải danh sách quận/huyện');
+							}
+						});
+					} else {
+						$('#district').prop('disabled', true);
+						$('#ward').prop('disabled', true);
+					}
+				});
+
+				// Khi chọn quận/huyện
+				$('#district').change(function() {
+					const districtId = $(this).val();
+					const districtName = $(this).find('option:selected').data('name');
+					$('#districtName').val(districtName);
+					$('#districtCode').val(districtId);
+
+					// Reset phường/xã
+					$('#ward').html('<option value="">Chọn Phường/Xã</option>');
+					$('#wardName').val('');
+					$('#wardCode').val('');
+
+					if (districtId) {
+						$('#ward').prop('disabled', false);
+						// Load phường/xã
+						$.ajax({
+							url: `https://localhost:7277/api/ghn/wards/${districtId}`,  // Thêm BaseAddress vào
+							type: 'GET',
+							success: function(response) {
+								const wards = response.data;
+								let options = '<option value="">Chọn Phường/Xã</option>';
+								wards.forEach(function(ward) {
+									options += `<option value="${ward.WardCode}" data-name="${ward.WardName}">${ward.WardName}</option>`;
+								});
+								$('#ward').html(options);
+							},
+							error: function(error) {
+								console.error('Lỗi khi tải danh sách phường/xã:', error);
+								toastr.error('Không thể tải danh sách phường/xã');
+							}
+						});
+					} else {
+						$('#ward').prop('disabled', true);
+					}
+				});
+
+				// Khi chọn phường/xã
+				$('#ward').change(function() {
+					const wardName = $(this).find('option:selected').data('name');
+					const wardCode = $(this).val();
+					$('#wardName').val(wardName || '');
+					$('#wardCode').val(wardCode || '');
+				});
+			});
+    </script>
+}
