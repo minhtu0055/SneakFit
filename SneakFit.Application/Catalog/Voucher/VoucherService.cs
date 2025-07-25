@@ -62,12 +62,15 @@ namespace SneakFit.Application.Catalog.Voucher
                 LoaiGiamGia = request.LoaiGiamGia,
                 GiaTriGiamGia = request.GiaTriGiamGia,
                 DieuKienApDung = request.DieuKienApDung,
-                GiaTriToiDa = request.GiaTriToiDa,
-                SoLuong = request.SoLuong,
+                GiaTriToiDa = request.LoaiGiamGia == LoaiGiamGia.PhamTram ? request.GiaTriToiDa ?? 0: 0,
+                SoLuong = request.LoaiVoucher == LoaiVoucher.CongKhai ? request.SoLuong ?? 0 : 0,
                 NgayTao = DateTime.Now,
-                ThoiGianBatDau = request.ThoiGianBatDau,
-                ThoiGianKetThuc = request.ThoiGianKetThuc,
-                TrangThai = GetVoucherStatus(request.ThoiGianBatDau, request.ThoiGianKetThuc),
+                ThoiGianBatDau = request.ThoiGianBatDau ?? throw new Exception("Thời gian bắt đầu không được để trống"),
+                ThoiGianKetThuc = request.ThoiGianKetThuc ?? throw new Exception("Thời gian kết thúc không được để trống"),
+                TrangThai = GetVoucherStatus(
+                    request.ThoiGianBatDau ?? throw new Exception("Thời gian bắt đầu không được để trống"),
+                    request.ThoiGianKetThuc ?? throw new Exception("Thời gian kết thúc không được để trống")
+                ),
                 loaiVoucher = request.LoaiVoucher,
             };
             _context.Voucher.Add(vc);
@@ -100,7 +103,7 @@ namespace SneakFit.Application.Catalog.Voucher
                             <li><strong>Loại giảm giá:</strong> {(vc.LoaiGiamGia == LoaiGiamGia.PhamTram ? "Giảm theo phần trăm" : "Giảm theo số tiền")}</li>
                             <li><strong>Giá trị giảm giá:</strong> {vc.GiaTriGiamGia}{(vc.LoaiGiamGia == LoaiGiamGia.PhamTram ? "%" : " VNĐ")}</li>
                             <li><strong>Điều kiện áp dụng:</strong> {vc.DieuKienApDung:N0} VNĐ</li>
-                            <li><strong>Điều kiện áp dụng:</strong> {vc.GiaTriToiDa:N0} VNĐ</li>
+                            <li><strong>Giá trị tối đa:</strong> {vc.GiaTriToiDa:N0} VNĐ</li>
                             <li><strong>Thời gian sử dụng:</strong> từ {vc.ThoiGianBatDau:dd/MM/yyyy HH:mm} đến {vc.ThoiGianKetThuc:dd/MM/yyyy HH:mm}</li>
                         </ul>
                         <p>Vui lòng sử dụng mã voucher này khi thanh toán đơn hàng của bạn.</p>
@@ -282,12 +285,15 @@ namespace SneakFit.Application.Catalog.Voucher
             voucher.LoaiGiamGia = request.LoaiGiamGia;
             voucher.GiaTriGiamGia = request.GiaTriGiamGia;
             voucher.DieuKienApDung = request.DieuKienApDung;
-            voucher.GiaTriToiDa = request.GiaTriToiDa;
-            voucher.SoLuong = request.SoLuong;
-            voucher.ThoiGianBatDau = request.ThoiGianBatDau;
-            voucher.ThoiGianKetThuc = request.ThoiGianKetThuc;
+            voucher.GiaTriToiDa = request.LoaiGiamGia == LoaiGiamGia.PhamTram ? request.GiaTriToiDa?? 0: 0;
+            voucher.SoLuong = request.LoaiVoucher == LoaiVoucher.CongKhai ? request.SoLuong?? 0 : 0;
+            voucher.ThoiGianBatDau = request.ThoiGianBatDau ?? throw new Exception("Thời gian bắt đầu không được để trống");
+            voucher.ThoiGianKetThuc = request.ThoiGianKetThuc ?? throw new Exception("Thời gian kết thúc không được để trống");
             voucher.loaiVoucher = request.LoaiVoucher;
-            voucher.TrangThai = GetVoucherStatus(request.ThoiGianBatDau, request.ThoiGianKetThuc);
+            voucher.TrangThai = GetVoucherStatus(
+                request.ThoiGianBatDau ?? throw new Exception("Thời gian bắt đầu không được để trống"),
+                request.ThoiGianKetThuc ?? throw new Exception("Thời gian kết thúc không được để trống")
+            );
 
             // Xử lý khi chuyển từ voucher công khai sang riêng tư
             if (voucher.loaiVoucher == LoaiVoucher.RiengTu && request.SelectedUserIds != null && request.SelectedUserIds.Any())
@@ -324,7 +330,7 @@ namespace SneakFit.Application.Catalog.Voucher
                                 <li><strong>Loại giảm giá:</strong> {(voucher.LoaiGiamGia == LoaiGiamGia.PhamTram ? "Giảm theo phần trăm" : "Giảm theo số tiền")}</li>
                                 <li><strong>Giá trị giảm giá:</strong> {voucher.GiaTriGiamGia}{(voucher.LoaiGiamGia == LoaiGiamGia.PhamTram ? "%" : " VNĐ")}</li>
                                 <li><strong>Điều kiện áp dụng:</strong> {voucher.DieuKienApDung:N0} VNĐ</li>
-                                <li><strong>Điều kiện áp dụng:</strong> {voucher.GiaTriToiDa:N0} VNĐ</li>
+                                <li><strong>Giá trị tối đa:</strong> {voucher.GiaTriToiDa:N0} VNĐ</li>
                                 <li><strong>Thời gian sử dụng:</strong> từ {voucher.ThoiGianBatDau:dd/MM/yyyy HH:mm} đến {voucher.ThoiGianKetThuc:dd/MM/yyyy HH:mm}</li>
                             </ul>
                             <p>Vui lòng sử dụng mã voucher này khi thanh toán đơn hàng của bạn.</p>
@@ -338,16 +344,6 @@ namespace SneakFit.Application.Catalog.Voucher
                     }
                 }
 
-                //// Xóa khách hàng bị loại bỏ
-                //foreach (var userId in removedUserIds)
-                //{
-                //    var voucherUser = await _context.VoucherUser
-                //        .FirstOrDefaultAsync(vu => vu.VoucherId == voucher.Id && vu.UserId == userId);
-                //    if (voucherUser != null)
-                //    {
-                //        _context.VoucherUser.Remove(voucherUser);
-                //    }
-                //}
 
                 // Gửi email thông báo cập nhật cho khách hàng cũ
                 var existingUsers = await _context.Users
@@ -364,7 +360,7 @@ namespace SneakFit.Application.Catalog.Voucher
                             <li><strong>Loại giảm giá:</strong> {(voucher.LoaiGiamGia == LoaiGiamGia.PhamTram ? "Giảm theo phần trăm" : "Giảm theo số tiền")}</li>
                             <li><strong>Giá trị giảm giá:</strong> {voucher.GiaTriGiamGia}{(voucher.LoaiGiamGia == LoaiGiamGia.PhamTram ? "%" : " VNĐ")}</li>
                             <li><strong>Điều kiện áp dụng:</strong> {voucher.DieuKienApDung:N0} VNĐ</li>
-                            <li><strong>Điều kiện áp dụng:</strong> {voucher.GiaTriToiDa:N0} VNĐ</li>
+                            <li><strong>Giá trị tối đa:</strong> {voucher.GiaTriToiDa:N0} VNĐ</li>
                             <li><strong>Thời gian sử dụng:</strong> từ {voucher.ThoiGianBatDau:dd/MM/yyyy HH:mm} đến {voucher.ThoiGianKetThuc:dd/MM/yyyy HH:mm}</li>
                         </ul>
                         <p>Vui lòng kiểm tra thông tin mới của voucher trước khi sử dụng.</p>
@@ -398,7 +394,7 @@ namespace SneakFit.Application.Catalog.Voucher
                             <li><strong>Loại giảm giá:</strong> {(voucher.LoaiGiamGia == LoaiGiamGia.PhamTram ? "Giảm theo phần trăm" : "Giảm theo số tiền")}</li>
                             <li><strong>Giá trị giảm giá:</strong> {voucher.GiaTriGiamGia}{(voucher.LoaiGiamGia == LoaiGiamGia.PhamTram ? "%" : " VNĐ")}</li>
                             <li><strong>Điều kiện áp dụng:</strong> {voucher.DieuKienApDung:N0} VNĐ</li>
-                            <li><strong>Điều kiện áp dụng:</strong> {voucher.GiaTriToiDa:N0} VNĐ</li>
+                            <li><strong>Giá trị tối đa:</strong> {voucher.GiaTriToiDa:N0} VNĐ</li>
                             <li><strong>Thời gian sử dụng:</strong> từ {voucher.ThoiGianBatDau:dd/MM/yyyy HH:mm} đến {voucher.ThoiGianKetThuc:dd/MM/yyyy HH:mm}</li>
                         </ul>
                         <p>Vui lòng kiểm tra thông tin mới của voucher trước khi sử dụng.</p>
@@ -445,24 +441,66 @@ namespace SneakFit.Application.Catalog.Voucher
             return false;
         }
 
+        //public async Task<bool> UseVoucher(string code, Guid userId)
+        //{
+        //    var voucher = await _context.Voucher.FirstOrDefaultAsync(x => x.MaVoucher == code);
+        //    if (voucher == null) return false;
+
+        //    var user = await _context.Users.FindAsync(userId);
+        //    if (user == null || user.TrangThai == false) return false;
+
+        //    // Nếu là voucher riêng tư
+        //    if (voucher.loaiVoucher == LoaiVoucher.RiengTu)
+        //    {
+        //        // Kiểm tra có được gán không
+        //        var voucherUser = await _context.VoucherUser
+        //            .FirstOrDefaultAsync(vu => vu.VoucherId == voucher.Id && vu.UserId == userId);
+
+        //        if (voucherUser == null) return false;
+
+        //        // ✅ Kiểm tra đã dùng chưa (gợi ý dùng thêm cột "IsUsed" trong bảng VoucherUser)
+        //        if (voucherUser.IsUsed) return false;
+        //    }
+
+        //    // Cập nhật trạng thái nếu cần
+        //    var newStatus = GetVoucherStatus(voucher.ThoiGianBatDau, voucher.ThoiGianKetThuc);
+        //    if (voucher.TrangThai != newStatus)
+        //    {
+        //        voucher.TrangThai = newStatus;
+        //        await _context.SaveChangesAsync();
+        //    }
+
+        //    // Điều kiện sử dụng
+        //    if (voucher.SoLuong <= 0 || voucher.TrangThai != TrangThaiGiamGia.HoatDong)
+        //        return false;
+
+        //    // Trừ số lượng
+        //    voucher.SoLuong--;
+        //    if (voucher.SoLuong == 0)
+        //        voucher.TrangThai = TrangThaiGiamGia.HetHan;
+
+        //    // ✅ Đánh dấu đã dùng nếu là riêng tư
+        //    if (voucher.loaiVoucher == LoaiVoucher.RiengTu)
+        //    {
+        //        var voucherUser = await _context.VoucherUser
+        //            .FirstOrDefaultAsync(vu => vu.VoucherId == voucher.Id && vu.UserId == userId);
+
+        //        voucherUser.IsUsed = true;
+        //    }
+
+        //    await _context.SaveChangesAsync();
+        //    return true;
+        //}
+
         public async Task<bool> UseVoucher(string code, Guid userId)
         {
             var voucher = await _context.Voucher.FirstOrDefaultAsync(x => x.MaVoucher == code);
             if (voucher == null) return false;
 
             var user = await _context.Users.FindAsync(userId);
-            if (user == null || user.TrangThai == false) return false; // Không hoạt động hoặc không tồn tại
+            if (user == null || user.TrangThai == false) return false;
 
-            // Nếu là voucher riêng tư → kiểm tra xem user có được gán không
-            if (voucher.loaiVoucher == LoaiVoucher.RiengTu)
-            {
-                var isAssigned = await _context.VoucherUser
-                    .AnyAsync(vu => vu.VoucherId == voucher.Id && vu.UserId == userId);
-
-                if (!isAssigned) return false; // Không có quyền sử dụng
-            }
-
-            // Cập nhật trạng thái voucher trước khi kiểm tra
+            // Cập nhật trạng thái nếu cần
             var newStatus = GetVoucherStatus(voucher.ThoiGianBatDau, voucher.ThoiGianKetThuc);
             if (voucher.TrangThai != newStatus)
             {
@@ -470,24 +508,40 @@ namespace SneakFit.Application.Catalog.Voucher
                 await _context.SaveChangesAsync();
             }
 
-            // Kiểm tra điều kiện sử dụng voucher
-            if (voucher.SoLuong <= 0 || voucher.TrangThai != TrangThaiGiamGia.HoatDong)
-            {
+            // Kiểm tra trạng thái hoạt động
+            if (voucher.TrangThai != TrangThaiGiamGia.HoatDong)
                 return false;
-            }
 
-            // ✅ Giảm số lượng
-            voucher.SoLuong--;
-
-            // ✅ Nếu hết số lượng thì cập nhật trạng thái
-            if (voucher.SoLuong == 0)
+            // --- Xử lý voucher riêng tư ---
+            if (voucher.loaiVoucher == LoaiVoucher.RiengTu)
             {
-                voucher.TrangThai = TrangThaiGiamGia.HetHan;
+                // Kiểm tra có được gán không
+                var voucherUser = await _context.VoucherUser
+                    .FirstOrDefaultAsync(vu => vu.VoucherId == voucher.Id && vu.UserId == userId);
+
+                if (voucherUser == null || voucherUser.IsUsed)
+                    return false;
+
+                // Đánh dấu đã dùng
+                voucherUser.IsUsed = true;
+            }
+            // --- Xử lý voucher công khai ---
+            else if (voucher.loaiVoucher == LoaiVoucher.CongKhai)
+            {
+                if (voucher.SoLuong <= 0)
+                    return false;
+
+                voucher.SoLuong--;
+
+                if (voucher.SoLuong == 0)
+                    voucher.TrangThai = TrangThaiGiamGia.HetHan;
             }
 
             await _context.SaveChangesAsync();
             return true;
         }
+
+
 
         public async Task<List<VoucherUserViewModel>> GetUsersForVoucher(Guid? voucherId = null)
         {
