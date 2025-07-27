@@ -14,7 +14,8 @@
             </h4>
         </div>
         <div>
-            <a asp-action="Index" asp-controller="SPCT" class="btn btn-secondary"> @* Thêm asp-controller="SanPham" để trả về SanPham/index *@
+            <a asp-action="Index" asp-controller="SPCT" class="btn btn-secondary">
+                @* Thêm asp-controller="SanPham" để trả về SanPham/index *@
                 <i class="bx bx-arrow-back me-1"></i> Quay lại
             </a>
         </div>
@@ -170,6 +171,8 @@
 
 @section Scripts {
     <!-- Thêm thư viện color picker -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-minicolors/2.3.6/jquery.minicolors.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-minicolors/2.3.6/jquery.minicolors.min.js"></script>
 
     <style>
         .selected-item {
@@ -989,12 +992,12 @@
             e.stopPropagation();
             let idx = $(this).data('idx');
             let colorGroupKey = $(this).closest('tr').data('color-group');
-            
+
             // Xóa ảnh khỏi mảng spctImages
             if (spctImages[colorGroupKey]) {
                 spctImages[colorGroupKey].splice(idx, 1);
             }
-            
+
             // Xóa thumbnail
             $(this).closest('.spct-thumb-wrapper').remove();
         });
@@ -1192,7 +1195,7 @@
                     DeGiayId: $tr.data('degiay-id') || deGiayId,
                     MauSacId: $tr.data('mausac-id'),
                     KichThuocId: $tr.data('kichthuoc-id'),
-                    SoLuong: parseInt($tr.find('.quantity-input').val().replace(/\./g, '')) || 0,
+                    SoLuong: parseInt($tr.find('.quantity-input').val().replace(/\./g, '')) || 0, // Sửa tại đây: loại bỏ dấu chấm
                     Gia: parseInt($tr.find('.price-input').val().replace(/\./g, '')) || 0,
                     TrangThai: $('#trangThaiSelect').val() === "true"
                 };
@@ -1498,7 +1501,7 @@
         // Áp dụng giá và số lượng chung cho tất cả sản phẩm chi tiết
         $('#btnApplyEditAll').on('click', function() {
             let price = $('#editAllPrice').val().replace(/\./g, '');
-            let quantity = $('#editAllQuantity').val();
+            let quantity = $('#editAllQuantity').val().replace(/\./g, ''); // Sửa tại đây: loại bỏ dấu chấm
             let isAllChecked = $('#modalEditPriceQuantity').data('isAllChecked');
             let selectedRows = $('#modalEditPriceQuantity').data('selectedRows');
 
@@ -1555,7 +1558,7 @@
             $(this).val(value);
         });
 
-        // PHÂN TRANG CHI TIẾT SẢN PHẨM 
+        // PHÂN TRANG CHI TIẾT SẢN PHẨM
         function renderProductDetailPagination() {
             var $rows = $('#productDetailList tr');
             var rowsPerPage = 6;
@@ -1593,135 +1596,6 @@
                     showPage(currentPage);
                 }
             });
-        }
-
-                // Thêm mới Thương hiệu bằng AJAX
-        $(document).on('submit', '#createThuongHieuForm', function(e) {
-            e.preventDefault();
-            var formData = $(this).serialize();
-            $.ajax({
-                url: '/ThuongHieu/Create',
-                type: 'POST',
-                data: formData,
-                success: function(res) {
-                    if(res.success) {
-                        $('#modalAddThuongHieu').modal('hide');
-                        reloadThuongHieuDropdown(res.id, res.name);
-                    } else {
-                        Swal.fire('Lỗi', res.message || 'Không thể thêm thương hiệu');
-                    }
-                }
-            });
-        });
-
-        function reloadThuongHieuDropdown(newId, newName) {
-            var $select = $('select[name="ThuongHieuId"]');
-            if ($select.find(`option[value="${newId}"]`).length === 0) {
-                $select.append(`<option value="${newId}">${newName}</option>`);
-            }
-            $select.val(newId);
-            $select.trigger('change');
-        }
-
-
-        //                function reloadThuongHieuDropdown(newId, newName) {
-        //     var $select = $('select[name="ThuongHieuId"]');
-        //     if ($select.find(`option[value="${newId}"]`).length === 0) {
-        //         $select.append(`<option value="${newId}">${newName}</option>`);
-        //     }
-        //     $.get('/api/ThuongHieu/GetAll', function(list) { //// Thay /GetAll thành /getall
-        //         $select.empty();
-        //         $select.append('<option value="">-- Chọn thương hiệu --</option>');
-        //         list.forEach(function(item) {
-        //             $select.append(`<option value="${item.id}">${item.tenThuongHieu}</option>`);
-        //         });
-        //     });
-        // }
-
-        // Tương tự cho Chất liệu
-        $(document).on('submit', '#createChatLieuForm', function(e) {
-            e.preventDefault();
-            var formData = $(this).serialize();
-            $.ajax({
-                url: '/ChatLieu/Create',
-                type: 'POST',
-                data: formData,
-                success: function(res) {
-                    if(res.success) {
-                        $('#modalAddChatLieu').modal('hide');
-                        reloadChatLieuDropdown(res.id, res.name);
-                    } else {
-                        Swal.fire('Lỗi', res.message || 'Không thể thêm chất liệu');
-                    }
-                }
-            });
-        });
-
-        function reloadChatLieuDropdown(newId, newName) {
-            var $select = $('select[name="ChatLieuId"]');
-            if ($select.find(`option[value="${newId}"]`).length === 0) {
-                $select.append(`<option value="${newId}">${newName}</option>`);
-            }
-            $select.val(newId);
-            $select.trigger('change');
-        }
-
-        // Tương tự cho Đế giày
-        $(document).on('submit', '#createDeGiayForm', function(e) {
-            e.preventDefault();
-            var formData = $(this).serialize();
-            $.ajax({
-                url: '/DeGiay/Create',
-                type: 'POST',
-                data: formData,
-                success: function(res) {
-                    if(res.success) {
-                        $('#modalAddDeGiay').modal('hide');
-                        reloadDeGiayDropdown(res.id, res.name);
-                    } else {
-                        Swal.fire('Lỗi', res.message || 'Không thể thêm đế giày');
-                    }
-                }
-            });
-        });
-
-
-        function reloadDeGiayDropdown(newId, newName) {
-            var $select = $('select[name="DeGiayId"]');
-            if ($select.find(`option[value="${newId}"]`).length === 0) {
-                $select.append(`<option value="${newId}">${newName}</option>`);
-            }
-            $select.val(newId);
-            $select.trigger('change');
-        }
-
-        // Tương tự cho Sản phẩm
-        $(document).on('submit', '#createSanPhamForm', function(e) {
-            e.preventDefault();
-            var formData = $(this).serialize();
-            $.ajax({
-                url: '/SanPham/Create',
-                type: 'POST',
-                data: formData,
-                success: function(res) {
-                    if(res.success) {
-                        $('#modalAddSanPham').modal('hide');
-                        reloadSanPhamDropdown(res.id, res.name);
-                    } else {
-                        Swal.fire('Lỗi', res.message || 'Không thể thêm sản phẩm');
-                    }
-                }
-            });
-        });
-
-
-        function reloadSanPhamDropdown(newId, newName) {
-            var $select = $('select[name="SanPhamId"]');
-            if ($select.find(`option[value="${newId}"]`).length === 0) {
-                $select.append(`<option value="${newId}">${newName}</option>`);
-            }
-            $select.val(newId);
-            $select.trigger('change');
         }
     </script>
 }
