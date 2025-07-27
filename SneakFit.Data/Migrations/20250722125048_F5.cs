@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SneakFit.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class update1 : Migration
+    public partial class F5 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -636,9 +636,9 @@ namespace SneakFit.Data.Migrations
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "GioiTinh", "HoVaTen", "LockoutEnabled", "LockoutEnd", "NgaySinh", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TrangThai", "TwoFactorEnabled", "UrlHinhAnh", "UserName" },
                 values: new object[,]
                 {
-                    { new Guid("69bd712f-9576-45ba-b5b7-f00649be00de"), 0, "db03e4c4-c595-4950-bb86-30be22932c0d", "kiet@gmail.com", true, false, "Cu Em Kiệt", false, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "kiet@gmail.com", "nhanvien", "AQAAAAIAAYagAAAAEJTN8g3jniGDods9AxFaSbFqhKVt/uLjHt6L4YgFRj7/UjXzU+RHKqYTOcnbaE03Yw==", null, false, "", true, false, null, "nhanvien" },
-                    { new Guid("69bd714f-9576-45ba-b5b7-f00649be00de"), 0, "e333cc02-f52c-4c03-9b1b-eabdf9ab3f5e", "tupmph49568@gmail.com", true, false, "Phí Minh Tú", false, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "tupmph49568@gmail.com", "Admin", "AQAAAAIAAYagAAAAEK1dLQwolePQCEL0N79UR+gqe9xeAHOdCHD6vvdN/2Rs7uTOxidlikZhYSt11pMgOQ==", null, false, "", true, false, null, "Admin" },
-                    { new Guid("69bd714f-9576-45ba-b5b7-f01649be00de"), 0, "51812552-6902-4a6f-a483-6621c5988905", "kiet@gmail.com", true, false, "Siu Nhân", false, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "kiet@gmail.com", "khachhang", "AQAAAAIAAYagAAAAEMHKbX15KUAYI73iozXGyKPGl0nBdCEXjEMAqvJSMrTHVRrEI+shxuM6id+zZCVRDg==", null, false, "", true, false, null, "khachhang" }
+                    { new Guid("69bd712f-9576-45ba-b5b7-f00649be00de"), 0, "1c5f451f-2676-40b9-b3d6-1c73057f2e14", "kiet@gmail.com", true, false, "Cu Em Kiệt", false, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "kiet@gmail.com", "nhanvien", "AQAAAAIAAYagAAAAEOssd/z1uDAL6UQcJ5jVTN/AY9g9TrfQe2GxBJXoA8Gwi7oMXrcmcX0laOkropUlHQ==", null, false, "", true, false, null, "nhanvien" },
+                    { new Guid("69bd714f-9576-45ba-b5b7-f00649be00de"), 0, "9a93a3d6-6251-482e-944f-8b26928532c0", "tupmph49568@gmail.com", true, false, "Phí Minh Tú", false, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "tupmph49568@gmail.com", "Admin", "AQAAAAIAAYagAAAAEIgFRSK51JsiX8wWs3HcYjN7mt/D6Tail8KsgOmtB3ai/z62WRVw88xwWCR4pjA1QA==", null, false, "", true, false, null, "Admin" },
+                    { new Guid("69bd714f-9576-45ba-b5b7-f01649be00de"), 0, "ce2e6e58-65fa-4826-8148-8e71b0508221", "kiet@gmail.com", true, false, "Siu Nhân", false, null, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "kiet@gmail.com", "khachhang", "AQAAAAIAAYagAAAAEKHyHN1q3xu45ajZtC2pLvRBp6r0EvNlpvfEY4pdwpIjuhl1+JJQGU6bKk+rFocRaw==", null, false, "", true, false, null, "khachhang" }
                 });
 
             migrationBuilder.CreateIndex(

@@ -24,7 +24,7 @@ namespace SneakFit.Data.EF
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server=LAPTOP-PH9VPOUT\\SQLEXPRESS;Database=SneakFit5;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true");       
+            optionsBuilder.UseSqlServer("Server=GIGABYTE\\SQLEXPRESS;Database=SneakFit_F5;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true");       
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

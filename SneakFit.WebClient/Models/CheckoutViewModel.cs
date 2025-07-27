@@ -50,5 +50,7 @@ namespace SneakFit.WebClient.Models
         {
             PhuongThucThanhToan = Data.Enums.PhuongThucThanhToan.COD;
         }
+
+        public Guid? SelectedAddressId { get; set; } // Thêm thuộc tính này
     }
 }

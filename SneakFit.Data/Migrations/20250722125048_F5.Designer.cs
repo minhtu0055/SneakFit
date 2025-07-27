@@ -12,8 +12,8 @@ using SneakFit.Data.EF;
 namespace SneakFit.Data.Migrations
 {
     [DbContext(typeof(SneakFitDbContext))]
-    [Migration("20250715044803_update1")]
-    partial class update1
+    [Migration("20250722125048_F5")]
+    partial class F5
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -256,7 +256,7 @@ namespace SneakFit.Data.Migrations
                         {
                             Id = new Guid("69bd714f-9576-45ba-b5b7-f00649be00de"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "e333cc02-f52c-4c03-9b1b-eabdf9ab3f5e",
+                            ConcurrencyStamp = "9a93a3d6-6251-482e-944f-8b26928532c0",
                             Email = "tupmph49568@gmail.com",
                             EmailConfirmed = true,
                             GioiTinh = false,
@@ -265,7 +265,7 @@ namespace SneakFit.Data.Migrations
                             NgaySinh = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NormalizedEmail = "tupmph49568@gmail.com",
                             NormalizedUserName = "Admin",
-                            PasswordHash = "AQAAAAIAAYagAAAAEK1dLQwolePQCEL0N79UR+gqe9xeAHOdCHD6vvdN/2Rs7uTOxidlikZhYSt11pMgOQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEIgFRSK51JsiX8wWs3HcYjN7mt/D6Tail8KsgOmtB3ai/z62WRVw88xwWCR4pjA1QA==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
                             TrangThai = true,
@@ -276,7 +276,7 @@ namespace SneakFit.Data.Migrations
                         {
                             Id = new Guid("69bd712f-9576-45ba-b5b7-f00649be00de"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "db03e4c4-c595-4950-bb86-30be22932c0d",
+                            ConcurrencyStamp = "1c5f451f-2676-40b9-b3d6-1c73057f2e14",
                             Email = "kiet@gmail.com",
                             EmailConfirmed = true,
                             GioiTinh = false,
@@ -285,7 +285,7 @@ namespace SneakFit.Data.Migrations
                             NgaySinh = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NormalizedEmail = "kiet@gmail.com",
                             NormalizedUserName = "nhanvien",
-                            PasswordHash = "AQAAAAIAAYagAAAAEJTN8g3jniGDods9AxFaSbFqhKVt/uLjHt6L4YgFRj7/UjXzU+RHKqYTOcnbaE03Yw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEOssd/z1uDAL6UQcJ5jVTN/AY9g9TrfQe2GxBJXoA8Gwi7oMXrcmcX0laOkropUlHQ==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
                             TrangThai = true,
@@ -296,7 +296,7 @@ namespace SneakFit.Data.Migrations
                         {
                             Id = new Guid("69bd714f-9576-45ba-b5b7-f01649be00de"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "51812552-6902-4a6f-a483-6621c5988905",
+                            ConcurrencyStamp = "ce2e6e58-65fa-4826-8148-8e71b0508221",
                             Email = "kiet@gmail.com",
                             EmailConfirmed = true,
                             GioiTinh = false,
@@ -305,7 +305,7 @@ namespace SneakFit.Data.Migrations
                             NgaySinh = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NormalizedEmail = "kiet@gmail.com",
                             NormalizedUserName = "khachhang",
-                            PasswordHash = "AQAAAAIAAYagAAAAEMHKbX15KUAYI73iozXGyKPGl0nBdCEXjEMAqvJSMrTHVRrEI+shxuM6id+zZCVRDg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEKHyHN1q3xu45ajZtC2pLvRBp6r0EvNlpvfEY4pdwpIjuhl1+JJQGU6bKk+rFocRaw==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
                             TrangThai = true,
