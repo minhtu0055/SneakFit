@@ -114,7 +114,18 @@ namespace SneakFit.Application.Catalog.Voucher
                 }
             }
 
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                if (ex.InnerException != null && ex.InnerException.Message.Contains("IX_Voucher_MaVoucher"))
+                {
+                    throw new Exception("Mã voucher đã tồn tại, vui lòng chọn mã khác.");
+                }
+                throw;
+            }
             return await GetById(vc.Id);
         }
 
@@ -419,7 +430,18 @@ namespace SneakFit.Application.Catalog.Voucher
                 }
             }
 
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                if (ex.InnerException != null && ex.InnerException.Message.Contains("IX_Voucher_MaVoucher"))
+                {
+                    throw new Exception("Mã voucher đã tồn tại, vui lòng chọn mã khác.");
+                }
+                throw;
+            }
 
             return new VoucherViewModels()
             {
