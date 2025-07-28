@@ -41,6 +41,12 @@ namespace SneakFit.WebClient.Controllers
 
         public async Task<IActionResult> Index(string tuKhoa, Guid? danhMucId, decimal? giaThapNhat, decimal? giaCaoNhat, int pageIndex = 1)
         {
+            // Kiểm tra thông báo lỗi thanh toán
+            if (TempData["PaymentError"] != null)
+            {
+                ViewBag.PaymentError = TempData["PaymentError"];
+            }
+            
             var categories = await _danhMucApiClient.GetAll();
             var colors = await _mauSacApiClient.GetAll();
             var brands = await _thuongHieuApiClient.GetAll();
