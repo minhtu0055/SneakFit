@@ -339,7 +339,41 @@
             updateQuantityUI();
         });
 
-        $('#btnAddToCart').click(function () {
+        // $('#btnAddToCart').click(function () {
+        //     var spctId = $('#selectedSpctId').val();
+        //     var soLuong = parseInt($('#quantityInput').val()) || 1;
+        //     var max = parseInt($('#quantityInput').attr('max')) || 1;
+
+        //     if (soLuong > max) {
+        //         alert("Bạn đã đạt số lượng tối đa trong kho cho sản phẩm này!");
+        //         return;
+        //     }
+
+        //     $.ajax({
+        //         url: '@Url.Action("AddToCart", "SanPham")',
+        //         type: 'POST',
+        //         data: {
+        //             sanPhamChiTietId: spctId,
+        //             soLuong: soLuong
+        //         },
+        //         success: function (res) {
+        //             if (res.requireLogin) {
+        //                 window.location.href = '/Login/Index';
+        //                 return;
+        //             }
+        //             if (res.success) {
+        //                 alert(res.message || 'Đã thêm vào giỏ hàng thành công!');
+        //             } else {
+        //                 alert(res.message || 'Có lỗi xảy ra!');
+        //             }
+        //         },
+        //         error: function () {
+        //             alert('Lỗi hệ thống, vui lòng thử lại!');
+        //         }
+        //     });
+        // });
+
+                $('#btnAddToCart').click(function () {
             var spctId = $('#selectedSpctId').val();
             var soLuong = parseInt($('#quantityInput').val()) || 1;
             var max = parseInt($('#quantityInput').attr('max')) || 1;
@@ -363,6 +397,10 @@
                     }
                     if (res.success) {
                         alert(res.message || 'Đã thêm vào giỏ hàng thành công!');
+                        // Cập nhật số lượng badge
+                        if (res.cartCount !== undefined) {
+                            $('.badge').text(res.cartCount); // Cập nhật số lượng trên badge
+                        }
                     } else {
                         alert(res.message || 'Có lỗi xảy ra!');
                     }
@@ -372,6 +410,7 @@
                 }
             });
         });
+
     </script>
 }
 
