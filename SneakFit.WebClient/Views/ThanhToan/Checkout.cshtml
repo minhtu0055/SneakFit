@@ -341,41 +341,59 @@
             }
 
             // Hàm cập nhật phí vận chuyển theo địa chỉ mới
-                    // Đảm bảo hàm updateShippingFee hoạt động độc lập và cập nhật hidden input
-        function updateShippingFee(address) {
-            if (!address.maHuyen || !address.maXa) {
-                alert('Địa chỉ không đầy đủ để tính phí vận chuyển.');
-                return;
-            }
-            $.ajax({
-                url: baseUrl + '/api/ghn/shipping-fee',
-                type: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify({
-                    FromDistrictId: 1452,
-                    ToDistrictId: parseInt(address.maHuyen),
-                    ToWardCode: address.maXa,
-                    Weight: 700,
-                    Length: 33,
-                    Width: 20,
-                    Height: 12,
-                    ServiceId: 53321
-                }),
-                success: function(response) {
-                    var json = typeof response === 'string' ? JSON.parse(response) : response;
-                    var newFee = json.data && (json.data.total || json.data.service_fee) ? json.data.total || json.data.service_fee : 0;
-                    $('#shipping-fee').text(newFee.toLocaleString('vi-VN') + ' ₫');
-                    $('#summary-shipping').text(newFee.toLocaleString('vi-VN') + ' ₫');
-                    $('input[asp-for="PhiVanChuyen"]').val(newFee); // Cập nhật hidden input
-                    var tongSanPham = parseFloat($('#summary-products').text().replace(/\./g, '').replace(/,/g, '').replace(' ₫', '')) || 0;
-                    var tongThanhToan = tongSanPham + newFee - (parseFloat($('#summary-voucher-amount').text().replace('-', '').replace(/\./g, '').replace(/,/g, '').replace(' ₫', '')) || 0);
-                    $('#summary-total').text(tongThanhToan.toLocaleString('vi-VN') + ' ₫');
-                },
-                error: function(xhr) {
-                    alert('Lỗi khi tính phí vận chuyển: ' + xhr.responseText);
+            function updateShippingFee(address) {
+                if (!address.maHuyen || !address.maXa) {
+                    alert('Địa chỉ không đầy đủ để tính phí vận chuyển.');
+                    return;
                 }
-            });
-        }
+                $.ajax({
+                    url: baseUrl + '/api/ghn/available-services',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        FromDistrictId: 1452, // Địa chỉ shop
+                        ToDistrict: parseInt(address.maHuyen)
+                    }),
+                    success: function(serviceRes) {
+                        if (!serviceRes.data || serviceRes.data.length === 0) {
+                            alert('Địa chỉ này không nằm trong vùng giao hàng của GHN.');
+                            return;
+                        }
+                        var serviceId = serviceRes.data[0].service_id;
+                        $.ajax({
+                            url: baseUrl + '/api/ghn/shipping-fee',
+                            type: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify({
+                                FromDistrictId: 1452,
+                                ToDistrictId: parseInt(address.maHuyen),
+                                ToWardCode: address.maXa,
+                                Weight: 700,
+                                Length: 33,
+                                Width: 20,
+                                Height: 12,
+                                ServiceId: serviceId
+                            }),
+                            success: function(response) {
+                                var json = typeof response === 'string' ? JSON.parse(response) : response;
+                                var newFee = 0;
+                                if (json && json.data && (json.data.total || json.data.service_fee)) {
+                                    newFee = json.data.total || json.data.service_fee;
+                                    $('#shipping-fee').text(newFee.toLocaleString('vi-VN') + ' ₫');
+                                    $('#summary-shipping').text(newFee.toLocaleString('vi-VN') + ' ₫');
+                                    $('input[asp-for="PhiVanChuyen"]').val(newFee); // Update lại hidden input
+                                    var tongSanPham = @Model.TongTienSanPham;
+                                    var tong = tongSanPham + newFee;
+                                    $('#summary-total').text(tong.toLocaleString('vi-VN') + ' ₫');
+
+                                    // Cập nhật lại summary sau khi thay đổi phí vận chuyển
+                                    updateOrderSummary(selectedVoucher);
+                                }
+                            }
+                        });
+                    }
+                });
+            }
 
             // Hàm khi chọn "Xác nhận" địa chỉ mặc định trong modal
             $('#confirm-address').click(function () {
@@ -430,83 +448,25 @@
             }
 
             // Cập nhật địa chỉ trên form thanh toán (tạm thời trong phiên checkout)
-            // function updateCheckoutAddress(addressId) {
-            //     if (!addressId) {
-            //         alert('Vui lòng chọn một địa chỉ.');
-            //         return;
-            //     }
-            //     $.ajax({
-            //         url: `/DiaChi/GetById?id=${addressId}`,
-            //         type: 'GET',
-            //         success: function (response) {
-            //             const address = response.resultObj || response;
-            //             setCheckoutAddress(address, true);
-            //             $('#changeAddressModal').modal('hide');
-            //             selectedAddressId = addressId; // Lưu tạm thời cho lần checkout này
-            //         },
-            //         error: function (xhr) {
-            //             alert('Lỗi khi cập nhật địa chỉ.');
-            //         }
-            //     });
-            // }
-
-        $(document).on('change', '.address-radio-default', function () {
-            selectedAddressId = $(this).val();
-            $('.address-item').removeClass('selected');
-            $('.address-item[data-address-id="' + selectedAddressId + '"]').addClass('selected');
-            // Lưu vào session ngay khi chọn
-            $.ajax({
-                url: '/ThanhToan/SaveSelectedAddress',
-                type: 'POST',
-                data: { addressId: selectedAddressId },
-                success: function (response) {
-                    console.log('Đã lưu selectedAddressId vào session:', response);
-                },
-                error: function (xhr) {
-                    console.error('Lỗi khi lưu session:', xhr.responseText);
+            function updateCheckoutAddress(addressId) {
+                if (!addressId) {
+                    alert('Vui lòng chọn một địa chỉ.');
+                    return;
                 }
-            });
-        });
-
-                // Trong hàm updateCheckoutAddress
-        function updateCheckoutAddress(addressId) {
-            if (!addressId) {
-                alert('Vui lòng chọn một địa chỉ.');
-                return;
+                $.ajax({
+                    url: `/DiaChi/GetById?id=${addressId}`,
+                    type: 'GET',
+                    success: function (response) {
+                        const address = response.resultObj || response;
+                        setCheckoutAddress(address, true);
+                        $('#changeAddressModal').modal('hide');
+                        selectedAddressId = addressId; // Lưu tạm thời cho lần checkout này
+                    },
+                    error: function (xhr) {
+                        alert('Lỗi khi cập nhật địa chỉ.');
+                    }
+                });
             }
-            $.ajax({
-                url: `/DiaChi/GetById?id=${addressId}`,
-                type: 'GET',
-                success: function (response) {
-                    const address = response.resultObj || response;
-                    setCheckoutAddress(address, true);
-                    updateShippingFee(address); // Gọi hàm tính phí vận chuyển ngay lập tức
-                    $('#changeAddressModal').modal('hide');
-                    selectedAddressId = addressId;
-                    $('#HiddenAddressInput').data('address-id', addressId);
-                    $('#HiddenAddressInput').val(`${address.tenDiaChi}, ${address.tenXa}, ${address.tenHuyen}, ${address.tenThanhPho}`);
-                },
-                error: function (xhr) {
-                    alert('Lỗi khi cập nhật địa chỉ: ' + xhr.responseText);
-                }
-            });
-        }
-
-        // Đảm bảo hàm setCheckoutAddress cập nhật hidden input
-        function setCheckoutAddress(address, shouldUpdateShippingFee = true) {
-            const fullAddress = `${address.tenDiaChi}, ${address.tenXa}, ${address.tenHuyen}, ${address.tenThanhPho}`;
-            $('.address-box p:last').text(fullAddress);
-            $('.address-box p:first strong').text(address.tenNguoiNhan);
-            $('.address-box p:first span').text(`(${address.soDienThoai})`);
-            $('#HoTenInput').val(address.tenNguoiNhan);
-            $('#SoDienThoaiInput').val(address.soDienThoai);
-            $('#DiaChiInput').val(fullAddress);
-            $('#HiddenAddressInput').val(fullAddress); // Cập nhật hidden input với địa chỉ đầy đủ
-            $('#HiddenAddressInput').data('address-id', address.id); // Lưu ID vào data attribute
-            if (shouldUpdateShippingFee) {
-                updateShippingFee(address); // Tính phí vận chuyển nếu cần
-            }
-        }
 
             // Load dữ liệu địa chỉ vào modal sửa đổi
             function loadAddressToEditModal(addressId) {
@@ -1027,29 +987,7 @@
                     $voucherList.append($col);
                 });
             });
-
-                    $(document).ready(function () {
-            // Kiểm tra SelectedAddressId từ model khi tải trang
-            var initialAddressId = '@Model.SelectedAddressId';
-            if (initialAddressId && initialAddressId !== '00000000-0000-0000-0000-000000000000') {
-                selectedAddressId = initialAddressId;
-                $.ajax({
-                    url: `/DiaChi/GetById?id=${selectedAddressId}`,
-                    type: 'GET',
-                    success: function (response) {
-                        const address = response.resultObj || response;
-                        setCheckoutAddress(address, true);
-                        updateShippingFee(address);
-                    },
-                    error: function (xhr) {
-                        console.error('Lỗi khi tải địa chỉ ban đầu:', xhr.responseText);
-                    }
-                });
-            }
         });
-        });
-
-   
     </script>
 }
 

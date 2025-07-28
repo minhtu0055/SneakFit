@@ -177,69 +177,6 @@ namespace SneakFit.WebClient.Controllers
         //        return Json(new { success = false, message = $"Có lỗi: {ex.Message}" });
         //    }
         //}
-
-
-        //[HttpPost]
-        //public async Task<IActionResult> AddToCart(Guid sanPhamChiTietId, int soLuong = 1)
-        //{
-        //    try
-        //    {
-        //        Guid userId;
-        //        try
-        //        {
-        //            userId = (User?.Identity?.IsAuthenticated ?? false)
-        //                ? Guid.Parse(User.Claims.FirstOrDefault(x => x.Type == "UserId" || x.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value)
-        //                : throw new UnauthorizedAccessException();
-        //        }
-        //        catch
-        //        {
-        //            return Json(new { success = false, requireLogin = true, message = "Bạn cần đăng nhập để mua hàng." });
-        //        }
-        //        // 1. Lấy giỏ hàng của người dùng
-        //        var gioHang = await _gioHangApiClient.GetByUserId(userId);
-        //        var item = gioHang?.GioHangChiTiets?.FirstOrDefault(x => x.SanPhamChiTietId.Equals(sanPhamChiTietId));
-
-        //        // 2. Lấy thông tin sản phẩm chi tiết
-        //        var spct = await _spctApiClient.GetById(sanPhamChiTietId);
-        //        if (spct == null || spct.SoLuong <= 0)
-        //        {
-        //            return Json(new { success = false, message = "Sản phẩm đã hết hàng." });
-        //        }
-
-        //        // 3. Tính số lượng
-        //        int soLuongTrongGio = item?.SoLuong ?? 0;
-        //        int soLuongConLai = spct.SoLuong - soLuongTrongGio;
-
-        //        // 4. Kiểm tra nếu giỏ hàng đã chứa số lượng tối đa
-        //        if (soLuongTrongGio >= spct.SoLuong)
-        //        {
-        //            return Json(new { success = false, message = $"Số lượng sản phẩm này trong giỏ hàng đã đạt số lượng tối đa ( {spct.SoLuong} )." });
-        //        }
-
-        //        // 5. Kiểm tra nếu số lượng yêu cầu vượt quá số lượng còn lại
-        //        if (soLuong > soLuongConLai)
-        //        {
-        //            return Json(new { success = false, message = $"Chỉ còn {soLuongConLai} sản phẩm có thể thêm vào giỏ hàng." });
-        //        }
-
-        //        // 6. Thêm vào giỏ hàng
-        //        var request = new ThemVaoGioHangRequest
-        //        {
-        //            UserId = userId,
-        //            SanPhamChiTietId = sanPhamChiTietId,
-        //            SoLuong = soLuong
-        //        };
-
-        //        var result = await _gioHangApiClient.ThemVaoGioHang(request);
-        //        return Json(new { success = true, message = "Đã thêm vào giỏ hàng!", cart = result });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Json(new { success = false, message = $"Có lỗi: {ex.Message}" });
-        //    }
-        //}
-
-
         [HttpPost]
         public async Task<IActionResult> AddToCart(Guid sanPhamChiTietId, int soLuong = 1)
         {
@@ -256,7 +193,6 @@ namespace SneakFit.WebClient.Controllers
                 {
                     return Json(new { success = false, requireLogin = true, message = "Bạn cần đăng nhập để mua hàng." });
                 }
-
                 // 1. Lấy giỏ hàng của người dùng
                 var gioHang = await _gioHangApiClient.GetByUserId(userId);
                 var item = gioHang?.GioHangChiTiets?.FirstOrDefault(x => x.SanPhamChiTietId.Equals(sanPhamChiTietId));
@@ -293,20 +229,7 @@ namespace SneakFit.WebClient.Controllers
                 };
 
                 var result = await _gioHangApiClient.ThemVaoGioHang(request);
-                if (result != null)
-                {
-                    // Lấy lại giỏ hàng để cập nhật số lượng mới
-                    var updatedGioHang = await _gioHangApiClient.GetByUserId(userId);
-                    int newCartCount = updatedGioHang?.GioHangChiTiets?.Count ?? 0;
-
-                    return Json(new
-                    {
-                        success = true,
-                        message = "Đã thêm vào giỏ hàng!",
-                        cartCount = newCartCount
-                    });
-                }
-                return Json(new { success = false, message = "Thêm vào giỏ hàng thất bại!" });
+                return Json(new { success = true, message = "Đã thêm vào giỏ hàng!", cart = result });
             }
             catch (Exception ex)
             {
