@@ -117,124 +117,30 @@ namespace SneakFit.WebClient.Controllers
             List<VoucherViewModels> publicVouchers = new();
             List<VoucherViewModels> privateVouchers = new();
 
-            //var userIdStr = User?.Claims?.FirstOrDefault(x => x.Type == "UserId" || x.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            //Guid? userId = string.IsNullOrEmpty(userIdStr) ? null : Guid.Parse(userIdStr);
-            //Guid? defaultAddressId = null;
-            //string hoTen = string.Empty, soDienThoai = string.Empty, diaChi = string.Empty, email = string.Empty;
-
-            //decimal phiVanChuyen = 0m;
-
-            //if (userId.HasValue)
-            //{
-            //    var diaChis = await _diaChiApiClient.GetAllByUser() ?? new List<DiaChiViewModel>();
-            //    var defaultAddress = diaChis.FirstOrDefault(x => x.MacDinh);
-
-            //    if (defaultAddress != null)
-            //    {
-            //        hoTen = defaultAddress.TenNguoiNhan ?? string.Empty;
-            //        soDienThoai = defaultAddress.SoDienThoai ?? string.Empty;
-            //        diaChi = $"{defaultAddress.TenDiaChi ?? ""}, {defaultAddress.TenXa ?? ""}, {defaultAddress.TenHuyen ?? ""}, {defaultAddress.TenThanhPho ?? ""}";
-            //        defaultAddressId = defaultAddress.Id;
-
-            //        if (!string.IsNullOrEmpty(defaultAddress.MaHuyen) && !string.IsNullOrEmpty(defaultAddress.MaXa))
-            //        {
-            //            var request = new ShippingFeeRequest
-            //            {
-            //                FromDistrictId = 1452, // Địa chỉ shop
-            //                ToDistrictId = int.TryParse(defaultAddress.MaHuyen, out int districtId) ? districtId : 0,
-            //                ToWardCode = defaultAddress.MaXa ?? "",
-            //                Weight = 700,
-            //                Length = 33,
-            //                Width = 20,
-            //                Height = 12,
-            //                ServiceId = 53321
-            //            };
-
-            //            try
-            //            {
-            //                var responseJson = await _ghnApiClient.CalculateShippingFee(request);
-            //                if (!string.IsNullOrEmpty(responseJson))
-            //                {
-            //                    using var jsonDoc = JsonDocument.Parse(responseJson);
-            //                    var root = jsonDoc.RootElement;
-            //                    if (root.TryGetProperty("data", out var data) && data.TryGetProperty("total", out var totalProp))
-            //                    {
-            //                        phiVanChuyen = totalProp.GetDecimal();
-            //                    }
-            //                    else if (root.TryGetProperty("data", out data) && data.TryGetProperty("service_fee", out totalProp)) // Thử key khác
-            //                    {
-            //                        phiVanChuyen = totalProp.GetDecimal();
-            //                    }
-            //                }
-            //            }
-            //            catch (Exception ex)
-            //            {
-            //                // Nếu lỗi thì phiVanChuyen giữ nguyên là 0
-            //                TempData["WarningMessage"] = "Không thể tính phí vận chuyển, vui lòng thử lại.";
-            //            }
-            //        }
-            //    }
-            //    else
-            //    {
-            //        TempData["WarningMessage"] = "Bạn chưa có địa chỉ mặc định. Vui lòng thêm địa chỉ trước khi thanh toán.";
-            //    }
-
-            //    email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? string.Empty;
-            //}
-
-            //var model = new CheckoutViewModel
-            //{
-            //    HoTen = hoTen,
-            //    SoDienThoai = soDienThoai,
-            //    DiaChiMoi = string.Empty,
-            //    DiaChi = diaChi,
-            //    PhuongThucThanhToan = PhuongThucThanhToan.COD,
-            //    PhiVanChuyen = phiVanChuyen,
-            //    GioHangItems = cartItems,
-            //    TongTienSanPham = cartItems.Sum(x => x.GiaKhuyenMai * x.SoLuong),
-            //    DiscountAmount = 0,
-            //    GhiChu = string.Empty,
-            //    DefaultAddressId = defaultAddressId,
-            //    Email = email,
-            //    Vouchers = vouchers
-            //};
-
-            //return View(model);
-
             var userIdStr = User?.Claims?.FirstOrDefault(x => x.Type == "UserId" || x.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             Guid? userId = string.IsNullOrEmpty(userIdStr) ? null : Guid.Parse(userIdStr);
             Guid? defaultAddressId = null;
-            Guid? selectedAddressId = null; // Thêm biến để lưu địa chỉ tạm thời
             string hoTen = string.Empty, soDienThoai = string.Empty, diaChi = string.Empty, email = string.Empty;
-            decimal phiVanChuyen = 0m;
 
-            //// Kiểm tra session để lấy địa chỉ tạm thời
-            //var selectedAddressIdStr = HttpContext.Session.GetString("SelectedAddressId");
-            //if (!string.IsNullOrEmpty(selectedAddressIdStr) && Guid.TryParse(selectedAddressIdStr, out Guid tempId))
-            //{
-            //    selectedAddressId = tempId;
-            //}
             if (userId.HasValue)
             {
                 var diaChis = await _diaChiApiClient.GetAllByUser() ?? new List<DiaChiViewModel>();
                 var defaultAddress = diaChis.FirstOrDefault(x => x.MacDinh);
-                var selectedAddress = defaultAddress; // LUÔN chọn mặc định
 
-                if (selectedAddress != null)
+                if (defaultAddress != null)
                 {
-                    hoTen = selectedAddress.TenNguoiNhan ?? string.Empty;
-                    soDienThoai = selectedAddress.SoDienThoai ?? string.Empty;
-                    diaChi = $"{selectedAddress.TenDiaChi ?? ""}, {selectedAddress.TenXa ?? ""}, {selectedAddress.TenHuyen ?? ""}, {selectedAddress.TenThanhPho ?? ""}";
-                    defaultAddressId = defaultAddress?.Id;
-                    selectedAddressId = selectedAddress.Id;
+                    hoTen = defaultAddress.TenNguoiNhan ?? string.Empty;
+                    soDienThoai = defaultAddress.SoDienThoai ?? string.Empty;
+                    diaChi = $"{defaultAddress.TenDiaChi ?? ""}, {defaultAddress.TenXa ?? ""}, {defaultAddress.TenHuyen ?? ""}, {defaultAddress.TenThanhPho ?? ""}";
+                    defaultAddressId = defaultAddress.Id;
 
-                    if (!string.IsNullOrEmpty(selectedAddress.MaHuyen) && !string.IsNullOrEmpty(selectedAddress.MaXa))
+                    if (!string.IsNullOrEmpty(defaultAddress.MaHuyen) && !string.IsNullOrEmpty(defaultAddress.MaXa))
                     {
                         var request = new ShippingFeeRequest
                         {
-                            FromDistrictId = 1452,
-                            ToDistrictId = int.TryParse(selectedAddress.MaHuyen, out int districtId) ? districtId : 0,
-                            ToWardCode = selectedAddress.MaXa ?? "",
+                            FromDistrictId = 1452, // Địa chỉ shop
+                            ToDistrictId = int.TryParse(defaultAddress.MaHuyen, out int districtId) ? districtId : 0,
+                            ToWardCode = defaultAddress.MaXa ?? "",
                             Weight = 700,
                             Length = 33,
                             Width = 20,
@@ -253,7 +159,7 @@ namespace SneakFit.WebClient.Controllers
                                 {
                                     phiVanChuyen = totalProp.GetDecimal();
                                 }
-                                else if (root.TryGetProperty("data", out data) && data.TryGetProperty("service_fee", out totalProp))
+                                else if (root.TryGetProperty("data", out data) && data.TryGetProperty("service_fee", out totalProp)) // Thử key khác
                                 {
                                     phiVanChuyen = totalProp.GetDecimal();
                                 }
@@ -261,13 +167,14 @@ namespace SneakFit.WebClient.Controllers
                         }
                         catch (Exception ex)
                         {
+                            // Nếu lỗi thì phiVanChuyen giữ nguyên là 0
                             TempData["WarningMessage"] = "Không thể tính phí vận chuyển, vui lòng thử lại.";
                         }
                     }
                 }
                 else
                 {
-                    TempData["WarningMessage"] = "Bạn chưa có địa chỉ. Vui lòng thêm địa chỉ trước khi thanh toán.";
+                    TempData["WarningMessage"] = "Bạn chưa có địa chỉ mặc định. Vui lòng thêm địa chỉ trước khi thanh toán.";
                 }
 
                 email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? string.Empty;
@@ -298,13 +205,10 @@ namespace SneakFit.WebClient.Controllers
                 GhiChu = string.Empty,
                 DefaultAddressId = defaultAddressId,
                 Email = email,
-                Vouchers = vouchers,
-                SelectedAddressId = selectedAddressId // Thêm trường này để lưu địa chỉ tạm thời
                 PublicVouchers = publicVouchers,
                 PrivateVouchers = privateVouchers
             };
 
-            HttpContext.Session.SetString("SelectedAddressId", selectedAddressId?.ToString() ?? ""); // Lưu vào session
             return View(model);
         }
 
@@ -335,7 +239,7 @@ namespace SneakFit.WebClient.Controllers
                 return RedirectToAction("Index", "GioHang");
             }
 
-            // Check tồn kho
+            // Check tồn kho (giữ nguyên)
             var invalidProducts = new List<string>();
             foreach (var item in cartItems)
             {
@@ -402,6 +306,7 @@ namespace SneakFit.WebClient.Controllers
             decimal giamVoucher = 0;
             Guid? voucherId = null;
 
+            // Parse voucher từ model (hidden fields)
             if (model.VoucherId.HasValue)
             {
                 var voucher = await _voucherApiClient.GetById(model.VoucherId.Value);
@@ -427,13 +332,13 @@ namespace SneakFit.WebClient.Controllers
                 }
             }
 
-            // Tính lại phí vận chuyển dựa trên địa chỉ mới từ HiddenAddressInput
-            decimal phiVanChuyen = model.PhiVanChuyen; // Giá trị mặc định
-            var diaChis = await _diaChiApiClient.GetAllByUser() ?? new List<DiaChiViewModel>();
-            var selectedAddressId = Request.Form["HiddenAddressInput"].FirstOrDefault()?.Split(',').LastOrDefault()?.Trim();
-            if (!string.IsNullOrEmpty(selectedAddressId) && Guid.TryParse(selectedAddressId, out Guid addressId))
+            // Tính phí ship (giữ nguyên, nhưng đảm bảo parse MaHuyen đúng)
+            decimal phiVanChuyen = model.PhiVanChuyen;
+            if (!string.IsNullOrEmpty(model.DiaChiMoi))
             {
-                var selectedAddress = diaChis.FirstOrDefault(x => x.Id == addressId);
+                var diaChis = await _diaChiApiClient.GetAllByUser() ?? new List<DiaChiViewModel>();
+                var selectedAddress = diaChis.FirstOrDefault(x => $"{x.TenDiaChi}, {x.TenXa}, {x.TenHuyen}, {x.TenThanhPho}" == model.DiaChiMoi);
+
                 if (selectedAddress != null && int.TryParse(selectedAddress.MaHuyen, out int toDistrictId))
                 {
                     var request = new ShippingFeeRequest
@@ -461,7 +366,8 @@ namespace SneakFit.WebClient.Controllers
                 }
             }
 
-            decimal tongTien = tongTienSanPham - giamVoucher + phiVanChuyen;
+            // Tính tổng đúng nghiệp vụ
+            var tongTien = tongTienSanPham - giamVoucher + phiVanChuyen;
             if (tongTien < 0) tongTien = 0;
 
             var email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? string.Empty;
@@ -476,6 +382,8 @@ namespace SneakFit.WebClient.Controllers
                 PhiVanChuyen = phiVanChuyen,
                 PhuongThucThanhToan = model.PhuongThucThanhToan.Value,
                 TrangThaiThanhToan = TrangThaiThanhToan.ChuaThanhToan,
+                //LoaiHoaDon = (model.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || model.PhuongThucThanhToan == PhuongThucThanhToan.MoMo)
+                //    ? LoaiHoaDon.Online : LoaiHoaDon.TaiQuay, // nếu thanh toán tại quầy = hóa đơn tại quầy
                 LoaiHoaDon = LoaiHoaDon.Online,
                 Email = email,
                 GhiChu = model.GhiChu,
@@ -490,6 +398,7 @@ namespace SneakFit.WebClient.Controllers
             {
                 var hoaDon = await _hoaDonClientApiClient.Create(hoaDonRequest);
 
+                // Giảm số lượng voucher nếu có sử dụng
                 if (voucherId.HasValue)
                 {
                     await _voucherApiClient.GiamSoLuongVoucher(voucherId.Value, 1);
@@ -518,6 +427,7 @@ namespace SneakFit.WebClient.Controllers
 
                 HttpContext.Session.Remove("SelectedCartItems");
 
+                // Xử lý redirect theo phương thức thanh toán
                 if (model.PhuongThucThanhToan == PhuongThucThanhToan.VnPay)
                 {
                     try
@@ -585,6 +495,7 @@ namespace SneakFit.WebClient.Controllers
                 }
                 else
                 {
+                    // COD
                     return RedirectToAction("OrderConfirmation", new { id = hoaDon.Id });
                 }
             }
@@ -594,7 +505,6 @@ namespace SneakFit.WebClient.Controllers
                 model.GioHangItems = cartItems;
                 model.TongTienSanPham = tongTienSanPham;
                 model.DiscountAmount = giamVoucher;
-                model.PhiVanChuyen = phiVanChuyen; // Cập nhật lại phiVanChuyen vào model
                 return View(model);
             }
         }
@@ -666,15 +576,7 @@ namespace SneakFit.WebClient.Controllers
             await _hoaDonClientApiClient.UpdateStatus(id, SneakFit.Data.Enums.TrangThaiHoaDon.TraHang);
             return RedirectToAction("Details", "HoaDon", new { id });
         }
-        [HttpPost]
-        public IActionResult SaveSelectedAddress(string addressId)
-        {
-            if (Guid.TryParse(addressId, out Guid id))
-            {
-                HttpContext.Session.SetString("SelectedAddressId", id.ToString());
-                return Json(new { success = true });
-            }
-            return Json(new { success = false, message = "ID không hợp lệ" });
-        }
+
+
     }
 }
