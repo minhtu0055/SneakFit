@@ -22,6 +22,9 @@ namespace SneakFit.Data.Configuration
             builder.Property(x => x.GiaTriGiamGia).HasColumnType("decimal(18,2)");
             builder.Property(x => x.LoaiGiamGia).HasConversion<int>();
             builder.Property(x => x.TrangThai).HasConversion<int>();
+
+            // Thêm dòng này để tránh thêm khuyến mại nhiều lần cùng 1 lúc 
+            builder.HasIndex(x => x.TenKhuyenMai).IsUnique();
         }
 
 

@@ -139,7 +139,19 @@ namespace SneakFit.Application.Catalog.KhuyenMai
             }
 
             _context.KhuyenMai.Add(khuyenMai);
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                // Bắt lỗi unique constraint (trùng tên khuyến mãi)
+                if (ex.InnerException != null && ex.InnerException.Message.Contains("IX_KhuyenMai_TenKhuyenMai"))
+                {
+                    throw new Exception("Tên khuyến mãi đã tồn tại, vui lòng chọn tên khác.");
+                }
+                throw;
+            }
             return await GetById(khuyenMai.Id);
         }
         // Phương thức lấy tất cả các khuyến mãi
@@ -439,7 +451,18 @@ namespace SneakFit.Application.Catalog.KhuyenMai
                 }
             }
 
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                if (ex.InnerException != null && ex.InnerException.Message.Contains("IX_KhuyenMai_TenKhuyenMai"))
+                {
+                    throw new Exception("Tên khuyến mãi đã tồn tại, vui lòng chọn tên khác.");
+                }
+                throw;
+            }
             return await GetById(request.Id);
         }
 

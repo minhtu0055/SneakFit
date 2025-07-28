@@ -22,6 +22,8 @@ namespace SneakFit.Data.Configuration
             builder.Property(x => x.ThoiGianBatDau);
             builder.Property(x => x.ThoiGianKetThuc);
             builder.Property(x => x.TrangThai);
+            // Thêm dòng này để tránh thêm vc nhiều lần cùng 1 lúc 
+            builder.HasIndex(x => x.MaVoucher).IsUnique();
         }
         public class VoucherUserConfiguration : IEntityTypeConfiguration<VoucherUser>
         {
