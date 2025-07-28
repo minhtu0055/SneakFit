@@ -13,5 +13,7 @@ namespace SneakFit.Data.Entities
         public Guid UserId { get; set; }
         public Voucher Voucher { get; set; }
         public AppUser User { get; set; }
+        public bool IsUsed { get; set; } = false;
+
     }
 }
