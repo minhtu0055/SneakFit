@@ -12,14 +12,25 @@
         {
             <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
         }
+        else if (Model.HoaDonClient.TrangThai == SneakFit.Data.Enums.TrangThaiHoaDon.DaHuy)
+        {
+            <!-- Thông báo đơn hàng đã hủy -->
+            <div class="section-box confirmation-message mb-4 text-center">
+                <h5><i class="bi bi-x-circle-fill text-danger"></i> Đơn hàng đã bị hủy!</h5>
+                <p>Đơn hàng của bạn đã bị hủy do thanh toán thất bại.</p>
+                <p>Mã đơn hàng: <strong>@Model.HoaDonClient.MaHoaDon</strong></p>
+                <p class="text-muted">Bạn có thể đặt hàng lại nếu muốn.</p>
+            </div>
+        }
         else
         {
-            <!-- Thông báo xác nhận -->
+            <!-- Thông báo xác nhận thành công -->
             <div class="section-box confirmation-message mb-4 text-center">
                 <h5><i class="bi bi-check-circle-fill text-success"></i> Đặt hàng thành công!</h5>
                 <p>Cảm ơn bạn đã mua sắm tại SneakFit. Đơn hàng của bạn đã được ghi nhận.</p>
-                <p>Mã đơn hàng: <strong>@Model.HoaDonClient.MaHoaDon</strong></p> <!-- Mã hóa đơn sẽ hiện ở đây -->
+                <p>Mã đơn hàng: <strong>@Model.HoaDonClient.MaHoaDon</strong></p>
             </div>
+        }
 
             <!-- Thông tin hóa đơn -->
             <div class="section-box order-info mb-4">
@@ -34,7 +45,20 @@
                     <div class="col-md-6">
                         <p><strong>Ngày đặt hàng:</strong> @Model.HoaDonClient.NgayTao.ToString("dd/MM/yyyy HH:mm")</p>
                         <p><strong>Phương thức thanh toán:</strong> @Model.HoaDonClient.PhuongThucThanhToan</p>
-                        <p><strong>Trạng thái:</strong> @Model.HoaDonClient.TrangThai</p>
+                        <p><strong>Trạng thái:</strong> 
+                            @if (Model.HoaDonClient.TrangThai == SneakFit.Data.Enums.TrangThaiHoaDon.DaHuy)
+                            {
+                                <span class="badge bg-danger">@Model.HoaDonClient.TrangThai</span>
+                            }
+                            else if (Model.HoaDonClient.TrangThai == SneakFit.Data.Enums.TrangThaiHoaDon.ChoVanChuyen)
+                            {
+                                <span class="badge bg-success">@Model.HoaDonClient.TrangThai</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning">@Model.HoaDonClient.TrangThai</span>
+                            }
+                        </p>
                     </div>
                 </div>
             </div>
@@ -314,8 +338,40 @@
         color: #60A5FA;
     }
 
-        .btn-outline-primary:hover {
-            background-color: #60A5FA;
-            color: #FFFFFF;
-        }
+            .btn-outline-primary:hover {
+        background-color: #60A5FA;
+        color: #FFFFFF;
+    }
+
+    /* Styles cho thông báo đơn hàng đã hủy */
+    .confirmation-message h5 .bi-x-circle-fill {
+        color: #DC3545;
+        font-size: 1.5rem;
+    }
+
+    .confirmation-message .text-danger {
+        color: #DC3545 !important;
+    }
+
+    .badge {
+        font-size: 0.9rem;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-weight: 500;
+    }
+
+    .badge.bg-danger {
+        background-color: #DC3545 !important;
+        color: #FFFFFF;
+    }
+
+    .badge.bg-success {
+        background-color: #198754 !important;
+        color: #FFFFFF;
+    }
+
+    .badge.bg-warning {
+        background-color: #FFC107 !important;
+        color: #000000;
+    }
 </style>

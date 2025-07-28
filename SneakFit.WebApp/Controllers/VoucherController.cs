@@ -99,6 +99,14 @@ namespace SneakFit.Admin.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(CreateVoucher request)
         {
+            // ✅ Validate số lượng chỉ khi là voucher công khai
+            if (request.LoaiVoucher == LoaiVoucher.CongKhai)
+            {
+                if (!request.SoLuong.HasValue || request.SoLuong <= 0)
+                {
+                    return Json(new { success = false, message = "Số lượng là bắt buộc và phải lớn hơn 0 đối với voucher công khai." });
+                }
+            }
             try
             {
                 var result = await _IvoucherCLient.Create(request);
@@ -110,34 +118,6 @@ namespace SneakFit.Admin.Controllers
             }
         }
 
-        //private async Task PopulateVoucherRelatedViewBags()
-        //{
-        //    ViewBag.LoaiVoucher = new SelectList(new[]
-        //    {
-        //        new { Id = (int)LoaiVoucher.CongKhai, Name = "Công khai" },
-        //        new { Id = (int)LoaiVoucher.RiengTu, Name = "Riêng tư" }
-        //    }, "Id", "Name");
-
-        //    ViewBag.LoaiGiamGia = new List<SelectListItem>()
-        //    {
-        //        new SelectListItem("Giảm theo phần trăm", ((int)LoaiGiamGia.PhamTram).ToString()),
-        //        new SelectListItem("Giảm theo số tiền", ((int)LoaiGiamGia.SoTien).ToString())
-        //    };
-
-        //    var getUserPagingRequest = new GetUserPagingRequest
-        //    { 
-        //        PageIndex = 1,
-        //        PageSize = 10,
-        //        Role = "KHÁCH HÀNG"
-        //    };
-        //    var rs = await _userApiClient.GetUsersPaging(getUserPagingRequest);
-        //    var khachHangs = new PagedResult<UserViewModels>();
-        //    if (rs.IsSuccessed)
-        //    {
-        //        khachHangs = rs.ResultObj;
-        //    }
-        //    ViewBag.KhachHangs = khachHangs;
-        //}
 
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
@@ -216,25 +196,17 @@ namespace SneakFit.Admin.Controllers
         public async Task<IActionResult> Edit(UpdateVoucher request)
         {
             request.SelectedUserIds = request.ParsedSelectedUserIds;
-            if (!ModelState.IsValid)
-            {
-                ViewBag.LoaiGiamGia = new List<SelectListItem>()
+
+            ViewBag.LoaiGiamGia = new List<SelectListItem>()
                 {
                     new SelectListItem("Giảm theo phần trăm", LoaiGiamGia.PhamTram.ToString("d"), request.LoaiGiamGia == LoaiGiamGia.PhamTram),
                     new SelectListItem("Giảm theo số tiền", LoaiGiamGia.SoTien.ToString("d"), request.LoaiGiamGia == LoaiGiamGia.SoTien)
                 };
-                return Json(new { success = false, message = "Dữ liệu không hợp lệ" });
-            }
 
             // Validate discount value based on discount type
             if (request.LoaiGiamGia == LoaiGiamGia.PhamTram && request.GiaTriGiamGia > 100)
             {
                 ModelState.AddModelError("GiaTriGiamGia", "Giá trị giảm giá không được vượt quá 100%");
-                ViewBag.LoaiGiamGia = new List<SelectListItem>()
-                {
-                    new SelectListItem("Giảm theo phần trăm", LoaiGiamGia.PhamTram.ToString("d"), request.LoaiGiamGia == LoaiGiamGia.PhamTram),
-                    new SelectListItem("Giảm theo số tiền", LoaiGiamGia.SoTien.ToString("d"), request.LoaiGiamGia == LoaiGiamGia.SoTien)
-                };
                 return Json(new { success = false, message = "Giá trị giảm giá không được vượt quá 100%" });
             }
 
@@ -311,45 +283,6 @@ namespace SneakFit.Admin.Controllers
             {
                 return Json(new ApiErrorResult<PagedResult<VoucherUserViewModel>>(ex.Message));
             }
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> PublicVouchers(decimal tongTienHoaDon)
-        {
-            try
-            {
-                var vouchers = await _IvoucherCLient.GetPublicVouchers(tongTienHoaDon);
-                return Json(new ApiSuccessResult<List<VoucherViewModels>>(vouchers));
-            }
-            catch (Exception ex)
-            {
-                return Json(new ApiErrorResult<List<VoucherViewModels>>(ex.Message));
-            }
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> PrivateVouchers(Guid userId, decimal tongTienHoaDon)
-        {
-            try
-            {
-                var vouchers = await _IvoucherCLient.GetPrivateVouchersForUser(userId, tongTienHoaDon);
-                return Json(new ApiSuccessResult<List<VoucherViewModels>>(vouchers));
-            }
-            catch (Exception ex)
-            {
-                return Json(new ApiErrorResult<List<VoucherViewModels>>(ex.Message));
-            }
-        }
-
-        [HttpGet("GetById")]
-        public async Task<IActionResult> GetById(Guid id)
-        {
-            var result = await _IvoucherCLient.GetById(id);
-            if (result == null)
-            {
-                return Json(new { success = false, message = "Không tìm thấy voucher." });
-            }
-            return Json(result);
         }
     }
 }

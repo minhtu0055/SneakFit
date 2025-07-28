@@ -47,8 +47,16 @@ namespace SneakFit.BackEndAPI.Controllers
         [HttpPost("vnpay-client")]
         public async Task<IActionResult> CreateVnPayClient([FromBody] VNPayPaymentRequest request)
         {
-            var url = await _thanhToanService.CreateVnPayPaymentUrlClient(request);
-            return Ok(new { paymentUrl = url });
+            try
+            {
+                var url = await _thanhToanService.CreateVnPayPaymentUrlClient(request);
+                var response = new { paymentUrl = url };
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
 
         [HttpGet("vnpay-callback-client")]
@@ -59,14 +67,23 @@ namespace SneakFit.BackEndAPI.Controllers
             {
                 vnp_Params[key] = Request.Query[key];
             }
+            
             var result = await _thanhToanService.XuLyVnPayCallBackClientAsync(vnp_Params);
             var orderId = vnp_Params.ContainsKey("vnp_TxnRef") ? vnp_Params["vnp_TxnRef"] : null;
+            
             if (result && !string.IsNullOrEmpty(orderId))
             {
+                // Thanh toán thành công
+                return Redirect($"https://localhost:7211/ThanhToan/OrderConfirmation/{orderId}");
+            }
+            else if (!string.IsNullOrEmpty(orderId))
+            {
+                // Thanh toán thất bại nhưng vẫn có orderId - redirect về OrderConfirmation để hiển thị trạng thái đã hủy
                 return Redirect($"https://localhost:7211/ThanhToan/OrderConfirmation/{orderId}");
             }
             else
             {
+                // Không có orderId - redirect về trang chủ với thông báo lỗi
                 return Redirect("https://localhost:7211/ThanhToan/OrderConfirmation?payment=fail");
             }
         }
@@ -83,13 +100,22 @@ namespace SneakFit.BackEndAPI.Controllers
         public async Task<IActionResult> MomoCallbackClient([FromBody] Dictionary<string, string> momoParams)
         {
             var result = await _thanhToanService.XuLyMomoCallBackClientAsync(momoParams);
-            if (result)
+            var orderId = momoParams.ContainsKey("orderId") ? momoParams["orderId"] : null;
+            
+            if (result && !string.IsNullOrEmpty(orderId))
             {
-                return Ok(new { success = true });
+                // Thanh toán thành công
+                return Redirect($"https://localhost:7211/ThanhToan/OrderConfirmation/{orderId}");
+            }
+            else if (!string.IsNullOrEmpty(orderId))
+            {
+                // Thanh toán thất bại nhưng vẫn có orderId - redirect về OrderConfirmation để hiển thị trạng thái đã hủy
+                return Redirect($"https://localhost:7211/ThanhToan/OrderConfirmation/{orderId}");
             }
             else
             {
-                return BadRequest(new { success = false });
+                // Không có orderId - redirect về trang chủ với thông báo lỗi
+                return Redirect("https://localhost:7211/ThanhToan/OrderConfirmation?payment=fail");
             }
         }     
     }

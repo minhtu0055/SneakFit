@@ -153,16 +153,15 @@
                 <input type="hidden" asp-for="HoTen" id="HoTenInput" value="@Model.HoTen" />
                 <input type="hidden" asp-for="SoDienThoai" id="SoDienThoaiInput" value="@Model.SoDienThoai" />
                 @* <input type="hidden" asp-for="Email" value="@Model.Email" /> *@
-                <input type="hidden" asp-for="VoucherId" />
-                <input type="hidden" asp-for="DiscountAmount" />
                 <input type="hidden" asp-for="DiaChi" id="DiaChiInput" value="@Model.DiaChi" />
                 <input type="hidden" asp-for="GhiChu" value="@Model.GhiChu ?? string.Empty" />
                 <input type="hidden" asp-for="PhiVanChuyen" value="@Model.PhiVanChuyen" />
                 <input type="hidden" asp-for="TongTienSanPham" value="@Model.TongTienSanPham" />
                 <input type="hidden" asp-for="DiaChiMoi" id="HiddenAddressInput" value="@Model.DiaChiMoi ?? string.Empty" />
-                <input type="hidden" asp-for="PhuongThucThanhToan" id="selectedPayment" value="@(Model.PhuongThucThanhToan?.ToString())" />
+                <input type="hidden" asp-for="PhuongThucThanhToan" id="selectedPayment" value="" />
                 <!-- Hidden voucher fields -->
-                <input type="hidden" name="VoucherId" id="VoucherId" />
+                <input type="hidden" asp-for="VoucherId" id="VoucherId" />
+                <input type="hidden" asp-for="DiscountAmount" id="DiscountAmount" />
                 <input type="hidden" name="VoucherCode" id="VoucherCode" />
                 <input type="hidden" name="VoucherType" id="VoucherType" />
                 <input type="hidden" name="VoucherValue" id="VoucherValue" />
@@ -732,26 +731,32 @@
 
             // Xử lý radio thanh toán
             let lastSelectedRadio = null;
-            $('.payment-btn input[type="radio"]').on('click', function () {
+            $('.payment-btn input[type="radio"]').on('change', function () {
                 const $radio = $(this);
-                if ($radio.is(':checked') && lastSelectedRadio === $radio[0]) {
-                    $radio.prop('checked', false);
-                    $('#selectedPayment').val('');
-                    lastSelectedRadio = null;
-                } else {
-                    $('#selectedPayment').val($radio.val());
+                const selectedValue = $radio.val();
+                
+                if ($radio.is(':checked')) {
+                    $('#selectedPayment').val(selectedValue);
                     lastSelectedRadio = $radio[0];
                     $('#paymentError').hide();
+                } else {
+                    $('#selectedPayment').val('');
+                    lastSelectedRadio = null;
                 }
             });
 
             // Kiểm tra khi submit
             $('#checkoutForm').on('submit', function (e) {
-                if (!$('.payment-btn input[type="radio"]:checked').length) {
+                const selectedPayment = $('.payment-btn input[type="radio"]:checked').val();
+                
+                if (!selectedPayment) {
                     e.preventDefault();
                     $('#paymentError').show();
                     return false;
                 }
+                
+                // Đảm bảo giá trị được set đúng
+                $('#selectedPayment').val(selectedPayment);
             });
 
             // Xử lí chọn Voucher
@@ -1121,12 +1126,17 @@
             </div>
             <div class="modal-body">
                 <div id="voucherList" class="row g-3 voucher-grid">
-                    @if (Model.Vouchers != null && Model.Vouchers.Any())
+                    @if ((Model.PrivateVouchers != null && Model.PrivateVouchers.Any()) || (Model.PublicVouchers != null && Model.PublicVouchers.Any()))
                     {
-                        var validVouchers = Model.Vouchers.Where(v => v.SoLuong > 0 && v.TrangThai == SneakFit.Data.Enums.TrangThaiGiamGia.HoatDong).ToList();
-                        if (validVouchers.Any())
+                        // --------- VOUCHER CÁ NHÂN ----------
+                        if (Model.PrivateVouchers != null && Model.PrivateVouchers.Any())
                         {
-                            foreach (var voucher in validVouchers)
+                            <div class="col-12 mb-2">
+                                <h6 class="fw-bold text-primary">
+                                    <i class="bi bi-person-badge"></i> Voucher cá nhân
+                                </h6>
+                            </div>
+                            @foreach (var voucher in Model.PrivateVouchers.Where(v => v.SoLuong > 0 && v.TrangThai == SneakFit.Data.Enums.TrangThaiGiamGia.HoatDong))
                             {
                                 var giaTriGiamGiaFormatted = voucher.GiaTriGiamGia.ToString("#,##0").Replace(",", ".");
                                 var giaTriToiDaFormatted = voucher.GiaTriToiDa > 0 ? voucher.GiaTriToiDa.ToString("#,##0").Replace(",", ".") : null;
@@ -1134,9 +1144,12 @@
                                     <div class="voucher-card mb-3" data-voucher-id="@voucher.Id">
                                         <div class="card-body d-flex flex-column justify-content-between h-100">
                                             <div>
+                                                <span class="badge badge-voucher badge-private mb-2">Cá nhân</span>
                                                 <h6 class="card-title mb-2 voucher-code">@voucher.MaVoucher</h6>
-                                                <p class="mb-2 voucher-value">Giảm: <strong>@giaTriGiamGiaFormatted @(voucher.LoaiGiamGia == SneakFit.Data.Enums.LoaiGiamGia.PhamTram ? "%" : "₫")</strong></p>
-                                                @if (giaTriToiDaFormatted != null && voucher.LoaiGiamGia == SneakFit.Data.Enums.LoaiGiamGia.PhamTram)
+                                                <p class="mb-2 voucher-value">
+                                                    Giảm: <strong>@giaTriGiamGiaFormatted @(voucher.LoaiGiamGia == SneakFit.Data.Enums.LoaiGiamGia.PhamTram ? "%" : "₫")</strong>
+                                                </p>
+                                                @if (voucher.LoaiGiamGia == SneakFit.Data.Enums.LoaiGiamGia.PhamTram && giaTriToiDaFormatted != null)
                                                 {
                                                     <p class="mb-2 voucher-max">Giá trị tối đa: @giaTriToiDaFormatted ₫</p>
                                                 }
@@ -1159,9 +1172,49 @@
                                 </div>
                             }
                         }
-                        else
+                        // --------- VOUCHER CÔNG KHAI ----------
+                        if (Model.PublicVouchers != null && Model.PublicVouchers.Any())
                         {
-                            <div class="col-12"><p>Không có voucher nào khả dụng.</p></div>
+                            <div class="col-12 mb-2 mt-3">
+                                <h6 class="fw-bold text-primary">
+                                    <i class="bi bi-globe"></i> Voucher công khai
+                                </h6>
+                            </div>
+                            @foreach (var voucher in Model.PublicVouchers.Where(v => v.SoLuong > 0 && v.TrangThai == SneakFit.Data.Enums.TrangThaiGiamGia.HoatDong))
+                            {
+                                var giaTriGiamGiaFormatted = voucher.GiaTriGiamGia.ToString("#,##0").Replace(",", ".");
+                                var giaTriToiDaFormatted = voucher.GiaTriToiDa > 0 ? voucher.GiaTriToiDa.ToString("#,##0").Replace(",", ".") : null;
+                                <div class="col-md-6">
+                                    <div class="voucher-card mb-3" data-voucher-id="@voucher.Id">
+                                        <div class="card-body d-flex flex-column justify-content-between h-100">
+                                            <div>
+                                                <span class="badge badge-voucher badge-public mb-2">Công khai</span>
+                                                <h6 class="card-title mb-2 voucher-code">@voucher.MaVoucher</h6>
+                                                <p class="mb-2 voucher-value">
+                                                    Giảm: <strong>@giaTriGiamGiaFormatted @(voucher.LoaiGiamGia == SneakFit.Data.Enums.LoaiGiamGia.PhamTram ? "%" : "₫")</strong>
+                                                </p>
+                                                @if (voucher.LoaiGiamGia == SneakFit.Data.Enums.LoaiGiamGia.PhamTram && giaTriToiDaFormatted != null)
+                                                {
+                                                    <p class="mb-2 voucher-max">Giá trị tối đa: @giaTriToiDaFormatted ₫</p>
+                                                }
+                                                <p class="mb-2 voucher-condition">Điều kiện: Đơn từ @voucher.DieuKienApDung.ToString("#,##0").Replace(",", ".") ₫</p>
+                                                <p class="mb-2 voucher-expiry">HSD: @voucher.ThoiGianKetThuc.ToString("dd/MM/yyyy")</p>
+                                            </div>
+                                            <div class="text-end">
+                                                <button type="button" class="btn btn-primary btn-apply-voucher"
+                                                        data-voucher-id="@voucher.Id"
+                                                        data-voucher-name="@voucher.MaVoucher"
+                                                        data-voucher-value="@voucher.GiaTriGiamGia"
+                                                        data-voucher-type="@((int)voucher.LoaiGiamGia)"
+                                                        data-voucher-max="@voucher.GiaTriToiDa"
+                                                        data-voucher-condition="@voucher.DieuKienApDung">
+                                                    Chọn
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
                         }
                     }
                     else
@@ -1958,6 +2011,27 @@
         margin-left: 10px;
         background-color: #D1FAE5;
         color: #065A60;
+    }
+    
+    .badge-voucher {
+        font-size: 0.92rem;
+        font-weight: 600;
+        border-radius: 8px;
+        padding: 4px 16px;
+        letter-spacing: 0.5px;
+        box-shadow: 0 1px 4px rgba(96,165,250,0.06);
+        margin-bottom: 4px;
+        display: inline-block;
+    }
+
+    .badge-private {
+        background: linear-gradient(90deg, #fef9c3, #fde047 70%);
+        color: #946700;
+    }
+
+    .badge-public {
+        background: linear-gradient(90deg, #d1fae5, #10b981 70%);
+        color: #065a60;
     }
 
     .address-content {
