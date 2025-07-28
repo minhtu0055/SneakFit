@@ -1,0 +1,132 @@
+@model List<SneakFit.ViewModels.System.DiaChi.DiaChiViewModel>
+@{
+    ViewData["Title"] = "Danh sách địa chỉ khách hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <a href="@Url.Action("CreateForUser", "DiaChi", new { userId = ViewBag.UserId })" class="btn btn-primary">
+            <i class="bx bx-plus me-1"></i> Thêm địa chỉ mới
+        </a>
+        <a href="@Url.Action("Index", "KhachHang")" class="btn btn-secondary">
+            <i class="bx bx-arrow-back me-1"></i> Quay lại
+        </a>
+    </div>
+</div>
+
+
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Địa chỉ của khách hàng: @ViewBag.UserName</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Người nhận</th>
+                    <th>Số điện thoại</th>
+                    <th>Địa chỉ</th>
+                    <th>Mặc định</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.TenNguoiNhan</td>
+                            <td>@item.SoDienThoai</td>
+                            <td>@item.TenDiaChi, @item.TenXa, @item.TenHuyen, @item.TenThanhPho</td>
+                            <td>
+                                @if (item.MacDinh)
+                                {
+                                    <span class="badge bg-primary">Mặc định</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Không</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="dropdown">
+                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                        <i class="bx bx-dots-vertical-rounded"></i>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="@Url.Action("EditForUser", "DiaChi", new { userId = ViewBag.UserId, id = item.Id })">
+                                            <i class="bx bx-edit-alt me-1"></i> Chỉnh sửa
+                                        </a>
+                                        @if (!item.MacDinh)
+                                        {
+                                            <form asp-action="SetDefaultForUser" method="post" style="display: inline;">
+                                                <input type="hidden" name="userId" value="@ViewBag.UserId" />
+                                                <input type="hidden" name="id" value="@item.Id" />
+                                                <button type="submit" class="dropdown-item" onclick="return confirm('Bạn có chắc muốn đặt địa chỉ này làm mặc định?')">
+                                                    <i class="bx bx-star me-1"></i> Đặt mặc định
+                                                </button>
+                                            </form>
+                                        }
+                                        <div class="dropdown-divider"></div>
+                                        <form asp-action="DeleteForUser" method="post" style="display: inline;">
+                                            <input type="hidden" name="userId" value="@ViewBag.UserId" />
+                                            <input type="hidden" name="id" value="@item.Id" />
+                                            <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Bạn có chắc muốn xóa địa chỉ này?')">
+                                                <i class="bx bx-trash me-1"></i> Xóa
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="text-center py-4">
+                            <div class="text-muted">
+                                <i class="bx bx-map-pin bx-lg mb-2"></i>
+                                <p class="mb-0">Khách hàng chưa có địa chỉ nào</p>
+                                <small>Hãy thêm địa chỉ đầu tiên cho khách hàng này</small>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Toast notifications
+            var successMessage = '@TempData["Success"]';
+            var errorMessage = '@TempData["Error"]';
+
+            if (successMessage) {
+                toastr.success(successMessage, 'Thành công!', {
+                    closeButton: true,
+                    progressBar: true,
+                    timeOut: 5000,
+                    extendedTimeOut: 2000,
+                    preventDuplicates: true
+                });
+            }
+
+            if (errorMessage) {
+                toastr.error(errorMessage, 'Lỗi!', {
+                    closeButton: true,
+                    progressBar: true,
+                    timeOut: 7000,
+                    extendedTimeOut: 2000,
+                    preventDuplicates: true
+                });
+            }
+        });
+    </script>
+} 

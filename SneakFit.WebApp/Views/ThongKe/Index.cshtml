@@ -1,5 +1,7 @@
 ﻿@model SneakFit.ViewModels.Catalog.ThongKe.ThongKeTongQuanViewModel
-
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
 <div class="container-fluid py-4">
     <!-- Thống kê tổng quan -->
     <div class="row g-4 mb-4">
@@ -301,7 +303,8 @@
                     "DangVanChuyen": "Vận chuyển",
                     "DaThanhToan": "Đã thanh toán",
                     "HoanThanh": "Thành công",
-                    "DaHuy": "Đã hủy"
+                    "DaHuy": "Đã hủy",
+                    "TraHang": "Trả hàng"
                 };
                 var labels = data.map(x => trangThaiVN[x.trangThai] || x.trangThai);
                 var values = data.map(x => x.soLuong);
@@ -313,7 +316,8 @@
                     "#4BC0C0", // Vận chuyển
                     "#9966FF", // Đã thanh toán
                     "#FF9F40", // Thành công
-                    "#C9CBCF"  // Đã hủy
+                    "#C9CBCF",  // Đã hủy
+                    "#FF0000"  // Trả hàng
                 ];
                 if(window.trangThaiDonHangChartObj) window.trangThaiDonHangChartObj.destroy();
                 var ctx = document.getElementById('trangThaiDonHangChart').getContext('2d');

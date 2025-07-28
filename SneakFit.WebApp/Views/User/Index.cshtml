@@ -131,4 +131,12 @@
 			});
 		}
 	</script>
+	@if (TempData["SuccessMessage"] != null)
+	{
+		<script>
+			$(document).ready(function () {
+				toastr.success('@TempData["SuccessMessage"]');
+			});
+		</script>
+	}
 }

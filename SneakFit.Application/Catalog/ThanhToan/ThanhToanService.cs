@@ -95,7 +95,6 @@ namespace SneakFit.Application.Catalog.ThanhToan
                 var hoaDon = await _hoaDonService.GetById(hoaDonId);
                 if (hoaDon != null)
                 {
-
                     hoaDon.TrangThai = TrangThaiHoaDon.ChoXacNhan; // Chờ xác nhận (string)
                     hoaDon.TrangThaiThanhToan = TrangThaiThanhToan.ChuaThanhToan; // Chưa thanh toán (string)
                     hoaDon.PhuongThucThanhToan = PhuongThucThanhToan.VnPay; // Chuyển khoản (string)
@@ -128,7 +127,6 @@ namespace SneakFit.Application.Catalog.ThanhToan
             var vnp_TmnCode = _config["VNPay:TmnCode"];
             var vnp_HashSecret = _config["VNPay:HashSecret"];
             var vnp_Url = _config["VNPay:BaseUrl"];
-
             if (string.IsNullOrEmpty(vnp_TmnCode) || string.IsNullOrEmpty(vnp_HashSecret) || string.IsNullOrEmpty(vnp_Url))
                 throw new InvalidOperationException("Thiếu cấu hình VNPay.");
 
@@ -166,8 +164,7 @@ namespace SneakFit.Application.Catalog.ThanhToan
             var responseCode = vnp_Params.ContainsKey("vnp_ResponseCode") ? vnp_Params["vnp_ResponseCode"] : null;
             if (responseCode == "00")
             {
-                if (hoaDon.GiaoHang == true)
-                {
+                if (hoaDon.GiaoHang == true) {                 
                     hoaDon.TrangThai = TrangThaiHoaDon.DaXacNhan; // Đã thanh toán                   
                 }
                 else
@@ -224,26 +221,34 @@ namespace SneakFit.Application.Catalog.ThanhToan
                     hoaDon.TrangThaiThanhToan = TrangThaiThanhToan.ChuaThanhToan;
                     hoaDon.PhuongThucThanhToan = PhuongThucThanhToan.VnPay;
                     hoaDon.NgayThanhToan = null;
-                    await hoaDonClientService.Update(new SuaHoaDonClient
+                    
+                    try
                     {
-                        Id = hoaDon.Id,
-                        TongTien = request.Amount,
-                        TrangThai = hoaDon.TrangThai,
-                        DiaChi = hoaDon.DiaChi,
-                        SoDienThoai = hoaDon.SoDienThoai,
-                        Email = hoaDon.Email,
-                        HoTen = hoaDon.HoTen,
-                        UserId = hoaDon.UserId,
-                        GhiChu = null,
-                        PhuongThucThanhToan = hoaDon.PhuongThucThanhToan,
-                        LoaiHoaDon = hoaDon.LoaiHoaDon,
-                        NgayThanhToan = hoaDon.NgayThanhToan,
-                        MaHoaDon = hoaDon.MaHoaDon,
-                        PhiVanChuyen = hoaDon.PhiVanChuyen,
-                        DonViVanChuyen = hoaDon.DonViVanChuyen,
-                        TrangThaiThanhToan = hoaDon.TrangThaiThanhToan,
-                        VoucherId = hoaDon.VoucherId
-                    });
+                        await hoaDonClientService.Update(new SuaHoaDonClient
+                        {
+                            Id = hoaDon.Id,
+                            TongTien = request.Amount,
+                            TrangThai = hoaDon.TrangThai,
+                            DiaChi = hoaDon.DiaChi,
+                            SoDienThoai = hoaDon.SoDienThoai,
+                            Email = hoaDon.Email,
+                            HoTen = hoaDon.HoTen,
+                            UserId = hoaDon.UserId,
+                            GhiChu = null,
+                            PhuongThucThanhToan = hoaDon.PhuongThucThanhToan,
+                            LoaiHoaDon = hoaDon.LoaiHoaDon,
+                            NgayThanhToan = hoaDon.NgayThanhToan,
+                            MaHoaDon = hoaDon.MaHoaDon,
+                            PhiVanChuyen = hoaDon.PhiVanChuyen,
+                            DonViVanChuyen = hoaDon.DonViVanChuyen,
+                            TrangThaiThanhToan = hoaDon.TrangThaiThanhToan,
+                            VoucherId = hoaDon.VoucherId
+                        });
+                    }
+                    catch (Exception)
+                    {
+                        // Không throw exception ở đây, tiếp tục tạo URL thanh toán
+                    }
                 }
             }
             // 2. Tạo link VNPay như cũ
@@ -285,12 +290,16 @@ namespace SneakFit.Application.Catalog.ThanhToan
                 return false;
 
             var responseCode = vnp_Params.ContainsKey("vnp_ResponseCode") ? vnp_Params["vnp_ResponseCode"] : null;
+            var responseMessage = vnp_Params.ContainsKey("vnp_ResponseMessage") ? vnp_Params["vnp_ResponseMessage"] : "Không xác định";
+            
             if (responseCode == "00")
             {
-                hoaDon.TrangThai = TrangThaiHoaDon.ChoVanChuyen; // Đổi từ ThanhCong sang ChoVanChuyen
+                // Thanh toán thành công
+                hoaDon.TrangThai = TrangThaiHoaDon.ChoVanChuyen;
                 hoaDon.GhiChu = vnp_Params.ContainsKey("vnp_TransactionNo") ? vnp_Params["vnp_TransactionNo"] : null;
                 hoaDon.NgayThanhToan = DateTime.Now;
                 hoaDon.TrangThaiThanhToan = TrangThaiThanhToan.DaThanhToan;
+                
                 var suaHoaDon = new SuaHoaDonClient
                 {
                     Id = hoaDon.Id,
@@ -310,14 +319,40 @@ namespace SneakFit.Application.Catalog.ThanhToan
                     DonViVanChuyen = hoaDon.DonViVanChuyen,
                     TrangThaiThanhToan = hoaDon.TrangThaiThanhToan,
                     VoucherId = hoaDon.VoucherId
-                };
-                await hoaDonClientService.Update(suaHoaDon);
-                return true;
+                                        };
+                        await hoaDonClientService.Update(suaHoaDon);
+                        return true;
             }
             else
             {
-                // Có thể cập nhật trạng thái thất bại nếu muốn
-                return false;
+                // Thanh toán thất bại hoặc bị hủy - cập nhật trạng thái thành "Đã hủy"
+                hoaDon.TrangThai = TrangThaiHoaDon.DaHuy;
+                hoaDon.GhiChu = $"Thanh toán thất bại: {responseMessage}";
+                hoaDon.NgayThanhToan = null;
+                hoaDon.TrangThaiThanhToan = TrangThaiThanhToan.ChuaThanhToan;
+                
+                var suaHoaDon = new SuaHoaDonClient
+                {
+                    Id = hoaDon.Id,
+                    TongTien = hoaDon.TongTien,
+                    TrangThai = hoaDon.TrangThai,
+                    DiaChi = hoaDon.DiaChi,
+                    SoDienThoai = hoaDon.SoDienThoai,
+                    Email = hoaDon.Email,
+                    HoTen = hoaDon.HoTen,
+                    UserId = hoaDon.UserId,
+                    GhiChu = hoaDon.GhiChu,
+                    PhuongThucThanhToan = hoaDon.PhuongThucThanhToan,
+                    LoaiHoaDon = hoaDon.LoaiHoaDon,
+                    NgayThanhToan = hoaDon.NgayThanhToan,
+                    MaHoaDon = hoaDon.MaHoaDon,
+                    PhiVanChuyen = hoaDon.PhiVanChuyen,
+                    DonViVanChuyen = hoaDon.DonViVanChuyen,
+                    TrangThaiThanhToan = hoaDon.TrangThaiThanhToan,
+                    VoucherId = hoaDon.VoucherId
+                                        };
+                        await hoaDonClientService.Update(suaHoaDon);
+                        return false;
             }
         }
         public async Task<bool> XuLyMomoCallBackClientAsync(Dictionary<string, string> momoParams)
@@ -331,12 +366,16 @@ namespace SneakFit.Application.Catalog.ThanhToan
                 return false;
             // Kiểm tra trạng thái giao dịch thành công (MoMo trả về resultCode == 0 là thành công)
             var resultCode = momoParams.ContainsKey("resultCode") ? momoParams["resultCode"] : null;
+            var message = momoParams.ContainsKey("message") ? momoParams["message"] : "Không xác định";
+            
             if (resultCode == "0")
             {
+                // Thanh toán thành công
                 hoaDon.TrangThai = TrangThaiHoaDon.ChoVanChuyen;
                 hoaDon.NgayThanhToan = DateTime.Now;
                 hoaDon.TrangThaiThanhToan = TrangThaiThanhToan.DaThanhToan;
                 hoaDon.GhiChu = momoParams.ContainsKey("transId") ? momoParams["transId"] : null;
+                
                 var suaHoaDon = new SuaHoaDonClient
                 {
                     Id = hoaDon.Id,
@@ -356,14 +395,40 @@ namespace SneakFit.Application.Catalog.ThanhToan
                     DonViVanChuyen = hoaDon.DonViVanChuyen,
                     TrangThaiThanhToan = hoaDon.TrangThaiThanhToan,
                     VoucherId = hoaDon.VoucherId
-                };
-                await _hoaDonClientService.Update(suaHoaDon);
-                return true;
+                                        };
+                        await _hoaDonClientService.Update(suaHoaDon);
+                        return true;
             }
             else
             {
-                // Có thể cập nhật trạng thái thất bại nếu muốn
-                return false;
+                // Thanh toán thất bại hoặc bị hủy - cập nhật trạng thái thành "Đã hủy"
+                hoaDon.TrangThai = TrangThaiHoaDon.DaHuy;
+                hoaDon.GhiChu = $"Thanh toán thất bại: {message}";
+                hoaDon.NgayThanhToan = null;
+                hoaDon.TrangThaiThanhToan = TrangThaiThanhToan.ChuaThanhToan;
+                
+                var suaHoaDon = new SuaHoaDonClient
+                {
+                    Id = hoaDon.Id,
+                    TongTien = hoaDon.TongTien,
+                    TrangThai = hoaDon.TrangThai,
+                    DiaChi = hoaDon.DiaChi,
+                    SoDienThoai = hoaDon.SoDienThoai,
+                    Email = hoaDon.Email,
+                    HoTen = hoaDon.HoTen,
+                    UserId = hoaDon.UserId,
+                    GhiChu = hoaDon.GhiChu,
+                    PhuongThucThanhToan = hoaDon.PhuongThucThanhToan,
+                    LoaiHoaDon = hoaDon.LoaiHoaDon,
+                    NgayThanhToan = hoaDon.NgayThanhToan,
+                    MaHoaDon = hoaDon.MaHoaDon,
+                    PhiVanChuyen = hoaDon.PhiVanChuyen,
+                    DonViVanChuyen = hoaDon.DonViVanChuyen,
+                    TrangThaiThanhToan = hoaDon.TrangThaiThanhToan,
+                    VoucherId = hoaDon.VoucherId
+                                        };
+                        await _hoaDonClientService.Update(suaHoaDon);
+                        return false;
             }
         }
     }

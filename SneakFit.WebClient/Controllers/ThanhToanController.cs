@@ -112,13 +112,10 @@ namespace SneakFit.WebClient.Controllers
                 }
             }
 
-            var voucherPaging = await _voucherApiClient.GetAllPaging(new GetVoucherPagingRequest
-            {
-                PageIndex = 1,
-                PageSize = 100,
-                Status = TrangThaiGiamGia.HoatDong
-            });
-            var vouchers = voucherPaging.Items?.ToList() ?? new List<VoucherViewModels>();
+            decimal phiVanChuyen = 0m;
+
+            List<VoucherViewModels> publicVouchers = new();
+            List<VoucherViewModels> privateVouchers = new();
 
             //var userIdStr = User?.Claims?.FirstOrDefault(x => x.Type == "UserId" || x.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             //Guid? userId = string.IsNullOrEmpty(userIdStr) ? null : Guid.Parse(userIdStr);
@@ -209,7 +206,6 @@ namespace SneakFit.WebClient.Controllers
             Guid? defaultAddressId = null;
             Guid? selectedAddressId = null; // Thêm biến để lưu địa chỉ tạm thời
             string hoTen = string.Empty, soDienThoai = string.Empty, diaChi = string.Empty, email = string.Empty;
-
             decimal phiVanChuyen = 0m;
 
             //// Kiểm tra session để lấy địa chỉ tạm thời
@@ -218,7 +214,6 @@ namespace SneakFit.WebClient.Controllers
             //{
             //    selectedAddressId = tempId;
             //}
-
             if (userId.HasValue)
             {
                 var diaChis = await _diaChiApiClient.GetAllByUser() ?? new List<DiaChiViewModel>();
@@ -276,6 +271,17 @@ namespace SneakFit.WebClient.Controllers
                 }
 
                 email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? string.Empty;
+
+                // Fetch vouchers for logged in user
+                decimal tongTienSanPham = cartItems.Sum(x => x.GiaKhuyenMai * x.SoLuong);
+                publicVouchers = await _voucherApiClient.GetPublicVouchers(tongTienSanPham);
+                privateVouchers = await _voucherApiClient.GetPrivateVouchersForUser(userId.Value, tongTienSanPham);
+            }
+            else
+            {
+                // Only fetch public vouchers for guests
+                decimal tongTienSanPham = cartItems.Sum(x => x.GiaKhuyenMai * x.SoLuong);
+                publicVouchers = await _voucherApiClient.GetPublicVouchers(tongTienSanPham);
             }
 
             var model = new CheckoutViewModel
@@ -294,6 +300,8 @@ namespace SneakFit.WebClient.Controllers
                 Email = email,
                 Vouchers = vouchers,
                 SelectedAddressId = selectedAddressId // Thêm trường này để lưu địa chỉ tạm thời
+                PublicVouchers = publicVouchers,
+                PrivateVouchers = privateVouchers
             };
 
             HttpContext.Session.SetString("SelectedAddressId", selectedAddressId?.ToString() ?? ""); // Lưu vào session
@@ -512,17 +520,54 @@ namespace SneakFit.WebClient.Controllers
 
                 if (model.PhuongThucThanhToan == PhuongThucThanhToan.VnPay)
                 {
-                    var vnpRequest = new VNPayPaymentRequest
+                    try
                     {
-                        Amount = tongTien,
-                        OrderId = hoaDon.Id.ToString(),
-                        OrderInfo = $"Thanh toán đơn hàng {hoaDon.MaHoaDon}",
-                        ReturnUrl = "https://localhost:7277/api/thanhtoan/vnpay-callback-client",
-                        NotifyUrl = ""
-                    };
-                    var paymentUrlJson = await _thanhToanApiClient.CreateVnPayPaymentUrlClient(vnpRequest);
-                    var paymentUrl = System.Text.Json.JsonDocument.Parse(paymentUrlJson).RootElement.TryGetProperty("paymentUrl", out var urlProp) ? urlProp.GetString() : paymentUrlJson;
-                    return Redirect(paymentUrl);
+                        var vnpRequest = new VNPayPaymentRequest
+                        {
+                            Amount = tongTien,
+                            OrderId = hoaDon.Id.ToString(),
+                            OrderInfo = $"Thanh toán đơn hàng {hoaDon.MaHoaDon}",
+                            ReturnUrl = "https://localhost:7277/api/thanhtoan/vnpay-callback-client",
+                            NotifyUrl = ""
+                        };
+                        
+                        var paymentUrlJson = await _thanhToanApiClient.CreateVnPayPaymentUrlClient(vnpRequest);
+                        
+                        string paymentUrl;
+                        try
+                        {
+                            var jsonDoc = System.Text.Json.JsonDocument.Parse(paymentUrlJson);
+                            if (jsonDoc.RootElement.TryGetProperty("paymentUrl", out var urlProp))
+                            {
+                                paymentUrl = urlProp.GetString();
+                            }
+                            else
+                            {
+                                // Nếu không có paymentUrl property, có thể response là URL trực tiếp
+                                paymentUrl = paymentUrlJson;
+                            }
+                        }
+                        catch (System.Text.Json.JsonException)
+                        {
+                            // Nếu không parse được JSON, có thể response là URL trực tiếp
+                            paymentUrl = paymentUrlJson;
+                        }
+                        
+                        if (string.IsNullOrEmpty(paymentUrl))
+                        {
+                            throw new Exception("Không nhận được URL thanh toán từ VNPay");
+                        }
+                        
+                        return Redirect(paymentUrl);
+                    }
+                    catch (Exception vnpayEx)
+                    {
+                        ModelState.AddModelError("", $"Lỗi khi tạo link thanh toán VNPay: {vnpayEx.Message}");
+                        model.GioHangItems = cartItems;
+                        model.TongTienSanPham = tongTienSanPham;
+                        model.DiscountAmount = giamVoucher;
+                        return View(model);
+                    }
                 }
                 else if (model.PhuongThucThanhToan == PhuongThucThanhToan.MoMo)
                 {
@@ -554,18 +599,32 @@ namespace SneakFit.WebClient.Controllers
             }
         }
 
-        public async Task<IActionResult> OrderConfirmation(Guid id)
+        public async Task<IActionResult> OrderConfirmation(Guid? id = null, string payment = null)
         {
             try
             {
-                var hoaDon = await _hoaDonClientApiClient.GetById(id);
+                // Xử lý trường hợp payment=fail (thanh toán thất bại)
+                if (payment == "fail")
+                {
+                    TempData["PaymentError"] = "Thanh toán thất bại. Đơn hàng đã được hủy.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                // Nếu không có id, redirect về trang chủ
+                if (!id.HasValue)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy thông tin đơn hàng.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+                var hoaDon = await _hoaDonClientApiClient.GetById(id.Value);
                 if (hoaDon == null)
                 {
                     TempData["ErrorMessage"] = "Không tìm thấy hóa đơn.";
                     return RedirectToAction("Index", "Home");
                 }
 
-                var chiTietHoaDon = await _hoaDonChiTietClientApiClient.GetByHoaDonId(id);
+                var chiTietHoaDon = await _hoaDonChiTietClientApiClient.GetByHoaDonId(id.Value);
 
                 if (chiTietHoaDon == null)
                 {
@@ -607,7 +666,6 @@ namespace SneakFit.WebClient.Controllers
             await _hoaDonClientApiClient.UpdateStatus(id, SneakFit.Data.Enums.TrangThaiHoaDon.TraHang);
             return RedirectToAction("Details", "HoaDon", new { id });
         }
-
         [HttpPost]
         public IActionResult SaveSelectedAddress(string addressId)
         {

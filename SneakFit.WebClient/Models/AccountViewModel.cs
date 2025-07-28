@@ -1,9 +1,13 @@
-﻿using SneakFit.ViewModels.System.User;
+﻿using SneakFit.ViewModels.Catalog.HoaDonClient;
+using SneakFit.ViewModels.System.User;
 
 namespace SneakFit.WebClient.Models
 {
     public class AccountViewModel
     {
         public UserViewModels User { get; set; }
+        public LoginRequest LoginRequest { get; set; }
+        public DoiMatKhauRequest DoiMatKhauRequest { get; set; } = new DoiMatKhauRequest();
+        public List<HoaDonClientViewModel> hoaDonClientViewModels { get; set; } = new();
     }
 }
