@@ -1,0 +1,46 @@
+﻿/* Loading Spinner */
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+
+    .search-section {
+        padding: 16px;
+    }
+
+    .search-input {
+        font-size: 14px;
+        padding: 10px 12px;
+    }
+
+    .search-btn {
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+
+    .filter-tags {
+        gap: 6px;
+    }
+
+    .filter-tag {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+
+    .color-circle {
+        width: 28px;
+        height: 28px;
+    }
+}

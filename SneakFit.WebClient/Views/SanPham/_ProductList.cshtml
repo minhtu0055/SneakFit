@@ -1,0 +1,181 @@
+@model SneakFit.ViewModels.Catalog.SanPhamChiTiet.DanhMucSPCTViewModel
+@using Microsoft.Extensions.Configuration
+@inject IConfiguration Configuration
+
+<!-- Results Summary -->
+<section id="results-summary" class="results-summary mb-3">
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="results-info">
+            <span class="results-count">
+                @if (Model.AllSpct != null)
+                {
+                    var uniqueProductCount = Model.AllSpct.GroupBy(spct => spct.SanPhamId).Count();
+                    <strong>@uniqueProductCount</strong> <span>sản phẩm</span>
+                }
+                else
+                {
+                    <strong>0</strong> <span>sản phẩm</span>
+                }
+            </span>
+        </div>
+        <div class="view-options">
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-outline-primary view-btn active" data-view="grid" aria-label="Grid view">
+                    <i class="bi bi-grid-3x3-gap-fill"></i>
+                </button>
+                <button type="button" class="btn btn-outline-primary view-btn" data-view="list" aria-label="List view">
+                    <i class="bi bi-list-ul"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Category Product List Section -->
+<section id="category-product-list" class="category-product-list section">
+    <div class="container" data-aos="fade-up" data-aos-delay="100">
+        <div class="row gy-4">
+            @if (Model.AllSpct != null && Model.AllSpct.Any())
+            {
+                // Group SPCT by SanPhamId to get unique products for current page
+                var uniqueProducts = Model.AllSpct
+                .GroupBy(spct => spct.SanPhamId)
+                .Select(group => new
+                {
+                    SanPhamId = group.Key,
+                    TenSanPham = group.First().TenSanPham,
+                    TenDanhMuc = group.First().TenDanhMuc,
+                    ImageDaiDien = Model.SanPhams?.Items?.FirstOrDefault(p => p.Id == group.Key)?.ImageDaiDien ?? "/images/Default_Logo.png",
+                    SpctList = group.ToList()
+                })
+                .ToList();
+
+                foreach (var product in uniqueProducts)
+                {
+                    <div class="col-lg-6">
+                        <div class="product-box" style="height: 550px">
+                            <div class="product-thumb" style="padding-bottom: 0px">
+                                <div class="img" style="height: 404px">
+                                    <img src="@($"{Configuration["BaseAddress"]}{product.ImageDaiDien}")"
+                                         alt="Product Image" style="width: 404px; object-fit: cover;" />
+                                </div>
+                                <div class="product-overlay">
+                                    <div class="product-quick-actions">
+                                        <button type="button" class="quick-action-btn"><i class="bi bi-heart"></i></button>
+                                        <button type="button" class="quick-action-btn"><i class="bi bi-arrow-repeat"></i></button>
+                                        <button type="button" class="quick-action-btn"
+                                                onclick="window.location.href='@Url.Action("Details", "SanPham", new { id = product.SanPhamId })'">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div class="add-to-cart-container">
+                                        <button type="button" class="add-to-cart-btn">Add to Cart</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="product-content">
+                                <div class="product-details d-flex justify-content-between">
+                                    <h2 class="product-title mb-0" style="font-weight: bold">@product.TenSanPham</h2>
+                                    <h4 class="product-category mb-0 ms-2" style="font-size:1rem; font-weight:600; color:#1766b3;">
+                                        @product.TenDanhMuc
+                                    </h4>
+                                </div>
+                                @{
+                                    var listGia = product.SpctList.Where(x => x.Gia > 0).ToList();
+                                    var minGiaGoc = listGia.Any() ? listGia.Min(x => x.GiaGoc) : 0M;
+                                    var minGiaKm = listGia.Any() ? listGia.Min(x => x.GiaKhuyenMai) : 0M;
+                                    var maxPhanTramGiam = listGia.Any() ? listGia.Max(x => x.KhuyenMaiPhanTram) : 0M;
+                                    var spctsCoKM = listGia.Where(x => x.KhuyenMaiPhanTram > 0 && x.GiaKhuyenMai < x.GiaGoc).ToList();
+
+                                    // Nếu có khuyến mãi
+                                    var minGiaGocCoKM = spctsCoKM.Any() ? spctsCoKM.Min(x => x.GiaGoc) : minGiaGoc;
+                                    var minGiaKMCoKM = spctsCoKM.Any() ? spctsCoKM.Min(x => x.GiaKhuyenMai) : minGiaKm;
+                                    var maxGiamCoKM = spctsCoKM.Any() ? spctsCoKM.Max(x => x.KhuyenMaiPhanTram) : 0M;
+                                }
+                                @if (listGia.Any())
+                                {
+                                    if (spctsCoKM.Any())
+                                    {
+                                        <div class="product-price mt-2 d-flex align-items-center gap-2">
+                                            <span class="gia-goc" style="text-decoration:line-through; color:gray">@minGiaGocCoKM.ToString("N0") đ</span>
+                                            <span class="gia-km">@minGiaKMCoKM.ToString("N0") đ</span>
+                                            <span class="giam-tag ms-2 text-danger">-@maxGiamCoKM%</span>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span style="font-weight: 700; font-size: 1.1rem; color: var(--heading-color);">@minGiaGoc.ToString("N0") đ</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span>Liên hệ</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="col-12">
+                    <div class="no-results text-center py-5">
+                        <i class="bi bi-search display-1 text-muted mb-3"></i>
+                        <h4 class="text-muted">Không tìm thấy sản phẩm phù hợp</h4>
+                        <p class="text-muted">Hãy thử thay đổi từ khóa tìm kiếm hoặc bộ lọc của bạn</p>
+                        <button type="button" class="btn btn-primary clear-all-filters-btn">
+                            <i class="bi bi-arrow-clockwise me-2"></i>Xóa tất cả bộ lọc
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Pagination -->
+<section id="category-pagination" class="category-pagination section" style="padding: 10px 0 50px 0">
+    <div class="container">
+        <nav class="d-flex justify-content-center" aria-label="Page navigation">
+            @if (Model.AllSpct != null && Model.AllSpct.Any())
+            {
+                var uniqueProducts = Model.AllSpct.GroupBy(spct => spct.SanPhamId).ToList();
+                var pageSize = 10;
+                var totalPages = (int)Math.Ceiling((double)uniqueProducts.Count / pageSize);
+                var currentPage = ViewBag.CurrentPage ?? 1;
+                var startIndex = (currentPage - 1) * pageSize;
+                var endIndex = Math.Min(startIndex + pageSize, uniqueProducts.Count);
+
+                @if (totalPages > 1)
+                {
+                    <ul class="pagination">
+                        @if (currentPage > 1)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="#" data-page="@(currentPage - 1)">
+                                    <i class="bi bi-chevron-left"></i>
+                                </a>
+                            </li>
+                        }
+
+                        @for (int i = 1; i <= totalPages; i++)
+                        {
+                            <li class="page-item @(i == currentPage ? "active" : "")">
+                                <a class="page-link" href="#" data-page="@i">@i</a>
+                            </li>
+                        }
+
+                        @if (currentPage < totalPages)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="#" data-page="@(currentPage + 1)">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                }
+            }
+        </nav>
+    </div>
+</section> 

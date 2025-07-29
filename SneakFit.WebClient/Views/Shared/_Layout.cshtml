@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <title>Index - eStore Bootstrap Template</title>
+    <title>SneakFit Store</title>
     <meta name="description" content="">
     <meta name="keywords" content="">
 
@@ -47,10 +47,10 @@
                 <div class="d-flex py-3 align-items-center justify-content-between">
 
                     <!-- Logo -->
-                    <a href="index.html" class="logo d-flex align-items-center">
+                    <a asp-action="Index" asp-controller="Home" class="logo d-flex align-items-center">
                         <!-- Uncomment the line below if you also wish to use an image logo -->
                         <!-- <img src="assets/img/logo.webp" alt=""> -->
-                        <h1 class="sitename">eStore</h1>
+                        <h1 class="sitename">SneakFit</h1>
                     </a>
 
                     <!-- Search -->
@@ -81,40 +81,40 @@
                             </button>
                             <div class="dropdown-menu">
                                 <div class="dropdown-header">
-                                    <h6>Welcome to <span class="sitename">SneakFit</span></h6>
-                                    <p class="mb-0">Access account &amp; manage orders</p>
+                                    <h6>Chào mừng bạn đến với <span class="sitename">SneakFit</span></h6>
+                                    <p class="mb-0">Truy cập tài khoản và quản lý đơn hàng</p>
                                 </div>
                                 <div class="dropdown-body">
                                     <a class="dropdown-item d-flex align-items-center" href="@Url.Action("MyProfile", "Account")">
                                         <i class="bi bi-person-circle me-2"></i>
-                                        <span>My Profile</span>
+                                        <span>Hồ sơ cá nhân</span>
                                     </a>
                                      <a class="dropdown-item d-flex align-items-center" href="account.html">
                                     <i class="bi bi-bag-check me-2"></i>
-                                    <span>My Orders</span>
+                                    <span>Đơn hàng của tôi</span>
                                     </a>
                                 </div>
                                 <div class="dropdown-footer">
                                     @if (User.Identity.IsAuthenticated)
                                     {
                                         <form asp-action="Logout" asp-controller="Account" method="post">
-                                            <button type="submit" class="btn btn-primary w-100 mb-2">Logout</button>
+                                            <button type="submit" class="btn btn-primary w-100 mb-2">Đăng xuất</button>
                                         </form>
                                     }
                                     else
                                     {
                                         <a asp-action="Index" asp-controller="Login" class="btn btn-primary w-100 mb-2">Đăng Nhập</a>
-                                        <a asp-action="Index" asp-controller="Login" class="btn btn-outline-primary w-100">Register</a>
+                                        <a asp-action="Index" asp-controller="Login" class="btn btn-outline-primary w-100">Đăng ký</a>
                                     }
                                 </div>
                             </div>
                         </div>
 
                         <!-- Wishlist -->
-                        <a class="header-action-btn d-none d-md-block">
+                        @* <a class="header-action-btn d-none d-md-block">
                             <i class="bi bi-heart"></i>
                             <span class="badge">0</span>
-                        </a>
+                        </a> *@
 
                         <!-- Cart -->
                         @* <a asp-action="index" asp-controller="GioHang" class="header-action-btn">
@@ -197,8 +197,8 @@
                 <div class="row gy-4">
                     <div class="col-lg-3 col-md-6 col-sm-12">
                         <div class="footer-widget footer-about">
-                            <a href="index.html" class="logo">
-                                <span class="sitename">eStore</span>
+                            <a asp-action="Index" asp-controller="Home" class="logo">
+                                <span class="sitename">SneakFit</span>
                             </a>
                             <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in nibh vehicula, facilisis magna ut, consectetur lorem.</p>
                             <div class="footer-contact mt-4">
@@ -313,7 +313,7 @@
                 </div>
 
                 <div class="copyright text-center">
-                    <p>© <span>Copyright</span> <strong class="sitename">eStore</strong>. All Rights Reserved.</p>
+                    <p>© <span>Copyright</span> <strong class="sitename">SneakFit</strong>. All Rights Reserved.</p>
                 </div>
 
                 <div class="credits">

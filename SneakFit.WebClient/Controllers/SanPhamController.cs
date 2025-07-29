@@ -57,11 +57,41 @@ namespace SneakFit.WebClient.Controllers
         }
 
         // Trang Index: chỉ fill danh sách SanPham + ảnh đại diện
-        public async Task<IActionResult> Index(string tuKhoa, Guid? danhMucId, decimal? giaThapNhat, decimal? giaCaoNhat, int pageIndex = 1)
+        public async Task<IActionResult> Index(string tuKhoa, Guid? danhMucId, decimal? giaThapNhat, decimal? giaCaoNhat, 
+            string selectedBrands, string selectedColors, string selectedCategories, string sortBy, int pageIndex = 1)
         {
             var categories = await _danhMucApiClient.GetAll();
             var colors = await _mauSacApiClient.GetAll();
             var brands = await _thuongHieuApiClient.GetAll();
+
+            // Parse selected brands, colors and categories
+            var selectedBrandIds = new List<Guid>();
+            var selectedColorIds = new List<Guid>();
+            var selectedCategoryIds = new List<Guid>();
+            
+            if (!string.IsNullOrEmpty(selectedBrands))
+            {
+                selectedBrandIds = selectedBrands.Split(',')
+                    .Where(x => !string.IsNullOrEmpty(x) && Guid.TryParse(x, out _))
+                    .Select(Guid.Parse)
+                    .ToList();
+            }
+            
+            if (!string.IsNullOrEmpty(selectedColors))
+            {
+                selectedColorIds = selectedColors.Split(',')
+                    .Where(x => !string.IsNullOrEmpty(x) && Guid.TryParse(x, out _))
+                    .Select(Guid.Parse)
+                    .ToList();
+            }
+            
+            if (!string.IsNullOrEmpty(selectedCategories))
+            {
+                selectedCategoryIds = selectedCategories.Split(',')
+                    .Where(x => !string.IsNullOrEmpty(x) && Guid.TryParse(x, out _))
+                    .Select(Guid.Parse)
+                    .ToList();
+            }
 
             var request = new SanPhamPagingRequest
             {
@@ -74,11 +104,11 @@ namespace SneakFit.WebClient.Controllers
             var pagedSanPham = await _sanPhamApiClient.GetAllPaging(request);
             var allSpct = new List<SPCTViewModels>();
 
-            // Lấy tất cả KM đang hoạt động
+            // Lấy tất cả khuyến mãi đang hoạt động
             var khuyenMais = await _khuyenMaiApiClient.GetAllPaging(new PhanTrangKhuyenMai
             {
                 PageIndex = 1,
-                PageSize = 10, // hoặc lớn hơn nếu nhiều KM
+                PageSize = 10, // hoặc lớn hơn nếu nhiều khuyến mãi
                 Keyword = null,
                 TrangThai = SneakFit.Data.Enums.TrangThaiGiamGia.HoatDong
             });
@@ -91,7 +121,7 @@ namespace SneakFit.WebClient.Controllers
 
                 foreach (var spct in spctList)
                 {
-                    // Tìm KM hoạt động đúng với SPCT này
+                    // Tìm khuyến mãi hoạt động đúng với SPCT này
                     var km = khuyenMais.Items
                             .Where(x => x.TrangThai == TrangThaiGiamGia.HoatDong
                                         && x.ThoiGianBatDau <= DateTime.Now
@@ -129,6 +159,105 @@ namespace SneakFit.WebClient.Controllers
                 sanPham.ImageDaiDien = spctDaiDien?.Images?.FirstOrDefault() ?? "/images/Default_Logo.png";
             }
 
+            // Áp dụng các bộ lọc bổ sung
+            var filteredSpct = allSpct.AsQueryable();
+
+            // Lọc theo khoảng giá
+            System.Diagnostics.Debug.WriteLine($"Price filter - giaThapNhat: {giaThapNhat}, giaCaoNhat: {giaCaoNhat}");
+            if (giaThapNhat.HasValue && giaThapNhat.Value > 0)
+            {
+                System.Diagnostics.Debug.WriteLine($"Applying min price filter: >= {giaThapNhat.Value}");
+                filteredSpct = filteredSpct.Where(spct => spct.GiaKhuyenMai >= giaThapNhat.Value);
+            }
+            if (giaCaoNhat.HasValue && giaCaoNhat.Value < 10000000)
+            {
+                System.Diagnostics.Debug.WriteLine($"Applying max price filter: <= {giaCaoNhat.Value}");
+                filteredSpct = filteredSpct.Where(spct => spct.GiaKhuyenMai <= giaCaoNhat.Value);
+            }
+
+            // Lọc theo thương hiệu (nếu có chọn)
+            if (selectedBrandIds.Any())
+            {
+                // Lọc theo thương hiệu sử dụng dữ liệu SPCT
+                filteredSpct = filteredSpct.Where(spct => selectedBrandIds.Contains(spct.ThuongHieuId));
+            }
+
+            // Lọc theo màu sắc (nếu có chọn)
+            if (selectedColorIds.Any())
+            {
+                filteredSpct = filteredSpct.Where(spct => selectedColorIds.Contains(spct.MauSacId));
+            }
+
+            // Lọc theo danh mục (nếu có chọn)
+            System.Diagnostics.Debug.WriteLine($"Category filter - selectedCategoryIds count: {selectedCategoryIds.Count}");
+            if (selectedCategoryIds.Any())
+            {
+                System.Diagnostics.Debug.WriteLine($"Category IDs: {string.Join(", ", selectedCategoryIds)}");
+                System.Diagnostics.Debug.WriteLine($"Before category filter: {filteredSpct.Count()} items");
+                filteredSpct = filteredSpct.Where(spct => selectedCategoryIds.Contains(spct.DanhMucId));
+                System.Diagnostics.Debug.WriteLine($"After category filter: {filteredSpct.Count()} items");
+            }
+
+            // Áp dụng sắp xếp
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                switch (sortBy)
+                {
+                    case "name_asc":
+                        filteredSpct = filteredSpct.OrderBy(spct => spct.TenSanPham);
+                        break;
+                    case "name_desc":
+                        filteredSpct = filteredSpct.OrderByDescending(spct => spct.TenSanPham);
+                        break;
+                    case "price_asc":
+                        filteredSpct = filteredSpct.OrderBy(spct => spct.GiaKhuyenMai);
+                        break;
+                    case "price_desc":
+                        filteredSpct = filteredSpct.OrderByDescending(spct => spct.GiaKhuyenMai);
+                        break;
+                    case "newest":
+                        filteredSpct = filteredSpct.OrderByDescending(spct => spct.NgayTao);
+                        break;
+                    case "popular":
+                        // Cần được implement dựa trên cấu trúc dữ liệu của bạn
+                        // Hiện tại, sắp xếp theo tên
+                        filteredSpct = filteredSpct.OrderBy(spct => spct.TenSanPham);
+                        break;
+                }
+            }
+
+            // Update the filtered results
+            allSpct = filteredSpct.ToList();
+
+            // Apply pagination to filtered results
+            var pageSize = 10;
+            var totalItems = allSpct.GroupBy(spct => spct.SanPhamId).Count();
+            var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+            
+            // Ensure pageIndex is within valid range
+            pageIndex = Math.Max(1, Math.Min(pageIndex, totalPages));
+            
+            // Get unique products for current page
+            var uniqueProducts = allSpct.GroupBy(spct => spct.SanPhamId).ToList();
+            var startIndex = (pageIndex - 1) * pageSize;
+            var endIndex = Math.Min(startIndex + pageSize, uniqueProducts.Count);
+            var currentPageProducts = uniqueProducts.Skip(startIndex).Take(pageSize).ToList();
+            
+            // Get SPCT for current page products only
+            var currentPageProductIds = currentPageProducts.Select(p => p.Key).ToList();
+            allSpct = allSpct.Where(spct => currentPageProductIds.Contains(spct.SanPhamId)).ToList();
+
+            // Set ViewBag for current filter state
+            ViewBag.Keyword = tuKhoa;
+            ViewBag.CategoryId = danhMucId?.ToString() ?? "";
+            ViewBag.MinPrice = giaThapNhat ?? 0;
+            ViewBag.MaxPrice = giaCaoNhat ?? 10000000;
+            ViewBag.SelectedBrands = selectedBrandIds;
+            ViewBag.SelectedColors = selectedColorIds;
+            ViewBag.SelectedCategories = selectedCategoryIds;
+            ViewBag.SortBy = sortBy;
+            ViewBag.CurrentPage = pageIndex;
+
             var viewModel = new DanhMucSPCTViewModel
             {
                 DanhMucs = categories,
@@ -139,6 +268,213 @@ namespace SneakFit.WebClient.Controllers
             };
 
             return View(viewModel);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetFilteredProducts(string tuKhoa, Guid? danhMucId, decimal? giaThapNhat, decimal? giaCaoNhat, 
+            string selectedBrands, string selectedColors, string selectedCategories, string sortBy, int pageIndex = 1)
+        {
+            var categories = await _danhMucApiClient.GetAll();
+            var colors = await _mauSacApiClient.GetAll();
+            var brands = await _thuongHieuApiClient.GetAll();
+
+            // Parse selected brands, colors and categories
+            var selectedBrandIds = new List<Guid>();
+            var selectedColorIds = new List<Guid>();
+            var selectedCategoryIds = new List<Guid>();
+            
+            if (!string.IsNullOrEmpty(selectedBrands))
+            {
+                selectedBrandIds = selectedBrands.Split(',')
+                    .Where(x => !string.IsNullOrEmpty(x) && Guid.TryParse(x, out _))
+                    .Select(Guid.Parse)
+                    .ToList();
+            }
+            
+            if (!string.IsNullOrEmpty(selectedColors))
+            {
+                selectedColorIds = selectedColors.Split(',')
+                    .Where(x => !string.IsNullOrEmpty(x) && Guid.TryParse(x, out _))
+                    .Select(Guid.Parse)
+                    .ToList();
+            }
+            
+            if (!string.IsNullOrEmpty(selectedCategories))
+            {
+                selectedCategoryIds = selectedCategories.Split(',')
+                    .Where(x => !string.IsNullOrEmpty(x) && Guid.TryParse(x, out _))
+                    .Select(Guid.Parse)
+                    .ToList();
+            }
+
+            var request = new SanPhamPagingRequest
+            {
+                Keyword = tuKhoa,
+                DanhMucId = danhMucId,
+                TrangThai = true,
+                PageIndex = pageIndex,
+                PageSize = 10
+            };
+            var pagedSanPham = await _sanPhamApiClient.GetAllPaging(request);
+            var allSpct = new List<SPCTViewModels>();
+
+            // Lấy tất cả KM đang hoạt động
+            var khuyenMais = await _khuyenMaiApiClient.GetAllPaging(new PhanTrangKhuyenMai
+            {
+                PageIndex = 1,
+                PageSize = 10,
+                Keyword = null,
+                TrangThai = SneakFit.Data.Enums.TrangThaiGiamGia.HoatDong
+            });
+
+            // Duyệt từng sản phẩm để gắn thông tin khuyến mãi và ảnh đại diện
+            foreach (var sanPham in pagedSanPham.Items)
+            {
+                var spctList = await _sanPhamApiClient.GetSPCTByProductName(sanPham.TenSanPham);
+
+                foreach (var spct in spctList)
+                {
+                    var km = khuyenMais.Items
+                            .Where(x => x.TrangThai == TrangThaiGiamGia.HoatDong
+                                        && x.ThoiGianBatDau <= DateTime.Now
+                                        && x.ThoiGianKetThuc >= DateTime.Now
+                                        && x.SanPhamChiTiets.Any(ct => ct.SPCTId == spct.Id))
+                            .OrderByDescending(x => x.ThoiGianBatDau)
+                            .FirstOrDefault();
+
+                    spct.GiaGoc = spct.Gia;
+
+                    if (km != null)
+                    {
+                        if (km.LoaiGiamGia == LoaiGiamGia.PhamTram)
+                        {
+                            spct.KhuyenMaiPhanTram = km.GiaTriGiamGia;
+                            spct.GiaKhuyenMai = Math.Round(spct.Gia * (1 - km.GiaTriGiamGia / 100), 0);
+                        }
+                        else if (km.LoaiGiamGia == LoaiGiamGia.SoTien)
+                        {
+                            spct.GiaKhuyenMai = Math.Max(0, spct.Gia - km.GiaTriGiamGia);
+                            spct.KhuyenMaiPhanTram = spct.Gia > 0 ? Math.Round((km.GiaTriGiamGia / spct.Gia) * 100, 0) : 0;
+                        }
+                    }
+                    else
+                    {
+                        spct.GiaKhuyenMai = spct.Gia;
+                        spct.KhuyenMaiPhanTram = 0;
+                    }
+                }
+
+                allSpct.AddRange(spctList);
+                var spctDaiDien = spctList.FirstOrDefault(spct => spct.Images != null && spct.Images.Any());
+                sanPham.ImageDaiDien = spctDaiDien?.Images?.FirstOrDefault() ?? "/images/Default_Logo.png";
+            }
+
+            // Áp dụng các bộ lọc bổ sung
+            var filteredSpct = allSpct.AsQueryable();
+
+            // Lọc theo khoảng giá
+            System.Diagnostics.Debug.WriteLine($"GetFilteredProducts - Price filter - giaThapNhat: {giaThapNhat}, giaCaoNhat: {giaCaoNhat}");
+            if (giaThapNhat.HasValue && giaThapNhat.Value > 0)
+            {
+                System.Diagnostics.Debug.WriteLine($"GetFilteredProducts - Applying min price filter: >= {giaThapNhat.Value}");
+                filteredSpct = filteredSpct.Where(spct => spct.GiaKhuyenMai >= giaThapNhat.Value);
+            }
+            if (giaCaoNhat.HasValue && giaCaoNhat.Value < 10000000)
+            {
+                System.Diagnostics.Debug.WriteLine($"GetFilteredProducts - Applying max price filter: <= {giaCaoNhat.Value}");
+                filteredSpct = filteredSpct.Where(spct => spct.GiaKhuyenMai <= giaCaoNhat.Value);
+            }
+
+            // Lọc theo thương hiệu (nếu có chọn)
+            if (selectedBrandIds.Any())
+            {
+                filteredSpct = filteredSpct.Where(spct => selectedBrandIds.Contains(spct.ThuongHieuId));
+            }
+
+            // Lọc theo màu sắc (nếu có chọn)
+            if (selectedColorIds.Any())
+            {
+                filteredSpct = filteredSpct.Where(spct => selectedColorIds.Contains(spct.MauSacId));
+            }
+
+            // Lọc theo danh mục (nếu có chọn)
+            System.Diagnostics.Debug.WriteLine($"GetFilteredProducts - Category filter - selectedCategoryIds count: {selectedCategoryIds.Count}");
+            if (selectedCategoryIds.Any())
+            {
+                System.Diagnostics.Debug.WriteLine($"GetFilteredProducts - Category IDs: {string.Join(", ", selectedCategoryIds)}");
+                System.Diagnostics.Debug.WriteLine($"GetFilteredProducts - Before category filter: {filteredSpct.Count()} items");
+                filteredSpct = filteredSpct.Where(spct => selectedCategoryIds.Contains(spct.DanhMucId));
+                System.Diagnostics.Debug.WriteLine($"GetFilteredProducts - After category filter: {filteredSpct.Count()} items");
+            }
+
+            // Apply sorting
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                switch (sortBy)
+                {
+                    case "name_asc":
+                        filteredSpct = filteredSpct.OrderBy(spct => spct.TenSanPham);
+                        break;
+                    case "name_desc":
+                        filteredSpct = filteredSpct.OrderByDescending(spct => spct.TenSanPham);
+                        break;
+                    case "price_asc":
+                        filteredSpct = filteredSpct.OrderBy(spct => spct.GiaKhuyenMai);
+                        break;
+                    case "price_desc":
+                        filteredSpct = filteredSpct.OrderByDescending(spct => spct.GiaKhuyenMai);
+                        break;
+                    case "newest":
+                        filteredSpct = filteredSpct.OrderByDescending(spct => spct.NgayTao);
+                        break;
+                    case "popular":
+                        filteredSpct = filteredSpct.OrderBy(spct => spct.TenSanPham);
+                        break;
+                }
+            }
+
+            // Update the filtered results
+            allSpct = filteredSpct.ToList();
+
+            // Apply pagination to filtered results
+            var pageSize = 10;
+            var totalItems = allSpct.GroupBy(spct => spct.SanPhamId).Count();
+            var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+            
+            // Ensure pageIndex is within valid range
+            pageIndex = Math.Max(1, Math.Min(pageIndex, totalPages));
+            
+            // Get unique products for current page
+            var uniqueProducts = allSpct.GroupBy(spct => spct.SanPhamId).ToList();
+            var startIndex = (pageIndex - 1) * pageSize;
+            var endIndex = Math.Min(startIndex + pageSize, uniqueProducts.Count);
+            var currentPageProducts = uniqueProducts.Skip(startIndex).Take(pageSize).ToList();
+            
+            // Get SPCT for current page products only
+            var currentPageProductIds = currentPageProducts.Select(p => p.Key).ToList();
+            allSpct = allSpct.Where(spct => currentPageProductIds.Contains(spct.SanPhamId)).ToList();
+
+            // Set ViewBag for current filter state
+            ViewBag.Keyword = tuKhoa;
+            ViewBag.CategoryId = danhMucId?.ToString() ?? "";
+            ViewBag.MinPrice = giaThapNhat ?? 0;
+            ViewBag.MaxPrice = giaCaoNhat ?? 10000000;
+            ViewBag.SelectedBrands = selectedBrandIds;
+            ViewBag.SelectedColors = selectedColorIds;
+            ViewBag.SelectedCategories = selectedCategoryIds;
+            ViewBag.SortBy = sortBy;
+            ViewBag.CurrentPage = pageIndex;
+
+            var viewModel = new DanhMucSPCTViewModel
+            {
+                DanhMucs = categories,
+                MauSacs = colors,
+                ThuongHieus = brands,
+                SanPhams = pagedSanPham,
+                AllSpct = allSpct,
+            };
+
+            return PartialView("_ProductList", viewModel);
         }
 
         //[HttpPost]
@@ -185,9 +521,22 @@ namespace SneakFit.WebClient.Controllers
                 Guid userId;
                 try
                 {
-                    userId = (User?.Identity?.IsAuthenticated ?? false)
-                        ? Guid.Parse(User.Claims.FirstOrDefault(x => x.Type == "UserId" || x.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value)
-                        : throw new UnauthorizedAccessException();
+                    if (User?.Identity?.IsAuthenticated ?? false)
+                    {
+                        var userIdClaim = User.Claims.FirstOrDefault(x => x.Type == "UserId" || x.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                        if (!string.IsNullOrEmpty(userIdClaim))
+                        {
+                            userId = Guid.Parse(userIdClaim);
+                        }
+                        else
+                        {
+                            throw new UnauthorizedAccessException();
+                        }
+                    }
+                    else
+                    {
+                        throw new UnauthorizedAccessException();
+                    }
                 }
                 catch
                 {
