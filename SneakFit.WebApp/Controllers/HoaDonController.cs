@@ -1,16 +1,18 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SneakFit.ApiIntegration.Services;
 using SneakFit.Data.Enums;
 using SneakFit.ViewModels.Catalog.HoaDon;
+using SneakFit.ViewModels.Catalog.LichSuHoaDon;
 using SneakFit.ViewModels.Catalog.SanPham;
 using SneakFit.ViewModels.Common;
 using System.Globalization;
 using System.Security.Claims;
-using SneakFit.ViewModels.Catalog.LichSuHoaDon;
 
 namespace SneakFit.Admin.Controllers
 {
-    public class HoaDonController : Controller
+   
+    public class HoaDonController : BaseController
     {
         private readonly IHoaDonApiClient _hoaDonApiClient;
         private readonly IHoaDonChiTietApiClient _hoaDonChiTietApiClient;
@@ -196,6 +198,21 @@ namespace SneakFit.Admin.Controllers
             try
             {
                 var result = await _hoaDonApiClient.UpdateStatus(hoaDonId, trangThai);
+                if (result)
+                    return Ok(new { success = true });
+                return BadRequest(new { success = false, message = "Không thể cập nhật trạng thái hóa đơn!" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+        [HttpPost]
+        public async Task<IActionResult> UpdateStatusAndLog(Guid hoaDonId, TrangThaiHoaDon newStatus, Guid userId, string? nguoiChinhSua = null)
+        {
+            try
+            {
+                var result = await _hoaDonApiClient.UpdateStatusAndLogAsync(hoaDonId, newStatus, userId, nguoiChinhSua);
                 if (result)
                     return Ok(new { success = true });
                 return BadRequest(new { success = false, message = "Không thể cập nhật trạng thái hóa đơn!" });

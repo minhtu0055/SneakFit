@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SneakFit.ApiIntegration.Services;
 using SneakFit.ViewModels.Catalog.ThuongHieu;
 
 namespace SneakFit.Admin.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class ThuongHieuController : BaseController
     {
         private readonly IThuongHieuApiClient _thuongHieuApiClient;

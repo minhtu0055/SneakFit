@@ -147,13 +147,13 @@ namespace SneakFit.ApiIntegration.Services
 
             var response = await client.GetAsync($"/api/HoaDon/cho-by-nguoitao?nguoiTao={nguoiTao}");
             var body = await response.Content.ReadAsStringAsync();
-            
+
             if (response.IsSuccessStatusCode)
             {
                 var result = JsonConvert.DeserializeObject<List<HoaDonViewModel>>(body);
                 return result ?? new List<HoaDonViewModel>();
             }
-            
+
             throw new Exception("Không thể lấy danh sách hóa đơn chờ");
         }
 
@@ -235,6 +235,27 @@ namespace SneakFit.ApiIntegration.Services
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
 
             var response = await client.PostAsync($"/api/HoaDon/{hoaDonId}/revert", null);
+            return response.IsSuccessStatusCode;
+        }
+
+
+        public async Task<bool> UpdateStatusAndLogAsync(Guid hoaDonId, TrangThaiHoaDon newStatus, Guid userId, string? nguoiChinhSua = null)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var request = new UpdateHoaDonStatusRequest
+            {
+                NewStatus = newStatus,
+                UserId = userId,
+                NguoiChinhSua = nguoiChinhSua
+            };
+            var json = JsonConvert.SerializeObject(request);
+            var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
+            var response = await client.PostAsync($"/api/HoaDon/{hoaDonId}/update-status", httpContent);
             return response.IsSuccessStatusCode;
         }
     }

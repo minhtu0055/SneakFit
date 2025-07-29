@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -15,6 +8,14 @@ using SneakFit.Data.Entities;
 using SneakFit.ViewModels.Common;
 using SneakFit.ViewModels.System.DiaChi;
 using SneakFit.ViewModels.System.User;
+using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Security.Claims;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace SneakFit.Application.System.User
 {
@@ -172,6 +173,11 @@ namespace SneakFit.Application.System.User
         }
         public async Task<ApiResult<bool>> Register(RegisterRequest request)
         {
+            var usernamePattern = "^[a-z0-9]+$"; // hoặc ^[a-z0-9]+$ nếu muốn cho phép số
+            if (!Regex.IsMatch(request.UserName, usernamePattern))
+            {
+                return new ApiErrorResult<bool>("Tài khoản chỉ được chữ thường và số");
+            }
             var user = await _userManager.FindByNameAsync(request.UserName);
             if (user != null)
             {

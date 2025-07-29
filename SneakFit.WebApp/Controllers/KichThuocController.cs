@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SneakFit.ApiIntegration.Services;
 using SneakFit.ViewModels.Catalog.ChatLieu;
 using SneakFit.ViewModels.Catalog.KichThuoc;
 
 namespace SneakFit.Admin.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class KichThuocController : BaseController
     {
         private readonly IKichThuocApiClient _kichThuocApiClient;

@@ -6,16 +6,16 @@
     var isTaiQuay = (int)Model.LoaiHoaDon == 2 && (Model.GiaoHang != true);
     var steps = isTaiQuay
         ? new[] {
-            new { Status = TrangThaiHoaDon.ChoXacNhan, Color = "royal-blue", Icon = "icon-file", Title = "Chờ xác nhận", Time = "17:52:50 21/12/2023" },
-            new { Status = TrangThaiHoaDon.ThanhCong, Color = "emerald", Icon = "icon-check", Title = "Thành công", Time = "18:16:01 22/12/2023" }
+            new { Status = TrangThaiHoaDon.ChoXacNhan, Color = "royal-blue", Icon = "icon-file", Title = "Chờ xác nhận", Time = Model.NgayTao.ToString("HH:mm:ss dd/MM/yyyy") },
+            new { Status = TrangThaiHoaDon.ThanhCong, Color = "emerald", Icon = "icon-check", Title = "Thành công", Time = Model.NgayTao.ToString("HH:mm:ss dd/MM/yyyy") }
         }
         : new[] {
-            new { Status = TrangThaiHoaDon.ChoXacNhan, Color = "royal-blue", Icon = "icon-file", Title = "Chờ xác nhận", Time = "17:52:50 21/12/2023" },
-            new { Status = TrangThaiHoaDon.DaXacNhan, Color = "indigo", Icon = "icon-truck", Title = "Đã xác nhận", Time = "18:14:48 21/12/2023" },
-            new { Status = TrangThaiHoaDon.ChoVanChuyen, Color = "purple", Icon = "icon-delivery", Title = "Chờ vận chuyển", Time = "18:15:40 21/12/2023" },
-            new { Status = TrangThaiHoaDon.DangVanChuyen, Color = "orange", Icon = "icon-payment", Title = "Đang vận chuyển", Time = "18:15:57 21/12/2023" },
-            new { Status = TrangThaiHoaDon.DaThanhToan, Color = "emerald", Icon = "icon-check", Title = "Đã thanh toán", Time = "18:16:01 21/12/2023" },
-            new { Status = TrangThaiHoaDon.ThanhCong, Color = "emerald", Icon = "icon-check", Title = "Thành công", Time = "18:16:01 22/12/2023" }
+            new { Status = TrangThaiHoaDon.ChoXacNhan, Color = "royal-blue", Icon = "icon-file", Title = "Chờ xác nhận", Time = Model.NgayTao.ToString("HH:mm:ss dd/MM/yyyy") },
+            new { Status = TrangThaiHoaDon.DaXacNhan, Color = "indigo", Icon = "icon-file-check", Title = "Đã xác nhận", Time = Model.NgayTao.ToString("HH:mm:ss dd/MM/yyyy") },
+            new { Status = TrangThaiHoaDon.ChoVanChuyen, Color = "purple", Icon = "icon-truck", Title = "Chờ vận chuyển", Time = Model.NgayTao.ToString("HH:mm:ss dd/MM/yyyy") },
+            new { Status = TrangThaiHoaDon.DangVanChuyen, Color = "orange", Icon = "icon-delivery", Title = "Đang vận chuyển", Time = Model.NgayTao.ToString("HH:mm:ss dd/MM/yyyy") },
+            new { Status = TrangThaiHoaDon.DaThanhToan, Color = "emerald", Icon = "icon-payment", Title = "Đã thanh toán", Time = Model.NgayTao.ToString("HH:mm:ss dd/MM/yyyy") },
+            new { Status = TrangThaiHoaDon.ThanhCong, Color = "emerald", Icon = "icon-check", Title = "Thành công", Time = Model.NgayTao.ToString("HH:mm:ss dd/MM/yyyy") }
         };
     var visibleSteps = steps.Where(s => (int)s.Status <= (int)Model.TrangThai).ToList();
 }
@@ -277,7 +277,13 @@
             height: 24px;
             background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4M20,18H4V12H20V18M20,8H4V6H20V8Z'/%3E%3C/svg%3E") center/contain no-repeat;
         }
-
+        .icon-file-check::before {
+            content: "";
+            display: block;
+            width: 24px;
+            height: 24px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20ZM9.5,17L7,14.5L8.41,13.09L9.5,14.17L15.09,8.59L16.5,10L9.5,17Z'/%3E%3C/svg%3E") center/contain no-repeat;
+        }
         .icon-check::before {
             content: "";
             display: block;
@@ -382,16 +388,18 @@
                 <div class="d-flex justify-content-between align-items-center mt-4">
                 <div>
                     @if (
-                        Model.TrangThai == TrangThaiHoaDon.ChoXacNhan ||
-                        Model.TrangThai == TrangThaiHoaDon.DaXacNhan ||
-                        Model.TrangThai == TrangThaiHoaDon.ChoVanChuyen ||
-                        Model.TrangThai == TrangThaiHoaDon.DangVanChuyen
+                        (Model.TrangThai == TrangThaiHoaDon.ChoXacNhan ||
+                         Model.TrangThai == TrangThaiHoaDon.DaXacNhan ||
+                         Model.TrangThai == TrangThaiHoaDon.ChoVanChuyen ||
+                         Model.TrangThai == TrangThaiHoaDon.DangVanChuyen ||
+                         Model.TrangThai == TrangThaiHoaDon.DaThanhToan)
+                        && Model.GiaoHang == true && Model.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan
                     )
                     {
                         <button class="btn btn-primary me-2" id="btnXacNhan">Xác nhận</button>
                         <button class="btn btn-warning me-2" id="btnQuayLai">Quay lại</button>
                     }
-                    @if (Model.TrangThai == TrangThaiHoaDon.ChoXacNhan)
+                    @if (Model.TrangThai == TrangThaiHoaDon.ChoXacNhan && Model.GiaoHang == true)
                     {
                         <button class="btn btn-danger" id="btnHuy">Hủy</button>
                     }
@@ -440,10 +448,16 @@
                             <p class="form-control-static">@Model.TongTien.ToString("N0") VNĐ</p>
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Địa chỉ: </label>
-                        <p class="form-control-static">@Model.DiaChi</p>
-                    </div>                   
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Địa chỉ: </label>
+                            <p class="form-control-static">@Model.DiaChi</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Phương thức thanh toán: </label>
+                            <p class="form-control-static">@GetStatusTTName(Model.PhuongThucThanhToan)</p>
+                        </div>
+                    </div>                 
                 </div>
             </div>
 
@@ -471,8 +485,7 @@
                             {
                                 <tr>
                                     <td>                                
-                                           @item.SanPhamChiTietId
-                                        
+                                           @item.SanPhamChiTietId                                      
                                     </td>
                                     <td>
                                         <div class="d-flex flex-column">
@@ -578,13 +591,31 @@
                 });
             });
 
-            // Xử lý nút Xác nhận (chuyển trạng thái tiếp theo)
+            // Xử lý nút Xác nhận (chuyển trạng thái tiếp theo và lưu lịch sử)
             $('#btnXacNhan').on('click', function () {
                 var hoaDonId = '@Model.Id';
+                var userId = '@(Model.UserId ?? Guid.Empty)';
+                var nguoiChinhSua = '@User.Identity.Name';
+                var currentStatus = @((int)Model.TrangThai);
+                var nextStatus = currentStatus;
+                // Xác định trạng thái tiếp theo
+                switch (currentStatus) {
+                    case 0: nextStatus = 1; break; // ChoXacNhan -> DaXacNhan
+                    case 1: nextStatus = 2; break; // DaXacNhan -> ChoVanChuyen
+                    case 2: nextStatus = 3; break; // ChoVanChuyen -> DangVanChuyen
+                    case 3: nextStatus = 4; break; // DangVanChuyen -> DaThanhToan
+                    case 4: nextStatus = 5; break; // DaThanhToan -> ThanhCong
+                    default: toastr.error('Không thể chuyển trạng thái!'); return;
+                }
                 $.ajax({
-                    url: '/HoaDon/UpdateStatus',
+                    url: '/HoaDon/UpdateStatusAndLog',
                     method: 'POST',
-                    data: { hoaDonId: hoaDonId },
+                    data: {
+                        hoaDonId: hoaDonId,
+                        newStatus: nextStatus,
+                        userId: userId,
+                        nguoiChinhSua: nguoiChinhSua
+                    },
                     success: function (res) {
                         if (res.success) {
                             toastr.success('Cập nhật trạng thái thành công!');
@@ -665,6 +696,18 @@
                 return "warning";
             default:
                 return "danger";
+        }
+    }
+    string GetStatusTTName(PhuongThucThanhToan status)
+    {
+        switch (status)
+        {
+            case PhuongThucThanhToan.TienMat:
+                return "Tiền Mặt";
+            case PhuongThucThanhToan.VnPay:
+                return "VNPay";
+            default:
+                return status.ToString();
         }
     }
     string GetStatusDisplayName(object trangThai)

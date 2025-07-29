@@ -14,6 +14,7 @@ builder.Services.AddAuthentication(options =>
 })
 .AddCookie(options =>
 {
+    options.Cookie.Name = "SneakFit.Client";
     options.LoginPath = "/Login/Login";
     options.AccessDeniedPath = "/Forbidden/Index";
 });

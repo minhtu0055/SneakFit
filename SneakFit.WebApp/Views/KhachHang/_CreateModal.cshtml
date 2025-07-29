@@ -4,7 +4,7 @@
       <form id="formThemMoiKH" enctype="multipart/form-data" novalidate>
         <div class="modal-header">
           <h5 class="modal-title">Thêm mới khách hàng</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          <button class="close-btn" data-bs-dismiss="modal" aria-label="Close">×</button>
         </div>
         <div class="modal-body">
           <div class="row">
@@ -70,6 +70,26 @@
                 </div>
               </div>
               <div class="mb-3 row">
+                  <div class="col-12">
+                    <h5>Thông Tin Địa Chỉ: </h5>
+                  </div>
+              </div>
+               <div class="mb-3 row">
+                    <label class="col-sm-2 col-form-label">Tên người nhận <span class="text-danger">*</span></label>
+                    <div class="col-sm-10">
+                        <input name="DiaChi.TenNguoiNhan" class="form-control" placeholder="Vui lòng nhập Họ Tên..." required />
+                        <span class="invalid-feedback">Vui lòng nhập họ và tên</span>
+                    </div>
+               </div>
+            
+                                <div class="mb-3 row">
+                                    <label class="col-sm-2 col-form-label">Số điện thoại <span class="text-danger">*</span></label>
+                                    <div class="col-sm-10">
+                                        <input name="DiaChi.SoDienThoai" class="form-control phone-only" placeholder="Nhập số điện thoại..." required pattern="^0[0-9]{9}$" inputmode="numeric" maxlength="10" />
+                                        <span class="invalid-feedback">Vui lòng nhập số điện thoại</span>
+              </div>
+              </div>
+                <div class="mb-3 row">
                 <label class="col-sm-2 col-form-label">Thôn/xã <span class="text-danger">*</span></label>
                 <div class="col-sm-10">
                   <div class="input-group has-validation">

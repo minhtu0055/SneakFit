@@ -74,8 +74,15 @@ namespace SneakFit.BackEndAPI.Controllers
         public async Task<IActionResult> ThanhToan([FromBody] SuaHoaDon request)
         {
             // Khi thanh toán thành công, cập nhật trạng thái về 5 (ThanhCong)
-            request.TrangThai = TrangThaiHoaDon.ThanhCong;
-            request.TrangThaiThanhToan = TrangThaiThanhToan.DaThanhToan;
+            if(request.GiaoHang == true)
+            {
+                request.TrangThai = TrangThaiHoaDon.DaXacNhan;
+                request.TrangThaiThanhToan = TrangThaiThanhToan.DaThanhToan;
+            }
+            else { 
+                request.TrangThai = TrangThaiHoaDon.ThanhCong;
+                request.TrangThaiThanhToan = TrangThaiThanhToan.DaThanhToan;
+            }
             request.NgayThanhToan = DateTime.Now;
 
             var updated = await _hoaDonService.Update(request);
@@ -124,5 +131,19 @@ namespace SneakFit.BackEndAPI.Controllers
             }
             return Ok(new { success = true });
         }
+
+        [HttpPost("{hoaDonId}/update-status")]
+        public async Task<IActionResult> UpdateStatus(Guid hoaDonId, [FromBody] UpdateHoaDonStatusRequest request)
+        {
+            // Lấy thông tin người thực hiện (nếu cần lấy từ token)
+            var user = await _userManager.GetUserAsync(User);
+            var nguoiChinhSua = request.NguoiChinhSua ?? user?.HoVaTen ?? User.Identity.Name;
+            var result = await _hoaDonService.UpdateStatusAndLogAsync(hoaDonId, request.NewStatus, request.UserId, nguoiChinhSua);
+            if (!result)
+                return BadRequest("Không thể cập nhật trạng thái hóa đơn.");
+            return Ok(new { success = true });
+        }
     }
 }
+
+

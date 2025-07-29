@@ -196,6 +196,15 @@ namespace SneakFit.Admin.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        public async Task<IActionResult> UserAddressesPartial(Guid userId)
+        {
+            var result = await _diaChiApiClient.GetAllByUserId(userId);
+            if (result.IsSuccessed)
+            {
+                return PartialView("_UserAddressesPartial", result.ResultObj);
+            }
+            return Content("Không thể lấy danh sách địa chỉ");
+        }
         // GET: DiaChi/UserAddresses/{userId}
         public async Task<IActionResult> UserAddresses(Guid userId)
         {
@@ -264,6 +273,37 @@ namespace SneakFit.Admin.Controllers
             }
         }
 
+        // POST: DiaChi/CreateForUserJson/{userId}
+        [HttpPost]
+        public async Task<JsonResult> CreateForUserJson(Guid userId, [FromBody] ThemDiaChiViewModel request)
+        {
+            if (!ModelState.IsValid)
+            {
+                // Trả về lỗi validate cho phía client
+                return Json(new ApiResult<bool>
+                {
+                    IsSuccessed = false,
+                    Message = "Dữ liệu không hợp lệ",
+                    ResultObj = false
+                });
+            }
+
+            try
+            {
+                var result = await _diaChiApiClient.CreateByUser(userId, request);
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                return Json(new ApiResult<bool>
+                {
+                    IsSuccessed = false,
+                    Message = ex.Message,
+                    ResultObj = false
+                });
+            }
+        }
+
         // GET: DiaChi/EditForUser/{userId}/{id}
         public async Task<IActionResult> EditForUser(Guid userId, Guid id)
         {
@@ -327,6 +367,36 @@ namespace SneakFit.Admin.Controllers
                 TempData["Error"] = ex.Message;
                 ViewBag.UserId = userId;
                 return View(request);
+            }
+        }
+
+        // PUT: DiaChi/EditForUserJson/{userId}/{id}
+        [HttpPut]
+        public async Task<JsonResult> EditForUserJson(Guid userId, Guid id, [FromBody] SneakFit.ViewModels.System.DiaChi.SuaDiaChiViewModel request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return Json(new SneakFit.ViewModels.Common.ApiResult<bool>
+                {
+                    IsSuccessed = false,
+                    Message = "Dữ liệu không hợp lệ",
+                    ResultObj = false
+                });
+            }
+
+            try
+            {
+                var result = await _diaChiApiClient.UpdateByUser(userId, id, request);
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                return Json(new SneakFit.ViewModels.Common.ApiResult<bool>
+                {
+                    IsSuccessed = false,
+                    Message = ex.Message,
+                    ResultObj = false
+                });
             }
         }
 

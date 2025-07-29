@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SneakFit.ApiIntegration.Services;
 using SneakFit.Data.Entities;
 using SneakFit.ViewModels.Catalog.MauSac;
 
 namespace SneakFit.Admin.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class MauSacController : BaseController
     {
         private readonly IMauSacApiClient _mauSacApiClient;

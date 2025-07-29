@@ -1,20 +1,22 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using SneakFit.ApiIntegration.Services;
-using SneakFit.Data.Enums;
-using SneakFit.ViewModels.Common;
-using SneakFit.ViewModels.Catalog.Voucher;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Azure.Core;
-using SneakFit.Data.Entities;
-using System.Net.NetworkInformation;
-using SneakFit.ViewModels.System.User;
-using Newtonsoft.Json;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using SneakFit.ApiIntegration.Services;
+using SneakFit.Data.Entities;
+using SneakFit.Data.Enums;
+using SneakFit.ViewModels.Catalog.Voucher;
+using SneakFit.ViewModels.Common;
+using SneakFit.ViewModels.System.User;
+using System.Net.NetworkInformation;
 
 
 namespace SneakFit.Admin.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class VoucherController : BaseController
     {
         private readonly IVoucherApiClient _IvoucherCLient;

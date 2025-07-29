@@ -1,20 +1,22 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using SneakFit.ViewModels.Catalog.SanPhamChiTiet;
-using SneakFit.ApiIntegration.Services;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using SneakFit.ViewModels.Catalog.MauSac;
-using SneakFit.ViewModels.Catalog.KichThuoc;
+using Microsoft.Extensions.Logging;
+using SneakFit.ApiIntegration.Services;
 using SneakFit.ViewModels.Catalog.ChatLieu;
 using SneakFit.ViewModels.Catalog.DeGiay;
-using SneakFit.ViewModels.Catalog.ThuongHieu;
+using SneakFit.ViewModels.Catalog.KichThuoc;
+using SneakFit.ViewModels.Catalog.MauSac;
 using SneakFit.ViewModels.Catalog.SanPham;
-using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
+using SneakFit.ViewModels.Catalog.SanPhamChiTiet;
+using SneakFit.ViewModels.Catalog.ThuongHieu;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
 
 namespace SneakFit.Admin.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class SPCTController : BaseController
     {
         private readonly ISpctApiClient _spctApiClient;
@@ -442,6 +444,14 @@ namespace SneakFit.Admin.Controllers
                 _logger.LogError(ex, "Lỗi khi lấy dữ liệu SPCT cho modal");
                 return Json(new { success = false, message = "Có lỗi xảy ra khi tải dữ liệu" });
             }
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            var spct = await _spctApiClient.GetById(id);
+            if (spct == null)
+                return Json(null);
+            return Json(spct);
         }
         
     }

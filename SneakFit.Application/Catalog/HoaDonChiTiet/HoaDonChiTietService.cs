@@ -61,6 +61,8 @@ namespace SneakFit.Application.Catalog.HoaDonChiTiet
                     .ThenInclude(spct => spct.KichThuoc)
                 .Include(h => h.SanPhamChiTiet)
                     .ThenInclude(spct => spct.MauSac)
+                .Include(h => h.SanPhamChiTiet)
+                    .ThenInclude(spct => spct.HinhAnhSanPham)
                 .ToListAsync();
 
             return chiTiets.Select(hoaDonChiTiet => new HoaDonChiTietViewModel()
@@ -72,7 +74,8 @@ namespace SneakFit.Application.Catalog.HoaDonChiTiet
                 TenSanPham = hoaDonChiTiet.SanPhamChiTiet?.SanPham?.TenSanPham,
                 KichThuoc = hoaDonChiTiet.SanPhamChiTiet?.KichThuoc?.MaKichThuoc,
                 MauSac = hoaDonChiTiet.SanPhamChiTiet?.MauSac?.TenMauSac,
-                SoLuongTon = hoaDonChiTiet.SanPhamChiTiet?.SoLuong ?? 0
+                SoLuongTon = hoaDonChiTiet.SanPhamChiTiet?.SoLuong ?? 0,
+                Images = hoaDonChiTiet.SanPhamChiTiet?.HinhAnhSanPham?.Select(x => x.UrlHinhAnh).ToList() ?? new List<string>()
             }).ToList();
         }
 
