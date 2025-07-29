@@ -4,6 +4,28 @@
 @inject IConfiguration Configuration
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var currentKeyword = ViewBag.Keyword ?? "";
+    var currentCategoryId = ViewBag.CategoryId ?? "";
+    var currentMinPrice = ViewBag.MinPrice ?? 0;
+    var currentMaxPrice = ViewBag.MaxPrice ?? 10000000;
+    var currentBrands = new List<Guid>();
+    var currentColors = new List<Guid>();
+    var currentCategories = new List<Guid>();
+    
+    if (ViewBag.SelectedBrands is List<Guid> brands)
+    {
+        currentBrands = brands;
+    }
+    
+    if (ViewBag.SelectedColors is List<Guid> colors)
+    {
+        currentColors = colors;
+    }
+    
+    if (ViewBag.SelectedCategories is List<Guid> categories)
+    {
+        currentCategories = categories;
+    }
 }
 <main class="main">
     <!-- Page Title -->
@@ -27,319 +49,252 @@
                 <div class="widgets-container" style="border-radius: 8px">
 
                     <!-- Product Categories Widget -->
-                    <ul class="category-tree list-unstyled mb-0">
+                    <div class="category-filter-widget widget-item">
+                        <h3 class="widget-title">Danh Mục</h3>
+                        <div class="category-list">
                         @foreach (var cat in Model.DanhMucs)
                         {
-                            <li class="category-item">
-                                <a href="@Url.Action("Index", "SanPham", new { categoryId = cat.Id })" class="category-link">
+                                <div class="category-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input category-checkbox" type="checkbox" 
+                                               id="category@cat.Id" value="@cat.Id"
+                                               @(currentCategories.Contains(cat.Id) ? "checked" : "")>
+                                        <label class="form-check-label" for="category@cat.Id">
                                     @cat.TenDanhMuc
-                                </a>
-                            </li>
+                                        </label>
+                                    </div>
+                                </div>
                         }
-                    </ul>
+                        </div>
+                    </div>
                     <!--/Product Categories Widget -->
-
                     <!-- Pricing Range Widget -->
                     <div class="pricing-range-widget widget-item">
-
-                        <h3 class="widget-title">Price Range</h3>
-
+                        <h3 class="widget-title">Khoảng Giá</h3>
                         <div class="price-range-container">
                             <div class="current-range mb-3">
-                                <span class="min-price">$0</span>
-                                <span class="max-price float-end">$1000</span>
+                                <span class="min-price">@currentMinPrice.ToString("N0")đ</span>
+                                <span class="max-price float-end">@currentMaxPrice.ToString("N0")đ</span>
                             </div>
 
                             <div class="range-slider">
                                 <div class="slider-track"></div>
                                 <div class="slider-progress"></div>
-                                <input type="range" class="min-range" min="0" max="1000" value="0" step="10">
-                                <input type="range" class="max-range" min="0" max="1000" value="500" step="10">
+                                <input type="range" class="min-range" min="0" max="10000000" value="@currentMinPrice" step="10000">
+                                <input type="range" class="max-range" min="0" max="10000000" value="@currentMaxPrice" step="10000">
                             </div>
 
                             <div class="price-inputs mt-3">
                                 <div class="row g-2">
                                     <div class="col-6">
                                         <div class="input-group input-group-sm">
-                                            <span class="input-group-text">$</span>
-                                            <input type="number" class="form-control min-price-input" placeholder="Min" min="0" max="1000" value="0" step="10">
+                                            <span class="input-group-text">đ</span>
+                                            <input type="number" class="form-control min-price-input" placeholder="Min" min="0" max="10000000" value="@currentMinPrice" step="10000">
                                         </div>
                                     </div>
                                     <div class="col-6">
                                         <div class="input-group input-group-sm">
-                                            <span class="input-group-text">$</span>
-                                            <input type="number" class="form-control max-price-input" placeholder="Max" min="0" max="1000" value="500" step="10">
+                                            <span class="input-group-text">đ</span>
+                                            <input type="number" class="form-control max-price-input" placeholder="Max" min="0" max="10000000" value="@currentMaxPrice" step="10000">
                                         </div>
                                     </div>
                                 </div>
                             </div>
-
-                            <div class="filter-actions mt-3">
-                                <button type="button" class="btn btn-sm btn-primary w-100">Apply Filter</button>
-                            </div>
                         </div>
-
                     </div>
                     <!--/Pricing Range Widget -->
-
                     <!-- Color Filter Widget -->
-                    <div class="color-options mb-4">
+                    <div class="color-filter-widget widget-item">
+                        <h3 class="widget-title">Màu Sắc</h3>
+                        <div class="color-options">
                         @foreach (var color in Model.MauSacs)
                         {
-                            <span class="color-circle"
+                                <span class="color-circle @(currentColors.Contains(color.Id) ? "selected" : "")"
                                   title="@color.TenMauSac"
                                   data-color="@color.MaMauSac"
                                   data-id="@color.Id"
                                   style="background:@color.MaMauSac"></span>
                         }
+                        </div>
                     </div>
                     <!--/Color Filter Widget -->
-
                     <!-- Brand Filter Widget -->
+                    <div class="brand-filter-widget widget-item">
+                        <h3 class="widget-title">Thương Hiệu</h3>
                     <div class="brand-list">
                         @foreach (var brand in Model.ThuongHieus)
                         {
                             <div class="brand-item">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="brand@brand.Id" value="@brand.Id">
+                                                                            <input class="form-check-input brand-checkbox" type="checkbox" 
+                                           id="brand@brand.Id" value="@brand.Id"
+                                           @(currentBrands.Contains(brand.Id) ? "checked" : "")>
                                     <label class="form-check-label" for="brand@brand.Id">
                                         @brand.TenThuongHieu
                                     </label>
                                 </div>
                             </div>
                         }
+                        </div>
                     </div>
                     <!--/Brand Filter Widget -->
+                    <!-- Apply Filters Button -->
+                    <div class="filter-actions mt-4">
+                        <button type="button" class="btn btn-primary w-100 apply-filters-btn">
+                            <i class="bi bi-funnel me-2"></i>Áp Dụng Bộ Lọc
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary w-100 mt-2 clear-filters-btn">
+                            <i class="bi bi-x-circle me-2"></i>Xóa Tất Cả
+                        </button>
+                    </div>
 
                 </div>
 
             </div>
 
-
             <div class="col-lg-8">
 
-                <!-- Category Header Section -->
-                <section id="category-header" class="category-header section">
-
-                    <div class="container" data-aos="fade-up">
-
-                        <!-- Filter and Sort Options -->
-                        <div class="filter-container mb-4" data-aos="fade-up" data-aos-delay="100">
+                <!-- Enhanced Search Section -->
+                <section id="search-section" class="search-section mb-4">
+                    <div class="search-container" data-aos="fade-up">
+                        <form id="searchForm" asp-action="Index" method="get" class="search-form">
                             <div class="row g-3">
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <div class="filter-item search-form">
-                                        @* <label for="productSearch" class="form-label">Search Products</label>
+                                <div class="col-12 col-md-8">
+                                    <div class="search-input-group">
                                         <div class="input-group">
-                                            <input type="text" class="form-control" id="productSearch" placeholder="Search for products..." aria-label="Search for products">
-                                            <button class="btn search-btn" type="button">
+                                            <span class="input-group-text search-icon">
                                                 <i class="bi bi-search"></i>
-                                            </button>
-                                        </div> *@
-                                        <form asp-action="Index" method="get">
-                                            <div class="input-group mb-3">
-                                                <input type="text" name="tuKhoa" value="@ViewBag.Keyword" class="form-control" placeholder="Tìm sản phẩm...">
-                                                <button class="btn btn-outline-secondary" type="submit">
-                                                    <i class="bi bi-search"></i>
+                                            </span>
+                                            <input type="text" name="tuKhoa" value="@currentKeyword"
+                                                   class="form-control search-input"
+                                                   placeholder="Tìm kiếm sản phẩm theo tên, thương hiệu, danh mục...">
+                                            <button class="btn btn-primary search-btn" type="submit">
+                                                <i class="bi bi-search me-1"></i>Tìm Kiếm
                                                 </button>
                                             </div>
-                                        </form>
                                     </div>
                                 </div>
-
-                                <div class="col-12 col-md-6 col-lg-2">
-                                    <div class="filter-item">
-                                        <label for="priceRange" class="form-label">Price Range</label>
-                                        <select class="form-select" id="priceRange">
-                                            <option selected="">All Prices</option>
-                                            <option>Under $25</option>
-                                            <option>$25 to $50</option>
-                                            <option>$50 to $100</option>
-                                            <option>$100 to $200</option>
-                                            <option>$200 &amp; Above</option>
+                                <div class="col-12 col-md-4">
+                                    <div class="search-options">
+                                        <select class="form-select" name="sortBy" id="sortBy">
+                                            <option value="">Sắp xếp theo</option>
+                                            <option value="name_asc">Tên A-Z</option>
+                                            <option value="name_desc">Tên Z-A</option>
+                                            <option value="price_asc">Giá tăng dần</option>
+                                            <option value="price_desc">Giá giảm dần</option>
+                                            <option value="newest">Mới nhất</option>
+                                            <option value="popular">Phổ biến</option>
                                         </select>
-                                    </div>
-                                </div>
-
-                                <div class="col-12 col-md-6 col-lg-2">
-                                    <div class="filter-item">
-                                        <label for="sortBy" class="form-label">Sort By</label>
-                                        <select class="form-select" id="sortBy">
-                                            <option selected="">Featured</option>
-                                            <option>Price: Low to High</option>
-                                            <option>Price: High to Low</option>
-                                            <option>Customer Rating</option>
-                                            <option>Newest Arrivals</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <div class="filter-item">
-                                        <label class="form-label">View</label>
-                                        <div class="d-flex align-items-center">
-                                            <div class="view-options me-3">
-                                                <button type="button" class="btn view-btn active" data-view="grid" aria-label="Grid view">
-                                                    <i class="bi bi-grid-3x3-gap-fill"></i>
-                                                </button>
-                                                <button type="button" class="btn view-btn" data-view="list" aria-label="List view">
-                                                    <i class="bi bi-list-ul"></i>
-                                                </button>
-                                            </div>
-                                            <div class="items-per-page">
-                                                <select class="form-select" id="itemsPerPage" aria-label="Items per page">
-                                                    <option value="12">12 per page</option>
-                                                    <option value="24">24 per page</option>
-                                                    <option value="48">48 per page</option>
-                                                    <option value="96">96 per page</option>
-                                                </select>
-                                            </div>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="row mt-3">
-                                <div class="col-12" data-aos="fade-up" data-aos-delay="200">
-                                    <div class="active-filters">
-                                        <span class="active-filter-label">Active Filters:</span>
-                                        <div class="filter-tags">
-                                            <span class="filter-tag">
-                                                Electronics <button class="filter-remove"><i class="bi bi-x"></i></button>
-                                            </span>
-                                            <span class="filter-tag">
-                                                $50 to $100 <button class="filter-remove"><i class="bi bi-x"></i></button>
-                                            </span>
-                                            <button class="clear-all-btn">Clear All</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-
+                            <!-- Hidden inputs for filters -->
+                            <input type="hidden" name="categoryId" id="categoryIdInput" value="@currentCategoryId">
+                            <input type="hidden" name="minPrice" id="minPriceInput" value="@currentMinPrice">
+                            <input type="hidden" name="maxPrice" id="maxPriceInput" value="@currentMaxPrice">
+                            <input type="hidden" name="selectedCategories" id="selectedCategoriesInput" value="@string.Join(",", currentCategories)">
+                            <input type="hidden" name="selectedBrands" id="selectedBrandsInput" value="@string.Join(",", currentBrands)">
+                            <input type="hidden" name="selectedColors" id="selectedColorsInput" value="@string.Join(",", currentColors)">
+                        </form>
                     </div>
-
                 </section>
-                <!-- /Category Header Section -->
-                <!-- Category Product List Section -->
-                <section id="category-product-list" class="category-product-list section">
-                    <div class="container" data-aos="fade-up" data-aos-delay="100">
-                        <div class="row gy-4">
-                            @if (Model.SanPhams != null && Model.SanPhams.Items.Any())
-                            {
-                                foreach (var item in Model.SanPhams.Items)
+
+                <!-- Active Filters Display -->
+                @if (!string.IsNullOrEmpty(currentKeyword) || currentCategories.Count > 0 || currentBrands.Count > 0 || currentColors.Count > 0 || (currentMinPrice > 0 || currentMaxPrice < 10000000))
+                {
+                    <section id="active-filters" class="active-filters-section mb-4" data-aos="fade-up" data-aos-delay="100">
+                        <div class="active-filters-container">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h6 class="active-filter-label mb-0">
+                                    <i class="bi bi-funnel-fill me-2"></i>Bộ lọc đang áp dụng:
+                                </h6>
+                                <button type="button" class="btn btn-sm btn-outline-danger clear-all-filters-btn">
+                                    <i class="bi bi-x-circle me-1"></i>Xóa tất cả
+                                </button>
+                            </div>
+                            <div class="filter-tags mt-2">
+                                @if (!string.IsNullOrEmpty(currentKeyword))
                                 {
-                                    <div class="col-lg-6">
-                                        <div class="product-box" style="height: 550px">
-                                            <div class="product-thumb" style="padding-bottom: 0px">
-                                                <div class="img" style="height: 404px">
-                                                    <img src="@($"{Configuration["BaseAddress"]}{item.ImageDaiDien}")"
-                                                         alt="Product Image" style="width: 404px; object-fit: cover;" />
-                                                </div>
-                                                <div class="product-overlay">
-                                                    <div class="product-quick-actions">
-                                                        <button type="button" class="quick-action-btn"><i class="bi bi-heart"></i></button>
-                                                        <button type="button" class="quick-action-btn"><i class="bi bi-arrow-repeat"></i></button>
-                                                        <button type="button" class="quick-action-btn"
-                                                                onclick="window.location.href='@Url.Action("Details", "SanPham", new { id = item.Id })'">
-                                                            <i class="bi bi-eye"></i>
+                                    <span class="filter-tag">
+                                        <i class="bi bi-search me-1"></i>"@currentKeyword"
+                                        <button class="filter-remove" data-type="keyword">
+                                            <i class="bi bi-x"></i>
                                                         </button>
-                                                    </div>
-                                                    <div class="add-to-cart-container">
-                                                        <button type="button" class="add-to-cart-btn">Add to Cart</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            @* <div class="product-content">
-                                                <div class="product-details">
-                                                    <h3 class="product-title">@item.TenSanPham</h3>
-                                                    <div class="product-price">
-                                                        <span>@item.TenDanhMuc</span>
-                                                    </div>
-                                                </div>
-                                            </div> *@
-                                            <div class="product-content">
-                                                <div class="product-details d-flex justify-content-between">
-                                                    <h2 class="product-title mb-0" style="font-weight: bold">@item.TenSanPham</h2>
-                                                    <h4 class="product-category mb-0 ms-2" style="font-size:1rem; font-weight:600; color:#1766b3;">
-                                                        @item.TenDanhMuc
-                                                    </h4>
-                                                </div>
-                                                @* <div class="product-price mt-2" style="font-size:1.13rem; font-weight:600; color:#e53935;">
-                                                    @if (listGia.Any())
-                                                    {
-                                                        <span>@listGia.Min().ToString("N0") VNĐ</span>
-                                                    }
-                                                    else
-                                                    {
-                                                        <span>Liên hệ</span>
-                                                    }
-                                                </div> *@
-                                                @{
-                                                    var listGia = Model.AllSpct
-                                                    .Where(x => x.SanPhamId == item.Id && x.Gia > 0)
-                                                    .ToList();
-                                                    var minGiaGoc = listGia.Any() ? listGia.Min(x => x.GiaGoc) : 0M;
-                                                    var minGiaKm = listGia.Any() ? listGia.Min(x => x.GiaKhuyenMai) : 0M;
-                                                    var maxPhanTramGiam = listGia.Any() ? listGia.Max(x => x.KhuyenMaiPhanTram) : 0M;
-                                                    var spctsCoKM = listGia.Where(x => x.KhuyenMaiPhanTram > 0 && x.GiaKhuyenMai < x.GiaGoc).ToList();
-
-                                                    // Nếu có khuyến mãi
-                                                    var minGiaGocCoKM = spctsCoKM.Any() ? spctsCoKM.Min(x => x.GiaGoc) : minGiaGoc;
-                                                    var minGiaKMCoKM = spctsCoKM.Any() ? spctsCoKM.Min(x => x.GiaKhuyenMai) : minGiaKm;
-                                                    var maxGiamCoKM = spctsCoKM.Any() ? spctsCoKM.Max(x => x.KhuyenMaiPhanTram) : 0M;
-                                                }
-                                                @if (listGia.Any())
-                                                {
-                                                    if (spctsCoKM.Any())
-                                                    {
-                                                        <div class="product-price mt-2 d-flex align-items-center gap-2">
-                                                            <span class="gia-goc" style="text-decoration:line-through; color:gray">@minGiaGocCoKM.ToString("N0") đ</span>
-                                                            <span class="gia-km" >@minGiaKMCoKM.ToString("N0") đ</span>
-                                                            <span class="giam-tag ms-2 text-danger">-@maxGiamCoKM%</span>
-                                                        </div>
-                                                    }
-                                                    else
-                                                    {
-                                                        <span style="font-weight: 700; font-size: 1.1rem; color: var(--heading-color);">@minGiaGoc.ToString("N0") đ</span>
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    <span>Liên hệ</span>
-                                                }
-                                            </div>
-                                        </div>
-                                    </div>
+                                    </span>
                                 }
-                            }
-                            else
-                            {
-                                <div class="col-12">
-                                    <p>Không có sản phẩm nào để hiển thị 😢</p>
-                                </div>
-                            }
-                        </div>
-                    </div>
-                </section>
-                <!-- Pagination -->
-                <section id="category-pagination" class="category-pagination section" style="padding: 10px 0 50px 0">
-                    <div class="container">
-                        <nav class="d-flex justify-content-center" aria-label="Page navigation">
-                            @if (Model.SanPhamChiTiets != null && Model.SanPhamChiTiets.PageCount > 1)
-                            {
-                                <ul>
-                                    @for (int i = 1; i <= Model.SanPhamChiTiets.PageCount; i++)
+                                @if (currentCategoryId != "")
+                                {
+                                    var category = Model.DanhMucs.FirstOrDefault(c => c.Id.ToString() == currentCategoryId);
+                                    if (category != null)
                                     {
-                                        <li>
-                                            <a href="@Url.Action("Index", new { pageIndex = i })" class="@(i == Model.SanPhamChiTiets.PageIndex ? "active" : "")">@i</a>
-                                        </li>
+                                        <span class="filter-tag">
+                                            <i class="bi bi-tag me-1"></i>@category.TenDanhMuc
+                                            <button class="filter-remove" data-type="category">
+                                                <i class="bi bi-x"></i>
+                                            </button>
+                                        </span>
                                     }
-                                </ul>
-                            }
-                        </nav>
+                                }
+                                @foreach (var categoryId in currentCategories)
+                                {
+                                    var category = Model.DanhMucs.FirstOrDefault(c => c.Id == categoryId);
+                                    if (category != null)
+                                    {
+                                        <span class="filter-tag">
+                                            <i class="bi bi-tag me-1"></i>@category.TenDanhMuc
+                                            <button class="filter-remove" data-type="category" data-id="@categoryId">
+                                                <i class="bi bi-x"></i>
+                                            </button>
+                                        </span>
+                                    }
+                                }
+                                @if ((currentMinPrice > 0 && currentMinPrice != 0) || (currentMaxPrice < 10000000 && currentMaxPrice != 10000000))
+                                {
+                                    <span class="filter-tag">
+                                        <i class="bi bi-currency-dollar me-1"></i>@currentMinPrice.ToString("N0")đ - @currentMaxPrice.ToString("N0")đ
+                                        <button class="filter-remove" data-type="price">
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                    </span>
+                                }
+                                @foreach (var brandId in currentBrands)
+                                    {
+                                        var brand = Model.ThuongHieus.FirstOrDefault(b => b.Id == brandId);
+                                        if (brand != null)
+                                        {
+                                            <span class="filter-tag">
+                                                <i class="bi bi-shop me-1"></i>@brand.TenThuongHieu
+                                                <button class="filter-remove" data-type="brand" data-id="@brandId">
+                                                    <i class="bi bi-x"></i>
+                                                </button>
+                                            </span>
+                                        }
+                                                                    }
+                                @foreach (var colorId in currentColors)
+                                        {
+                                            var color = Model.MauSacs.FirstOrDefault(c => c.Id == colorId);
+                                            if (color != null)
+                                            {
+                                                <span class="filter-tag">
+                                                    <i class="bi bi-palette me-1"></i>@color.TenMauSac
+                                                    <button class="filter-remove" data-type="color" data-id="@colorId">
+                                                        <i class="bi bi-x"></i>
+                                                    </button>
+                                                </span>
+                                            }
+                                        }
+                                    }
+                                }
+                            </div>
                     </div>
                 </section>
+                }
+
+                <!-- Product List Container -->
+                <div id="product-list-container">
+                    @await Html.PartialAsync("_ProductList", Model)
+                </div>
             </div>
 
         </div>
@@ -350,31 +305,859 @@
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-color/2.1.2/jquery.color.min.js"></script>
+    <link rel="stylesheet" href="~/assets/css/Products.css" />
     
     <script>
         $(function () {
-            // Dùng jQuery-color để chuẩn hóa và animate nếu muốn
+            // Khởi tạo các vòng tròn màu sắc
             $('.color-circle').each(function () {
                 var color = $(this).data('color');
-                // Nếu màu chưa đúng định dạng hex, convert ở backend trước khi truyền ra
                 $(this).css('background-color', $.Color(color));
             });
 
-            // Chọn màu khi click
+            // Chọn màu sắc
             $('.color-circle').click(function () {
-                $('.color-circle').removeClass('selected');
-                $(this).addClass('selected');
-                // Gửi filter nếu muốn hoặc lấy $(this).data('id') để lọc
+                $(this).toggleClass('selected');
+                updateSelectedColors();
             });
 
-            
-        });
+            // Chọn thương hiệu
+            $('.brand-checkbox').change(function () {
+                updateSelectedBrands();
+            });
 
+            // Chọn danh mục
+            $('.category-checkbox').change(function () {
+                updateSelectedCategories();
+            });
+
+            // Thanh trượt khoảng giá
+            const minRange = $('.min-range');
+            const maxRange = $('.max-range');
+            const minPriceInput = $('.min-price-input');
+            const maxPriceInput = $('.max-price-input');
+            const minPriceDisplay = $('.min-price');
+            const maxPriceDisplay = $('.max-price');
+
+            function updatePriceDisplay() {
+                const minVal = parseInt(minRange.val());
+                const maxVal = parseInt(maxRange.val());
+
+                minPriceDisplay.text(minVal.toLocaleString() + 'đ');
+                maxPriceDisplay.text(maxVal.toLocaleString() + 'đ');
+
+                minPriceInput.val(minVal);
+                maxPriceInput.val(maxVal);
+
+                $('#minPriceInput').val(minVal);
+                $('#maxPriceInput').val(maxVal);
+                
+                console.log('Price range updated:', { min: minVal, max: maxVal });
+            }
+
+            minRange.on('input', function() {
+                const minVal = parseInt($(this).val());
+                const maxVal = parseInt(maxRange.val());
+
+                if (minVal > maxVal) {
+                    maxRange.val(minVal);
+                }
+                updatePriceDisplay();
+            });
+
+            maxRange.on('input', function() {
+                const minVal = parseInt(minRange.val());
+                const maxVal = parseInt($(this).val());
+
+                if (maxVal < minVal) {
+                    minRange.val(maxVal);
+                }
+                updatePriceDisplay();
+            });
+
+            minPriceInput.on('input', function() {
+                const val = parseInt($(this).val()) || 0;
+                minRange.val(val);
+                updatePriceDisplay();
+            });
+
+            maxPriceInput.on('input', function() {
+                const val = parseInt($(this).val()) || 10000000;
+                maxRange.val(val);
+                updatePriceDisplay();
+            });
+
+            // Fix currency symbol issue for number inputs
+            minPriceInput.on('change', function() {
+                const val = parseInt($(this).val()) || 0;
+                $(this).val(val);
+            });
+
+            maxPriceInput.on('change', function() {
+                const val = parseInt($(this).val()) || 10000000;
+                $(this).val(val);
+            });
+
+            // Cập nhật màu sắc đã chọn
+            function updateSelectedColors() {
+                const selectedColors = [];
+                $('.color-circle.selected').each(function() {
+                    selectedColors.push($(this).data('id'));
+                });
+                $('#selectedColorsInput').val(selectedColors.join(','));
+            }
+
+            // Cập nhật thương hiệu đã chọn
+            function updateSelectedBrands() {
+                const selectedBrands = [];
+                $('.brand-checkbox:checked').each(function() {
+                    selectedBrands.push($(this).val());
+                });
+                $('#selectedBrandsInput').val(selectedBrands.join(','));
+            }
+
+            // Cập nhật danh mục đã chọn
+            function updateSelectedCategories() {
+                const selectedCategories = [];
+                $('.category-checkbox:checked').each(function() {
+                    selectedCategories.push($(this).val());
+                });
+                $('#selectedCategoriesInput').val(selectedCategories.join(','));
+                console.log('Selected categories:', selectedCategories);
+                console.log('Selected categories input value:', $('#selectedCategoriesInput').val());
+            }
+
+            // Áp dụng bộ lọc
+            $('.apply-filters-btn').click(function() {
+                updateSelectedColors();
+                updateSelectedBrands();
+                updateSelectedCategories();
+                loadFilteredProducts();
+            });
+
+            // Xóa tất cả bộ lọc
+            $('.clear-filters-btn, .clear-all-filters-btn').click(function() {
+                // Đặt lại tất cả input form
+                $('input[name="tuKhoa"]').val('');
+                $('.category-checkbox').prop('checked', false);
+                $('.color-circle').removeClass('selected');
+                $('.brand-checkbox').prop('checked', false);
+                $('.min-range').val(0);
+                $('.max-range').val(10000000);
+                updatePriceDisplay();
+                updateSelectedColors();
+                updateSelectedBrands();
+                updateSelectedCategories();
+                loadFilteredProducts();
+            });
+
+            // Xóa từng tag bộ lọc riêng lẻ
+            $('.filter-remove').click(function() {
+                const type = $(this).data('type');
+                const id = $(this).data('id');
+
+                switch(type) {
+                    case 'keyword':
+                        $('input[name="tuKhoa"]').val('');
+                        break;
+                    case 'category':
+                        $(`input[value="${id}"]`).prop('checked', false);
+                        break;
+                    case 'price':
+                        $('.min-range').val(0);
+                        $('.max-range').val(10000000);
+                        updatePriceDisplay();
+                        break;
+                    case 'brand':
+                        $(`input[value="${id}"]`).prop('checked', false);
+                        break;
+                    case 'color':
+                        $(`.color-circle[data-id="${id}"]`).removeClass('selected');
+                        break;
+                }
+
+                updateSelectedColors();
+                updateSelectedBrands();
+                updateSelectedCategories();
+                loadFilteredProducts();
+            });
+
+            // Chuyển đổi chế độ xem
+            $('.view-btn').click(function() {
+                $('.view-btn').removeClass('active');
+                $(this).addClass('active');
+
+                const view = $(this).data('view');
+                if (view === 'list') {
+                    $('.product-box').addClass('list-view');
+                } else {
+                    $('.product-box').removeClass('list-view');
+                }
+            });
+
+            // Tải sản phẩm đã lọc qua AJAX
+            function loadFilteredProducts(pageIndex = 1) {
+                const minPrice = parseInt($('#minPriceInput').val()) || 0;
+                const maxPrice = parseInt($('#maxPriceInput').val()) || 10000000;
+                
+                const formData = {
+                    tuKhoa: $('input[name="tuKhoa"]').val(),
+                    selectedCategories: $('#selectedCategoriesInput').val(),
+                    selectedBrands: $('#selectedBrandsInput').val(),
+                    selectedColors: $('#selectedColorsInput').val(),
+                    minPrice: minPrice > 0 ? minPrice : null,
+                    maxPrice: maxPrice < 10000000 ? maxPrice : null,
+                    sortBy: $('#sortBy').val(),
+                    pageIndex: pageIndex
+                };
+
+                // Hiển thị chỉ báo đang tải
+                $('#product-list-container').html('<div class="text-center py-5"><i class="bi bi-arrow-clockwise spin display-4"></i><p class="mt-3">Đang tải sản phẩm...</p></div>');
+
+                // Ghi log debug
+                console.log('Sending filter data:', formData);
+                console.log('Selected categories:', formData.selectedCategories);
+                console.log('Selected brands:', formData.selectedBrands);
+                console.log('Selected colors:', formData.selectedColors);
+                
+                $.ajax({
+                    url: '@Url.Action("GetFilteredProducts", "SanPham")',
+                    type: 'GET',
+                    data: formData,
+                    success: function(response) {
+                        console.log('Filter response received');
+                        $('#product-list-container').html(response);
+                        updateActiveFilters();
+                        reinitializeEventHandlers();
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Filter error:', error);
+                        console.error('Response text:', xhr.responseText);
+                        $('#product-list-container').html('<div class="text-center py-5"><i class="bi bi-exclamation-triangle display-4 text-danger"></i><p class="mt-3 text-danger">Có lỗi xảy ra khi tải sản phẩm</p><p class="text-muted">Chi tiết: ' + error + '</p></div>');
+                    }
+                });
+            }
+
+            // Cập nhật hiển thị bộ lọc đang áp dụng
+            function updateActiveFilters() {
+                const keyword = $('input[name="tuKhoa"]').val();
+                const selectedCategories = $('#selectedCategoriesInput').val();
+                const selectedBrands = $('#selectedBrandsInput').val();
+                const selectedColors = $('#selectedColorsInput').val();
+                const minPrice = $('#minPriceInput').val();
+                const maxPrice = $('#maxPriceInput').val();
+
+                let hasActiveFilters = false;
+                let filterHtml = '';
+
+                if (keyword) {
+                    hasActiveFilters = true;
+                    filterHtml += `<span class="filter-tag">
+                        <i class="bi bi-search me-1"></i>"${keyword}"
+                        <button class="filter-remove" data-type="keyword">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </span>`;
+                }
+
+                if (selectedCategories) {
+                    hasActiveFilters = true;
+                    const categoryIds = selectedCategories.split(',');
+                    categoryIds.forEach(id => {
+                        if (id) {
+                            const categoryName = $(`#category${id}`).next('label').text();
+                            filterHtml += `<span class="filter-tag">
+                                <i class="bi bi-tag me-1"></i>${categoryName}
+                                <button class="filter-remove" data-type="category" data-id="${id}">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </span>`;
+                        }
+                    });
+                }
+
+                if (selectedBrands) {
+                    hasActiveFilters = true;
+                    const brandIds = selectedBrands.split(',');
+                    brandIds.forEach(id => {
+                        if (id) {
+                            const brandName = $(`#brand${id}`).next('label').text();
+                            filterHtml += `<span class="filter-tag">
+                                <i class="bi bi-shop me-1"></i>${brandName}
+                                <button class="filter-remove" data-type="brand" data-id="${id}">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </span>`;
+                        }
+                    });
+                }
+
+                if (selectedColors) {
+                    hasActiveFilters = true;
+                    const colorIds = selectedColors.split(',');
+                    colorIds.forEach(id => {
+                        if (id) {
+                            const colorName = $(`.color-circle[data-id="${id}"]`).attr('title');
+                            filterHtml += `<span class="filter-tag">
+                                <i class="bi bi-palette me-1"></i>${colorName}
+                                <button class="filter-remove" data-type="color" data-id="${id}">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </span>`;
+                        }
+                    });
+                }
+
+                if (minPrice > 0 || maxPrice < 10000000) {
+                    hasActiveFilters = true;
+                    filterHtml += `<span class="filter-tag">
+                        <i class="bi bi-currency-dollar me-1"></i>${parseInt(minPrice).toLocaleString()}đ - ${parseInt(maxPrice).toLocaleString()}đ
+                        <button class="filter-remove" data-type="price">
+                            <i class="bi bi-x"></i>
+                        </button>
+                    </span>`;
+                }
+
+                if (hasActiveFilters) {
+                    if ($('#active-filters').length === 0) {
+                        const activeFiltersHtml = `
+                            <section id="active-filters" class="active-filters-section mb-4" data-aos="fade-up" data-aos-delay="100">
+                                <div class="active-filters-container">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <h6 class="active-filter-label mb-0">
+                                            <i class="bi bi-funnel-fill me-2"></i>Bộ lọc đang áp dụng:
+                                        </h6>
+                                        <button type="button" class="btn btn-sm btn-outline-danger clear-all-filters-btn">
+                                            <i class="bi bi-x-circle me-1"></i>Xóa tất cả
+                                        </button>
+                                    </div>
+                                    <div class="filter-tags mt-2">
+                                        ${filterHtml}
+                                    </div>
+                                </div>
+                            </section>`;
+                        $('#search-section').after(activeFiltersHtml);
+                    } else {
+                        $('#active-filters .filter-tags').html(filterHtml);
+                    }
+                } else {
+                    $('#active-filters').remove();
+                }
+            }
+
+            // Khởi tạo lại các event handlers sau khi tải AJAX
+            function reinitializeEventHandlers() {
+                // Khởi tạo lại chuyển đổi chế độ xem
+                $('.view-btn').click(function() {
+                    $('.view-btn').removeClass('active');
+                    $(this).addClass('active');
+
+                    const view = $(this).data('view');
+                    if (view === 'list') {
+                        $('.product-box').addClass('list-view');
+                    } else {
+                        $('.product-box').removeClass('list-view');
+                    }
+                });
+
+                // Khởi tạo lại phân trang
+                $('.page-link').click(function(e) {
+                    e.preventDefault();
+                    const page = $(this).data('page');
+                    if (page) {
+                        loadFilteredProducts(page);
+                    }
+                });
+
+                // Khởi tạo lại các nút xóa bộ lọc
+                $('.filter-remove').click(function() {
+                    const type = $(this).data('type');
+                    const id = $(this).data('id');
+
+                    switch(type) {
+                        case 'keyword':
+                            $('input[name="tuKhoa"]').val('');
+                            break;
+                        case 'category':
+                            $(`input[id="category${id}"]`).prop('checked', false);
+                            break;
+                        case 'price':
+                            $('.min-range').val(0);
+                            $('.max-range').val(10000000);
+                            updatePriceDisplay();
+                            break;
+                        case 'brand':
+                            $(`input[value="${id}"]`).prop('checked', false);
+                            break;
+                        case 'color':
+                            $(`.color-circle[data-id="${id}"]`).removeClass('selected');
+                            break;
+                    }
+
+                    updateSelectedColors();
+                    updateSelectedBrands();
+                    updateSelectedCategories();
+                    loadFilteredProducts();
+                });
+
+                // Khởi tạo lại xóa tất cả bộ lọc
+                $('.clear-all-filters-btn').click(function() {
+                    $('input[name="tuKhoa"]').val('');
+                    $('.category-checkbox').prop('checked', false);
+                    $('.color-circle').removeClass('selected');
+                    $('.brand-checkbox').prop('checked', false);
+                    $('.min-range').val(0);
+                    $('.max-range').val(10000000);
+                    updatePriceDisplay();
+                    updateSelectedColors();
+                    updateSelectedBrands();
+                    updateSelectedCategories();
+                    loadFilteredProducts();
+                });
+            }
+
+            // Khởi tạo hiển thị giá
+            updatePriceDisplay();
+        });
     </script>
 }
 
 <style>
-    /* Danh mục (Category) */
+    /* Search Section Styles */
+    .search-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+    .search-input-group {
+        position: relative;
+    }
+
+    .search-input {
+        border: 2px solid #e9ecef;
+        border-radius: 8px 0 0 8px;
+        padding: 12px 16px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+    }
+
+        .search-input:focus {
+            border-color: #1976d2;
+            box-shadow: 0 0 0 0.2rem rgba(25, 118, 210, 0.25);
+        }
+
+    .search-icon {
+        background: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-right: none;
+        color: #6c757d;
+    }
+
+        .search-btn {
+        border-radius: 0 8px 8px 0;
+        padding: 12px 20px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+        border: none;
+        color: white;
+    }
+
+    .search-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(25, 118, 210, 0.4);
+        background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+    }
+
+    .search-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3);
+    }
+
+    /* Active Filters Styles */
+    .active-filters-section {
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 16px;
+    }
+
+    .active-filter-label {
+        color: #495057;
+        font-weight: 600;
+    }
+
+    .filter-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .filter-tag {
+        display: inline-flex;
+        align-items: center;
+        background: #e3f2fd;
+        color: #1976d2;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 500;
+        border: 1px solid #bbdefb;
+        transition: all 0.2s ease;
+    }
+
+        .filter-tag:hover {
+            background: #bbdefb;
+            transform: translateY(-1px);
+        }
+
+    .filter-remove {
+        background: none;
+        border: none;
+        color: #1976d2;
+        margin-left: 6px;
+        padding: 0;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+
+        .filter-remove:hover {
+            background: #1976d2;
+            color: white;
+        }
+
+    /* Results Summary Styles */
+    .results-summary {
+        background: #fff;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 12px 16px;
+    }
+
+    .results-count {
+        color: #495057;
+        font-size: 16px;
+    }
+
+    .view-options .btn-group {
+        border-radius: 6px;
+        overflow: hidden;
+    }
+
+    .view-btn {
+        border: 1px solid #dee2e6;
+        padding: 8px 12px;
+        transition: all 0.2s ease;
+    }
+
+        .view-btn.active {
+            background: #1976d2;
+            border-color: #1976d2;
+            color: white;
+        }
+
+    /* No Results Styles */
+    .no-results {
+        background: #f8f9fa;
+        border-radius: 12px;
+        border: 2px dashed #dee2e6;
+    }
+
+    /* Widget Styles */
+    .widget-item {
+        margin-bottom: 32px;
+        padding: 24px;
+        background: #fff;
+        border-radius: 12px;
+        border: 1px solid #e9ecef;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+
+    .widget-item:hover {
+        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+
+    .widget-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1766b3;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+    }
+
+        .widget-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: #1976d2;
+            margin-right: 8px;
+            border-radius: 2px;
+        }
+
+    /* Color Filter Styles */
+    .color-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .color-circle {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 3px solid #e0e0e0;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        position: relative;
+    }
+
+        .color-circle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .color-circle.selected {
+            border: 3px solid #1976d2;
+            box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.2);
+        }
+
+            .color-circle.selected::after {
+                content: '✓';
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                color: white;
+                font-weight: bold;
+                text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            }
+
+        /* Category Filter Styles */
+    .category-list {
+        max-height: 200px;
+        overflow-y: auto;
+        margin-bottom: 16px;
+        padding-right: 8px;
+        scrollbar-width: thin;
+        scrollbar-color: #c1c1c1 #f1f1f1;
+    }
+
+    .category-list::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .category-list::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+
+    .category-list::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+    }
+
+    .category-list::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+
+    .category-item {
+        margin-bottom: 8px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+    }
+
+    .category-item:hover {
+        background: #f8f9fa;
+        border-color: #e3f2fd;
+        transform: translateX(2px);
+    }
+
+    .category-item .form-check {
+        margin: 0;
+    }
+
+    /* Brand Filter Styles */
+    .brand-list {
+        max-height: 200px;
+        overflow-y: auto;
+        margin-bottom: 16px;
+        padding-right: 8px;
+        scrollbar-width: thin;
+        scrollbar-color: #c1c1c1 #f1f1f1;
+    }
+
+    .brand-list::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .brand-list::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+
+    .brand-list::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+    }
+
+    .brand-list::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+
+    .brand-item {
+        margin-bottom: 8px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+    }
+
+    .brand-item:hover {
+        background: #f8f9fa;
+        border-color: #e3f2fd;
+        transform: translateX(2px);
+    }
+
+    .brand-item .form-check {
+        margin: 0;
+    }
+
+    .form-check-input[type="checkbox"] {
+        accent-color: #1976d2;
+        width: 18px;
+        height: 18px;
+        margin-top: 0;
+    }
+
+    .form-check-label {
+        font-size: 14px;
+        color: #495057;
+        margin-left: 8px;
+        cursor: pointer;
+        margin-bottom: 0;
+        line-height: 1.4;
+    }
+
+    /* Filter Actions Styles */
+    .filter-actions {
+        border-top: 1px solid #e9ecef;
+        padding-top: 16px;
+    }
+
+        .apply-filters-btn {
+        background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+        border: none;
+        padding: 14px;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(25, 118, 210, 0.2);
+    }
+
+    .apply-filters-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(25, 118, 210, 0.4);
+        background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+    }
+
+    .apply-filters-btn:active {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+    }
+
+    .clear-filters-btn {
+        border: 2px solid #6c757d;
+        color: #6c757d;
+        background: transparent;
+        padding: 14px;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        border-radius: 8px;
+    }
+
+    .clear-filters-btn:hover {
+        background: #6c757d;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+    }
+
+    .clear-filters-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 6px rgba(108, 117, 125, 0.2);
+    }
+
+    /* Pagination Styles */
+    .pagination {
+        display: flex;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        gap: 4px;
+    }
+
+    .page-item {
+        margin: 0;
+    }
+
+    .page-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border: 1px solid #dee2e6;
+        background: #fff;
+        color: #495057;
+        text-decoration: none;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        font-weight: 500;
+    }
+
+        .page-link:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+            color: #495057;
+            transform: translateY(-1px);
+        }
+
+    .page-item.active .page-link {
+        background: #1976d2;
+        border-color: #1976d2;
+        color: white;
+        box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3);
+    }
+
+        .page-item.active .page-link:hover {
+            background: #1565c0;
+            border-color: #1565c0;
+            transform: translateY(-1px);
+        }
+
+    .page-link:focus {
+        box-shadow: 0 0 0 0.2rem rgba(25, 118, 210, 0.25);
+        outline: none;
+    }
+
+    /* Existing styles remain unchanged */
     .category-tree {
         margin-bottom: 28px;
         padding: 0;
@@ -399,16 +1182,8 @@
             color: #1976d2;
         }
 
-    /* Giá */
     .pricing-range-widget {
         margin-bottom: 28px;
-    }
-
-    .widget-title {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #1766b3;
-        margin-bottom: 14px;
     }
 
     .price-range-container {
@@ -443,48 +1218,4 @@
         vertical-align: middle;
     }
 
-
-    /* Color Filter */
-    .color-options {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px 8px;
-        margin-bottom: 24px;
-    }
-
-    .color-circle {
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        border: 2px solid #e0e0e0;
-        display: inline-block;
-        cursor: pointer;
-        transition: border 0.2s, box-shadow 0.2s;
-        box-shadow: 0 1px 6px 0 rgba(100,100,100,0.07);
-    }
-
-        .color-circle.selected,
-        .color-circle:hover {
-            border: 2.5px solid #1976d2;
-            box-shadow: 0 2px 8px 0 rgba(25,118,210,0.13);
-        }
-
-    /* Brand Filter */
-    .brand-list {
-        margin-bottom: 0;
-    }
-
-    .brand-item {
-        margin-bottom: 7px;
-    }
-
-    .form-check-input[type="checkbox"] {
-        accent-color: #1976d2;
-    }
-
-    .form-check-label {
-        font-size: 1rem;
-        color: #333;
-        margin-left: 5px;
-    }
 </style>
