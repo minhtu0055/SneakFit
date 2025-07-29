@@ -5,6 +5,11 @@
 	ViewData["Title"] = "Danh sách hóa đơn";
 	Layout = "~/Views/Shared/_Layout.cshtml";
 }
+<style>
+	#tab-scroll-x::-webkit-scrollbar {
+		display: none; /* Ẩn thanh cuộn ngang */
+	}
+</style>
 <div class="text-end mb-4">
 	<div class="card">
 		<div class="card-header">
@@ -42,11 +47,11 @@
 <div class="card">
 	<div class="card-header">
 		<div class="row">
-			<div class="col-md-6 col-xs-12">
+			<div class="col-md-12 col-xs-12">
 				<form asp-action="Index" method="get">
 					<div class="row">
-						<div class="col-md-12">
-							<ul class="nav nav-tabs mb-3">
+						<div class="col-md-12" id="tab-scroll-x" style="overflow-x: auto; white-space: nowrap; cursor: grab;">
+							<ul class="nav nav-tabs mb-3" style="flex-wrap: nowrap;">
 								<li class="nav-item">
 									<a class="nav-link @(ViewBag.TrangThai == null ? "active" : "")"
 									   href="@Url.Action("Index", new { trangThai = (TrangThaiHoaDon?)null })">
@@ -159,6 +164,49 @@
 			if (!ngayKetThuc.value) {
 				ngayKetThuc.setAttribute("placeholder", "Đến ngày");
 			}
+		});
+		const tabScroll = document.getElementById('tab-scroll-x');
+		let isDown = false;
+		let startX;
+		let scrollLeft;
+
+		tabScroll.addEventListener('mousedown', (e) => {
+			isDown = true;
+			tabScroll.classList.add('active');
+			startX = e.pageX - tabScroll.offsetLeft;
+			scrollLeft = tabScroll.scrollLeft;
+			tabScroll.style.cursor = 'grabbing';
+		});
+		tabScroll.addEventListener('mouseleave', () => {
+			isDown = false;
+			tabScroll.style.cursor = 'grab';
+		});
+		tabScroll.addEventListener('mouseup', () => {
+			isDown = false;
+			tabScroll.style.cursor = 'grab';
+		});
+		tabScroll.addEventListener('mousemove', (e) => {
+			if (!isDown) return;
+			e.preventDefault();
+			const x = e.pageX - tabScroll.offsetLeft;
+			const walk = (x - startX) * 1.5; // tốc độ lướt
+			tabScroll.scrollLeft = scrollLeft - walk;
+		});
+
+		// Hỗ trợ cho cả cảm ứng (touch)
+		tabScroll.addEventListener('touchstart', (e) => {
+			isDown = true;
+			startX = e.touches[0].pageX - tabScroll.offsetLeft;
+			scrollLeft = tabScroll.scrollLeft;
+		});
+		tabScroll.addEventListener('touchend', () => {
+			isDown = false;
+		});
+		tabScroll.addEventListener('touchmove', (e) => {
+			if (!isDown) return;
+			const x = e.touches[0].pageX - tabScroll.offsetLeft;
+			const walk = (x - startX) * 1.5;
+			tabScroll.scrollLeft = scrollLeft - walk;
 		});
 	</script>
 }
