@@ -52,14 +52,10 @@
                         <!-- User Info -->
                         <div class="user-info" data-aos="fade-right">
                             <div class="user-avatar">
-                                <img src="@ViewBag.AnhDaiDien" class="rounded-circle" width="100" />
+                                <img src="@(string.IsNullOrEmpty(User.FindFirst("UrlHinhAnh")?.Value) ? Url.Content("~/assets/img/ava.jpg") : $"{Configuration["BaseAddress"]}{User.FindFirst("UrlHinhAnh")?.Value}")" class="rounded-circle" width="100" />
                                 <span class="status-badge"><i class="bi bi-shield-check"></i></span>
                             </div>
                             <h4>@ViewBag.HoVaTen</h4>
-                            <div class="user-status">
-                                <i class="bi bi-award"></i>
-                                <span>Premium Member</span>
-                            </div>
                         </div>
 
                         <!-- Navigation Menu -->
@@ -87,10 +83,6 @@
                             </ul>
 
                             <div class="menu-footer">
-                                <a href="#" class="help-link">
-                                    <i class="bi bi-question-circle"></i>
-                                    <span>Help Center</span>
-                                </a>
                                 <a class="dropdown-item d-flex align-items-center"
                                    asp-controller="Account"
                                    asp-action="Logout">
