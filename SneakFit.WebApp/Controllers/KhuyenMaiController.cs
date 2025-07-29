@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SneakFit.ApiIntegration.Services;
 using SneakFit.Data.Enums;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace SneakFit.Admin.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class KhuyenMaiController : BaseController
     {
         private readonly IKhuyenMaiApiClient _khuyenMaiApiClient;

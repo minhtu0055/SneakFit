@@ -79,6 +79,30 @@ namespace SneakFit.Application.Catalog.SanPhamChiTiet
 
             if (entity == null) throw new Exception($"Không tìm thấy sản phẩm có id: {id}");
 
+            // Lấy khuyến mại (nếu có)
+            Guid? khuyenMaiId = null;
+            decimal giaKhuyenMai = 0;
+            var kmctList = await _context.KhuyenMaiChiTiet
+                .Where(x => x.SPCTId == entity.ID)
+                .ToListAsync();
+            foreach (var kmct in kmctList)
+            {
+                var km = await _context.KhuyenMai
+                    .FirstOrDefaultAsync(x => x.Id == kmct.KhuyenMaiId
+                        && x.TrangThai == TrangThaiGiamGia.HoatDong
+                        && x.ThoiGianBatDau <= DateTime.Now
+                        && x.ThoiGianKetThuc >= DateTime.Now);
+                if (km != null)
+                {
+                    khuyenMaiId = km.Id;
+                    if (km.LoaiGiamGia == LoaiGiamGia.SoTien)
+                        giaKhuyenMai = Math.Max(0, entity.Gia - km.GiaTriGiamGia);
+                    else if (km.LoaiGiamGia == LoaiGiamGia.PhamTram)
+                        giaKhuyenMai = Math.Max(0, entity.Gia * (1 - km.GiaTriGiamGia / 100));
+                    break; // chỉ lấy 1 khuyến mại đang hoạt động
+                }
+            }
+
             return new SPCTViewModels()
             {
                 Id = entity.ID,
@@ -88,14 +112,15 @@ namespace SneakFit.Application.Catalog.SanPhamChiTiet
                 KichThuocId = entity.KichThuocId,
                 ChatLieuId = entity.ChatLieuId,
                 DeGiayId = entity.DeGiayId,
-
                 ThuongHieuId = entity.ThuongHieuId,
                 SanPhamId = entity.SanPhamId,
                 DanhMucId = entity.SanPham.DanhMucId,
                 TrangThai = entity.TrangThai,
                 TenDanhMuc = entity.SanPham.DanhMuc.TenDanhMuc,
                 NgayTao = entity.NgayTao,
-                Images = entity.HinhAnhSanPham.Select(h => h.UrlHinhAnh).ToList()
+                Images = entity.HinhAnhSanPham.Select(h => h.UrlHinhAnh).ToList(),
+                KhuyenMaiId = khuyenMaiId,
+                GiaKhuyenMai = giaKhuyenMai
             };
         }
 
@@ -472,6 +497,9 @@ namespace SneakFit.Application.Catalog.SanPhamChiTiet
 
             if (request.LocTrangthai == true)
                 query = query.Where(x => x.spct.TrangThai == request.TrangThai);
+
+            // Chỉ hiển thị sản phẩm có số lượng > 0
+            query = query.Where(x => x.spct.SoLuong > 0);
 
             int totalRow = await query.CountAsync();
 

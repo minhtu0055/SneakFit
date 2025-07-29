@@ -74,6 +74,25 @@
 								</div>
 							</div>
 							<div class="mb-3 row">
+								<div class="col-12">
+									<h5>Thông Tin Địa Chỉ: </h5>
+								</div>
+							</div>
+							<div class="mb-3 row">
+								<label asp-for="DiaChi.TenNguoiNhan" class="col-sm-2 col-form-label">Tên người nhận <span class="text-danger">*</span></label>
+								<div class="col-sm-10">
+									<input asp-for="DiaChi.TenNguoiNhan" class="form-control" placeholder="Vui lòng nhập tên người nhận..." required />
+									<span class="invalid-feedback">Vui lòng nhập họ và tên</span>
+								</div>
+							</div>
+							<div class="mb-3 row">
+								<label asp-for="DiaChi.SoDienThoai" class="col-sm-2 col-form-label">Số điện thoại <span class="text-danger">*</span></label>
+								<div class="col-sm-10">
+									<input asp-for="DiaChi.SoDienThoai" class="form-control phone-only" placeholder="Nhập số điện thoại người nhận..." required pattern="^0[0-9]{9}$" inputmode="numeric" maxlength="10" />
+									<span asp-validation-for="DiaChi.SoDienThoai" class="text-danger"></span>
+								</div>
+							</div>
+							<div class="mb-3 row">
 								<label asp-for="DiaChi.TenDiaChi" class="col-sm-2 col-form-label">Thôn/xã <span class="text-danger">*</span></label>
 								<div class="col-sm-10">
 									<div class="input-group has-validation">
@@ -197,7 +216,6 @@
 				url: 'https://localhost:7277/api/ghn/provinces',  // Thêm BaseAddress vào
 				type: 'GET',			
 				success: function(response) {
-					debugger
 					const provinces = response.data;
 					let options = '<option value="">Chọn Tỉnh/Thành phố</option>';
 					provinces.forEach(function(province) {

@@ -45,32 +45,58 @@ namespace SneakFit.Application.GHN
         public async Task<string> CalculateShippingFeeAsync(ShippingFeeRequest request)
         {
             var url = $"{_configuration["GhnSettings:BaseUrl"]}v2/shipping-order/fee";
+            var serviceIds = new List<int> { 53320, 53321, 53322 };
+            string lastError = "";
 
-            var requestBody = new
+            foreach (var serviceId in serviceIds)
             {
-                from_district_id = request.FromDistrictId,
-                service_id = request.ServiceId,
-                to_district_id = request.ToDistrictId,
-                to_ward_code = request.ToWardCode,
-                weight = request.Weight,
-                length = request.Length,
-                width = request.Width,
-                height = request.Height
-            };
+                var requestBody = new
+                {
+                    from_district_id = request.FromDistrictId,
+                    service_id = serviceId,
+                    to_district_id = request.ToDistrictId,
+                    to_ward_code = request.ToWardCode,
+                    weight = request.Weight,
+                    length = request.Length,
+                    width = request.Width,
+                    height = request.Height
+                };
 
-            var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync(url, content);
+                var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+                var response = await _httpClient.PostAsync(url, content);
+                var responseContent = await response.Content.ReadAsStringAsync();
 
-            // Lấy nội dung response
-            var responseContent = await response.Content.ReadAsStringAsync();
-
-            // Xử lý response nếu có lỗi
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception($"GHN API lỗi ({response.StatusCode}): {responseContent}");
+                if (response.IsSuccessStatusCode)
+                {
+                    // Check nếu GHN trả về mã lỗi trong JSON (tránh trường hợp response success mà lỗi logic)
+                    var doc = JsonDocument.Parse(responseContent);
+                    if (doc.RootElement.TryGetProperty("code", out var codeProp))
+                    {
+                        int code = codeProp.GetInt32();
+                        if (code == 200)
+                        {
+                            // Thành công: trả luôn kết quả này
+                            return responseContent;
+                        }
+                        else
+                        {
+                            lastError = $"GHN response với ServiceId {serviceId} báo code {code}: {responseContent}";
+                        }
+                    }
+                    else
+                    {
+                        // Không có code thì vẫn trả về
+                        return responseContent;
+                    }
+                }
+                else
+                {
+                    lastError = $"GHN API lỗi với ServiceId {serviceId} ({response.StatusCode}): {responseContent}";
+                }
             }
 
-            return responseContent;
+            // Nếu cả 3 đều không tính được thì trả lỗi cuối cùng
+            throw new Exception(lastError);
         }
 
         public async Task<string> GetAvailableServicesAsync(int fromDistrict, int toDistrict)

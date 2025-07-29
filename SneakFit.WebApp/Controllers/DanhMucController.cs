@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SneakFit.Admin.Controllers;
@@ -8,6 +9,7 @@ using SneakFit.ViewModels.Common;
 
 namespace SneakFit.WebApp.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class DanhMucController : BaseController
     {
         private readonly IDanhMucApiClient _danhMucApiClient;

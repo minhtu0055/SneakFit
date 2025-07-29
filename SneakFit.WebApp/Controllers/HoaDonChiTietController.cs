@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SneakFit.ApiIntegration.Services;
 using SneakFit.ViewModels.Catalog.HoaDonChiTiet;
 using System.Threading.Tasks;
 
 namespace SneakFit.Admin.Controllers
 {
-    public class HoaDonChiTietController : Controller
+
+    public class HoaDonChiTietController : BaseController
     {
         private readonly IHoaDonChiTietApiClient _hoaDonChiTietApiClient;
         public HoaDonChiTietController(IHoaDonChiTietApiClient hoaDonChiTietApiClient)

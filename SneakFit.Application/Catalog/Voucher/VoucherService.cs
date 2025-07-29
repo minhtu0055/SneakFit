@@ -578,7 +578,7 @@ namespace SneakFit.Application.Catalog.Voucher
                 loaiVoucher = x.loaiVoucher,
                 GiaTriGiamGia = x.GiaTriGiamGia,
                 DieuKienApDung = x.DieuKienApDung,
-                GiaTriToiDa = x.GiaTriToiDa, // THÊM DÒNG NÀY
+                GiaTriToiDa = x.GiaTriToiDa,
                 SoLuong = x.SoLuong,
                 NgayTao = x.NgayTao,
                 ThoiGianBatDau = x.ThoiGianBatDau,
@@ -609,7 +609,7 @@ namespace SneakFit.Application.Catalog.Voucher
                 loaiVoucher = x.loaiVoucher,
                 GiaTriGiamGia = x.GiaTriGiamGia,
                 DieuKienApDung = x.DieuKienApDung,
-                GiaTriToiDa = x.GiaTriToiDa, // THÊM DÒNG NÀY
+                GiaTriToiDa = x.GiaTriToiDa,
                 SoLuong = x.SoLuong,
                 NgayTao = x.NgayTao,
                 ThoiGianBatDau = x.ThoiGianBatDau,

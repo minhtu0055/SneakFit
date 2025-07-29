@@ -8,6 +8,7 @@ using SneakFit.ViewModels.System.User;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Linq;
 
 namespace SneakFit.Admin.Controllers
 {
@@ -39,7 +40,28 @@ namespace SneakFit.Admin.Controllers
                 ModelState.AddModelError("", result.Message);
                 return View();
             }
+            
+            // Kiểm tra role của user
             var userPrincipal = this.ValidateToken(result.ResultObj);
+            var roleClaim = userPrincipal.FindFirst(ClaimTypes.Role)?.Value;
+            
+            if (string.IsNullOrEmpty(roleClaim))
+            {
+                ModelState.AddModelError("", "Tài khoản không có quyền truy cập");
+                return View();
+            }
+            
+            // Chỉ cho phép Admin và Nhân Viên đăng nhập
+            var allowedRoles = new[] { "Admin", "Nhân Viên" };
+            var userRoles = roleClaim.Split(';');
+            var hasAllowedRole = userRoles.Any(role => allowedRoles.Contains(role.Trim()));
+            
+            if (!hasAllowedRole)
+            {
+                ModelState.AddModelError("", "Bạn không có quyền truy cập vào hệ thống quản trị.");
+                return View();
+            }
+            
             var authProperties = new AuthenticationProperties
             {
                 ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(10),

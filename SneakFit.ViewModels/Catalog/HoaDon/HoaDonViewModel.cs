@@ -39,5 +39,6 @@ namespace SneakFit.ViewModels.Catalog.HoaDon
         public string MaXa { get; set; }
         public string TenXa { get; set; }
         public string TenDiaChi { get; set; }
+        public string ? ReturnUrl { get; set; }
     }
 }

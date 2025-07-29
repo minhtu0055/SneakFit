@@ -1,12 +1,14 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SneakFit.ApiIntegration.Services;
 using SneakFit.ViewModels.Catalog.SanPham;
 using SneakFit.ViewModels.Catalog.SanPhamChiTiet;
-using Microsoft.AspNetCore.Http;
 
 namespace SneakFit.Admin.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class SanPhamController : BaseController
     {
         private readonly ISanPhamApiClient _sanPhamApiClient;

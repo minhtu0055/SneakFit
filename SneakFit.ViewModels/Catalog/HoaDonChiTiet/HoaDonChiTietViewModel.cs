@@ -16,5 +16,6 @@ namespace SneakFit.ViewModels.Catalog.HoaDonChiTiet
         public int? KichThuoc { get; set; }
         public string? MauSac { get; set; }
         public int? SoLuongTon { get; set; }
+        public List<string> Images { get; set; } // hoặc HinhAnhSanPham
     }
 }

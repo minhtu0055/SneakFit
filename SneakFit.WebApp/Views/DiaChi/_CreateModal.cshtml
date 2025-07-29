@@ -1,0 +1,65 @@
+@model SneakFit.ViewModels.System.DiaChi.ThemDiaChiViewModel
+
+<div class="modal fade" id="modalThemDiaChi" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="formThemDiaChi">
+                <div class="modal-header">
+                    <h5 class="modal-title">Thêm địa chỉ mới</h5>
+                    <button type="button" class="close-btn" data-bs-dismiss="modal" aria-label="Close">×</button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="UserId" value="" />
+                    <div class="mb-3">
+                        <label asp-for="TenNguoiNhan" class="form-label">Tên người nhận <span class="text-danger">*</span></label>
+                        <input asp-for="TenNguoiNhan" class="form-control" placeholder="Tên người nhận hàng" />
+                        <span asp-validation-for="TenNguoiNhan" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="SoDienThoai" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                        <input asp-for="SoDienThoai" class="form-control" placeholder="Số điện thoại người nhận" />
+                        <span asp-validation-for="SoDienThoai" class="text-danger"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label class="col-sm-2 col-form-label">Thôn/xã <span class="text-danger">*</span></label>
+                        <div class="input-group has-validation">
+                            <input asp-for="TenDiaChi" class="form-control" placeholder="Nhập địa chỉ chi tiết..." required />
+                            <span class="invalid-feedback">Vui lòng nhập địa chỉ chi tiết</span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="col-sm-2 col-form-label">Thành phố/Tỉnh <span class="text-danger">*</span></label>
+                        <select class="form-select province-dropdown" required>
+                            <option value="">Chọn Tỉnh/Thành phố</option>
+                        </select>
+                        <input type="hidden" asp-for="TenThanhPho" id="modalProvinceName" />
+                        <input type="hidden" asp-for="MaTinh" id="modalProvinceCode" />
+                        <span class="invalid-feedback">Vui lòng chọn tỉnh/thành phố</span>
+                    </div>
+                    <div class="mb-3">
+                        <label class="col-sm-2 col-form-label">Quận/Huyện <span class="text-danger">*</span></label>
+                        <select class="form-select district-dropdown" required disabled>
+                            <option value="">Chọn Quận/Huyện</option>
+                        </select>
+                        <input type="hidden" asp-for="TenHuyen" id="modalDistrictName" />
+                        <input type="hidden" asp-for="MaHuyen" id="modalDistrictCode" />
+                        <span class="invalid-feedback">Vui lòng chọn quận/huyện</span>
+                    </div>
+                    <div class="mb-3">
+                        <label class="col-sm-2 col-form-label">Phường/Xã <span class="text-danger">*</span></label>
+                        <select class="form-select ward-dropdown" required disabled>
+                            <option value="">Chọn Phường/Xã</option>
+                        </select>
+                        <input type="hidden" asp-for="TenXa" id="modalWardName" />
+                        <input type="hidden" asp-for="MaXa" id="modalWardCode" />
+                        <span class="invalid-feedback">Vui lòng chọn phường/xã</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary me-2" id="btnSubmitDiaChi">Lưu</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

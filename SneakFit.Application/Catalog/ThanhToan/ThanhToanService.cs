@@ -105,7 +105,7 @@ namespace SneakFit.Application.Catalog.ThanhToan
                         Id = hoaDon.Id,
                         TongTien = request.Amount,
                         TrangThai = hoaDon.TrangThai,
-                        DiaChi = hoaDon.DiaChi,
+                        DiaChi = request.DiaChi ?? hoaDon.DiaChi, // <-- Lấy địa chỉ mới nếu có
                         SoDienThoai = hoaDon.SoDienThoai,
                         Email = hoaDon.Email,
                         HoTen = hoaDon.HoTen,
@@ -124,9 +124,9 @@ namespace SneakFit.Application.Catalog.ThanhToan
                 }
             }
             // 2. Tạo link VNPay như cũ
-            var vnp_TmnCode = _config["VNPay:TmnCode"];
-            var vnp_HashSecret = _config["VNPay:HashSecret"];
-            var vnp_Url = _config["VNPay:BaseUrl"];
+            var vnp_TmnCode = _config["VnPay:TmnCode"];
+            var vnp_HashSecret = _config["VnPay:HashSecret"];
+            var vnp_Url = _config["VnPay:BaseUrl"];
             if (string.IsNullOrEmpty(vnp_TmnCode) || string.IsNullOrEmpty(vnp_HashSecret) || string.IsNullOrEmpty(vnp_Url))
                 throw new InvalidOperationException("Thiếu cấu hình VNPay.");
 

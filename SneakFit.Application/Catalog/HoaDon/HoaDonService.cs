@@ -351,5 +351,33 @@ namespace SneakFit.Application.Catalog.HoaDon
             await _context.SaveChangesAsync();
             return entity.Id;
         }
+                
+        public async Task<bool> UpdateStatusAndLogAsync(Guid hoaDonId, TrangThaiHoaDon newStatus, Guid userId, string nguoiChinhSua)
+        {
+            var hoaDon = await _context.HoaDon.FindAsync(hoaDonId);
+            if (hoaDon == null)
+                return false;
+
+            var oldStatus = hoaDon.TrangThai;
+            if (oldStatus == newStatus)
+                return true; // No change
+
+            hoaDon.TrangThai = newStatus;
+
+            var history = new Data.Entities.LichSuHoaDon
+            {
+                Id = Guid.NewGuid(),
+                HoaDonId = hoaDonId,
+                TrangThaiCu = oldStatus,
+                TrangThaiMoi = newStatus,
+                NgayTao = DateTime.Now,
+                NguoiChinhSua = nguoiChinhSua,
+                UserId = userId
+            };
+            _context.LichSuHoaDon.Add(history);
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

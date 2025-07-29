@@ -13,5 +13,7 @@ namespace SneakFit.Application.Catalog.ThanhToan
         public string OrderInfo { get; set; }
         public string ReturnUrl { get; set; }
         public string NotifyUrl { get; set; }
+        public string? DiaChi { get; set; }
     }
 }
+

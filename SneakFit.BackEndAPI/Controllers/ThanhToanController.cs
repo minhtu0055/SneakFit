@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SneakFit.Application.Catalog.ThanhToan;
+using SneakFit.ViewModels.Catalog.HoaDon;
 
 namespace SneakFit.BackEndAPI.Controllers
 {
@@ -36,7 +37,7 @@ namespace SneakFit.BackEndAPI.Controllers
             var result = await _thanhToanService.XuLyVnPayCallbackAsync(vnp_Params);
             if (result)
             {
-                return Redirect("https://localhost:7039/BanHang/Index?payment=success");
+                return Redirect("https://localhost:7039/Forbidden/ThanhToanThanhCong");
             }
             else
             {
