@@ -64,7 +64,8 @@ namespace SneakFit.Application.Payments
             String signData = queryString;
             if (signData.Length > 0)
             {
-
+                // signData = signData.Remove(data.Length - 1, 1); 
+                // code cũ nếu để như này thì client khi áp dụng voucher không thanh toán vnpay đc
                 signData = signData.Remove(signData.Length - 1, 1);
             }
             string vnp_SecureHash = Utils.HmacSHA512(vnp_HashSecret, signData);

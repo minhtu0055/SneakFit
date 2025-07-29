@@ -4,6 +4,13 @@
 @{
 	Layout = "~/Views/Shared/_Layout.cshtml";
 }
+@* @if (TempData["SuccessMsg"] != null)
+{
+	<div class="alert alert-success alert-dismissible fade show" role="alert">
+		@TempData["SuccessMsg"]
+		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+	</div>
+} *@
 <div class="text-end mb-4">
 	<a asp-action="Create" asp-controller="KhuyenMai" class="btn btn-primary">
 		<i class="bx bx-plus me-1"></i> Tạo khuyến mại mới
@@ -116,12 +123,24 @@
 </div>
 @section Scripts {
 	<script>
-		function confirmCancel(id) {
-			if (confirm('Bạn có chắc muốn hủy khuyến mãi này?')) {
-				document.getElementById('cancel-' + id).submit();
-			}
-		}
-	</script>
+        // Hiển thị toast khi có TempData["SuccessMsg"]
+        $(function () {
+            var msg = '@TempData["SuccessMsg"]';
+            if (msg && msg !== '') {
+                toastr.options = {
+                    "positionClass": "toast-top-right",
+                    "timeOut": "3000"
+                };
+                toastr.success(msg);
+            }
+        });
+
+        function confirmCancel(id) {
+            if (confirm('Bạn có chắc muốn hủy khuyến mãi này?')) {
+                document.getElementById('cancel-' + id).submit();
+            }
+        }
+    </script>
 }
 @functions {
 	string GetStatusName(TrangThaiGiamGia status)

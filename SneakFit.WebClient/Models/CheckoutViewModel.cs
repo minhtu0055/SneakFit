@@ -45,6 +45,10 @@ namespace SneakFit.WebClient.Models
 
         public List<VoucherViewModels> Vouchers { get; set; } = new();
 
+        // Add these two properties for public and private vouchers
+        public List<VoucherViewModels> PublicVouchers { get; set; } = new();
+        public List<VoucherViewModels> PrivateVouchers { get; set; } = new();
+
         public Guid? VoucherId { get; set; } // Thêm trường này để lưu id voucher đã chọn
         public CheckoutViewModel()
         {

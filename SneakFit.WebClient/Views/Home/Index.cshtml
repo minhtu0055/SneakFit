@@ -8,6 +8,15 @@
     var baseAddress = ViewBag.BaseAddress?.ToString();
     var productPrices = ViewBag.ProductPrices as Dictionary<Guid, Tuple<decimal?, decimal?, string>>;
 }
+
+@if (ViewBag.PaymentError != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin: 20px; border-radius: 10px;">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <strong>Thông báo:</strong> @ViewBag.PaymentError
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
 <!-- Hero Section -->
 <section class="ecommerce-hero-1 hero section" id="hero">
     <div class="container">

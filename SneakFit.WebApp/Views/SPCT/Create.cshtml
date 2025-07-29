@@ -170,6 +170,8 @@
 
 @section Scripts {
     <!-- Thêm thư viện color picker -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-minicolors/2.3.6/jquery.minicolors.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-minicolors/2.3.6/jquery.minicolors.min.js"></script>
 
     <style>
         .selected-item {
@@ -1498,7 +1500,7 @@
         // Áp dụng giá và số lượng chung cho tất cả sản phẩm chi tiết
         $('#btnApplyEditAll').on('click', function() {
             let price = $('#editAllPrice').val().replace(/\./g, '');
-            let quantity = $('#editAllQuantity').val();
+            let quantity = $('#editAllQuantity').val().replace(/\./g, '');
             let isAllChecked = $('#modalEditPriceQuantity').data('isAllChecked');
             let selectedRows = $('#modalEditPriceQuantity').data('selectedRows');
 
@@ -1595,7 +1597,7 @@
             });
         }
 
-                // Thêm mới Thương hiệu bằng AJAX
+        // Thêm mới Thương hiệu bằng AJAX
         $(document).on('submit', '#createThuongHieuForm', function(e) {
             e.preventDefault();
             var formData = $(this).serialize();
@@ -1685,7 +1687,6 @@
             });
         });
 
-
         function reloadDeGiayDropdown(newId, newName) {
             var $select = $('select[name="DeGiayId"]');
             if ($select.find(`option[value="${newId}"]`).length === 0) {
@@ -1713,7 +1714,6 @@
                 }
             });
         });
-
 
         function reloadSanPhamDropdown(newId, newName) {
             var $select = $('select[name="SanPhamId"]');

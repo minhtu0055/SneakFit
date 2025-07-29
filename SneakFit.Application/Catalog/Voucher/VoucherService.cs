@@ -62,12 +62,17 @@ namespace SneakFit.Application.Catalog.Voucher
                 LoaiGiamGia = request.LoaiGiamGia,
                 GiaTriGiamGia = request.GiaTriGiamGia,
                 DieuKienApDung = request.DieuKienApDung,
-                GiaTriToiDa = request.GiaTriToiDa,
-                SoLuong = request.SoLuong,
+                GiaTriToiDa = request.LoaiGiamGia == LoaiGiamGia.PhamTram
+                    ? request.GiaTriToiDa ?? 0
+                    : request.GiaTriGiamGia,
+                SoLuong = request.LoaiVoucher == LoaiVoucher.CongKhai ? request.SoLuong ?? 0 : request.SelectedUserIds?.Count ?? 0,
                 NgayTao = DateTime.Now,
-                ThoiGianBatDau = request.ThoiGianBatDau,
-                ThoiGianKetThuc = request.ThoiGianKetThuc,
-                TrangThai = GetVoucherStatus(request.ThoiGianBatDau, request.ThoiGianKetThuc),
+                ThoiGianBatDau = request.ThoiGianBatDau ?? throw new Exception("Thời gian bắt đầu không được để trống"),
+                ThoiGianKetThuc = request.ThoiGianKetThuc ?? throw new Exception("Thời gian kết thúc không được để trống"),
+                TrangThai = GetVoucherStatus(
+                    request.ThoiGianBatDau ?? throw new Exception("Thời gian bắt đầu không được để trống"),
+                    request.ThoiGianKetThuc ?? throw new Exception("Thời gian kết thúc không được để trống")
+                ),
                 loaiVoucher = request.LoaiVoucher,
             };
             _context.Voucher.Add(vc);
@@ -79,9 +84,11 @@ namespace SneakFit.Application.Catalog.Voucher
                 {
                     Id = Guid.NewGuid(),
                     VoucherId = vc.Id,
-                    UserId = userId
+                    UserId = userId,
+                    IsUsed = false
                 }).ToList();
 
+                vc.SoLuong = voucherUsers.Count;
                 _context.VoucherUser.AddRange(voucherUsers);
 
                 // Lấy thông tin người dùng để gửi email
@@ -114,7 +121,18 @@ namespace SneakFit.Application.Catalog.Voucher
                 }
             }
 
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                if (ex.InnerException != null && ex.InnerException.Message.Contains("IX_Voucher_MaVoucher"))
+                {
+                    throw new Exception("Mã voucher đã tồn tại, vui lòng chọn mã khác.");
+                }
+                throw;
+            }
             return await GetById(vc.Id);
         }
 
@@ -145,14 +163,18 @@ namespace SneakFit.Application.Catalog.Voucher
             foreach (var voucher in vouchers)
             {
                 var newStatus = GetVoucherStatus(voucher.ThoiGianBatDau, voucher.ThoiGianKetThuc);
-                // Nếu số lượng <= 0 thì luôn là HếtHạn
-                if (voucher.SoLuong <= 0)
+                // Kiểm tra trạng thái dựa trên loại voucher
+                if (voucher.loaiVoucher == LoaiVoucher.CongKhai && voucher.SoLuong <= 0)
                 {
                     voucher.SoLuong = 0;
-                    if (voucher.TrangThai != TrangThaiGiamGia.HetHan)
-                        voucher.TrangThai = TrangThaiGiamGia.HetHan;
+                    voucher.TrangThai = TrangThaiGiamGia.HetHan;
                 }
-                else if (voucher.TrangThai != newStatus)
+                else if (voucher.loaiVoucher == LoaiVoucher.RiengTu && voucher.SoLuong <= 0)
+                {
+                    voucher.SoLuong = 0;
+                    voucher.TrangThai = TrangThaiGiamGia.HetHan;
+                }
+                else
                 {
                     voucher.TrangThai = newStatus;
                 }
@@ -284,17 +306,21 @@ namespace SneakFit.Application.Catalog.Voucher
             {
                 throw new Exception("Không thể chuyển voucher riêng tư sang công khai.");
             }
-
             // Cập nhật thông tin voucher
             voucher.LoaiGiamGia = request.LoaiGiamGia;
             voucher.GiaTriGiamGia = request.GiaTriGiamGia;
             voucher.DieuKienApDung = request.DieuKienApDung;
-            voucher.GiaTriToiDa = request.GiaTriToiDa;
-            voucher.SoLuong = request.SoLuong;
-            voucher.ThoiGianBatDau = request.ThoiGianBatDau;
-            voucher.ThoiGianKetThuc = request.ThoiGianKetThuc;
+            voucher.GiaTriToiDa = request.LoaiGiamGia == LoaiGiamGia.PhamTram
+                ? request.GiaTriToiDa ?? 0
+                : request.GiaTriGiamGia;
+            voucher.SoLuong = request.LoaiVoucher == LoaiVoucher.CongKhai ? request.SoLuong ?? 0 : request.SelectedUserIds?.Count ?? 0;
+            voucher.ThoiGianBatDau = request.ThoiGianBatDau ?? throw new Exception("Thời gian bắt đầu không được để trống");
+            voucher.ThoiGianKetThuc = request.ThoiGianKetThuc ?? throw new Exception("Thời gian kết thúc không được để trống");
             voucher.loaiVoucher = request.LoaiVoucher;
-            voucher.TrangThai = GetVoucherStatus(request.ThoiGianBatDau, request.ThoiGianKetThuc);
+            voucher.TrangThai = GetVoucherStatus(
+                request.ThoiGianBatDau ?? throw new Exception("Thời gian bắt đầu không được để trống"),
+                request.ThoiGianKetThuc ?? throw new Exception("Thời gian kết thúc không được để trống")
+            );
 
             // Xử lý khi chuyển từ voucher công khai sang riêng tư
             if (voucher.loaiVoucher == LoaiVoucher.RiengTu && request.SelectedUserIds != null && request.SelectedUserIds.Any())
@@ -318,6 +344,9 @@ namespace SneakFit.Application.Catalog.Voucher
                         UserId = userId
                     };
                     _context.VoucherUser.Add(voucherUser);
+
+                    // Cập nhật số lượng voucher riêng tư
+                    voucher.SoLuong = request.SelectedUserIds.Count;
 
                     // Gửi email thông báo cho khách hàng mới
                     var user = await _context.Users.FindAsync(userId);
@@ -387,6 +416,9 @@ namespace SneakFit.Application.Catalog.Voucher
             // Xử lý khi là voucher riêng tư và có thay đổi thông tin
             else if (voucher.loaiVoucher == LoaiVoucher.RiengTu)
             {
+                // Cập nhật số lượng voucher riêng tư
+                voucher.SoLuong = request.SelectedUserIds?.Count ?? 0;
+
                 // Lấy danh sách khách hàng được gán voucher này
                 var voucherUsers = await _context.VoucherUser
                     .Where(vu => vu.VoucherId == voucher.Id)
@@ -419,7 +451,18 @@ namespace SneakFit.Application.Catalog.Voucher
                 }
             }
 
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+            {
+                if (ex.InnerException != null && ex.InnerException.Message.Contains("IX_Voucher_MaVoucher"))
+                {
+                    throw new Exception("Mã voucher đã tồn tại, vui lòng chọn mã khác.");
+                }
+                throw;
+            }
 
             return new VoucherViewModels()
             {
@@ -512,19 +555,19 @@ namespace SneakFit.Application.Catalog.Voucher
             await _context.SaveChangesAsync();
             return true;
         }
-        public async Task<List<VoucherViewModels>> GetVouchersForUser(Guid userId,decimal tongTienHoaDon)
+        public async Task<List<VoucherViewModels>> GetVouchersForUser(Guid userId, decimal tongTienHoaDon)
         {
             var now = DateTime.Now;
             var privateVouchers = await (from v in _context.Voucher
-                                 join vu in _context.VoucherUser on v.Id equals vu.VoucherId
-                                 where vu.UserId == userId
-                                    && v.loaiVoucher == LoaiVoucher.RiengTu
-                                    && v.TrangThai == TrangThaiGiamGia.HoatDong
-                                    && v.SoLuong > 0
-                                    && v.ThoiGianBatDau <= now
-                                    && v.ThoiGianKetThuc >= now
-                                    && v.DieuKienApDung <= tongTienHoaDon // Thêm điều kiện này
-                                 select v).ToListAsync();
+                                         join vu in _context.VoucherUser on v.Id equals vu.VoucherId
+                                         where vu.UserId == userId
+                                            && v.loaiVoucher == LoaiVoucher.RiengTu
+                                            && v.TrangThai == TrangThaiGiamGia.HoatDong
+                                            && v.SoLuong > 0
+                                            && v.ThoiGianBatDau <= now
+                                            && v.ThoiGianKetThuc >= now
+                                            && v.DieuKienApDung <= tongTienHoaDon // Thêm điều kiện này
+                                         select v).ToListAsync();
 
             // Map sang ViewModel
             var result = privateVouchers.Select(x => new VoucherViewModels
