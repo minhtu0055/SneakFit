@@ -47,12 +47,12 @@
                             <input type="text" value="@ViewBag.Keyword" placeholder="Tìm kiếm theo tên thương hiệu" name="Keyword" class="form-control" />
                         </div>
                         <div class="col-md-2 mb-2 d-flex align-items-end">
-                            <div class="btn-group w-100">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="bx bx-search"></i> Tìm
+                            <div class="btn-group w-auto">
+                                <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
+                                    <i class="bx bx-search"></i> <span>Tìm</span>
                                 </button>
-                                <button type="button" onclick="window.location.href='/ThuongHieu/Index'" class="btn btn-dark">
-                                    <i class="bx bx-reset"></i> Reset
+                                <button type="button" onclick="window.location.href='/ThuongHieu/Index'" class="btn btn-dark d-flex align-items-center gap-1" style="white-space: nowrap;">
+                                    <i class="bx bx-reset"></i> <span>Làm mới</span>
                                 </button>
                             </div>
                         </div>

@@ -176,40 +176,24 @@
                             <div class="text-truncate" data-i18n="Banhang">Bán Hàng</div>
                         </a>
                     </li>
-                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" || ViewContext.RouteData.Values["controller"]?.ToString() == "KhachHang" ? "active open" : "" )">
-                        <a href="javascript:void(0);" class="menu-link menu-toggle">
-                            <i class="menu-icon tf-icons bx bx-group"></i>
-                            <div class="text-truncate" data-i18n="Account Settings">Quản lý tài khoản</div>
+                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "HoaDon" ? "active open" : "")">
+                        <a asp-action="Index" asp-controller="HoaDon" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-spreadsheet"></i>
+                            <div class="text-truncate" data-i18n="Hoadon">Quản lý hóa đơn</div>
                         </a>
-                        <ul class="menu-sub ">
-                            <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
-                                <a asp-action="Index" asp-controller="User" class="menu-link">
-                                    <div class="text-truncate" data-i18n="Account">Nhân Viên</div>
-                                </a>
-                            </li>
-                            <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "KhachHang" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
-                                <a asp-action="Index" asp-controller="KhachHang" class="menu-link">
-                                    <div class="text-truncate" data-i18n="Account">Khách Hàng</div>
-                                </a>
-                            </li>
-                            <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" && ViewContext.RouteData.Values["action"]?.ToString() == "DoiMatKhau" ? "active" : "") ">
-                                <a asp-action="DoiMatKhau" asp-controller="User" class="menu-link">
-                                    <div class="text-truncate" data-i18n="Notifications">Đổi Mật Khẩu</div>
-                                </a>
-                            </li>
-                        </ul>
                     </li>
+                    
                     <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "SPCT" || ViewContext.RouteData.Values["controller"]?.ToString() == "ChatLieu" || ViewContext.RouteData.Values["controller"]?.ToString() == "KichThuoc" || ViewContext.RouteData.Values["controller"]?.ToString() == "ThuongHieu"|| ViewContext.RouteData.Values["controller"]?.ToString() == "SanPham" || ViewContext.RouteData.Values["controller"]?.ToString() == "MauSac" || ViewContext.RouteData.Values["controller"]?.ToString() == "DeGiay" ? "active open" : "" )">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-cube-alt"></i>
                             <div class="text-truncate" data-i18n="Misc">Quản lý sản phẩm</div>
                         </a>
                         <ul class="menu-sub ">
-                            <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "SPCT" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "") ">
+                           @*  <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "SPCT" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "") ">
                                 <a asp-action="Index" asp-controller="SPCT" class="menu-link">
                                     <div class="text-truncate" data-i18n="Product">Sản Phẩm Chi Tiết</div>
                                 </a>
-                            </li>
+                            </li> *@
                             <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "SanPham" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "") ">
                                 <a asp-action="Index" asp-controller="SanPham" class="menu-link">
                                     <div class="text-truncate" data-i18n="sanpham">Sản Phẩm</div>
@@ -265,11 +249,28 @@
                             </li>
                         </ul>
                     </li>
-                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "HoaDon" ? "active open" : "")">
-                        <a asp-action="Index" asp-controller="HoaDon" class="menu-link">
-                            <i class="menu-icon tf-icons bx bx-spreadsheet"></i>
-                            <div class="text-truncate" data-i18n="Hoadon">Quản lý hóa đơn</div>
+                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" || ViewContext.RouteData.Values["controller"]?.ToString() == "KhachHang" ? "active open" : "")">
+                        <a href="javascript:void(0);" class="menu-link menu-toggle">
+                            <i class="menu-icon tf-icons bx bx-group"></i>
+                            <div class="text-truncate" data-i18n="Account Settings">Quản lý tài khoản</div>
                         </a>
+                        <ul class="menu-sub ">
+                            <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
+                                <a asp-action="Index" asp-controller="User" class="menu-link">
+                                    <div class="text-truncate" data-i18n="Account">Nhân Viên</div>
+                                </a>
+                            </li>
+                            <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "KhachHang" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
+                                <a asp-action="Index" asp-controller="KhachHang" class="menu-link">
+                                    <div class="text-truncate" data-i18n="Account">Khách Hàng</div>
+                                </a>
+                            </li>
+                            <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" && ViewContext.RouteData.Values["action"]?.ToString() == "DoiMatKhau" ? "active" : "") ">
+                                <a asp-action="DoiMatKhau" asp-controller="User" class="menu-link">
+                                    <div class="text-truncate" data-i18n="Notifications">Đổi Mật Khẩu</div>
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                 </ul>
             </aside>

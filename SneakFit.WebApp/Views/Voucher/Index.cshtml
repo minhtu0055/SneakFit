@@ -25,13 +25,13 @@
                         <select name="status" class="form-select" asp-items="ViewBag.DanhSachTrangThai"></select>
                     </div>
                     <div class="col-md-2 mb-2 d-flex align-items-end">
-                        <div class="btn-group w-100">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bx bx-search"></i> Tìm
+                        <div class="btn-group w-auto">
+                            <button type="submit" class="btn btn-primary d-flex align-items-center gap-1">
+                                <i class="bx bx-search"></i> <span>Tìm</span>
                             </button>
-                            <a asp-action="Index" class="btn btn-dark">
-                                <i class="bx bx-reset"></i> Reset
-                            </a>
+                            <button type="button" onclick="window.location.href='/Voucher/Index'" class="btn btn-dark d-flex align-items-center gap-1" style="white-space: nowrap;">
+                                <i class="bx bx-reset"></i> <span>Làm mới</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -60,7 +60,6 @@
             <thead>
                 <tr>
                     <th>MÃ VOUCHER</th>
-                    <th>LOẠI GIẢM GIÁ</th>
                     <th>GIÁ TRỊ GIẢM</th>
                     <th>loại Voucher</th>
                     <th>ĐIỀU KIỆN</th>
@@ -79,9 +78,6 @@
                         <tr>
                             <td>
                                 @Html.DisplayFor(modelItem => item.MaVoucher)
-                            </td>
-                            <td>
-                                @(item.LoaiGiamGia == LoaiGiamGia.PhamTram ? "Phần trăm" : "Số tiền")
                             </td>
                             <td>
                                 @(item.LoaiGiamGia == LoaiGiamGia.PhamTram ? item.GiaTriGiamGia + "%" : item.GiaTriGiamGia.ToString("N0") + " đ")
