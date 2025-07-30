@@ -1,0 +1,43 @@
+﻿@model List<SneakFit.ViewModels.Catalog.HoaDonClient.HoaDonClientViewModel>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="section-box text-center p-4">
+        <p class="text-muted">Không có đơn hàng nào ở trạng thái này.</p>
+        <button type="button" class="btn btn-primary mt-3" onclick="showTimeline()">Quay lại Timeline</button>
+    </div>
+}
+else
+{
+    <div class="section-box">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th style="border-right: none; ">Mã Đơn Hàng</th>
+                        <th style="border-right: none; ">Ngày Đặt Hàng</th>
+                        <th style="border-right: none; ">Tổng Tiền</th>
+                        <th style="border-right: none; ">Trạng Thái</th>
+                        <th>Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td style="border-right: none; ">@item.MaHoaDon</td>
+                            <td style="border-right: none; ">@item.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td style="border-right: none; ">@item.TongTien.ToString("N0") ₫</td>
+                            <td style="border-right: none; ">
+                                <span class="status-badge">@item.TrangThai</span>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="loadOrderDetails('@item.Id')">Xem Chi Tiết</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+} 

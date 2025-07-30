@@ -138,7 +138,7 @@ namespace SneakFit.WebClient.Controllers
                     {
                         var request = new ShippingFeeRequest
                         {
-                            FromDistrictId = 1452, // Địa chỉ shop
+                            FromDistrictId = 0, // Server sẽ tự động set địa chỉ shop
                             ToDistrictId = int.TryParse(defaultAddress.MaHuyen, out int districtId) ? districtId : 0,
                             ToWardCode = defaultAddress.MaXa ?? "",
                             Weight = 700,
@@ -343,7 +343,7 @@ namespace SneakFit.WebClient.Controllers
                 {
                     var request = new ShippingFeeRequest
                     {
-                        FromDistrictId = 1452,
+                        FromDistrictId = 0, // Server sẽ tự động set địa chỉ shop
                         ToDistrictId = toDistrictId,
                         ToWardCode = selectedAddress.MaXa,
                         Weight = 700,
@@ -353,15 +353,23 @@ namespace SneakFit.WebClient.Controllers
                         ServiceId = 53321
                     };
 
-                    var responseJson = await _ghnApiClient.CalculateShippingFee(request);
-                    if (!string.IsNullOrEmpty(responseJson))
+                    try
                     {
-                        using var jsonDoc = JsonDocument.Parse(responseJson);
-                        var root = jsonDoc.RootElement;
-                        if (root.TryGetProperty("data", out var data) && (data.TryGetProperty("total", out var totalProp) || data.TryGetProperty("service_fee", out totalProp)))
+                        var responseJson = await _ghnApiClient.CalculateShippingFee(request);
+                        if (!string.IsNullOrEmpty(responseJson))
                         {
-                            phiVanChuyen = totalProp.GetDecimal();
+                            using var jsonDoc = JsonDocument.Parse(responseJson);
+                            var root = jsonDoc.RootElement;
+                            if (root.TryGetProperty("data", out var data) && (data.TryGetProperty("total", out var totalProp) || data.TryGetProperty("service_fee", out totalProp)))
+                            {
+                                phiVanChuyen = totalProp.GetDecimal();
+                            }
                         }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Nếu lỗi thì giữ nguyên phí ship hiện tại
+                        TempData["WarningMessage"] = "Không thể tính phí vận chuyển, vui lòng thử lại.";
                     }
                 }
             }

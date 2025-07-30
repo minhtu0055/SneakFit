@@ -9,7 +9,10 @@ using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
 using SneakFit.ViewModels.Catalog.HoaDonClient;
 using SneakFit.ViewModels.Catalog.Voucher;
+using SneakFit.ViewModels.Catalog.HoaDonChiTietClient;
 using SneakFit.WebClient.Models;
+using SneakFit.Data.Entities;
+using SneakFit.ApiIntegration.Services;
 
 namespace SneakFit.WebClient.Controllers
 {
@@ -104,7 +107,44 @@ namespace SneakFit.WebClient.Controllers
             }
             return Guid.Parse(userIdStr);
         }
+        // AJAX action để lấy danh sách đơn hàng theo trạng thái
+        public async Task<IActionResult> GetOrdersByStatus(int? trangThai = null)
+        {
+            try
+            {
+                var userId = GetUserId();
+                var request = new PhanTrangHoaDonClient
+                {
+                    PageIndex = 1,
+                    PageSize = 100, // Lấy nhiều hơn để hiển thị đầy đủ
+                    Keyword = "",
+                    Trangthaihoadon = (SneakFit.Data.Enums.TrangThaiHoaDon?)trangThai,
+                    NgayBatDau = null,
+                    NgayKetThuc = null,
+                    UserId = userId
+                };
 
+                var hoaDons = await _hoaDonClientApiClient.GetAllPaging(request);
+
+                if (hoaDons == null || hoaDons.Items == null || !hoaDons.Items.Any())
+                {
+                    return PartialView("_OrdersList", new List<HoaDonClientViewModel>());
+                }
+
+                var filtered = hoaDons.Items
+                    .OrderByDescending(x => x.NgayTao)
+                    .ToList();
+
+                return PartialView("_OrdersList", filtered);
+            }
+            catch (Exception ex)
+            {
+                return PartialView("_OrdersList", new List<HoaDonClientViewModel>());
+            }
+        }
+
+
+        // Trang chủ Account
         [Authorize]
         [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
         public async Task<IActionResult> MyProfile(int? trangThai = null)
@@ -125,25 +165,47 @@ namespace SneakFit.WebClient.Controllers
                     model.User = userResult.ResultObj;
                 }
 
-                var request = new PhanTrangHoaDonClient
+                // Lấy tất cả hóa đơn để tính số lượng theo trạng thái
+                var requestAll = new PhanTrangHoaDonClient
                 {
                     PageIndex = 1,
-                    PageSize = 10,
+                    PageSize = 1000, // Lấy nhiều để đảm bảo có tất cả dữ liệu
                     Keyword = "",
-                    Trangthaihoadon = (Data.Enums.TrangThaiHoaDon?)trangThai,
+                    Trangthaihoadon = null, // Không filter theo trạng thái
                     NgayBatDau = null,
                     NgayKetThuc = null,
                     UserId = userId
                 };
 
-                var hoaDons = await _hoaDonClientApiClient.GetAllPaging(request);
+                var allHoaDons = await _hoaDonClientApiClient.GetAllPaging(requestAll);
 
-                if (hoaDons?.Items != null)
+                if (allHoaDons?.Items != null)
                 {
-                    model.hoaDonClientViewModels = hoaDons.Items
+                    var allDanhSachDon = allHoaDons.Items
                         .Where(x => x.UserId == userId)
-                        .OrderByDescending(x => x.NgayTao)
                         .ToList();
+
+                    // Tính số lượng theo trạng thái từ tất cả dữ liệu
+                    model.SoLuongTheoTrangThai = allDanhSachDon
+                        .GroupBy(x => x.TrangThai)
+                        .ToDictionary(g => g.Key, g => g.Count());
+
+                    // Lấy dữ liệu để hiển thị (có thể filter theo trạng thái)
+                    if (trangThai.HasValue)
+                    {
+                        // Nếu có filter trạng thái, chỉ lấy dữ liệu cho trạng thái đó
+                        model.hoaDonClientViewModels = allDanhSachDon
+                            .Where(x => x.TrangThai == (Data.Enums.TrangThaiHoaDon)trangThai.Value)
+                            .OrderByDescending(x => x.NgayTao)
+                            .ToList();
+                    }
+                    else
+                    {
+                        // Nếu không có filter, lấy tất cả
+                        model.hoaDonClientViewModels = allDanhSachDon
+                            .OrderByDescending(x => x.NgayTao)
+                            .ToList();
+                    }
                 }
             }
             catch (Exception ex)
@@ -217,6 +279,65 @@ namespace SneakFit.WebClient.Controllers
             }
         }
 
+        // AJAX action để lấy chi tiết hóa đơn
+        public async Task<IActionResult> GetOrderDetails(Guid id)
+        {
+            try
+            {
+                var userId = GetUserId();
+                var hoaDon = await _hoaDonClientApiClient.GetById(id);
+                if (hoaDon == null || hoaDon.UserId != userId)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy đơn hàng hoặc bạn không có quyền xem đơn hàng này." });
+                }
+
+                var chiTietHoaDon = await _hoaDonChiTietClientApiClient.GetByHoaDonId(id);
+                // Lấy thông tin khuyến mãi cho từng sản phẩm chi tiết
+                foreach (var item in chiTietHoaDon)
+                {
+                    try
+                    {
+                        var spct = await _spctApiClient.GetById(item.SanPhamChiTietId);
+                        if (spct != null)
+                        {
+                            item.GiaGoc = spct.Gia; // Đảm bảo luôn truyền giá gốc
+                            if (spct.KhuyenMaiId.HasValue && spct.GiaKhuyenMai > 0 && spct.GiaKhuyenMai < spct.Gia)
+                            {
+                                item.GiaKhuyenMai = spct.GiaKhuyenMai;
+                                item.KhuyenMaiPhanTram = spct.KhuyenMaiPhanTram;
+                                item.KhuyenMaiId = spct.KhuyenMaiId;
+                                item.TenKhuyenMai = $"Giảm {spct.KhuyenMaiPhanTram}%";
+                            }
+                            else
+                            {
+                                item.GiaKhuyenMai = null;
+                                item.KhuyenMaiPhanTram = null;
+                                item.KhuyenMaiId = null;
+                                item.TenKhuyenMai = null;
+                            }
+                        }
+                    }
+                    catch { }
+                }
+                VoucherViewModels usedVoucher = null;
+                if (hoaDon.VoucherId.HasValue)
+                {
+                    usedVoucher = await _voucherApiClient.GetById(hoaDon.VoucherId.Value);
+                }
+                var model = new OrderConfirmationViewModel
+                {
+                    HoaDonClient = hoaDon,
+                    ChiTietHoaDonClient = chiTietHoaDon,
+                    UsedVoucher = usedVoucher
+                };
+                return PartialView("_OrderDetails", model);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Lỗi khi lấy chi tiết hóa đơn: {ex.Message}" });
+            }
+        }
+
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -243,7 +364,7 @@ namespace SneakFit.WebClient.Controllers
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                 HttpContext.Session.Remove("Token");
                 TempData["SuccessMessage"] = "Đổi mật khẩu thành công. Vui lòng đăng nhập lại.";
-                return RedirectToAction("MyProfile", "Account");
+                return RedirectToAction("Index", "Login");
             }
 
             // Nếu đổi mật khẩu thất bại

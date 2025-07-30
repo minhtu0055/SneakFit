@@ -22,6 +22,7 @@ namespace SneakFit.ViewModels.Catalog.SanPhamChiTiet
         public PagedResult<SanPhamViewModels> SanPhams { get; set; }
         public PagedResult<SPCTViewModels> SanPhamChiTiets { get; set; }
         public List<SPCTViewModels> AllSpct { get; set; }
+        public List<SneakFit.ViewModels.Catalog.ThongKe.SanPhamChiTietThongKeViewModel> BestSellerSpct { get; set; }
         public Guid? DanhMucId { get; set; }
     }
 }

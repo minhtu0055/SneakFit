@@ -372,17 +372,44 @@ namespace SneakFit.WebClient.Controllers
             // Áp dụng các bộ lọc bổ sung
             var filteredSpct = allSpct.AsQueryable();
 
-            // Lọc theo khoảng giá
-            System.Diagnostics.Debug.WriteLine($"GetFilteredProducts - Price filter - giaThapNhat: {giaThapNhat}, giaCaoNhat: {giaCaoNhat}");
-            if (giaThapNhat.HasValue && giaThapNhat.Value > 0)
+            // Lọc sản phẩm theo giá thấp nhất của từng sản phẩm
+            var productIdsWithValidPrice = new List<Guid>();
+            var spctIdMinPriceDict = new Dictionary<Guid, Guid>(); // SanPhamId -> SPCTId có giá thấp nhất
+            foreach (var product in pagedSanPham.Items)
             {
-                System.Diagnostics.Debug.WriteLine($"GetFilteredProducts - Applying min price filter: >= {giaThapNhat.Value}");
-                filteredSpct = filteredSpct.Where(spct => spct.GiaKhuyenMai >= giaThapNhat.Value);
+                var productSpcts = allSpct.Where(spct => spct.SanPhamId == product.Id && spct.Gia > 0).ToList();
+                if (productSpcts.Any())
+                {
+                    var minGiaGoc = productSpcts.Min(x => x.GiaGoc);
+                    var minGiaKm = productSpcts.Min(x => x.GiaKhuyenMai);
+                    var giaSoSanh = (minGiaKm > 0 && minGiaKm < minGiaGoc) ? minGiaKm : minGiaGoc;
+                    var spctMin = (minGiaKm > 0 && minGiaKm < minGiaGoc)
+                        ? productSpcts.OrderBy(x => x.GiaKhuyenMai).First()
+                        : productSpcts.OrderBy(x => x.GiaGoc).First();
+                    bool isValidPrice = true;
+                    if (giaThapNhat.HasValue && giaThapNhat.Value > 0)
+                    {
+                        isValidPrice = giaSoSanh >= giaThapNhat.Value;
+                    }
+                    if (giaCaoNhat.HasValue && giaCaoNhat.Value < 10000000 && isValidPrice)
+                    {
+                        isValidPrice = giaSoSanh <= giaCaoNhat.Value;
+                    }
+                    if (isValidPrice)
+                    {
+                        productIdsWithValidPrice.Add(product.Id);
+                        spctIdMinPriceDict[product.Id] = spctMin.Id;
+                    }
+                }
             }
-            if (giaCaoNhat.HasValue && giaCaoNhat.Value < 10000000)
+            // Lọc SPCT chỉ cho các sản phẩm có giá hợp lệ VÀ chỉ lấy SPCT có giá thấp nhất
+            if (productIdsWithValidPrice.Any())
             {
-                System.Diagnostics.Debug.WriteLine($"GetFilteredProducts - Applying max price filter: <= {giaCaoNhat.Value}");
-                filteredSpct = filteredSpct.Where(spct => spct.GiaKhuyenMai <= giaCaoNhat.Value);
+                filteredSpct = filteredSpct.Where(spct => productIdsWithValidPrice.Contains(spct.SanPhamId) && spctIdMinPriceDict[spct.SanPhamId] == spct.Id);
+            }
+            else
+            {
+                filteredSpct = filteredSpct.Where(spct => false);
             }
 
             // Lọc theo thương hiệu (nếu có chọn)
@@ -397,13 +424,22 @@ namespace SneakFit.WebClient.Controllers
                 filteredSpct = filteredSpct.Where(spct => selectedColorIds.Contains(spct.MauSacId));
             }
 
-            // Lọc theo danh mục (nếu có chọn)
+            // Lọc theo danh mục (nếu có chọn) - Lọc theo danh mục của sản phẩm, không phải SPCT
             System.Diagnostics.Debug.WriteLine($"GetFilteredProducts - Category filter - selectedCategoryIds count: {selectedCategoryIds.Count}");
             if (selectedCategoryIds.Any())
             {
                 System.Diagnostics.Debug.WriteLine($"GetFilteredProducts - Category IDs: {string.Join(", ", selectedCategoryIds)}");
                 System.Diagnostics.Debug.WriteLine($"GetFilteredProducts - Before category filter: {filteredSpct.Count()} items");
-                filteredSpct = filteredSpct.Where(spct => selectedCategoryIds.Contains(spct.DanhMucId));
+                
+                // Lọc sản phẩm theo danh mục
+                var productIdsWithValidCategory = pagedSanPham.Items
+                    .Where(sp => selectedCategoryIds.Contains(sp.DanhMucId))
+                    .Select(sp => sp.Id)
+                    .ToList();
+                
+                // Lọc SPCT chỉ cho các sản phẩm có danh mục hợp lệ
+                filteredSpct = filteredSpct.Where(spct => productIdsWithValidCategory.Contains(spct.SanPhamId));
+                
                 System.Diagnostics.Debug.WriteLine($"GetFilteredProducts - After category filter: {filteredSpct.Count()} items");
             }
 

@@ -47,6 +47,7 @@ builder.Services.AddScoped<IGhnApiClient, GhnApiClient>();
 builder.Services.AddScoped<IUserApiClient, UserApiClient>();
 builder.Services.AddScoped<IDiaChiApiClient, DiaChiApiClient>();
 builder.Services.AddScoped<IThanhToanApiClient, ThanhToanApiClient>();
+builder.Services.AddScoped<IThongKeApiClient, ThongKeApiClient>();
 
 builder.Services.AddCors(options =>
 {
