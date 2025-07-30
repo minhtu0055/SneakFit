@@ -677,6 +677,14 @@
             let totalRecords = 0;
             let pageCount = 0;
             let currentKeyword = "";
+            let video = document.getElementById('qr-video');
+            let canvas = document.getElementById('qr-canvas');
+            let ctx = canvas ? canvas.getContext('2d') : null;
+            let scanning = false;
+            let stream = null;
+            let scanInterval = null;
+            let lastResult = null;
+            let modal = null;
 
             $(document).ready(function () {
                 // Initialize events
@@ -2776,41 +2784,33 @@
                 this.value = val;
             });
 
-            function loadFilterOptions() {
-                // Load kích thước options
-                $.ajax({
-                    url: '/KichThuoc/GetAll',
-                    type: 'GET',
-                    success: function(response) {
-                        // response là 1 mảng các object KichThuocViewModels
-                        const kichThuocSelect = $("#filterKichThuoc");
-                        kichThuocSelect.find('option:not(:first)').remove();
-                        (response.resultObj || response).forEach(function(kt) {
-                            kichThuocSelect.append(`<option value="${kt.tenKichThuoc || kt.maKichThuoc}">${kt.tenKichThuoc || kt.maKichThuoc}</option>`);
+                    function loadFilterOptions() {
+                        // Kích thước
+                        $.ajax({
+                            url: '/KichThuoc/GetAll',
+                            type: 'GET',
+                            success: function(response) {
+                                const kichThuocSelect = $("#filterKichThuoc");
+                                kichThuocSelect.find('option:not(:first)').remove();
+                                (response.resultObj || response).forEach(function(kt) {
+                                    kichThuocSelect.append(`<option value="${kt.id}">${kt.tenKichThuoc || kt.maKichThuoc}</option>`);
+                                });
+                            }
                         });
-                    },
-                    error: function(xhr) {
-                        console.error('Lỗi khi tải danh sách kích thước:', xhr);
-                    }
-                });
 
-                // Load màu sắc options
-                $.ajax({
-                    url: '/MauSac/GetAll',
-                    type: 'GET',
-                    success: function(response) {
-                        // response là 1 mảng các object MauSacViewModels
-                        const mauSacSelect = $("#filterMauSac");
-                        mauSacSelect.find('option:not(:first)').remove();
-                        (response.resultObj || response).forEach(function(ms) {
-                            mauSacSelect.append(`<option value="${ms.tenMauSac}">${ms.tenMauSac}</option>`);
+                        // Màu sắc
+                        $.ajax({
+                            url: '/MauSac/GetAll',
+                            type: 'GET',
+                            success: function(response) {
+                                const mauSacSelect = $("#filterMauSac");
+                                mauSacSelect.find('option:not(:first)').remove();
+                                (response.resultObj || response).forEach(function(ms) {
+                                    mauSacSelect.append(`<option value="${ms.id}">${ms.tenMauSac}</option>`);
+                                });
+                            }
                         });
-                    },
-                    error: function(xhr) {
-                        console.error('Lỗi khi tải danh sách màu sắc:', xhr);
                     }
-                });
-            }
 
             // Mở modal chọn địa chỉ
             $("#btnChonDiaChi").click(function (e) {
@@ -3004,15 +3004,6 @@
             });
 
             //QR code
-
-            let video = document.getElementById('qr-video');
-            let canvas = document.getElementById('qr-canvas');
-            let ctx = canvas ? canvas.getContext('2d') : null;
-            let scanning = false;
-            let stream = null;
-            let scanInterval = null;
-            let lastResult = null;
-            let modal = null;
 
             function showToast(msg, isSuccess = true) {
                 // Đơn giản: alert, có thể thay bằng toast đẹp hơn

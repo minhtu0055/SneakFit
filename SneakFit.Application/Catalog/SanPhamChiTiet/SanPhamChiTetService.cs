@@ -489,6 +489,12 @@ namespace SneakFit.Application.Catalog.SanPhamChiTiet
             if (request.DanhMucId.HasValue)
                 query = query.Where(x => x.sp.DanhMucId == request.DanhMucId);
 
+            if (request.DanhMucId.HasValue)
+                query = query.Where(x => x.spct.MauSacId == request.MauSacId);
+
+            if (request.DanhMucId.HasValue)
+                query = query.Where(x => x.spct.KichThuocId == request.KichThuocId);
+
             if (request.GiaThapNhat.HasValue)
                 query = query.Where(x => x.spct.Gia >= request.GiaThapNhat.Value);
 

@@ -20,7 +20,7 @@ builder.Services.AddAuthentication(options =>
 });
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.IdleTimeout = TimeSpan.FromMinutes(1);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
@@ -30,7 +30,6 @@ builder.Services.AddHttpClient();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
-
 builder.Services.AddScoped<ISpctApiClient, SpctApiClient>();
 builder.Services.AddScoped<IDanhMucApiClient, DanhMucApiClient>();
 builder.Services.AddScoped<IMauSacApiClient, MauSacApiClient>();
@@ -49,8 +48,6 @@ builder.Services.AddScoped<IUserApiClient, UserApiClient>();
 builder.Services.AddScoped<IDiaChiApiClient, DiaChiApiClient>();
 builder.Services.AddScoped<IThanhToanApiClient, ThanhToanApiClient>();
 builder.Services.AddScoped<IThongKeApiClient, ThongKeApiClient>();
-
-
 
 builder.Services.AddCors(options =>
 {
@@ -71,18 +68,11 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-
 app.UseCors();
-
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
-
-
 app.UseRouting();
-
 app.UseAuthentication();
-
 app.UseAuthorization();
 app.UseSession();
 

@@ -390,13 +390,16 @@ namespace SneakFit.Admin.Controllers
 
         // Action để lấy dữ liệu SPCT cho modal bán hàng
         [HttpGet]
-        public async Task<IActionResult> GetSPCTForModal(string tuKhoa = "", int pageIndex = 1, int pageSize = 10)
+        public async Task<IActionResult> GetSPCTForModal(string tuKhoa = "",Guid? kichThuocId = null, Guid? mauSacId = null, Guid? danhMucId = null, int pageIndex = 1, int pageSize = 10)
         {
             try
             {
                 var request = new PhanTrangSPCT()
                 {
                     TuKhoa = tuKhoa,
+                    MauSacId = mauSacId,
+                    KichThuocId = kichThuocId,
+                    DanhMucId = danhMucId,
                     PageIndex = pageIndex,
                     PageSize = pageSize
                 };
@@ -421,6 +424,7 @@ namespace SneakFit.Admin.Controllers
                         sp.SanPhamId,
                         sp.MauSacId,
                         sp.KichThuocId,
+                        sp.DanhMucId,
                         sp.SoLuong,
                         sp.Gia,
                         sp.TrangThai,
