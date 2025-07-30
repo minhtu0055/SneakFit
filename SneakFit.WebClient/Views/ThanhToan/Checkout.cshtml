@@ -351,7 +351,7 @@
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify({
-                        FromDistrictId: 1452, // Địa chỉ shop
+                        FromDistrict: 1452, // Địa chỉ shop
                         ToDistrict: parseInt(address.maHuyen)
                     }),
                     success: function(serviceRes) {
@@ -365,7 +365,7 @@
                             type: 'POST',
                             contentType: 'application/json',
                             data: JSON.stringify({
-                                FromDistrictId: 1452,
+                                FromDistrict: 1452,
                                 ToDistrictId: parseInt(address.maHuyen),
                                 ToWardCode: address.maXa,
                                 Weight: 700,
@@ -381,12 +381,9 @@
                                     newFee = json.data.total || json.data.service_fee;
                                     $('#shipping-fee').text(newFee.toLocaleString('vi-VN') + ' ₫');
                                     $('#summary-shipping').text(newFee.toLocaleString('vi-VN') + ' ₫');
-                                    $('input[asp-for="PhiVanChuyen"]').val(newFee); // Update lại hidden input
-                                    var tongSanPham = @Model.TongTienSanPham;
-                                    var tong = tongSanPham + newFee;
-                                    $('#summary-total').text(tong.toLocaleString('vi-VN') + ' ₫');
-
-                                    // Cập nhật lại summary sau khi thay đổi phí vận chuyển
+                                    $('input[asp-for="PhiVanChuyen"]').val(newFee);
+                                    var tongSanPham = parseInt($('#summary-products').text().replace(/\D/g, '')) || 0;
+                                    // Update tổng thanh toán & voucher nếu có
                                     updateOrderSummary(selectedVoucher);
                                 }
                             }
@@ -406,7 +403,8 @@
                     type: 'GET',
                     success: function(response) {
                         const address = response.resultObj || response;
-                        setCheckoutAddress(address, true); // Cập nhật địa chỉ trong checkout và tính phí vận chuyển
+                        setCheckoutAddress(address, true); // cập nhật UI + tính lại phí ship
+                        updateShippingFee(address); // Cập nhật phí ship ngay)
                         $('#changeAddressModal').modal('hide');
                     },
                     error: function(xhr) {
@@ -417,6 +415,7 @@
 
             // Hàm cập nhật địa chỉ nhận hàng trên giao diện Checkout
             function setCheckoutAddress(address, shouldUpdateShippingFee = true) {
+                // Update thông tin địa chỉ
                 const fullAddress = `${address.tenDiaChi}, ${address.tenXa}, ${address.tenHuyen}, ${address.tenThanhPho}`;
                 $('.address-box p:last').text(fullAddress);
                 $('.address-box p:first strong').text(address.tenNguoiNhan);
@@ -426,6 +425,8 @@
                 $('#DiaChiInput').val(fullAddress);
                 $('#HiddenAddressInput').val(fullAddress);
                 $('#HiddenAddressInput').data('address-id', address.id); // Lưu id vào data attribute
+
+                // Update phí vận chuyển nếu cần (không dùng setTimeout)
                 if (shouldUpdateShippingFee) {
                     updateShippingFee(address);
                 }
@@ -437,9 +438,18 @@
                     url: `/DiaChi/SetDefault?id=${addressId}`,
                     type: 'PUT',
                     success: function (response) {
-                        selectedAddressId = addressId; // Cập nhật selectedAddressId sau khi set default
-                        loadUserAddresses(); // Tải lại danh sách để phản ánh trạng thái mới
-                        sessionStorage.setItem('selectedAddressId', addressId); // Lưu vào sessionStorage
+                        selectedAddressId = addressId; // Update biến selected
+                        loadUserAddresses(function() {
+                            // Nếu hiện tại đang checkout với địa chỉ mặc định thì update lại luôn phí ship và địa chỉ
+                            $.ajax({
+                                url: `/DiaChi/GetById?id=${addressId}`,
+                                type: 'GET',
+                                success: function (response) {
+                                    const address = response.resultObj || response;
+                                    setCheckoutAddress(address, true); // Cập nhật ngay UI và phí ship
+                                }
+                            });
+                        });
                     },
                     error: function (xhr) {
                         alert('Lỗi khi đặt địa chỉ mặc định.');
@@ -587,17 +597,11 @@
                     contentType: 'application/json',
                     data: JSON.stringify(updatedAddress),
                     success: function (response) {
-                        if (isDefault) {
-                            setDefaultAddress(addressId);
-                            updateCheckoutAddress(addressId);
-                        }
                         loadUserAddresses(function () {
                             $('#editAddressModal').modal('hide');
                             $('#changeAddressModal').modal('show');
                         });
-                        if (selectedAddressId === addressId && !isDefault) {
-                            updateCheckoutAddress(addressId);
-                        }
+                        // KHÔNG gọi setCheckoutAddress ở đây!
                     },
                     error: function (xhr) {
                         alert('Lỗi khi cập nhật địa chỉ.');
@@ -687,6 +691,16 @@
                 selectedAddressId = $(this).val();
                 $('.address-item').removeClass('selected');
                 $('.address-item[data-address-id="' + selectedAddressId + '"]').addClass('selected');
+                // // Gọi luôn cập nhật phí ship cho địa chỉ này
+                // $.ajax({
+                //     url: `/DiaChi/GetById?id=${selectedAddressId}`,
+                //     type: 'GET',
+                //     success: function(response) {
+                //         const address = response.resultObj || response;
+                //         // Tính lại ship và cập nhật phần hiển thị phí ship/tổng tiền trên UI checkout
+                //         updateShippingFee(address);
+                //     }
+                // });
             });
 
             // Cho phép click vào toàn bộ address-item để chọn radio
@@ -703,15 +717,6 @@
                 $('#editAddressModal').data('address-id', addressId);
                 loadAddressToEditModal(addressId);
             });
-
-            // Click "Xác nhận" trong changeAddressModal
-            // $('#confirm-address').click(function () {
-            //     if (!selectedAddressId) {
-            //         alert('Vui lòng chọn một địa chỉ.');
-            //         return;
-            //     }
-            //     updateCheckoutAddress(selectedAddressId); // Cập nhật tạm thời cho checkout
-            // });
 
             // Click "Lưu địa chỉ" trong addNewAddressModal
             $('#save-new-address').click(function () {
@@ -761,56 +766,7 @@
 
             // Xử lí chọn Voucher
             let selectedVoucher = null;
-            // $(document).on('click', '.btn-apply-voucher', function () {
-            //     const voucherId = $(this).data('voucher-id');
-            //     const voucherName = $(this).data('voucher-name');
-            //     const voucherValue = parseFloat($(this).data('voucher-percent').toString().replaceAll('.', '').replaceAll(',', ''));
-            //     const voucherType = $(this).data('voucher-type'); // 0: %, 1: tiền
-            //     const voucherMax = $(this).data('voucher-max') ? parseFloat($(this).data('voucher-max').toString().replaceAll('.', '').replaceAll(',', '')) : null;
-            //     const voucherCondition = parseFloat($(this).data('voucher-condition'));
-            //     const voucherExpiry = $(this).closest('.card-body').find('p.voucher-expiry').text();
-            //     selectedVoucher = {
-            //         id: voucherId,
-            //         maVoucher: voucherName,
-            //         value: voucherValue,
-            //         type: voucherType,
-            //         max: voucherMax,
-            //         condition: voucherCondition,
-            //         expiry: voucherExpiry
-            //     };
 
-            //     // Sửa lại hiển thị giảm giá
-            //     let valueDisplay = voucherType == 0 ? voucherValue + '%' : Number(voucherValue).toLocaleString('vi-VN') + ' ₫';
-            //     let html = `
-            //         <div class="selected-voucher-box" data-voucher-id="${voucherId}">
-            //             <div class="selected-voucher-content">
-            //                 <div class="selected-voucher-header">
-            //                     <span class="selected-voucher-code">${voucherName}</span>
-            //                     <span class="selected-voucher-value">Giảm: <strong>${valueDisplay}</strong></span>
-            //                 </div>
-            //                 <div class="selected-voucher-details">
-            //                     ${voucherType == 0 && voucherMax ? `<p class='selected-voucher-max'>Giá trị tối đa: ${voucherMax.toLocaleString('vi-VN')} ₫</p>` : ''}
-            //                     <p class="selected-voucher-condition">Điều kiện: Đơn từ ${voucherCondition.toLocaleString('vi-VN')} ₫</p>
-            //                     <p class="selected-voucher-expiry">HSD: ${voucherExpiry}</p>
-            //                 </div>
-            //                 <button type="button" class="btn btn-outline-secondary btn-remove-voucher" data-voucher-id="${voucherId}">Xóa</button>
-            //             </div>
-            //         </div>
-            //     `;
-            //     $('#selectedVoucherText').html(html);
-            //     $('#voucherModal').modal('hide');
-
-            //     // Tính toán giảm giá và cập nhật summary
-            //     updateOrderSummary(selectedVoucher);
-
-            //     // Thêm sự kiện xóa voucher
-            //     $('.btn-remove-voucher').on('click', function () {
-            //         selectedVoucher = null;
-            //         $('#selectedVoucherText').html('<span>Chưa chọn voucher</span>');
-            //         setVoucherHiddenFields(null, 0); // Reset hidden fields
-            //         updateOrderSummary(null); // Reset summary
-            //     });
-            // });
             $(document).on('click', '.btn-apply-voucher', function () {
                 const voucherId = $(this).data('voucher-id');
                 const voucherName = $(this).data('voucher-name');

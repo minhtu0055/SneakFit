@@ -105,17 +105,11 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IThanhToanService, ThanhToanService>();
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(policy =>
-    {
-        policy.WithOrigins("https://localhost:7039") // URL của WebApp
+    options.AddPolicy("AllowAllFrontend", policy =>
+        policy.WithOrigins("https://localhost:7039", "http://localhost:7039", "https://localhost:7211", "http://localhost:7211")
               .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
-    options.AddPolicy("AllowSpecificOrigin", builder =>
-        builder.WithOrigins("https://localhost:7211") // Thay bằng port của WebClient
-               .AllowAnyMethod()
-               .AllowAnyHeader()
-               .AllowCredentials());
+              .AllowAnyMethod()
+              .AllowCredentials());
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(x =>
@@ -181,10 +175,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseCors();
-app.UseCors("AllowSpecificOrigin");
 app.UseStaticFiles();
-
+app.UseRouting();
+app.UseCors("AllowAllFrontend");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

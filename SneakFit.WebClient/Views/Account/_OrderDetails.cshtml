@@ -288,6 +288,7 @@
 }
 
 <style>
+    /* Định dạng chính */
     .main {
         padding: 20px 10px;
         background-color: #F1F5F9;
@@ -346,6 +347,219 @@
             margin: 10px 0;
         }
 
+    /* Timeline */
+    .progress-timeline {
+        display: flex;
+        align-items: flex-start;
+        position: relative;
+        max-width: 950px;
+        margin: 0 auto;
+        min-height: 170px;
+    }
+
+    /* Thanh mũi tên tiến trình */
+    .arrow-progress {
+        display: flex;
+        align-items: center;
+        position: absolute;
+        top: 100px;
+        left: 0;
+        right: 0;
+        height: 20px;
+        z-index: 1;
+    }
+
+    .arrow-segment {
+        height: 100%;
+        position: relative;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        /* hiệu ứng */
+        transition: background-color 0.3s;
+    }
+
+        .arrow-segment::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%, 10px 50%);
+            background-color: inherit;
+            transition: background-color 0.3s;
+        }
+
+        .arrow-segment:first-child::before {
+            clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%);
+        }
+
+        /* Màu sắc khi hoàn thành */
+        .arrow-segment.royal-blue::before {
+            background-color: #3b82f6;
+        }
+
+        .arrow-segment.indigo::before {
+            background-color: #6366f1;
+        }
+
+        .arrow-segment.purple::before {
+            background-color: #8b5cf6;
+        }
+
+        .arrow-segment.orange::before {
+            background-color: #f59e0b;
+        }
+
+        .arrow-segment.emerald::before {
+            background-color: #10b981;
+        }
+
+        /* Màu xám cho bước chưa tới */
+        .arrow-segment.step-inactive::before {
+            background-color: #d6d6d6 !important;
+        }
+
+    /* Dot trắng trên thanh tiến trình */
+    .arrow-dot {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background-color: white;
+        border-radius: 50%;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 2;
+        border: 2px solid #fff;
+        box-shadow: 0 0 2px #bbb;
+    }
+
+    .arrow-segment.step-inactive .arrow-dot {
+        background-color: #bbb !important;
+        border: 2px solid #eee;
+        box-shadow: none;
+    }
+
+    /* Bước (icon - title - desc) */
+    .progress-step {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        z-index: 3;
+    }
+
+    .step-icon {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 24px;
+        margin-bottom: 15px;
+        position: relative;
+        z-index: 4;
+        background-color: #bbb; /* default gray */
+        transition: background 0.3s;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+        .step-icon.royal-blue {
+            background-color: #3b82f6;
+        }
+
+        .step-icon.indigo {
+            background-color: #6366f1;
+        }
+
+        .step-icon.purple {
+            background-color: #8b5cf6;
+        }
+
+        .step-icon.orange {
+            background-color: #f59e0b;
+        }
+
+        .step-icon.emerald {
+            background-color: #10b981;
+        }
+
+        .step-icon.step-inactive {
+            background-color: #d6d6d6 !important;
+            color: #fff !important;
+            filter: none !important;
+        }
+
+    .step-connector {
+        width: 2px;
+        height: 30px;
+        position: absolute;
+        top: 70px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 2;
+        background-color: #bbb;
+    }
+
+        .step-connector.royal-blue {
+            background-color: #3b82f6;
+        }
+
+        .step-connector.indigo {
+            background-color: #6366f1;
+        }
+
+        .step-connector.purple {
+            background-color: #8b5cf6;
+        }
+
+        .step-connector.orange {
+            background-color: #f59e0b;
+        }
+
+        .step-connector.emerald {
+            background-color: #10b981;
+        }
+
+        .step-connector.step-inactive {
+            background-color: #bbb !important;
+        }
+
+    /* Chữ bước hoàn thành - đen, chưa hoàn thành - nhạt */
+    .step-title {
+        font-weight: 700;
+        font-size: 16px;
+        margin-bottom: 8px;
+        text-align: center;
+        white-space: nowrap;
+        margin-top: 60px;
+        color: #222;
+        transition: color 0.3s;
+    }
+
+    .step-description {
+        font-size: 13px;
+        color: #666;
+        text-align: center;
+        line-height: 1.4;
+        margin-bottom: 5px;
+        max-width: 140px;
+        transition: color 0.3s;
+    }
+
+    .progress-step .step-title.step-inactive,
+    .progress-step .step-description.step-inactive {
+        color: #9ca3af !important;
+    }
+
+    /* ICON SVG giữ nguyên */
+
+    /* --- Các thành phần khác của page (giữ nguyên như cũ) --- */
     .order-info p {
         font-size: 1rem;
         color: #4B5563;
@@ -475,516 +689,5 @@
     .text-muted.text-decoration-line-through {
         color: #9ca3af !important;
     }
-    /* Voucher Used Section Custom Style */
-    .voucher-used-box {
-        border: 1.5px solid #60A5FA;
-        background: #f7fbff;
-        box-shadow: 0 2px 8px rgba(96, 165, 250, 0.08);
-    }
 
-    .voucher-title {
-        font-weight: 700;
-        color: #1E3A8A;
-        font-size: 1.4rem;
-        border-bottom: 2px solid #60A5FA;
-        padding-bottom: 10px;
-        width: 100%;
-        margin-bottom: 0;
-    }
-
-    .voucher-used-box .row {
-        margin-top: 10px;
-    }
-
-    .voucher-label {
-        font-size: 1.08rem;
-        color: #1E3A8A;
-        font-weight: 500;
-        margin-bottom: 10px;
-        display: flex;
-        align-items: center;
-    }
-
-        .voucher-label span:first-child {
-            min-width: 130px;
-            color: #2563eb;
-            font-weight: 600;
-            margin-right: 8px;
-        }
-
-    .voucher-badge {
-        background: linear-gradient(90deg, #1E3A8A, #60A5FA);
-        color: #fff;
-        font-weight: 700;
-        border-radius: 8px;
-        padding: 3px 16px;
-        font-size: 1.08rem;
-        letter-spacing: 1px;
-        box-shadow: 0 2px 8px rgba(30, 58, 138, 0.08);
-        margin-left: 2px;
-        display: inline-block;
-    }
-
-    .voucher-value {
-        color: #2563eb;
-        font-weight: 600;
-        font-size: 1.08rem;
-    }
-
-    .voucher-discount {
-        color: #e11d48;
-        font-weight: 700;
-        font-size: 1.08rem;
-        letter-spacing: 1px;
-    }
-
-    .voucher-info-box {
-        background: #fff;
-        border: 1.5px solid #60A5FA;
-        border-radius: 10px;
-        padding: 20px;
-        margin-bottom: 25px;
-        box-shadow: 0 2px 8px rgba(96, 165, 250, 0.08);
-    }
-
-    .voucher-info-title {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: #1E3A8A;
-        letter-spacing: 0.5px;
-        display: flex;
-        align-items: center;
-        border-bottom: 2px solid #60A5FA;
-        padding-bottom: 10px;
-        margin-bottom: 18px;
-    }
-
-    .voucher-icon {
-        font-size: 2rem;
-        color: #22c55e;
-        display: inline-block;
-        vertical-align: middle;
-    }
-
-    .voucher-info-row {
-        margin-bottom: 10px;
-        font-size: 1.08rem;
-    }
-
-    .voucher-info-label {
-        font-weight: 600;
-        color: #1E3A8A;
-        min-width: 140px;
-        display: inline-block;
-    }
-
-    .voucher-info-value {
-        color: #2563eb;
-        font-weight: 500;
-        word-break: break-word;
-        margin-left: 4px;
-    }
-
-    .order-info-value {
-        color: #4B5563;
-        font-weight: 500;
-        margin-left: 4px;
-    }
-
-
-
-
-
-    .step-wrapper {
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        margin: 30px auto;
-        height: 110px;
-        max-width: 1200px;
-    }
-
-    .step-item {
-        position: relative;
-        flex: 1;
-        text-align: center;
-    }
-
-    .step-arrow {
-        position: absolute;
-        top: 50px;
-        left: 100%;
-        width: 0;
-        height: 0;
-        border-top: 25px solid transparent;
-        border-bottom: 25px solid transparent;
-        border-left: 25px solid #ccc;
-        z-index: 1;
-    }
-
-    .step-circle {
-        width: 70px;
-        height: 70px;
-        border-radius: 50%;
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto;
-        font-size: 24px;
-        margin-bottom: 10px;
-    }
-
-    .step-bar {
-        height: 20px;
-        background-color: #ccc;
-        border-radius: 10px;
-        margin: 0 auto;
-        position: relative;
-        width: 100%;
-    }
-
-        .step-bar.active {
-            background-color: #4CAF50;
-        }
-
-    .step-dot {
-        width: 12px;
-        height: 12px;
-        background-color: white;
-        border: 2px solid #999;
-        border-radius: 50%;
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-    }
-
-    .step-title {
-        font-weight: bold;
-    }
-
-    .step-sub {
-        font-size: 14px;
-        color: #666;
-    }
-
-    .step-circle.blue {
-        background-color: #007bff;
-    }
-
-    .step-circle.cyan {
-        background-color: #00bcd4;
-    }
-
-    .step-circle.purple {
-        background-color: #9c27b0;
-    }
-
-    .step-circle.orange {
-        background-color: #ffa000;
-    }
-
-    .step-circle.green {
-        background-color: #4caf50;
-    }
-
-    .step-inactive {
-        filter: grayscale(1) brightness(1.7) opacity(0.5) !important;
-        color: #bbb !important;
-    }
-
-
-    @* css details *@
-</style>
-
-<style>
-
-    /* Thanh xanh lá trên cùng */
-    .top-bar {
-        height: 4px;
-        background-color: #4caf50;
-        width: 100%;
-    }
-
-    .separator {
-        margin: 0 8px;
-        color: #666;
-    }
-
-    .invoice-id {
-        color: #333;
-        font-weight: 500;
-    }
-
-    .print-btn {
-        position: absolute;
-        right: 20px;
-        top: 50%;
-        transform: translateY(-50%);
-        background-color: rgba(0,0,0,0.8);
-        color: white;
-        padding: 8px 16px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 12px;
-        font-weight: 500;
-    }
-
-    .progress-timeline {
-        display: flex;
-        align-items: flex-start;
-        position: relative;
-        max-width: 900px;
-        margin: 0 auto;
-    }
-
-    /* Mũi tên progress bar với màu sắc mới */
-    .arrow-progress {
-        display: flex;
-        align-items: center;
-        position: absolute;
-        top: 100px;
-        left: 0;
-        right: 0;
-        height: 20px;
-        z-index: 1;
-    }
-
-    .arrow-segment {
-        height: 100%;
-        position: relative;
-        flex: 1;
-        display: flex;
-        align-items: center;
-    }
-
-        .arrow-segment::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%, 10px 50%);
-        }
-
-        .arrow-segment:first-child::before {
-            clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%);
-        }
-
-        /* Màu sắc mới cho các mũi tên */
-        .arrow-segment.royal-blue::before {
-            background-color: #3b82f6;
-        }
-
-        .arrow-segment.indigo::before {
-            background-color: #6366f1;
-        }
-
-        .arrow-segment.purple::before {
-            background-color: #8b5cf6;
-        }
-
-        .arrow-segment.orange::before {
-            background-color: #f59e0b;
-        }
-
-        .arrow-segment.emerald::before {
-            background-color: #10b981;
-        }
-
-    /* Chấm tròn trắng trên mũi tên */
-    .arrow-dot {
-        position: absolute;
-        width: 8px;
-        height: 8px;
-        background-color: white;
-        border-radius: 50%;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        z-index: 2;
-    }
-
-    .progress-step {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        position: relative;
-        z-index: 3;
-    }
-
-    .step-icon {
-        width: 70px;
-        height: 70px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 24px;
-        margin-bottom: 15px;
-        position: relative;
-        z-index: 4;
-    }
-
-    /* Đường nối từ icon xuống dải màu với màu tương ứng */
-    .step-connector {
-        width: 2px;
-        height: 30px;
-        position: absolute;
-        top: 70px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 2;
-    }
-
-    /* Màu sắc mới cho các icon và connector */
-    .step-icon.royal-blue {
-        background-color: #3b82f6;
-    }
-
-    .step-connector.royal-blue {
-        background-color: #3b82f6;
-    }
-
-    .step-icon.indigo {
-        background-color: #6366f1;
-    }
-
-    .step-connector.indigo {
-        background-color: #6366f1;
-    }
-
-    .step-icon.purple {
-        background-color: #8b5cf6;
-    }
-
-    .step-connector.purple {
-        background-color: #8b5cf6;
-    }
-
-    .step-icon.orange {
-        background-color: #f59e0b;
-    }
-
-    .step-connector.orange {
-        background-color: #f59e0b;
-    }
-
-    .step-icon.emerald {
-        background-color: #10b981;
-    }
-
-    .step-connector.emerald {
-        background-color: #10b981;
-    }
-
-    .step-title {
-        font-weight: 600;
-        font-size: 16px;
-        color: #333;
-        margin-bottom: 8px;
-        text-align: center;
-        white-space: nowrap;
-        margin-top: 60px;
-    }
-
-    .step-description {
-        font-size: 13px;
-        color: #666;
-        text-align: center;
-        line-height: 1.4;
-        margin-bottom: 5px;
-        max-width: 140px;
-    }
-
-    .step-time {
-        font-size: 12px;
-        color: #999;
-        text-align: center;
-    }
-
-    /* Icons */
-    .icon-file::before {
-        content: "";
-        display: block;
-        width: 24px;
-        height: 24px;
-        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z'/%3E%3C/svg%3E") center/contain no-repeat;
-    }
-
-    .icon-truck::before {
-        content: "";
-        display: block;
-        width: 24px;
-        height: 24px;
-        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M18,18.5A1.5,1.5 0 0,1 16.5,17A1.5,1.5 0 0,1 18,15.5A1.5,1.5 0 0,1 19.5,17A1.5,1.5 0 0,1 18,18.5M19.5,9.5L21.46,12H17V9.5M6,18.5A1.5,1.5 0 0,1 4.5,17A1.5,1.5 0 0,1 6,15.5A1.5,1.5 0 0,1 7.5,17A1.5,1.5 0 0,1 6,18.5M20,8H17V4H3C1.89,4 1,4.89 1,6V17H3A3,3 0 0,0 6,20A3,3 0 0,0 9,17H15A3,3 0 0,0 18,20A3,3 0 0,0 21,17H23V12L20,8Z'/%3E%3C/svg%3E") center/contain no-repeat;
-    }
-
-    .icon-delivery::before {
-        content: "";
-        display: block;
-        width: 24px;
-        height: 24px;
-        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M3,4A2,2 0 0,0 1,6V17H3A3,3 0 0,0 6,20A3,3 0 0,0 9,17H15A3,3 0 0,0 18,20A3,3 0 0,0 21,17H23V12L20,8H17V4M10,6L14,10L10,14V11H4V9H10M6,15.5A1.5,1.5 0 0,1 7.5,17A1.5,1.5 0 0,1 6,18.5A1.5,1.5 0 0,1 4.5,17A1.5,1.5 0 0,1 6,15.5M18,15.5A1.5,1.5 0 0,1 19.5,17A1.5,1.5 0 0,1 18,18.5A1.5,1.5 0 0,1 16.5,17A1.5,1.5 0 0,1 18,15.5Z'/%3E%3C/svg%3E") center/contain no-repeat;
-    }
-
-    .icon-payment::before {
-        content: "";
-        display: block;
-        width: 24px;
-        height: 24px;
-        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4M20,18H4V12H20V18M20,8H4V6H20V8Z'/%3E%3C/svg%3E") center/contain no-repeat;
-    }
-
-    .icon-check::before {
-        content: "";
-        display: block;
-        width: 24px;
-        height: 24px;
-        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z'/%3E%3C/svg%3E") center/contain no-repeat;
-    }
-
-    .action-buttons {
-        position: absolute;
-        bottom: 20px;
-        right: 20px;
-        display: flex;
-        gap: 10px;
-    }
-
-    .btn {
-        padding: 8px 20px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 13px;
-        font-weight: 500;
-        min-width: 70px;
-    }
-
-    .btn-cancel {
-        background-color: #6c757d;
-        color: white;
-    }
-
-    .btn-edit {
-        background-color: #007bff;
-        color: white;
-    }
-
-    .btn-accept {
-        background-color: #28a745;
-        color: white;
-    }
-
-    .btn:hover {
-        opacity: 0.9;
-        transform: translateY(-1px);
-        transition: all 0.2s ease;
-    }
 </style>
