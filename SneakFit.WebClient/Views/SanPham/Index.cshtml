@@ -11,17 +11,17 @@
     var currentBrands = new List<Guid>();
     var currentColors = new List<Guid>();
     var currentCategories = new List<Guid>();
-    
+
     if (ViewBag.SelectedBrands is List<Guid> brands)
     {
         currentBrands = brands;
     }
-    
+
     if (ViewBag.SelectedColors is List<Guid> colors)
     {
         currentColors = colors;
     }
-    
+
     if (ViewBag.SelectedCategories is List<Guid> categories)
     {
         currentCategories = categories;
@@ -52,19 +52,19 @@
                     <div class="category-filter-widget widget-item">
                         <h3 class="widget-title">Danh Mục</h3>
                         <div class="category-list">
-                        @foreach (var cat in Model.DanhMucs)
-                        {
+                            @foreach (var cat in Model.DanhMucs)
+                            {
                                 <div class="category-item">
                                     <div class="form-check">
-                                        <input class="form-check-input category-checkbox" type="checkbox" 
+                                        <input class="form-check-input category-checkbox" type="checkbox"
                                                id="category@cat.Id" value="@cat.Id"
-                                               @(currentCategories.Contains(cat.Id) ? "checked" : "")>
+                                        @(currentCategories.Contains(cat.Id) ? "checked" : "")>
                                         <label class="form-check-label" for="category@cat.Id">
-                                    @cat.TenDanhMuc
+                                            @cat.TenDanhMuc
                                         </label>
                                     </div>
                                 </div>
-                        }
+                            }
                         </div>
                     </div>
                     <!--/Product Categories Widget -->
@@ -107,34 +107,34 @@
                     <div class="color-filter-widget widget-item">
                         <h3 class="widget-title">Màu Sắc</h3>
                         <div class="color-options">
-                        @foreach (var color in Model.MauSacs)
-                        {
+                            @foreach (var color in Model.MauSacs)
+                            {
                                 <span class="color-circle @(currentColors.Contains(color.Id) ? "selected" : "")"
-                                  title="@color.TenMauSac"
-                                  data-color="@color.MaMauSac"
-                                  data-id="@color.Id"
-                                  style="background:@color.MaMauSac"></span>
-                        }
+                                      title="@color.TenMauSac"
+                                      data-color="@color.MaMauSac"
+                                      data-id="@color.Id"
+                                      style="background:@color.MaMauSac"></span>
+                            }
                         </div>
                     </div>
                     <!--/Color Filter Widget -->
                     <!-- Brand Filter Widget -->
                     <div class="brand-filter-widget widget-item">
                         <h3 class="widget-title">Thương Hiệu</h3>
-                    <div class="brand-list">
-                        @foreach (var brand in Model.ThuongHieus)
-                        {
-                            <div class="brand-item">
-                                <div class="form-check">
-                                                                            <input class="form-check-input brand-checkbox" type="checkbox" 
-                                           id="brand@brand.Id" value="@brand.Id"
-                                           @(currentBrands.Contains(brand.Id) ? "checked" : "")>
-                                    <label class="form-check-label" for="brand@brand.Id">
-                                        @brand.TenThuongHieu
-                                    </label>
+                        <div class="brand-list">
+                            @foreach (var brand in Model.ThuongHieus)
+                            {
+                                <div class="brand-item">
+                                    <div class="form-check">
+                                        <input class="form-check-input brand-checkbox" type="checkbox"
+                                               id="brand@brand.Id" value="@brand.Id"
+                                        @(currentBrands.Contains(brand.Id) ? "checked" : "")>
+                                        <label class="form-check-label" for="brand@brand.Id">
+                                            @brand.TenThuongHieu
+                                        </label>
+                                    </div>
                                 </div>
-                            </div>
-                        }
+                            }
                         </div>
                     </div>
                     <!--/Brand Filter Widget -->
@@ -143,7 +143,7 @@
                         <button type="button" class="btn btn-primary w-100 apply-filters-btn">
                             <i class="bi bi-funnel me-2"></i>Áp Dụng Bộ Lọc
                         </button>
-                        <button type="button" class="btn btn-outline-secondary w-100 mt-2 clear-filters-btn">
+                        <button type="button" class="btn btn-outline-secondary w-100 mt-2 clear-filters-btn" style="font-size: 0.875rem; padding: 0.5rem 1rem;">
                             <i class="bi bi-x-circle me-2"></i>Xóa Tất Cả
                         </button>
                     </div>
@@ -167,11 +167,11 @@
                                             </span>
                                             <input type="text" name="tuKhoa" value="@currentKeyword"
                                                    class="form-control search-input"
-                                                   placeholder="Tìm kiếm sản phẩm theo tên, thương hiệu, danh mục...">
+                                                   placeholder="Tìm sản phẩm theo tên, thương hiệu, danh mục...">
                                             <button class="btn btn-primary search-btn" type="submit">
                                                 <i class="bi bi-search me-1"></i>Tìm Kiếm
-                                                </button>
-                                            </div>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-12 col-md-4">
@@ -209,7 +209,7 @@
                                 <h6 class="active-filter-label mb-0">
                                     <i class="bi bi-funnel-fill me-2"></i>Bộ lọc đang áp dụng:
                                 </h6>
-                                <button type="button" class="btn btn-sm btn-outline-danger clear-all-filters-btn">
+                                <button type="button" class="btn btn-sm btn-outline-danger clear-all-filters-btn" style="font-size: 0.875rem; padding: 0.375rem 0.75rem;">
                                     <i class="bi bi-x-circle me-1"></i>Xóa tất cả
                                 </button>
                             </div>
@@ -220,7 +220,7 @@
                                         <i class="bi bi-search me-1"></i>"@currentKeyword"
                                         <button class="filter-remove" data-type="keyword">
                                             <i class="bi bi-x"></i>
-                                                        </button>
+                                        </button>
                                     </span>
                                 }
                                 @if (currentCategoryId != "")
@@ -230,7 +230,7 @@
                                     {
                                         <span class="filter-tag">
                                             <i class="bi bi-tag me-1"></i>@category.TenDanhMuc
-                                            <button class="filter-remove" data-type="category">
+                                            <button class="filter-remove" data-type="category" data-id="@category.Id">
                                                 <i class="bi bi-x"></i>
                                             </button>
                                         </span>
@@ -253,42 +253,40 @@
                                 {
                                     <span class="filter-tag">
                                         <i class="bi bi-currency-dollar me-1"></i>@currentMinPrice.ToString("N0")đ - @currentMaxPrice.ToString("N0")đ
-                                        <button class="filter-remove" data-type="price">
+                                        <button class="filter-remove" data-type="price" data-id="">
                                             <i class="bi bi-x"></i>
                                         </button>
                                     </span>
                                 }
                                 @foreach (var brandId in currentBrands)
+                                {
+                                    var brand = Model.ThuongHieus.FirstOrDefault(b => b.Id == brandId);
+                                    if (brand != null)
                                     {
-                                        var brand = Model.ThuongHieus.FirstOrDefault(b => b.Id == brandId);
-                                        if (brand != null)
-                                        {
-                                            <span class="filter-tag">
-                                                <i class="bi bi-shop me-1"></i>@brand.TenThuongHieu
-                                                <button class="filter-remove" data-type="brand" data-id="@brandId">
-                                                    <i class="bi bi-x"></i>
-                                                </button>
-                                            </span>
-                                        }
-                                                                    }
+                                        <span class="filter-tag">
+                                            <i class="bi bi-shop me-1"></i>@brand.TenThuongHieu
+                                            <button class="filter-remove" data-type="brand" data-id="@brandId">
+                                                <i class="bi bi-x"></i>
+                                            </button>
+                                        </span>
+                                    }
+                                }
                                 @foreach (var colorId in currentColors)
-                                        {
-                                            var color = Model.MauSacs.FirstOrDefault(c => c.Id == colorId);
-                                            if (color != null)
-                                            {
-                                                <span class="filter-tag">
-                                                    <i class="bi bi-palette me-1"></i>@color.TenMauSac
-                                                    <button class="filter-remove" data-type="color" data-id="@colorId">
-                                                        <i class="bi bi-x"></i>
-                                                    </button>
-                                                </span>
-                                            }
-                                        }
+                                {
+                                    var color = Model.MauSacs.FirstOrDefault(c => c.Id == colorId);
+                                    if (color != null)
+                                    {
+                                        <span class="filter-tag">
+                                            <i class="bi bi-palette me-1"></i>@color.TenMauSac
+                                            <button class="filter-remove" data-type="color" data-id="@colorId">
+                                                <i class="bi bi-x"></i>
+                                            </button>
+                                        </span>
                                     }
                                 }
                             </div>
-                    </div>
-                </section>
+                        </div>
+                    </section>
                 }
 
                 <!-- Product List Container -->
@@ -306,7 +304,7 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-color/2.1.2/jquery.color.min.js"></script>
     <link rel="stylesheet" href="~/assets/css/Products.css" />
-    
+
     <script>
         $(function () {
             // Khởi tạo các vòng tròn màu sắc
@@ -351,7 +349,7 @@
 
                 $('#minPriceInput').val(minVal);
                 $('#maxPriceInput').val(maxVal);
-                
+
                 console.log('Price range updated:', { min: minVal, max: maxVal });
             }
 
@@ -461,7 +459,12 @@
                         $('input[name="tuKhoa"]').val('');
                         break;
                     case 'category':
-                        $(`input[value="${id}"]`).prop('checked', false);
+                        if (id) {
+                            $(`input[value="${id}"]`).prop('checked', false);
+                        } else {
+                            // Xóa tất cả checkbox danh mục
+                            $('.category-checkbox').prop('checked', false);
+                        }
                         break;
                     case 'price':
                         $('.min-range').val(0);
@@ -499,7 +502,7 @@
             function loadFilteredProducts(pageIndex = 1) {
                 const minPrice = parseInt($('#minPriceInput').val()) || 0;
                 const maxPrice = parseInt($('#maxPriceInput').val()) || 10000000;
-                
+
                 const formData = {
                     tuKhoa: $('input[name="tuKhoa"]').val(),
                     selectedCategories: $('#selectedCategoriesInput').val(),
@@ -519,7 +522,7 @@
                 console.log('Selected categories:', formData.selectedCategories);
                 console.log('Selected brands:', formData.selectedBrands);
                 console.log('Selected colors:', formData.selectedColors);
-                
+
                 $.ajax({
                     url: '@Url.Action("GetFilteredProducts", "SanPham")',
                     type: 'GET',
@@ -565,7 +568,7 @@
                     const categoryIds = selectedCategories.split(',');
                     categoryIds.forEach(id => {
                         if (id) {
-                            const categoryName = $(`#category${id}`).next('label').text();
+                            const categoryName = $(`label[for='category${id}']`).text().trim();
                             filterHtml += `<span class="filter-tag">
                                 <i class="bi bi-tag me-1"></i>${categoryName}
                                 <button class="filter-remove" data-type="category" data-id="${id}">
@@ -581,7 +584,7 @@
                     const brandIds = selectedBrands.split(',');
                     brandIds.forEach(id => {
                         if (id) {
-                            const brandName = $(`#brand${id}`).next('label').text();
+                            const brandName = $(`label[for='brand${id}']`).text().trim();
                             filterHtml += `<span class="filter-tag">
                                 <i class="bi bi-shop me-1"></i>${brandName}
                                 <button class="filter-remove" data-type="brand" data-id="${id}">
@@ -610,8 +613,10 @@
 
                 if (minPrice > 0 || maxPrice < 10000000) {
                     hasActiveFilters = true;
+                    const minPriceFormatted = parseInt(minPrice).toLocaleString();
+                    const maxPriceFormatted = parseInt(maxPrice).toLocaleString();
                     filterHtml += `<span class="filter-tag">
-                        <i class="bi bi-currency-dollar me-1"></i>${parseInt(minPrice).toLocaleString()}đ - ${parseInt(maxPrice).toLocaleString()}đ
+                        <i class="bi bi-currency-dollar me-1"></i>${minPriceFormatted}đ - ${maxPriceFormatted}đ
                         <button class="filter-remove" data-type="price">
                             <i class="bi bi-x"></i>
                         </button>
@@ -679,7 +684,12 @@
                             $('input[name="tuKhoa"]').val('');
                             break;
                         case 'category':
-                            $(`input[id="category${id}"]`).prop('checked', false);
+                            if (id) {
+                                $(`input[id="category${id}"]`).prop('checked', false);
+                            } else {
+                                // Xóa tất cả checkbox danh mục
+                                $('.category-checkbox').prop('checked', false);
+                            }
                             break;
                         case 'price':
                             $('.min-range').val(0);
@@ -755,7 +765,7 @@
         color: #6c757d;
     }
 
-        .search-btn {
+    .search-btn {
         border-radius: 0 8px 8px 0;
         padding: 12px 20px;
         font-weight: 600;
@@ -765,16 +775,16 @@
         color: white;
     }
 
-    .search-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(25, 118, 210, 0.4);
-        background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
-    }
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(25, 118, 210, 0.4);
+            background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+        }
 
-    .search-btn:active {
-        transform: translateY(0);
-        box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3);
-    }
+        .search-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3);
+        }
 
     /* Active Filters Styles */
     .active-filters-section {
@@ -883,10 +893,10 @@
         transition: all 0.3s ease;
     }
 
-    .widget-item:hover {
-        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-        transform: translateY(-2px);
-    }
+        .widget-item:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
 
     .widget-title {
         font-size: 1.1rem;
@@ -945,7 +955,7 @@
                 text-shadow: 0 1px 2px rgba(0,0,0,0.5);
             }
 
-        /* Category Filter Styles */
+    /* Category Filter Styles */
     .category-list {
         max-height: 200px;
         overflow-y: auto;
@@ -955,23 +965,23 @@
         scrollbar-color: #c1c1c1 #f1f1f1;
     }
 
-    .category-list::-webkit-scrollbar {
-        width: 6px;
-    }
+        .category-list::-webkit-scrollbar {
+            width: 6px;
+        }
 
-    .category-list::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 3px;
-    }
+        .category-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
 
-    .category-list::-webkit-scrollbar-thumb {
-        background: #c1c1c1;
-        border-radius: 3px;
-    }
+        .category-list::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
 
-    .category-list::-webkit-scrollbar-thumb:hover {
-        background: #a8a8a8;
-    }
+            .category-list::-webkit-scrollbar-thumb:hover {
+                background: #a8a8a8;
+            }
 
     .category-item {
         margin-bottom: 8px;
@@ -981,15 +991,15 @@
         border: 1px solid transparent;
     }
 
-    .category-item:hover {
-        background: #f8f9fa;
-        border-color: #e3f2fd;
-        transform: translateX(2px);
-    }
+        .category-item:hover {
+            background: #f8f9fa;
+            border-color: #e3f2fd;
+            transform: translateX(2px);
+        }
 
-    .category-item .form-check {
-        margin: 0;
-    }
+        .category-item .form-check {
+            margin: 0;
+        }
 
     /* Brand Filter Styles */
     .brand-list {
@@ -1001,23 +1011,23 @@
         scrollbar-color: #c1c1c1 #f1f1f1;
     }
 
-    .brand-list::-webkit-scrollbar {
-        width: 6px;
-    }
+        .brand-list::-webkit-scrollbar {
+            width: 6px;
+        }
 
-    .brand-list::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 3px;
-    }
+        .brand-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
 
-    .brand-list::-webkit-scrollbar-thumb {
-        background: #c1c1c1;
-        border-radius: 3px;
-    }
+        .brand-list::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
 
-    .brand-list::-webkit-scrollbar-thumb:hover {
-        background: #a8a8a8;
-    }
+            .brand-list::-webkit-scrollbar-thumb:hover {
+                background: #a8a8a8;
+            }
 
     .brand-item {
         margin-bottom: 8px;
@@ -1027,15 +1037,15 @@
         border: 1px solid transparent;
     }
 
-    .brand-item:hover {
-        background: #f8f9fa;
-        border-color: #e3f2fd;
-        transform: translateX(2px);
-    }
+        .brand-item:hover {
+            background: #f8f9fa;
+            border-color: #e3f2fd;
+            transform: translateX(2px);
+        }
 
-    .brand-item .form-check {
-        margin: 0;
-    }
+        .brand-item .form-check {
+            margin: 0;
+        }
 
     .form-check-input[type="checkbox"] {
         accent-color: #1976d2;
@@ -1059,7 +1069,7 @@
         padding-top: 16px;
     }
 
-        .apply-filters-btn {
+    .apply-filters-btn {
         background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
         border: none;
         padding: 14px;
@@ -1070,39 +1080,39 @@
         box-shadow: 0 2px 8px rgba(25, 118, 210, 0.2);
     }
 
-    .apply-filters-btn:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(25, 118, 210, 0.4);
-        background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
-    }
+        .apply-filters-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(25, 118, 210, 0.4);
+            background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+        }
 
-    .apply-filters-btn:active {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
-    }
+        .apply-filters-btn:active {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+        }
 
     .clear-filters-btn {
         border: 2px solid #6c757d;
         color: #6c757d;
         background: transparent;
-        padding: 14px;
+        padding: 12px;
         font-weight: 600;
-        font-size: 16px;
+        font-size: 14px;
         transition: all 0.3s ease;
         border-radius: 8px;
     }
 
-    .clear-filters-btn:hover {
-        background: #6c757d;
-        color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
-    }
+        .clear-filters-btn:hover {
+            background: #6c757d;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+        }
 
-    .clear-filters-btn:active {
-        transform: translateY(0);
-        box-shadow: 0 2px 6px rgba(108, 117, 125, 0.2);
-    }
+        .clear-filters-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 6px rgba(108, 117, 125, 0.2);
+        }
 
     /* Pagination Styles */
     .pagination {
@@ -1155,6 +1165,14 @@
     .page-link:focus {
         box-shadow: 0 0 0 0.2rem rgba(25, 118, 210, 0.25);
         outline: none;
+    }
+
+    /* Clear all filters button in active filters section */
+    .clear-all-filters-btn {
+        font-size: 0.875rem !important;
+        padding: 0.375rem 0.75rem !important;
+        border-radius: 6px;
+        font-weight: 500;
     }
 
     /* Existing styles remain unchanged */

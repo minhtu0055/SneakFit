@@ -23,46 +23,61 @@
         <div class="row align-items-center">
             <div class="col-lg-6 content-col" data-aos="fade-right" data-aos-delay="100">
                 <div class="content">
-                    <span class="promo-badge">New Collection 2025</span>
-                    <h1>Discover Stylish <span>Fashion</span> For Every Season</h1>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit tellus, luctus nec ullamcorper mattis, pulvinar dapibus leo. Vestibulum ante ipsum primis in faucibus.</p>
+                    <span class="promo-badge">SneakFit 2025</span>
+                    <h1>
+                        <span class="highlight">Khám phá</span> bộ sưu tập <br>
+                        <span class="brand">SneakFit</span> mới nhất
+                    </h1>
+                    <p>Đẳng cấp - Thoải mái - Thời trang</p>
                     <div class="hero-cta">
-                        <a href="#" class="btn btn-shop">Shop Now <i class="bi bi-arrow-right"></i></a>
-                        <a href="#" class="btn btn-collection">View Collection</a>
-                    </div>
-                    <div class="hero-features">
-                        <div class="feature-item">
-                            <i class="bi bi-truck"></i>
-                            <span>Free Shipping</span>
-                        </div>
-                        <div class="feature-item">
-                            <i class="bi bi-shield-check"></i>
-                            <span>Secure Payment</span>
-                        </div>
-                        <div class="feature-item">
-                            <i class="bi bi-arrow-repeat"></i>
-                            <span>Easy Returns</span>
-                        </div>
+                        <a href="/SanPham" class="btn btn-shop">Mua ngay <i class="bi bi-arrow-right"></i></a>
+                        @* <a href="/SanPham" class="btn btn-collection">Xem bộ sưu tập</a> *@
                     </div>
                 </div>
             </div>
             <div class="col-lg-6 image-col" data-aos="fade-left" data-aos-delay="200">
                 <div class="hero-image">
-                    <img src="~/assets/img/product/product-f-9.webp" alt="Fashion Product" class="main-product" loading="lazy">
-                    <div class="floating-product product-1" data-aos="fade-up" data-aos-delay="300">
-                        <img src="~/assets/img/product/product-4.webp" alt="Product 2">
-                        <div class="product-info">
-                            <h4>Summer Collection</h4>
-                            <span class="price">$89.99</span>
-                            ngugngu
+                    <div class="hero-slider swiper init-swiper" style="height: 450px">
+                        <script type="application/json" class="swiper-config">
+                            {
+                              "loop": true,
+                              "autoplay": {
+                                "delay": 3500,
+                                "disableOnInteraction": false
+                              },
+                              "grabCursor": true,
+                              "speed": 800,
+                              "slidesPerView": 1,
+                              "effect": "fade",
+                              "fadeEffect": { "crossFade": true },
+                              "navigation": {
+                                "nextEl": ".hero-swiper-next",
+                                "prevEl": ".hero-swiper-prev"
+                              }
+                            }
+                        </script>
+                        <div class="swiper-wrapper">
+                            <div class="swiper-slide">
+                                <img src="~/assets/img/Giay3-removebg-preview.png" alt="SneakFit Hero" class="main-product floating" loading="lazy" style="max-width: 50%">
+                            </div>
+                            <div class="swiper-slide">
+                                <img src="~/assets/img/Giay2-removebg-preview.png" alt="Giày 1" class="main-product floating" loading="lazy" style="max-width: 50%">
+                            </div>
+                            <div class="swiper-slide">
+                                <img src="~/assets/img/Giay1-removebg-preview.png" alt="Giày 2" class="main-product floating" loading="lazy" style="max-width: 50%">
+                            </div>
                         </div>
+                        @* <div class="hero-swiper-next swiper-button-next"></div>
+                        <div class="hero-swiper-prev swiper-button-prev"></div> *@
                     </div>
-                    <div class="floating-product product-2" data-aos="fade-up" data-aos-delay="400">
-                        <img src="~/assets/img/product/product-3.webp" alt="Product 3">
-                        <div class="product-info">
-                            <h4>Casual Wear</h4>
-                            <span class="price">$59.99</span>
-                        </div>
+                    <div class="floating-product product-1 floating" style="animation-delay:0.5s;">
+                        <img src="~/assets/img/Giay3-removebg-preview.png" alt="Giày 1">
+                    </div>
+                    <div class="floating-product product-2 floating" style="animation-delay:1.2s;">
+                        <img src="~/assets/img/Giay2-removebg-preview.png" alt="Giày 2">
+                    </div>
+                    <div class="floating-product product-3 floating" style="animation-delay:1.8s;">
+                        <img src="~/assets/img/Giay1-removebg-preview.png" alt="Giày 3">
                     </div>
                     <div class="discount-badge" data-aos="zoom-in" data-aos-delay="500">
                         <span class="percent">30%</span>
@@ -74,7 +89,7 @@
     </div>
 </section><!-- /Hero Section -->
 <!-- Info Cards Section -->
-<section id="info-cards" class="info-cards section light-background">
+@* <section id="info-cards" class="info-cards section light-background">
 
     <div class="container" data-aos="fade-up" data-aos-delay="100">
 
@@ -123,7 +138,7 @@
 
     </div>
 
-</section><!-- /Info Cards Section -->
+</section><!-- /Info Cards Section --> *@
 <!-- Category Cards Section -->
 <section id="category-cards" class="category-cards section">
 
@@ -277,166 +292,81 @@
 </section><!-- /Category Cards Section -->
 <!-- Best Sellers Section -->
 <section id="best-sellers" class="best-sellers section">
-
-    <!-- Section Title -->
-    <div class="container section-title" data-aos="fade-up">
-        <h2>Best Sellers</h2>
-        <p>Necessitatibus eius consequatur ex aliquid fuga eum quidem sint consectetur velit</p>
-    </div><!-- End Section Title -->
-
     <div class="container" data-aos="fade-up" data-aos-delay="100">
-
-        <div class="row gy-4">
-            <!-- Product 1 -->
-            <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="100">
-                <div class="product-card">
-                    <div class="product-image">
-                        <img src="~/assets/img/product/product-1.webp" class="img-fluid default-image" alt="Product" loading="lazy">
-                        <img src="~/assets/img/product/product-1-variant.webp" class="img-fluid hover-image" alt="Product hover" loading="lazy">
-                        <div class="product-tags">
-                            <span class="badge bg-accent">New</span>
-                        </div>
-                        <div class="product-actions">
-                            <button class="btn-wishlist" type="button" aria-label="Add to wishlist">
-                                <i class="bi bi-heart"></i>
-                            </button>
-                            <button class="btn-quickview" type="button" aria-label="Quick view">
-                                <i class="bi bi-eye"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-title"><a href="product-details.html">Lorem ipsum dolor sit amet</a></h3>
-                        <div class="product-price">
-                            <span class="current-price">$89.99</span>
-                        </div>
-                        <div class="product-rating">
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-half"></i>
-                            <span class="rating-count">(42)</span>
-                        </div>
-                        <button class="btn btn-add-to-cart">
-                            <i class="bi bi-bag-plus me-2"></i>Add to Cart
-                        </button>
-                    </div>
-                </div>
-            </div><!-- End Product 1 -->
-            <!-- Product 2 -->
-            <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="150">
-                <div class="product-card">
-                    <div class="product-image">
-                        <img src="~/assets/img/product/product-4.webp" class="img-fluid default-image" alt="Product" loading="lazy">
-                        <img src="~/assets/img/product/product-4-variant.webp" class="img-fluid hover-image" alt="Product hover" loading="lazy">
-                        <div class="product-tags">
-                            <span class="badge bg-sale">Sale</span>
-                        </div>
-                        <div class="product-actions">
-                            <button class="btn-wishlist" type="button" aria-label="Add to wishlist">
-                                <i class="bi bi-heart"></i>
-                            </button>
-                            <button class="btn-quickview" type="button" aria-label="Quick view">
-                                <i class="bi bi-eye"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-title"><a href="product-details.html">Consectetur adipiscing elit</a></h3>
-                        <div class="product-price">
-                            <span class="current-price">$64.99</span>
-                            <span class="original-price">$79.99</span>
-                        </div>
-                        <div class="product-rating">
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star"></i>
-                            <span class="rating-count">(28)</span>
-                        </div>
-                        <button class="btn btn-add-to-cart">
-                            <i class="bi bi-bag-plus me-2"></i>Add to Cart
-                        </button>
-                    </div>
-                </div>
-            </div><!-- End Product 2 -->
-            <!-- Product 3 -->
-            <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="200">
-                <div class="product-card">
-                    <div class="product-image">
-                        <img src="~/assets/img/product/product-7.webp" class="img-fluid default-image" alt="Product" loading="lazy">
-                        <img src="~/assets/img/product/product-7-variant.webp" class="img-fluid hover-image" alt="Product hover" loading="lazy">
-                        <div class="product-actions">
-                            <button class="btn-wishlist" type="button" aria-label="Add to wishlist">
-                                <i class="bi bi-heart"></i>
-                            </button>
-                            <button class="btn-quickview" type="button" aria-label="Quick view">
-                                <i class="bi bi-eye"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-title"><a href="product-details.html">Sed do eiusmod tempor incididunt</a></h3>
-                        <div class="product-price">
-                            <span class="current-price">$119.00</span>
-                        </div>
-                        <div class="product-rating">
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <span class="rating-count">(56)</span>
-                        </div>
-                        <button class="btn btn-add-to-cart">
-                            <i class="bi bi-bag-plus me-2"></i>Add to Cart
-                        </button>
-                    </div>
-                </div>
-            </div><!-- End Product 3 -->
-            <!-- Product 4 -->
-            <div class="col-md-6 col-lg-3" data-aos="fade-up" data-aos-delay="250">
-                <div class="product-card">
-                    <div class="product-image">
-                        <img src="~/assets/img/product/product-12.webp" class="img-fluid default-image" alt="Product" loading="lazy">
-                        <img src="~/assets/img/product/product-12-variant.webp" class="img-fluid hover-image" alt="Product hover" loading="lazy">
-                        <div class="product-tags">
-                            <span class="badge bg-sold-out">Sold Out</span>
-                        </div>
-                        <div class="product-actions">
-                            <button class="btn-wishlist" type="button" aria-label="Add to wishlist">
-                                <i class="bi bi-heart"></i>
-                            </button>
-                            <button class="btn-quickview" type="button" aria-label="Quick view">
-                                <i class="bi bi-eye"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="product-info">
-                        <h3 class="product-title"><a href="product-details.html">Ut labore et dolore magna aliqua</a></h3>
-                        <div class="product-price">
-                            <span class="current-price">$75.50</span>
-                        </div>
-                        <div class="product-rating">
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star-fill"></i>
-                            <i class="bi bi-star"></i>
-                            <i class="bi bi-star"></i>
-                            <span class="rating-count">(15)</span>
-                        </div>
-                        <button class="btn btn-add-to-cart btn-disabled" disabled="">
-                            <i class="bi bi-bag-plus me-2"></i>Sold Out
-                        </button>
-                    </div>
-                </div>
-            </div><!-- End Product 4 -->
+        <div class="section-title">
+            <h2>Best Sellers</h2>
+            <p>Những sản phẩm bán chạy nhất trong tháng</p>
         </div>
+        <div class="best-seller-slider swiper init-swiper">
+            <script type="application/json" class="swiper-config">
+                {
+                  "loop": true,
+                  "autoplay": {
+                    "delay": 5000,
+                    "disableOnInteraction": false
+                  },
+                  "grabCursor": true,
+                  "speed": 600,
+                  "slidesPerView": "auto",
+                  "spaceBetween": 20,
+                  "navigation": {
+                    "nextEl": ".swiper-button-next",
+                    "prevEl": ".swiper-button-prev"
+                  },
+                  "breakpoints": {
+                    "320": { "slidesPerView": 1, "spaceBetween": 10 },
+                    "576": { "slidesPerView": 2, "spaceBetween": 15 },
+                    "768": { "slidesPerView": 3, "spaceBetween": 20 },
 
+                    "992": { "slidesPerView": 4, "spaceBetween": 20 },
+                    "1200": { "slidesPerView": 5, "spaceBetween": 20 }
+                  }
+                }
+            </script>
+            <div class="swiper-wrapper">
+                @if (Model.BestSellerSpct != null && Model.BestSellerSpct.Any())
+                {
+                    foreach (var item in Model.BestSellerSpct)
+                    {
+                        <div class="swiper-slide">
+                            <div class="product-card" data-aos="fade-up">
+                                <div class="product-image position-relative">
+                                    <img src="@item.Anh" alt="@item.TenSanPham" class="img-fluid main-img" loading="lazy" style="height:220px;object-fit:cover;">
+                                    <span class="badge bg-danger position-absolute top-0 start-0 m-2">Best Seller</span>
+                                </div>
+                                <div class="product-info">
+                                    <div class="product-content">
+                                        <div class="product-details d-flex justify-content-between">
+                                            <h2 class="product-title mb-0" style="font-weight: bold">@item.TenSanPham</h2>
+                                            <h4 class="product-category mb-0 ms-2" style="font-size:1rem; font-weight:600; color:#1766b3;">
+                                                @item.MauSac - @item.KichThuoc
+                                            </h4>
+                                        </div>
+                                        <div class="product-price mt-2" style="font-size:1.13rem; font-weight:600; color:#e53935;">
+                                            <span>@item.Gia.ToString("N0") đ</span>
+                                        </div>
+                                    </div>
+                                    <div class="product-stock mt-1">
+                                        <span class="stock-amount">Đã bán: @item.SoLuongDaBan</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="swiper-slide">
+                        <div class="product-card text-center">
+                            <p>Không có sản phẩm bán chạy nào.</p>
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+        </div>
     </div>
-
 </section><!-- /Best Sellers Section -->
 <!-- Product List Section -->
 <section id="product-list" class="product-list section">
@@ -447,10 +377,11 @@
             <div class="col-12">
                 <div class="product-filters isotope-filters mb-5 d-flex justify-content-center" data-aos="fade-up">
                     <ul class="d-flex flex-wrap gap-2 list-unstyled">
-                        <li class="filter-active" data-filter="*">All</li>
-                        <li data-filter=".filter-clothing">Clothing</li>
-                        <li data-filter=".filter-accessories">Accessories</li>
-                        <li data-filter=".filter-electronics">Electronics</li>
+                        <li class="filter-active" data-filter="*">Tất cả</li>
+                        @foreach (var dm in Model.DanhMucs)
+                        {
+                            <li data-filter=".filter-@dm.TenDanhMuc.ToLower().Replace(" ", "-")">@dm.TenDanhMuc</li>
+                        }
                     </ul>
                 </div>
             </div>
@@ -468,21 +399,30 @@
 
                     var listGia = Model.AllSpct
                     .Where(x => x.SanPhamId == item.Id && x.Gia > 0)
-                    .Select(x => x.Gia)
                     .ToList();
+                    
+                    var minGiaGoc = listGia.Any() ? listGia.Min(x => x.GiaGoc) : 0M;
+                    var minGiaKm = listGia.Any() ? listGia.Min(x => x.GiaKhuyenMai) : 0M;
+                    var maxPhanTramGiam = listGia.Any() ? listGia.Max(x => x.KhuyenMaiPhanTram) : 0M;
+                    var spctsCoKM = listGia.Where(x => x.KhuyenMaiPhanTram > 0 && x.GiaKhuyenMai < x.GiaGoc).ToList();
+
+                    // Nếu có khuyến mãi
+                    var minGiaGocCoKM = spctsCoKM.Any() ? spctsCoKM.Min(x => x.GiaGoc) : minGiaGoc;
+                    var minGiaKMCoKM = spctsCoKM.Any() ? spctsCoKM.Min(x => x.GiaKhuyenMai) : minGiaKm;
+                    var maxGiamCoKM = spctsCoKM.Any() ? spctsCoKM.Max(x => x.KhuyenMaiPhanTram) : 0M;
 
                     <div class="col-md-6 col-lg-3 product-item isotope-item filter-@item.TenDanhMuc?.ToLower().Replace(" ", "-")">
                         <div class="product-card">
                             <div class="product-image position-relative">
                                 @if (!string.IsNullOrEmpty(item.ImageDaiDien))
                                 {
-                                    <img src="@(ViewBag.BaseAddress + item.ImageDaiDien)" alt="@item.TenSanPham" class="img-fluid main-img" loading="lazy">
-                                    <img src="@(ViewBag.BaseAddress + item.ImageDaiDien)" alt="@item.TenSanPham Hover" class="img-fluid hover-img" loading="lazy">
+                                    <img src="@(ViewBag.BaseAddress + item.ImageDaiDien)" alt="@item.TenSanPham" class="img-fluid main-img" loading="lazy" onerror="this.src='/assets/img/SneakFit_Logo.png'">
+                                    <img src="@(ViewBag.BaseAddress + item.ImageDaiDien)" alt="@item.TenSanPham Hover" class="img-fluid hover-img" loading="lazy" onerror="this.src='/assets/img/SneakFit_Logo.png'">
                                 }
                                 else
                                 {
-                                    <img src="~/assets/img/product/no-image.png" alt="@item.TenSanPham" class="img-fluid main-img" loading="lazy">
-                                    <img src="~/assets/img/product/no-image.png" alt="@item.TenSanPham Hover" class="img-fluid hover-img" loading="lazy">
+                                    <img src="~/assets/img/SneakFit_Logo.png" alt="@item.TenSanPham" class="img-fluid main-img" loading="lazy">
+                                    <img src="~/assets/img/SneakFit_Logo.png" alt="@item.TenSanPham Hover" class="img-fluid hover-img" loading="lazy">
                                 }
 
                                 @if (!string.IsNullOrEmpty(nhanKM))
@@ -491,14 +431,9 @@
                                 }
 
                                 <div class="product-overlay">
-                                    @* <a href="/gio-hang/them/@item.Id" class="btn-cart"><i class="bi bi-cart-plus"></i> Add to Cart</a> *@
-                                    <form action="@Url.Action("AddToCart", "Cart")" method="post" class="d-inline" id="cartForm" style="display: none;">
-                                        <input type="hidden" name="id" id="selectedSpctId" value="" />
-                                        <input type="hidden" name="quantity" id="cartQuantityInput" value="1" />
-                                        <button type="submit" class="btn btn-primary">
-                                            <i class="bi bi-cart-plus"></i> Thêm vào giỏ hàng
-                                        </button>
-                                    </form>
+                                    <button type="button" class="btn btn-cart" onclick="openProductModal('@item.Id', '@item.TenSanPham')">
+                                        <i class="bi bi-cart-plus"></i> Thêm vào giỏ hàng
+                                    </button>
                                     <div class="product-actions">
                                         <div class="product-quick-actions">
                                             <button type="button" class="quick-action-btn"><i class="bi bi-heart"></i></button>
@@ -523,7 +458,18 @@
                                     <div class="product-price mt-2" style="font-size:1.13rem; font-weight:600; color:#e53935;">
                                         @if (listGia.Any())
                                         {
-                                            <span>@listGia.Min().ToString("N0") đ</span>
+                                            if (spctsCoKM.Any())
+                                            {
+                                                <div class="d-flex align-items-center gap-2">
+                                                    @* <span class="gia-goc" style="text-decoration:line-through; color:gray">@minGiaGocCoKM.ToString("N0") đ</span> *@
+                                                    <span class="gia-km">@minGiaKMCoKM.ToString("N0") đ</span>
+                                                    <span class="giam-tag ms-2 text-danger">-@maxGiamCoKM%</span>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <span>@minGiaGoc.ToString("N0") đ</span>
+                                            }
                                         }
                                         else
                                         {
@@ -547,17 +493,13 @@
                 </div>
             }
         </div>
-
-        <div class="text-center mt-5" data-aos="fade-up">
-            <a href="#" class="view-all-btn">View All Products <i class="bi bi-arrow-right"></i></a>
-        </div>
-
     </div>
 
 </section><!-- /Product List Section -->
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-color/2.1.2/jquery.color.min.js"></script>
+    <link rel="stylesheet" href="~/assets/css/Home.css">
 
     <script>
         $(function () {
@@ -575,11 +517,706 @@
                 // Gửi filter nếu muốn hoặc lấy $(this).data('id') để lọc
             });
 
+            // ===== HIỆU ỨNG NÂNG CAO CHO HERO SECTION =====
 
+            // 1. Parallax Effect - Ảnh giày di chuyển khi cuộn
+            $(window).scroll(function() {
+                const scrolled = $(window).scrollY;
+                const heroSection = $('#hero');
+                const heroHeight = heroSection.height();
+
+                if (scrolled < heroHeight) {
+                    // Main product parallax
+                    $('.main-product').css({
+                        'transform': `translateY(${scrolled * 0.15}px) scale(${1 + scrolled * 0.0001})`
+                    });
+
+                    // Floating products parallax
+                    $('.product-1').css({
+                        'transform': `translateY(${scrolled * 0.1}px) rotate(${scrolled * 0.02}deg)`
+                    });
+
+                    $('.product-2').css({
+                        'transform': `translateY(${scrolled * 0.08}px) rotate(${-scrolled * 0.015}deg)`
+                    });
+
+                    $('.product-3').css({
+                        'transform': `translateY(${scrolled * 0.06}px) rotate(${scrolled * 0.01}deg)`
+                    });
+
+                    // Discount badge parallax
+                    $('.discount-badge').css({
+                        'transform': `translateY(${scrolled * 0.05}px) scale(${1 + scrolled * 0.0002})`
+                    });
+                }
+            });
+
+            // 2. 3D Hover Effect cho ảnh giày - Cải tiến cho ảnh đã xóa nền
+            $('.main-product, .floating-product img').on('mousemove', function(e) {
+                const $this = $(this);
+                const rect = this.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+
+                const rotateX = (y - centerY) / 15;
+                const rotateY = (centerX - x) / 15;
+
+                $this.css({
+                    'transform': `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.1)`,
+                    'transition': 'transform 0.1s ease-out',
+                    'filter': 'drop-shadow(0 15px 35px rgba(23,102,179,0.3))'
+                });
+            }).on('mouseleave', function() {
+                $(this).css({
+                    'transform': 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)',
+                    'transition': 'transform 0.5s ease-out',
+                    'filter': 'drop-shadow(0 8px 32px rgba(23,102,179,0.15))'
+                });
+            });
+
+            // 3. Particle Effect cho background
+            createParticles();
+
+            // 4. Text Animation cho tiêu đề - TẠM TẮT để fix lỗi
+            // animateHeroText();
+
+            // 5. CTA Button Pulse Effect
+            $('.btn-shop').addClass('pulse-animation');
+
+            // 6. Modal event listeners
+            $('#productModal').on('shown.bs.modal', function () {
+                console.log('Modal shown event triggered');
+                // Enable backdrop click và keyboard - Sử dụng cách an toàn hơn
+                try {
+                    const modalInstance = bootstrap.Modal.getInstance(this);
+                    if (modalInstance) {
+                        modalInstance._config.backdrop = true;
+                        modalInstance._config.keyboard = true;
+                    }
+                } catch (error) {
+                    console.log('Modal config update skipped:', error);
+                }
+            });
+
+            $('#productModal').on('hidden.bs.modal', function () {
+                console.log('Modal hidden event triggered');
+                // Reset form khi đóng modal
+                $('#quantityInput').val(1);
+                selectedColorId = null;
+                selectedSizeId = null;
+                // Clear modal content
+                $('#colorOptions').empty();
+                $('#sizeOptions').empty();
+                $('#modalProductPrice').text('');
+            });
+
+            // Force close modal khi click backdrop
+            $(document).on('click', '.modal-backdrop', function() {
+                $('#productModal').modal('hide');
+            });
+
+            // Force close modal khi press ESC
+            $(document).on('keydown', function(e) {
+                if (e.key === 'Escape' && $('#productModal').hasClass('show')) {
+                    $('#productModal').modal('hide');
+                }
+            });
         });
+
+        // Tạo particle effect
+        function createParticles() {
+            const heroSection = document.getElementById('hero');
+            if (!heroSection) return;
+
+            // Tạo container cho particles
+            const particleContainer = document.createElement('div');
+            particleContainer.className = 'particle-container';
+            particleContainer.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+                pointer-events: none;
+                z-index: 1;
+            `;
+            heroSection.appendChild(particleContainer);
+
+            // Tạo particles
+            for (let i = 0; i < 15; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.cssText = `
+                    position: absolute;
+                    width: 4px;
+                    height: 4px;
+                    background: rgba(23, 102, 179, 0.1);
+                    border-radius: 50%;
+                    animation: float-particle ${3 + Math.random() * 4}s infinite linear;
+                    left: ${Math.random() * 100}%;
+                    top: ${Math.random() * 100}%;
+                `;
+                particleContainer.appendChild(particle);
+            }
+        }
+
+        // Animation cho text
+        function animateHeroText() {
+            const title = $('.ecommerce-hero-1 h1');
+            const text = title.text();
+            title.empty();
+
+            text.split('').forEach((char, index) => {
+                const span = $('<span>').text(char === ' ' ? '\u00A0' : char);
+                span.css({
+                    'opacity': '0',
+                    'animation': `fadeInChar 0.5s ease forwards ${index * 0.05}s`
+                });
+                title.append(span);
+            });
+        }
+
+        // ===== MODAL FUNCTIONS =====
+        let currentProductId = null;
+        let selectedColorId = null;
+        let selectedSizeId = null;
+        let productSpctData = [];
+        let listMauCoSPCT = [];
+        let listSizeCoSPCT = [];
+
+        // Mở modal chọn sản phẩm
+        function openProductModal(productId, productName) {
+            console.log('Opening modal for product:', productId, productName);
+
+            // Reset modal state
+            selectedColorId = null;
+            selectedSizeId = null;
+            $('#quantityInput').val(1);
+
+            currentProductId = productId;
+            $('#modalProductName').text(productName);
+
+            // Lấy ảnh sản phẩm
+            const productCard = $(`[onclick*="${productId}"]`).closest('.product-card');
+            const productImage = productCard.find('.main-img').attr('src');
+            $('#modalProductImage').attr('src', productImage);
+
+            // Hiển thị modal trước
+            try {
+                const modal = new bootstrap.Modal(document.getElementById('productModal'), {
+                    backdrop: true,
+                    keyboard: true,
+                    focus: true
+                });
+                modal.show();
+                console.log('Modal opened successfully');
+            } catch (error) {
+                console.error('Error opening modal:', error);
+                // Fallback cho jQuery
+                $('#productModal').modal({
+                    backdrop: true,
+                    keyboard: true,
+                    show: true
+                });
+            }
+
+            // Load SPCT data từ API
+            loadProductSpctDataFromAPI(productId);
+        }
+
+        // Load dữ liệu SPCT cho sản phẩm từ API
+        function loadProductSpctDataFromAPI(productId) {
+            // Hiển thị loading
+            $('#colorOptions').html('<p class="text-muted">Đang tải...</p>');
+            $('#sizeOptions').html('<p class="text-muted">Đang tải...</p>');
+
+            $.ajax({
+                url: '@Url.Action("GetProductModalData", "Home")',
+                type: 'GET',
+                data: { productId: productId },
+                success: function(response) {
+                    console.log('API Response:', response);
+
+                    if (response.success) {
+                        // Lưu dữ liệu
+                        productSpctData = response.spctList;
+                        console.log('productSpctData saved:', productSpctData);
+
+                        // Chuẩn hóa để fill tất cả màu/kích thước
+                        listMauCoSPCT = productSpctData.map(x => x.mauSacId);
+                        listSizeCoSPCT = productSpctData.map(x => x.kichThuocId);
+
+                        console.log('listMauCoSPCT:', listMauCoSPCT);
+                        console.log('listSizeCoSPCT:', listSizeCoSPCT);
+
+                        // Render color options
+                        renderColorOptionsFromAPI(response.colors, response.spctList);
+
+                        // Render size options
+                        renderSizeOptionsFromAPI(response.sizes, response.spctList);
+
+                        // Khởi tạo UI
+                        updateStatusShowHide();
+                        updateUI();
+
+                        console.log('Modal data loaded successfully');
+                    } else {
+                        console.error('API Error:', response.message);
+                        $('#colorOptions').html('<p class="text-danger">Lỗi: ' + response.message + '</p>');
+                        $('#sizeOptions').html('<p class="text-danger">Lỗi: ' + response.message + '</p>');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', error);
+                    $('#colorOptions').html('<p class="text-danger">Lỗi kết nối</p>');
+                    $('#sizeOptions').html('<p class="text-danger">Lỗi kết nối</p>');
+                }
+            });
+        }
+
+        // Render color options từ API data
+        function renderColorOptionsFromAPI(colors, spctList) {
+            try {
+                const colorOptions = $('#colorOptions');
+                colorOptions.empty();
+
+                console.log('Available colors from API:', colors);
+                console.log('listMauCoSPCT:', listMauCoSPCT);
+
+                if (!colors || colors.length === 0) {
+                    colorOptions.html('<p class="text-muted">Không có màu sắc</p>');
+                    return;
+                }
+
+                colors.forEach((color, index) => {
+                    console.log('Rendering color:', color);
+                    var hasSPCT = listMauCoSPCT.includes(color.id);
+                    console.log(`Color ${color.name} (${color.id}) has SPCT:`, hasSPCT);
+
+                    const colorBtn = $(`
+                        <button type="button"
+                                class="color-swatch"
+                                title="${color.name}"
+                                data-color-id="${color.id}"
+                                data-color-hex="${color.hex}"
+                        ${hasSPCT ? "" : "disabled"}
+                                style="background:${color.hex}; border:2.5px solid #ddd; opacity:${hasSPCT ? "1" : "0.4"};
+                                       cursor:${hasSPCT ? "pointer" : "not-allowed"}; width:48px; height:48px; border-radius:50%; text-align:center; margin-bottom:20px;">
+                            <span class="color-name">
+                                ${color.name}
+                            </span>
+                        </button>
+                    `);
+                    colorOptions.append(colorBtn);
+                });
+            } catch (error) {
+                console.error('Error rendering colors from API:', error);
+                $('#colorOptions').html('<p class="text-danger">Lỗi hiển thị màu sắc</p>');
+            }
+        }
+
+        // Helper function để lấy màu hex từ tên màu
+        function getColorHex(colorName) {
+            const colorMap = {
+                'Đen': '#000000',
+                'Trắng': '#FFFFFF',
+                'Đỏ': '#FF0000',
+                'Xanh': '#0000FF',
+                'Xanh lá': '#00FF00',
+                'Vàng': '#FFFF00',
+                'Cam': '#FFA500',
+                'Tím': '#800080',
+                'Hồng': '#FFC0CB',
+                'Nâu': '#A52A2A',
+                'Xám': '#808080'
+            };
+            return colorMap[colorName] || '#CCCCCC';
+        }
+
+        // Render size options từ API data
+        function renderSizeOptionsFromAPI(sizes, spctList) {
+            try {
+                const sizeOptions = $('#sizeOptions');
+                sizeOptions.empty();
+
+                console.log('Available sizes from API:', sizes);
+                console.log('listSizeCoSPCT:', listSizeCoSPCT);
+
+                if (!sizes || sizes.length === 0) {
+                    sizeOptions.html('<p class="text-muted">Không có kích thước</p>');
+                    return;
+                }
+
+                sizes.forEach((size, index) => {
+                    console.log('Rendering size:', size);
+                    var hasSPCT = listSizeCoSPCT.includes(size.id);
+                    console.log(`Size ${size.name} (${size.id}) has SPCT:`, hasSPCT);
+
+                    const sizeBtn = $(`
+                        <button type="button"
+                                class="size-box"
+                                data-size-id="${size.id}"
+                        ${hasSPCT ? "" : "disabled"}
+                                style="padding:8px 18px; border:2px solid #ddd; border-radius:7px; background:#fff;
+                                       font-weight:500; font-size:15px; opacity:${hasSPCT ? "1" : "0.5"}; cursor:${hasSPCT ? "pointer" : "not-allowed"};">
+                            ${size.name}
+                        </button>
+                    `);
+                    sizeOptions.append(sizeBtn);
+                });
+            } catch (error) {
+                console.error('Error rendering sizes from API:', error);
+                $('#sizeOptions').html('<p class="text-danger">Lỗi hiển thị kích thước</p>');
+            }
+        }
+
+        // Hàm tìm giá nhỏ nhất từ tất cả SPCT (có tính khuyến mãi)
+        function getGiaThapNhat() {
+            if (!productSpctData || productSpctData.length === 0) return 0;
+
+            let giaList = productSpctData
+                .filter(x => Number(x.gia) > 0)
+                .map(x => {
+                    // Ưu tiên giá khuyến mãi nếu có
+                    if (x.giaKhuyenMai && x.khuyenMaiPhanTram > 0 && x.giaKhuyenMai < x.giaGoc) {
+                        return Number(x.giaKhuyenMai);
+                    } else {
+                        return Number(x.giaGoc || x.gia);
+                    }
+                });
+
+            if (giaList.length === 0) return 0;
+            return Math.min(...giaList);
+        }
+
+        // Hàm cập nhật UI và giá
+        function updateUI() {
+            console.log('updateUI được gọi');
+            console.log('selectedColorId:', selectedColorId);
+            console.log('selectedSizeId:', selectedSizeId);
+
+            // Reset active + border
+            $('.color-grid .color-swatch').removeClass('active').css('border-color', '#ddd');
+            $('.size-grid .size-box').removeClass('active').css('border-color', '#ddd').css('background', '#fff');
+
+            // Đánh dấu active cho màu và size đã chọn
+            if (selectedColorId) {
+                $('.color-grid .color-swatch[data-color-id="' + selectedColorId + '"]')
+                    .addClass('active').css('border-color', '#1976d2');
+            }
+            if (selectedSizeId) {
+                $('.size-grid .size-box[data-size-id="' + selectedSizeId + '"]')
+                    .addClass('active').css('border-color', '#ffa502').css('background', '#fffbe7');
+            }
+
+            // Tìm SPCT phù hợp
+            let spct = null;
+            if (selectedColorId && selectedSizeId) {
+                spct = productSpctData.find(x => x.mauSacId == selectedColorId && x.kichThuocId == selectedSizeId);
+                console.log('SPCT tìm thấy:', spct);
+            }
+
+            // Update giá bán:
+            if (spct) {
+                console.log('SPCT có khuyến mãi:', spct.giaKhuyenMai, spct.khuyenMaiPhanTram, spct.giaGoc);
+
+                // Hiển thị giá gốc nếu có KM
+                if (spct.giaKhuyenMai && spct.khuyenMaiPhanTram > 0 && spct.giaKhuyenMai < spct.giaGoc) {
+                    $('#GiaGoc').text(spct.giaGoc.toLocaleString('vi-VN') + ' đ').show();
+                    $('#GiaApDungKhuyenMai').text(spct.giaKhuyenMai.toLocaleString('vi-VN') + ' đ').show();
+                    $('#PhanTramGiamGia').text('-' + spct.khuyenMaiPhanTram + '%').show();
+                } else {
+                    $('#GiaGoc').hide();
+                    $('#PhanTramGiamGia').hide();
+                    $('#GiaApDungKhuyenMai').text(spct.giaGoc.toLocaleString('vi-VN') + ' đ').show();
+                }
+            } else {
+                // Trường hợp chưa chọn đủ - hiện giá thấp nhất
+                let giaThapNhat = getGiaThapNhat();
+                console.log('Giá thấp nhất:', giaThapNhat);
+
+                if (giaThapNhat > 0) {
+                    $('#GiaGoc').hide();
+                    $('#PhanTramGiamGia').hide();
+                    $('#GiaApDungKhuyenMai').text(giaThapNhat.toLocaleString('vi-VN') + ' đ').show();
+                } else {
+                    $('#GiaGoc').hide();
+                    $('#GiaApDungKhuyenMai').text('').hide();
+                    $('#PhanTramGiamGia').hide();
+                }
+            }
+
+            // Cập nhật form và số lượng
+            if (spct) {
+                $('#soLuongGroup').show();
+                $('#quantityInput').attr('min', 1).attr('max', spct.soLuong || 1).val(1);
+                $('#cartQuantityInput').val(1);
+                $('#selectedSpctId').val(spct.id);
+                $('#cartForm').show();
+                $('#soLuongTon').text(`Còn: ${spct.soLuong ?? 0} sản phẩm`);
+                updateQuantityUI();
+            } else {
+                $('#soLuongGroup').hide();
+                $('#cartForm').hide();
+                $('#soLuongTon').text('');
+            }
+        }
+
+        // Check ngưng hoạt động thì ẩn những màu sắc và kích thước của spct đã ngưng hoạt động
+        function updateStatusShowHide() {
+            console.log('updateStatusShowHide được gọi');
+            console.log('selectedColorId:', selectedColorId);
+            console.log('selectedSizeId:', selectedSizeId);
+            console.log('productSpctData:', productSpctData);
+
+            // Reset trạng thái enable/disable
+            $('.color-grid .color-swatch').removeClass('disabled').css('opacity', '1').prop('disabled', false);
+            $('.size-grid .size-box').removeClass('disabled').css('opacity', '1').prop('disabled', false);
+
+            // Nếu đã chọn size => chỉ enable màu có SPCT active
+            if (selectedSizeId) {
+                let mauSacCoSPCT = productSpctData
+                    .filter(x => x.kichThuocId == selectedSizeId && x.trangThai && x.soLuong > 0)
+                    .map(x => x.mauSacId);
+
+                console.log('Màu sắc có SPCT cho size đã chọn:', mauSacCoSPCT);
+
+                $('.color-grid .color-swatch').each(function() {
+                    let id = $(this).data('color-id');
+                    if (!mauSacCoSPCT.includes(id)) {
+                        $(this).addClass('disabled').css('opacity', '0.5').prop('disabled', true);
+                    }
+                });
+            }
+
+            // Nếu đã chọn màu => chỉ enable size có SPCT active
+            if (selectedColorId) {
+                let sizeCoSPCT = productSpctData
+                    .filter(x => x.mauSacId == selectedColorId && x.trangThai && x.soLuong > 0)
+                    .map(x => x.kichThuocId);
+
+                console.log('Size có SPCT cho màu đã chọn:', sizeCoSPCT);
+
+                $('.size-grid .size-box').each(function() {
+                    let id = $(this).data('size-id');
+                    if (!sizeCoSPCT.includes(id)) {
+                        $(this).addClass('disabled').css('opacity', '0.5').prop('disabled', true);
+                    }
+                });
+            }
+        }
+
+        // Sự kiện chọn màu
+        $(document).on('click', '.color-grid .color-swatch:not([disabled])', function () {
+            var id = $(this).data('color-id');
+            console.log('Chọn màu:', id);
+
+            // Toggle: nếu đã chọn thì bỏ chọn, chưa chọn thì chọn
+            if (selectedColorId === id) {
+                selectedColorId = null;
+            } else {
+                selectedColorId = id;
+            }
+
+            console.log('selectedColorId sau khi chọn:', selectedColorId);
+
+            // Reset size nếu chọn màu mới
+            if (selectedColorId && selectedSizeId) {
+                // Kiểm tra xem size hiện tại có hợp với màu mới không
+                let spctExists = productSpctData.find(x => x.mauSacId == selectedColorId && x.kichThuocId == selectedSizeId);
+                if (!spctExists) {
+                    selectedSizeId = null;
+                    console.log('Reset selectedSizeId vì không hợp với màu mới');
+                }
+            }
+
+            updateStatusShowHide();
+            updateUI();
+        });
+
+        // Sự kiện chọn size
+        $(document).on('click', '.size-grid .size-box:not([disabled])', function () {
+            var id = $(this).data('size-id');
+            console.log('Chọn size:', id);
+
+            // Toggle: nếu đã chọn thì bỏ chọn, chưa chọn thì chọn
+            if (selectedSizeId === id) {
+                selectedSizeId = null;
+            } else {
+                selectedSizeId = id;
+            }
+
+            console.log('selectedSizeId sau khi chọn:', selectedSizeId);
+
+            // Reset màu nếu chọn size mới
+            if (selectedColorId && selectedSizeId) {
+                // Kiểm tra xem màu hiện tại có hợp với size mới không
+                let spctExists = productSpctData.find(x => x.mauSacId == selectedColorId && x.kichThuocId == selectedSizeId);
+                if (!spctExists) {
+                    selectedColorId = null;
+                    console.log('Reset selectedColorId vì không hợp với size mới');
+                }
+            }
+
+            updateStatusShowHide();
+            updateUI();
+        });
+
+        // Số lượng input cộng/trừ với kiểm tra max/min
+        function updateQuantityUI() {
+            let inp = $('#quantityInput');
+            let val = parseInt(inp.val()) || 1;
+            let min = parseInt(inp.attr('min')) || 1;
+            let max = parseInt(inp.attr('max')) || 1;
+
+            // Fix giá trị nếu ngoài range
+            if (val < min) val = min;
+            if (val > max) val = max;
+            inp.val(val);
+            $('#cartQuantityInput').val(val);
+
+            // Enable/disable nút
+            $('#btnMinus').prop('disabled', val <= min);
+            $('#btnPlus').prop('disabled', val >= max);
+        }
+
+        $('#btnMinus').click(function () {
+            let inp = $('#quantityInput');
+            let val = parseInt(inp.val()) || 1;
+            let min = parseInt(inp.attr('min')) || 1;
+            if (val > min) {
+                inp.val(val - 1);
+                updateQuantityUI();
+            }
+        });
+
+        $('#btnPlus').click(function () {
+            let inp = $('#quantityInput');
+            let val = parseInt(inp.val()) || 1;
+            let max = parseInt(inp.attr('max')) || 1;
+            if (val < max) {
+                inp.val(val + 1);
+                updateQuantityUI();
+            }
+        });
+
+        $('#quantityInput').on('input', function () {
+            updateQuantityUI();
+        });
+
+        $('#btnAddToCart').click(function () {
+            var spctId = $('#selectedSpctId').val();
+            var soLuong = parseInt($('#quantityInput').val()) || 1;
+            var max = parseInt($('#quantityInput').attr('max')) || 1;
+
+            if (soLuong > max) {
+                alert("Bạn đã đạt số lượng tối đa trong kho cho sản phẩm này!");
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("AddToCart", "SanPham")',
+                type: 'POST',
+                data: {
+                    sanPhamChiTietId: spctId,
+                    soLuong: soLuong
+                },
+                success: function (res) {
+                    if (res.requireLogin) {
+                        window.location.href = '/Login/Index';
+                        return;
+                    }
+                    if (res.success) {
+                        $('#productModal').modal('hide');
+                        alert(res.message || 'Đã thêm vào giỏ hàng thành công!');
+                        location.reload();
+                    } else {
+                        alert(res.message || 'Có lỗi xảy ra!');
+                    }
+                },
+                error: function () {
+                    alert('Lỗi hệ thống, vui lòng thử lại!');
+                }
+            });
+        });
+
 
     </script>
 }
+
+<!-- Product Selection Modal -->
+<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productModalLabel">Chọn sản phẩm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="product-image-container">
+                            <img id="modalProductImage" src="" alt="Product" class="img-fluid rounded" style="object-fit:cover; width:100%;max-height:400px;" onerror="this.src='/assets/img/SneakFit_Logo.png'">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h4 id="modalProductName" class="fw-bold mb-2"></h4>
+
+                        <!-- Giá sản phẩm -->
+                        <div class="mb-3" id="giaSPBox" style="min-height: 38px;">
+                            <span id="GiaApDungKhuyenMai" class="gia-km"></span>
+                            <span id="GiaGoc" class="gia-goc"></span>
+                            <span id="PhanTramGiamGia" class="giam-tag"></span>
+                        </div>
+
+                        <!-- Màu sắc -->
+                        <div class="mb-2">
+                            <b>Màu sắc:</b>
+                            <div id="colorOptions" class="color-grid flex-wrap" style="display: flex; gap: 10px;">
+                                <!-- Colors will be loaded here -->
+                            </div>
+                        </div>
+
+                        <!-- Kích thước -->
+                        <div class="mb-2">
+                            <b>Size:</b>
+                            <div id="sizeOptions" class="size-grid flex-wrap" style="display: flex; gap: 10px;">
+                                <!-- Sizes will be loaded here -->
+                            </div>
+                        </div>
+
+                        <!-- Số lượng và thêm giỏ -->
+                        <div class="mb-2 d-flex align-items-center" id="soLuongGroup" style="display: none">
+                            <b style="padding-right: 5px;">Số lượng:</b>
+                            <button type="button" id="btnMinus" class="btn-qty mx-2">-</button>
+                            <input id="quantityInput" name="quantity" value="1" min="1" max="1"
+                                   style="width: 55px; text-align: center;" class="form-control form-control-sm d-inline mx-2" />
+                            <button type="button" id="btnPlus" class="btn-qty mx-2">+</button>
+                            <span class="ms-2 text-muted" id="soLuongTon" style="font-weight: 500; min-width: 65px;"></span>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <form class="d-inline" id="cartForm" style="display: none;">
+                                <input type="hidden" name="id" id="selectedSpctId" value="" />
+                                <input type="hidden" name="quantity" id="cartQuantityInput" value="1" />
+                                <button type="button" id="btnAddToCart" class="btn btn-custom btn-checkout">
+                                    <i class="bi bi-cart-plus me-2"></i> Thêm vào giỏ hàng
+                                </button>
+                            </form>
+                            <button type="button" class="btn btn-custom btn-return" onclick="$('#productModal').modal('hide')">
+                                <i class="bi bi-x-circle me-2"></i> Đóng
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <style>
     .product-image {
@@ -644,4 +1281,402 @@
             box-shadow: 0 0 0 3px rgba(0,123,255,0.4);
         }
 
+    .ecommerce-hero-1.hero {
+        background: linear-gradient(120deg, #f8fafc 60%, #e3f0ff 100%);
+        padding: 60px 0 40px 0;
+    }
+
+    .ecommerce-hero-1 .content .highlight {
+        color: #e53935;
+        font-weight: bold;
+    }
+
+    .ecommerce-hero-1 .content .brand {
+        color: #1766b3;
+        font-weight: bold;
+    }
+
+    .ecommerce-hero-1 .hero-cta .btn-shop {
+        background: #e53935;
+        color: #fff;
+        margin-right: 10px;
+    }
+
+    .ecommerce-hero-1 .hero-cta .btn-collection {
+        background: #fff;
+        color: #1766b3;
+        border: 1px solid #1766b3;
+    }
+
+    .ecommerce-hero-1 .hero-features {
+        margin-top: 20px;
+        display: flex;
+        gap: 20px;
+        list-style: none;
+        padding: 0;
+    }
+
+        .ecommerce-hero-1 .hero-features li {
+            font-size: 1rem;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+    .ecommerce-hero-1 .hero-image {
+        position: relative;
+        text-align: center;
+    }
+
+    .ecommerce-hero-1 .main-product {
+        width: 40%;
+        max-width: 180px;
+        filter: drop-shadow(0 8px 32px rgba(23,102,179,0.15));
+        border-radius: 24px;
+        animation: shoe-dance 6s ease-in-out infinite;
+    }
+
+    .ecommerce-hero-1 .floating-product {
+        position: absolute;
+        width: 90px;
+        border-radius: 16px;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        background: #fff;
+        padding: 8px;
+    }
+
+    .ecommerce-hero-1 .product-1 {
+        left: 0;
+        top: 30%;
+    }
+
+    .ecommerce-hero-1 .product-2 {
+        right: 0;
+        bottom: 10%;
+    }
+
+    .ecommerce-hero-1 .product-3 {
+        left: 0;
+        bottom: 0;
+    }
+
+    .ecommerce-hero-1 .discount-badge {
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        background: #e53935;
+        color: #fff;
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.1rem;
+        box-shadow: 0 2px 8px rgba(229,57,53,0.15);
+    }
+
+    .floating {
+        animation: floating 3.5s ease-in-out infinite;
+    }
+
+    /* Floating Products Animation - Bay theo vòng tròn */
+    .ecommerce-hero-1 .product-1 {
+        animation: float-circle-1 8s ease-in-out infinite;
+    }
+
+    .ecommerce-hero-1 .product-2 {
+        animation: float-circle-2 10s ease-in-out infinite;
+    }
+
+    .ecommerce-hero-1 .product-3 {
+        animation: float-circle-3 12s ease-in-out infinite;
+    }
+
+    /* Pulse Animation cho CTA Button */
+    .pulse-animation {
+        animation: pulse 2s infinite;
+    }
+
+    /* Hover Effects - Cải tiến cho ảnh đã xóa nền */
+    .ecommerce-hero-1 .main-product:hover,
+    .ecommerce-hero-1 .floating-product:hover {
+        filter: drop-shadow(0 15px 40px rgba(23,102,179,0.4)) !important;
+        transform: scale(1.05) !important;
+    }
+
+    .ecommerce-hero-1 .floating-product img:hover {
+        animation-play-state: paused;
+    }
+
+    .ecommerce-hero-1 .btn-shop:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(229, 57, 53, 0.3);
+    }
+
+    .ecommerce-hero-1 .btn-collection:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(23, 102, 179, 0.2);
+    }
+
+    /* Modal Styles */
+    .modal {
+        z-index: 1050;
+    }
+
+    .modal-backdrop {
+        z-index: 1040;
+    }
+
+    .modal.show {
+        display: block !important;
+    }
+
+    .modal-dialog {
+        pointer-events: auto;
+    }
+
+    .modal-content {
+        border-radius: 15px;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .modal-header {
+        border-bottom: 1px solid #eee;
+        padding: 20px 25px;
+    }
+
+    .modal-body {
+        padding: 25px;
+    }
+
+    .product-image-container {
+        text-align: center;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+
+        .product-image-container img {
+            max-height: 300px;
+            object-fit: contain;
+        }
+
+    .color-swatch, .size-box {
+        transition: all 0.3s ease;
+    }
+
+        .color-swatch:hover, .size-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .color-swatch.active {
+            border-color: #1976d2 !important;
+            box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+        }
+
+        .size-box.active {
+            border-color: #ffa502 !important;
+            background: #fffbe7 !important;
+            box-shadow: 0 0 0 2px rgba(255, 165, 2, 0.2);
+        }
+
+    .price-display {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #e53935;
+    }
+
+    /* CSS từ SanPham/Details */
+    .color-swatch {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        cursor: pointer;
+        position: relative;
+        justify-content: center;
+        font-size: 13px;
+        transition: border 0.2s, box-shadow 0.2s;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 6px 0 rgba(100,100,100,0.07);
+        overflow: visible;
+        text-decoration: none;
+    }
+
+        .color-swatch:hover, .color-swatch.active {
+            border: 2.5px solid #1976d2 !important;
+            box-shadow: 0 2px 8px 0 rgba(25,118,210,0.13);
+        }
+
+    .color-name {
+        position: absolute;
+        bottom: -25px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #444;
+        background: #fff;
+        padding: 1px 6px;
+        border-radius: 5px;
+        font-size: 13px;
+        box-shadow: 0 1px 4px 0 rgba(0,0,0,0.04);
+        min-width: 48px;
+        text-align: center;
+        white-space: nowrap;
+        font-weight: 500;
+    }
+
+    .size-box {
+        display: inline-block;
+        padding: 8px 18px;
+        border: 2px solid #ddd;
+        border-radius: 7px;
+        background: #fff;
+        font-weight: 500;
+        font-size: 15px;
+        margin: 0 6px 8px 0;
+        cursor: pointer;
+        transition: border 0.16s, background 0.16s;
+    }
+
+        .size-box.active, .size-box:hover {
+            border: 2.5px solid #ffa502;
+            background: #fffbe7;
+        }
+
+    .btn-qty {
+        width: 36px;
+        height: 36px;
+        background: #f6f8fa;
+        color: #1976d2;
+        border: none;
+        border-radius: 50%;
+        font-size: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background .18s, color .18s, box-shadow .18s;
+        box-shadow: 0 1px 5px 0 rgba(25,118,210,0.06);
+        font-weight: bold;
+        outline: none;
+    }
+
+        .btn-qty:hover:not(:disabled) {
+            background: #1976d2;
+            color: #fff;
+            box-shadow: 0 2px 8px 0 rgba(25,118,210,0.15);
+        }
+
+        .btn-qty:disabled {
+            background: #eee;
+            color: #ccc;
+            cursor: not-allowed;
+        }
+
+    .color-swatch[disabled], .size-box[disabled] {
+        opacity: 0.45 !important;
+        pointer-events: none !important;
+        filter: grayscale(0.2);
+        border-color: #eee !important;
+    }
+
+    .product-price-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    #giaSPBox {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 38px;
+    }
+
+    .gia-goc {
+        text-decoration: line-through;
+        color: #888;
+        font-size: 1.2rem;
+    }
+
+    .gia-km {
+        color: #e53935;
+        font-size: 1.13rem;
+        font-weight: bold;
+    }
+
+    .giam-tag {
+        background: #ffeaea;
+        color: #d7263d;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+        padding: 2px 8px;
+        margin-left: 4px;
+        display: flex;
+        align-items: center;
+        height: 28px;
+    }
+
+    #soLuongTon {
+        margin-left: 10px;
+        color: #1976d2;
+        font-size: 15px;
+        font-weight: 600;
+        min-width: 65px;
+        display: inline-block;
+        text-align: left;
+    }
+
+    /* Button thêm vào giỏ hàng và đóng */
+    .btn-custom {
+        padding: 12px 20px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        border: none;
+        min-width: 200px;
+        height: 48px;
+    }
+
+    .btn-checkout {
+        background: linear-gradient(90deg, #1E3A8A, #60A5FA);
+        color: #FFFFFF;
+    }
+
+        .btn-checkout:hover {
+            background: linear-gradient(90deg, #60A5FA, #1E3A8A);
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3);
+            transform: translateY(-2px);
+            color: #FFFFFF;
+        }
+
+    .btn-return {
+        background: linear-gradient(90deg, #60A5FA, #1E3A8A);
+        color: #FFFFFF;
+    }
+
+        .btn-return:hover {
+            background: linear-gradient(90deg, #1E3A8A, #60A5FA);
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3);
+            transform: translateY(-2px);
+            color: #FFFFFF;
+        }
+
+        .btn-return i,
+        .btn-checkout i {
+            margin-right: 8px;
+        }
 </style>
