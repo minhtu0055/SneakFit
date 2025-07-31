@@ -16,5 +16,6 @@ namespace SneakFit.ViewModels.Catalog.LichSuHoaDon
         public TrangThaiHoaDon TrangThaiMoi { get; set; } // Trạng thái mới
         public DateTime NgayTao { get; set; } // Ngày tạo lịch sử
         public string NguoiChinhSua { get; set; } // Người chỉnh sửa lịch sử
+        public string GhiChu { get; set; } // Người chỉnh sửa lịch sử
     }
 }

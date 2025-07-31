@@ -39,7 +39,9 @@
                                     </div>
                                 </div>
                                 <div class="flex-grow-1">
-                                    <h6 class="mb-0" action="/Home/index">@User.Identity.Name</h6>
+                                    <h6 class="mb-0">
+                                        @(User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.GivenName)?.Value)
+                                    </h6>
                                     <small class="text-muted"></small>
                                 </div>
                             </div>
@@ -49,8 +51,8 @@
                         <div class="dropdown-divider my-1"></div>
                     </li>
                     <li>
-                        <a class="dropdown-item" href="#">
-                            <i class="bx bx-user bx-md me-3"></i><span>My Profile</span>
+                        <a class="dropdown-item" asp-controller="user" asp-action="edit" asp-route-id="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value">
+                            <i class="bx bx-user bx-md me-3"></i><span>Hồ sơ của tôi</span>
                         </a>
                     </li>
                     <li>

@@ -37,7 +37,7 @@ namespace SneakFit.BackEndAPI.Controllers
             var result = await _thanhToanService.XuLyVnPayCallbackAsync(vnp_Params);
             if (result)
             {
-                return Redirect("https://localhost:7039/Forbidden/ThanhToanThanhCong");
+                return Redirect("https://localhost:7039/HoaDon/ThanhToanThanhCong");
             }
             else
             {

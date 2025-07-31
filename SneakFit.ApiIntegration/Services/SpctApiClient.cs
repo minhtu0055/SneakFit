@@ -447,6 +447,8 @@ namespace SneakFit.ApiIntegration.Services
                     $"&pageSize={request.PageSize}" +
                     $"&tuKhoa={request.TuKhoa}" +
                     $"&danhMucId={request.DanhMucId}" +
+                    $"&mauSacId={request.MauSacId}" +
+                    $"&kichThuocId={request.KichThuocId}" +
                     $"&giaThapNhat={request.GiaThapNhat}" +
                     $"&giaCaoNhat={request.GiaCaoNhat}" +
                     $"&locTrangThai={request.LocTrangthai}" +

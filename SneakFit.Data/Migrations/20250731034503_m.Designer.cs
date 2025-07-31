@@ -12,8 +12,8 @@ using SneakFit.Data.EF;
 namespace SneakFit.Data.Migrations
 {
     [DbContext(typeof(SneakFitDbContext))]
-    [Migration("20250727182236_spam")]
-    partial class spam
+    [Migration("20250731034503_m")]
+    partial class m
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -256,7 +256,7 @@ namespace SneakFit.Data.Migrations
                         {
                             Id = new Guid("69bd714f-9576-45ba-b5b7-f00649be00de"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "c0be9391-66a1-4eba-877d-5d203480bbe7",
+                            ConcurrencyStamp = "9cd17a0b-0f80-4171-9701-f21b0aaa6e29",
                             Email = "tupmph49568@gmail.com",
                             EmailConfirmed = true,
                             GioiTinh = false,
@@ -265,7 +265,7 @@ namespace SneakFit.Data.Migrations
                             NgaySinh = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NormalizedEmail = "tupmph49568@gmail.com",
                             NormalizedUserName = "Admin",
-                            PasswordHash = "AQAAAAIAAYagAAAAEOctyieReu93p3p9dVFFHve2pPPZWQPxfeja6xDyUhfe+WsZNT3mz8LMuHKojbmOxA==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEJ3qE27+BStDQTBg5gDAk9D1cxIPcPnoryBVg4mtgBGgriGEtU2hhfRhue/KEAYExw==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
                             TrangThai = true,
@@ -276,7 +276,7 @@ namespace SneakFit.Data.Migrations
                         {
                             Id = new Guid("69bd712f-9576-45ba-b5b7-f00649be00de"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "768836f8-4685-4582-8d0d-06c2ca7d2451",
+                            ConcurrencyStamp = "0dc10b0d-e2d9-4cd1-9085-fc5ab6a8d3cc",
                             Email = "kiet@gmail.com",
                             EmailConfirmed = true,
                             GioiTinh = false,
@@ -285,7 +285,7 @@ namespace SneakFit.Data.Migrations
                             NgaySinh = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NormalizedEmail = "kiet@gmail.com",
                             NormalizedUserName = "nhanvien",
-                            PasswordHash = "AQAAAAIAAYagAAAAELGGiBoD0J56zUgXx/7x7s60tdTmQIWgHNcKSdPSGGs4Ot9G7d8k7Sg9CGhxJA9BJg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEHdKkk3ciUIwZ7M+9aEvRET9U6TdTWcgSIdK/Rsy1htbPcrHgaAN7ToRJ3QOIGh5BA==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
                             TrangThai = true,
@@ -296,7 +296,7 @@ namespace SneakFit.Data.Migrations
                         {
                             Id = new Guid("69bd714f-9576-45ba-b5b7-f01649be00de"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "1f3d8a84-12af-41b1-99be-bc447b903bcd",
+                            ConcurrencyStamp = "617a610a-524f-40d5-b843-0a93e74ef205",
                             Email = "kiet@gmail.com",
                             EmailConfirmed = true,
                             GioiTinh = false,
@@ -305,7 +305,7 @@ namespace SneakFit.Data.Migrations
                             NgaySinh = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             NormalizedEmail = "kiet@gmail.com",
                             NormalizedUserName = "khachhang",
-                            PasswordHash = "AQAAAAIAAYagAAAAELiHJrK6l95Tdlt9vlLIdLt0/oHxipZ9U7HnxSQe0t75/xJMs3lQo2ZRVkw1l95WJw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAELxFl/MgZHVc3BlQCPvPPd9IGcGzM++6gu9syxLFo5m9he7YMSMXIzN/kYLaRu8Kmg==",
                             PhoneNumberConfirmed = false,
                             SecurityStamp = "",
                             TrangThai = true,
@@ -730,6 +730,10 @@ namespace SneakFit.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("GhiChu")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid>("HoaDonId")
                         .HasColumnType("uniqueidentifier");
 
@@ -954,6 +958,9 @@ namespace SneakFit.Data.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("bit");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
