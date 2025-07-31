@@ -329,7 +329,8 @@ namespace SneakFit.Application.Catalog.HoaDon
                     TrangThaiCu = x.TrangThaiCu,
                     TrangThaiMoi = x.TrangThaiMoi,
                     NgayTao = x.NgayTao,
-                    NguoiChinhSua = x.NguoiChinhSua
+                    NguoiChinhSua = x.NguoiChinhSua,
+                    GhiChu = x.GhiChu
                 });
 
             return await query.ToListAsync();
@@ -352,8 +353,11 @@ namespace SneakFit.Application.Catalog.HoaDon
             return entity.Id;
         }
                 
-        public async Task<bool> UpdateStatusAndLogAsync(Guid hoaDonId, TrangThaiHoaDon newStatus, Guid userId, string nguoiChinhSua)
+        public async Task<bool> UpdateStatusAndLogAsync(Guid hoaDonId, TrangThaiHoaDon newStatus, Guid userId, string nguoiChinhSua, string ghiChu)
         {
+            if (string.IsNullOrWhiteSpace(ghiChu))
+                return false; // hoặc throw new ArgumentException("Ghi chú không được để trống!");
+
             var hoaDon = await _context.HoaDon.FindAsync(hoaDonId);
             if (hoaDon == null)
                 return false;
@@ -372,7 +376,8 @@ namespace SneakFit.Application.Catalog.HoaDon
                 TrangThaiMoi = newStatus,
                 NgayTao = DateTime.Now,
                 NguoiChinhSua = nguoiChinhSua,
-                UserId = userId
+                UserId = userId,
+                GhiChu = ghiChu
             };
             _context.LichSuHoaDon.Add(history);
 

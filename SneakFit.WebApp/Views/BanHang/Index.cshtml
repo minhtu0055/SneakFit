@@ -730,6 +730,12 @@
                     $("#searchSanPham").val("");
                 });
 
+                $("#filterMauSac, #filterKichThuoc").on("change", function() {
+                debugger
+                currentPage = 1; // reset về trang đầu khi lọc
+                loadDanhSachSanPham();
+                });
+
                 // Payment method toggle
                 $('input[name="paymentMethod"]').change(function () {
                     if ($('#chuyenKhoan').is(':checked')) {
@@ -1478,80 +1484,115 @@
                     });
                 }
             }
+                    function loadFilterOptions() {
+                        // Kích thước
+                        $.ajax({
+                            url: '/KichThuoc/GetAll',
+                            type: 'GET',
+                            success: function(response) {
+                                const kichThuocSelect = $("#filterKichThuoc");
+                                kichThuocSelect.find('option:not(:first)').remove();
+                                (response.resultObj || response).forEach(function(kt) {
+                                    kichThuocSelect.append(`<option value="${kt.id}">${kt.tenKichThuoc || kt.maKichThuoc}</option>`);
+                                });
+                            }
+                        });
 
+                        // Màu sắc
+                        $.ajax({
+                            url: '/MauSac/GetAll',
+                            type: 'GET',
+                            success: function(response) {
+                                const mauSacSelect = $("#filterMauSac");
+                                mauSacSelect.find('option:not(:first)').remove();
+                                (response.resultObj || response).forEach(function(ms) {
+                                    mauSacSelect.append(`<option value="${ms.id}">${ms.tenMauSac}</option>`);
+                                });
+                            }
+                        });
+                    }
             // Load product list
             function loadDanhSachSanPham() {
                 const tableBody = $("#danhSachSanPham").html('<tr><td colspan="9" class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>');
 
-                $.ajax({
-                    url: '/SPCT/GetSPCTForModal',
-                    type: 'GET',
-                    data: { tuKhoa: currentKeyword, pageIndex: currentPage, pageSize: pageSize },
-                    success: function (response) {
-                        tableBody.empty();
-                        if (!response.items || response.items.length === 0) {
-                            tableBody.append('<tr><td colspan="9" class="text-center">Không tìm thấy sản phẩm nào</td></tr>');
+                // Thêm delay 2-3 giây trước khi gọi ajax
+                setTimeout(function() {
+                    $.ajax({
+                        url: '/SPCT/GetSPCTForModal',
+                        type: 'GET',
+                        data: { 
+                            tuKhoa: currentKeyword, 
+                            pageIndex: currentPage, 
+                            pageSize: pageSize,
+                            mauSacId: $("#filterMauSac").val() || null,
+                            kichThuocId: $("#filterKichThuoc").val() || null
+                        },
+                        success: function (response) {
+                            tableBody.empty();
+                            if (!response.items || response.items.length === 0) {
+                                tableBody.append('<tr><td colspan="9" class="text-center">Không tìm thấy sản phẩm nào</td></tr>');
+                                updatePaginationInfo(0, 0, 0);
+                                return;
+                            }
+
+                            totalRecords = response.totalRecords;
+                            pageCount = response.pageCount;
+                            currentPage = response.pageIndex;
+
+                            response.items.forEach((sp, index) => {
+                                let anhSanPham = 'https://localhost:7277/images/Default_Logo.png';
+                                if (sp.images && sp.images.length > 0) {
+                                    anhSanPham = sp.images[0].startsWith('http') ? sp.images[0] : `https://localhost:7277${sp.images[0]}`;
+                                }
+                                const row = `
+                                    <tr>
+                                        <td>${(currentPage - 1) * pageSize + index + 1}</td>
+                                        <td style="width:70px; position:relative;">
+                                            <div style="position:relative; display:inline-block;">
+                                                <img src="${anhSanPham}" alt="${sp.tenSanPham}" width="60" height="60" style="object-fit:cover; border-radius:8px; border:1px solid #eee;">
+                                            </div>
+                                        </td>
+                                        <td>${sp.tenSanPham}</td>
+                                        <td>
+                                            ${
+                                                sp.giaKhuyenMai && sp.giaKhuyenMai > 0 && sp.giaKhuyenMai < sp.gia
+                                                ? `<span class="gia-khuyen-mai">${formatCurrency(sp.giaKhuyenMai)}</span><br>
+                                                <span class="gia-goc">${formatCurrency(sp.gia)}</span>`
+                                                : `${formatCurrency(sp.gia)}`
+                                            }
+                                        </td>
+                                        <td>${sp.soLuong}</td>
+                                        <td>${sp.tenKichThuoc}</td>
+                                        <td>${sp.tenMauSac}</td>
+                                        <td>${sp.trangThai ? '<span class="badge bg-success">Còn hàng</span>' : '<span class="badge bg-danger">Hết hàng</span>'}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary btn-them-vao-hoadon" data-sp-id="${sp.id}" ${sp.trangThai ? '' : 'disabled'}>
+                                                Chọn
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `;
+                                tableBody.append(row);
+                            });
+
+                            $(".btn-them-vao-hoadon").click(function () {
+                                const spId = $(this).data("sp-id");
+                                const sanPham = response.items.find(sp => sp.id === spId);
+                                if (sanPham) {
+                                    themSanPhamVaoHoaDon(sanPham);
+                                }
+                            });
+
+                            updatePaginationInfo();
+                            createPagination();
+                        },
+                        error: function (error) {
+                            tableBody.html(`<tr><td colspan="9" class="text-center text-danger">Lỗi khi tải dữ liệu: ${error.statusText}</td></tr>`);
+                            console.error('Lỗi khi tải danh sách sản phẩm:', error);
                             updatePaginationInfo(0, 0, 0);
-                            return;
                         }
-
-                        totalRecords = response.totalRecords;
-                        pageCount = response.pageCount;
-                        currentPage = response.pageIndex;
-
-                        response.items.forEach((sp, index) => {
-                            let anhSanPham = 'https://localhost:7277/images/Default_Logo.png';
-                            if (sp.images && sp.images.length > 0) {
-                                anhSanPham = sp.images[0].startsWith('http') ? sp.images[0] : `https://localhost:7277${sp.images[0]}`;
-                            }
-                            const row = `
-                                <tr>
-                                    <td>${(currentPage - 1) * pageSize + index + 1}</td>
-                                    <td style="width:70px; position:relative;">
-                                        <div style="position:relative; display:inline-block;">
-                                            <img src="${anhSanPham}" alt="${sp.tenSanPham}" width="60" height="60" style="object-fit:cover; border-radius:8px; border:1px solid #eee;">
-                                        </div>
-                                    </td>
-                                    <td>${sp.tenSanPham}</td>
-                                    <td>
-                                        ${
-                                            sp.giaKhuyenMai && sp.giaKhuyenMai > 0 && sp.giaKhuyenMai < sp.gia
-                                            ? `<span class="gia-khuyen-mai">${formatCurrency(sp.giaKhuyenMai)}</span><br>
-                                            <span class="gia-goc">${formatCurrency(sp.gia)}</span>`
-                                            : `${formatCurrency(sp.gia)}`
-                                        }
-                                    </td>
-                                    <td>${sp.soLuong}</td>
-                                    <td>${sp.tenKichThuoc}</td>
-                                    <td>${sp.tenMauSac}</td>
-                                    <td>${sp.trangThai ? '<span class="badge bg-success">Còn hàng</span>' : '<span class="badge bg-danger">Hết hàng</span>'}</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-primary btn-them-vao-hoadon" data-sp-id="${sp.id}" ${sp.trangThai ? '' : 'disabled'}>
-                                            Chọn
-                                        </button>
-                                    </td>
-                                </tr>
-                            `;
-                            tableBody.append(row);
-                        });
-
-                        $(".btn-them-vao-hoadon").click(function () {
-                            const spId = $(this).data("sp-id");
-                            const sanPham = response.items.find(sp => sp.id === spId);
-                            if (sanPham) {
-                                themSanPhamVaoHoaDon(sanPham);
-                            }
-                        });
-
-                        updatePaginationInfo();
-                        createPagination();
-                    },
-                    error: function (error) {
-                        tableBody.html(`<tr><td colspan="9" class="text-center text-danger">Lỗi khi tải dữ liệu: ${error.statusText}</td></tr>`);
-                        console.error('Lỗi khi tải danh sách sản phẩm:', error);
-                        updatePaginationInfo(0, 0, 0);
-                    }
-                });
+                    });
+                }, Math.floor(Math.random() * 100) + 250); // Delay ngẫu nhiên từ 2-3 giây
             }
 
             // Update pagination info
@@ -1660,7 +1701,7 @@
                 clearTimeout(searchTimeout);
 
                 // Validation: chỉ cho phép chữ cái, số, dấu cách và một số ký tự đặc biệt
-                const validPattern = /^[a-zA-ZÀ-ỹ0-9\s\-\.]+$/;
+                const validPattern = /^[a-zA-ZÀ-ỹđĐ0-9\s\-\.]+$/;
                 if (keyword.length > 0 && !validPattern.test(keyword)) {
                     toastr.warning("Từ khóa chỉ được chứa chữ cái, số và dấu cách");
                     return;
@@ -1833,7 +1874,27 @@
                                 </div>
                             `);
 
-                            response.data.items.forEach(customer => {
+                            // SẮP XẾP KẾT QUẢ: ĐƯA KHÁCH HÀNG KHỚP TÊN LÊN ĐẦU
+                            let sortedItems = response.data.items.slice();
+                            const lowerKeyword = keyword.toLowerCase();
+                            sortedItems.sort((a, b) => {
+                                const aName = (a.hoVaTen || '').toLowerCase();
+                                const bName = (b.hoVaTen || '').toLowerCase();
+                                // Ưu tiên tên bắt đầu bằng keyword
+                                const aStarts = aName.startsWith(lowerKeyword);
+                                const bStarts = bName.startsWith(lowerKeyword);
+                                if (aStarts && !bStarts) return -1;
+                                if (!aStarts && bStarts) return 1;
+                                // Ưu tiên tên chứa keyword
+                                const aContains = aName.includes(lowerKeyword);
+                                const bContains = bName.includes(lowerKeyword);
+                                if (aContains && !bContains) return -1;
+                                if (!aContains && bContains) return 1;
+                                // Nếu không thì giữ nguyên thứ tự
+                                return 0;
+                            });
+
+                            sortedItems.forEach(customer => {
                                 const customerItem = `
                                     <div class="p-2 border-bottom customer-item" data-id="${customer.id}" style="cursor: pointer;">
                                         <div class="d-flex align-items-center">
@@ -2784,33 +2845,7 @@
                 this.value = val;
             });
 
-                    function loadFilterOptions() {
-                        // Kích thước
-                        $.ajax({
-                            url: '/KichThuoc/GetAll',
-                            type: 'GET',
-                            success: function(response) {
-                                const kichThuocSelect = $("#filterKichThuoc");
-                                kichThuocSelect.find('option:not(:first)').remove();
-                                (response.resultObj || response).forEach(function(kt) {
-                                    kichThuocSelect.append(`<option value="${kt.id}">${kt.tenKichThuoc || kt.maKichThuoc}</option>`);
-                                });
-                            }
-                        });
-
-                        // Màu sắc
-                        $.ajax({
-                            url: '/MauSac/GetAll',
-                            type: 'GET',
-                            success: function(response) {
-                                const mauSacSelect = $("#filterMauSac");
-                                mauSacSelect.find('option:not(:first)').remove();
-                                (response.resultObj || response).forEach(function(ms) {
-                                    mauSacSelect.append(`<option value="${ms.id}">${ms.tenMauSac}</option>`);
-                                });
-                            }
-                        });
-                    }
+                    
 
             // Mở modal chọn địa chỉ
             $("#btnChonDiaChi").click(function (e) {
@@ -3119,6 +3154,8 @@
                     stopCamera();
                 });
             });
+
+           
     </script>
 }
 @await Html.PartialAsync("~/Views/KhachHang/_CreateModal.cshtml")

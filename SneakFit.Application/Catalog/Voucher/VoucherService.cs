@@ -55,7 +55,7 @@ namespace SneakFit.Application.Catalog.Voucher
                 }
             }
 
-            var vc = new SneakFit.Data.Entities.Voucher()
+            var vc = new Data.Entities.Voucher()
             {
                 Id = Guid.NewGuid(),
                 MaVoucher = request.MaVoucher,

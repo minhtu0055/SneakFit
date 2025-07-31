@@ -20,6 +20,6 @@ namespace SneakFit.ApiIntegration.Services
         Task<List<LichSuHoaDonViewModel>> GetHistoryByHoaDonId(Guid hoaDonId);
         Task<bool> RevertToPreviousStatus(Guid hoaDonId);
         Task<Guid> CreateHistory(CreateLichSuHoaDonRequest request);
-        Task<bool> UpdateStatusAndLogAsync(Guid hoaDonId, TrangThaiHoaDon newStatus, Guid userId, string nguoiChinhSua);
+        Task<bool> UpdateStatusAndLogAsync(Guid hoaDonId, TrangThaiHoaDon newStatus, Guid userId, string nguoiChinhSua, string ghiChu);
     }
 }

@@ -138,9 +138,11 @@ namespace SneakFit.BackEndAPI.Controllers
             // Lấy thông tin người thực hiện (nếu cần lấy từ token)
             var user = await _userManager.GetUserAsync(User);
             var nguoiChinhSua = request.NguoiChinhSua ?? user?.HoVaTen ?? User.Identity.Name;
-            var result = await _hoaDonService.UpdateStatusAndLogAsync(hoaDonId, request.NewStatus, request.UserId, nguoiChinhSua);
+            if (string.IsNullOrWhiteSpace(request.GhiChu))
+                return BadRequest("Ghi chú bắt buộc!");
+            var result = await _hoaDonService.UpdateStatusAndLogAsync(hoaDonId, request.NewStatus, request.UserId, nguoiChinhSua, request.GhiChu);
             if (!result)
-                return BadRequest("Không thể cập nhật trạng thái hóa đơn.");
+                return BadRequest("Không thể cập nhật trạng thái hóa đơn hoặc ghi chú bị thiếu.");
             return Ok(new { success = true });
         }
     }
