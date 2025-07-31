@@ -213,6 +213,15 @@ namespace SneakFit.Application.Catalog.HoaDonClient
             return true;
         }
 
+        public async Task<bool> UpdatePaymentStatus(Guid id, SneakFit.Data.Enums.TrangThaiThanhToan newPaymentStatus)
+        {
+            var hoaDon = await _context.HoaDon.FindAsync(id);
+            if (hoaDon == null) return false;
+            hoaDon.TrangThaiThanhToan = newPaymentStatus;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
         public async Task<Dictionary<TrangThaiHoaDon, int>> GetCountByStatusAsync()
         {
             // Lấy toàn bộ hóa đơn, group by trạng thái, đếm từng loại

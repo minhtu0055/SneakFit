@@ -104,6 +104,19 @@ namespace SneakFit.ApiIntegration.Services
             var response = await client.PatchAsync($"/api/HoaDonClient/{id}/trangthai", content);
             return response.IsSuccessStatusCode;
         }
+
+        public async Task<bool> UpdatePaymentStatus(Guid id, SneakFit.Data.Enums.TrangThaiThanhToan newPaymentStatus)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", sessions);
+
+            var content = new StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(newPaymentStatus), Encoding.UTF8, "application/json");
+            var response = await client.PatchAsync($"/api/HoaDonClient/{id}/trangthai-thanhtoan", content);
+            return response.IsSuccessStatusCode;
+        }
         public async Task<Dictionary<string, int>> GetCountByStatusAsync()
         {
             var client = _httpClientFactory.CreateClient();

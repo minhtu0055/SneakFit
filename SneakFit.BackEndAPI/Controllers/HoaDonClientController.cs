@@ -74,5 +74,19 @@ namespace SneakFit.BackEndAPI.Controllers
 
             return Ok(new { success = true });
         }
+
+        [HttpPatch("{id}/trangthai-thanhtoan")]
+        public async Task<IActionResult> UpdateTrangThaiThanhToan(Guid id, [FromBody] SneakFit.Data.Enums.TrangThaiThanhToan newPaymentStatus)
+        {
+            var hoaDon = await _HoaDonClientService.GetById(id);
+            if (hoaDon == null)
+                return NotFound();
+
+            var result = await _HoaDonClientService.UpdatePaymentStatus(id, newPaymentStatus);
+            if (!result)
+                return BadRequest();
+
+            return Ok(new { success = true });
+        }
     }
 }

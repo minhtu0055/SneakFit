@@ -117,6 +117,12 @@ namespace SneakFit.Application.Catalog.SanPham
             if (danhMuc == null)
                 throw new Exception($"Không tìm thấy danh mục với id = {request.DanhMucId}");
 
+            // Fix lỗi trùng tên sp
+            var existingProduct = await _context.SanPham
+                .FirstOrDefaultAsync(x => x.TenSanPham == request.TenSanPham);
+            if (existingProduct != null)
+                throw new Exception($"Sản phẩm với tên '{request.TenSanPham}' đã tồn tại.");
+
             var newSanPham = new Data.Entities.SanPham()
             {
                 Id = Guid.NewGuid(),
@@ -146,6 +152,12 @@ namespace SneakFit.Application.Catalog.SanPham
             var entity = await _context.SanPham
                 .Include(x => x.DanhMuc)
                 .FirstOrDefaultAsync(x => x.Id == request.Id);
+
+            // Fix lỗi trùng tên sp]
+            var existingProduct = await _context.SanPham
+                .FirstOrDefaultAsync(x => x.TenSanPham == request.TenSanPham);
+            if (existingProduct != null)
+                throw new Exception($"Sản phẩm với tên '{request.TenSanPham}' đã tồn tại.");
 
             if (entity == null)
                 return null;
