@@ -415,7 +415,12 @@ namespace SneakFit.Application.Catalog.ThongKe
                             MoTa = g.Key.Mota,
                             DanhMuc = g.Key.DanhMuc,
                             SoLuongDaBan = g.Sum(x => x.hdct.SoLuong),
-                            SoLuongSanPhamChiTiet = g.Select(x => x.spct.ID).Distinct().Count(),
+                            //SoLuongSanPhamChiTiet = g.Select(x => x.spct.ID).Distinct().Count(),
+                             SoLuongSanPhamChiTiet = g
+                            .GroupBy(x => x.spct.ID)
+                            .Where(gr => gr.Sum(x => x.hdct.SoLuong) > 5)
+                            .Count(),
+
                             STT = 0
                         };
 
@@ -498,9 +503,18 @@ namespace SneakFit.Application.Catalog.ThongKe
             }
 
             // Lọc hóa đơn theo khoảng thời gian
-            var donTrongKhoang = await _context.HoaDon
-                .Where(x => x.NgayThanhToan >= fromDate && x.NgayThanhToan < toDate)
+            //var donTrongKhoang = await _context.HoaDon
+            //    .Where(x => x.NgayThanhToan >= fromDate && x.NgayThanhToan < toDate)
+            //    .ToListAsync();
+
+              var donTrongKhoang = await _context.HoaDon
+                .Where(x =>
+                    (x.TrangThai == TrangThaiHoaDon.DaHuy && x.NgayTao >= fromDate && x.NgayTao < toDate)
+                    ||
+                    (x.TrangThai != TrangThaiHoaDon.DaHuy && x.NgayThanhToan >= fromDate && x.NgayThanhToan < toDate)
+                )
                 .ToListAsync();
+
 
             var tong = donTrongKhoang.Count;
 
@@ -995,7 +1009,11 @@ namespace SneakFit.Application.Catalog.ThongKe
                             SoLuongDaBan = g.Sum(x => x.hdct.SoLuong)
                         };
 
-            var result = await query.ToListAsync();
+            //var result = await query.ToListAsync();
+            var result = await query
+            .Where(x => x.SoLuongDaBan > 5)
+            .ToListAsync();
+
             for (int i = 0; i < result.Count; i++)
                 result[i].STT = i + 1;
             return result;

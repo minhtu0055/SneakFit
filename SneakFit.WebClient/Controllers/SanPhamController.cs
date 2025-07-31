@@ -549,6 +549,7 @@ namespace SneakFit.WebClient.Controllers
         //        return Json(new { success = false, message = $"Có lỗi: {ex.Message}" });
         //    }
         //}
+
         [HttpPost]
         public async Task<IActionResult> AddToCart(Guid sanPhamChiTietId, int soLuong = 1)
         {
@@ -613,8 +614,25 @@ namespace SneakFit.WebClient.Controllers
                     SoLuong = soLuong
                 };
 
+                //var result = await _gioHangApiClient.ThemVaoGioHang(request);
+                //return Json(new { success = true, message = "Đã thêm vào giỏ hàng!", cart = result });
+
+                //cập nhật số lượng giỏ hàng khi thêm
                 var result = await _gioHangApiClient.ThemVaoGioHang(request);
-                return Json(new { success = true, message = "Đã thêm vào giỏ hàng!", cart = result });
+                if (result != null)
+                {
+                    // Lấy lại giỏ hàng để cập nhật số lượng mới
+                    var updatedGioHang = await _gioHangApiClient.GetByUserId(userId);
+                    int newCartCount = updatedGioHang?.GioHangChiTiets?.Count ?? 0;
+
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Đã thêm vào giỏ hàng!",
+                        cartCount = newCartCount
+                    });
+                }
+                return Json(new { success = false, message = "Thêm vào giỏ hàng thất bại!" });
             }
             catch (Exception ex)
             {
