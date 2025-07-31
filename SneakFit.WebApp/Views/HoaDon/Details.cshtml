@@ -1,6 +1,7 @@
 ﻿@using SneakFit.Data.Enums
 @using SneakFit.ViewModels.Catalog.LichSuHoaDon
 @model SneakFit.ViewModels.Catalog.HoaDon.HoaDonViewModel
+@inject IConfiguration Configuration
 @{
     ViewData["Title"] = "Chi tiết đơn hàng";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -24,6 +25,12 @@
         }
     }
     
+    // Đặc biệt xử lý cho hóa đơn tại quầy với trạng thái thành công
+    if (isTaiQuay && Model.NgayThanhToan.HasValue)
+    {
+        statusTimeMap[TrangThaiHoaDon.ThanhCong] = Model.NgayThanhToan.Value;
+    }
+    
     // Hàm helper để lấy thời gian cho trạng thái
     DateTime GetTimeForStatus(TrangThaiHoaDon status)
     {
@@ -38,6 +45,12 @@
             return Model.NgayTao; // Thời gian tạo hóa đơn
         }
         
+        // Đặc biệt xử lý cho hóa đơn tại quầy với trạng thái thành công
+        if (isTaiQuay && status == TrangThaiHoaDon.ThanhCong && Model.NgayThanhToan.HasValue)
+        {
+            return Model.NgayThanhToan.Value;
+        }
+        
         // Với các trạng thái khác, nếu chưa có lịch sử thì không hiển thị thời gian
         return Model.NgayTao; // Fallback về thời gian tạo hóa đơn
     }
@@ -45,7 +58,7 @@
     var steps = isTaiQuay
         ? new[] {
             new { Status = TrangThaiHoaDon.ChoXacNhan, Color = "royal-blue", Icon = "icon-file", Title = "Chờ xác nhận", Time = GetTimeForStatus(TrangThaiHoaDon.ChoXacNhan).ToString("HH:mm:ss dd/MM/yyyy") },
-            new { Status = TrangThaiHoaDon.ThanhCong, Color = "emerald", Icon = "icon-check", Title = "Thành công", Time = GetTimeForStatus(TrangThaiHoaDon.ThanhCong).ToString("HH:mm:ss dd/MM/yyyy") }
+            new { Status = TrangThaiHoaDon.ThanhCong, Color = "emerald", Icon = "icon-check", Title = "Thành công", Time = Model.NgayThanhToan?.ToString("HH:mm:ss dd/MM/yyyy") ?? GetTimeForStatus(TrangThaiHoaDon.ThanhCong).ToString("HH:mm:ss dd/MM/yyyy") }
         }
         : new[] {
             new { Status = TrangThaiHoaDon.ChoXacNhan, Color = "royal-blue", Icon = "icon-file", Title = "Chờ xác nhận", Time = GetTimeForStatus(TrangThaiHoaDon.ChoXacNhan).ToString("HH:mm:ss dd/MM/yyyy") },
@@ -517,7 +530,25 @@
                         var isCompleted = (int)step.Status <= (int)Model.TrangThai;
                         var hasRealTime = statusTimeMap.ContainsKey(step.Status);
                         var stepClass = isCompleted ? step.Color : "inactive";
-                        var timeDisplay = hasRealTime ? step.Time : (isCompleted ? step.Time : "Chưa thực hiện");
+                        
+                        // Đặc biệt xử lý cho hóa đơn tại quầy với trạng thái thành công
+                        var timeDisplay = "";
+                        if (isTaiQuay && step.Status == TrangThaiHoaDon.ThanhCong && Model.NgayThanhToan.HasValue)
+                        {
+                            timeDisplay = Model.NgayThanhToan.Value.ToString("HH:mm:ss dd/MM/yyyy");
+                        }
+                        else if (hasRealTime)
+                        {
+                            timeDisplay = step.Time;
+                        }
+                        else if (isCompleted)
+                        {
+                            timeDisplay = step.Time;
+                        }
+                        else
+                        {
+                            timeDisplay = "Chưa thực hiện";
+                        }
                         
                         <div class="progress-step">
                             <div class="step-icon @stepClass @step.Icon"></div>
@@ -630,8 +661,15 @@
                             @foreach (var item in Model.HoaDonChiTiet)
                             {
                                 <tr>
-                                    <td>                                
-                                           @item.SanPhamChiTietId                                      
+                                    <td>
+                                        @if (item.Images != null && item.Images.Count > 0)
+                                        {
+                                            <img src="@($"{Configuration["BaseAddress"]}{item.Images[0]}")" alt="Ảnh sản phẩm" style="width: 80px; height: 80px; object-fit: cover;" onerror="this.src='/assets/img/Default_Logo.png'" />
+                                        }
+                                        else
+                                        {
+                                            <img src="/assets/img/Default_Logo.png" alt="No Image" style="width: 80px; height: 80px; object-fit: cover;" />
+                                        }
                                     </td>
                                     <td>
                                         <div class="d-flex flex-column">
