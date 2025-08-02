@@ -304,6 +304,19 @@ namespace SneakFit.Application.Catalog.SanPham
             var spct = await _context.SanPhamChiTiet.FirstOrDefaultAsync(x => x.ID == model.Id);
             if (spct == null) return false;
 
+            // Kiểm tra xem có SPCT khác với cùng SanPhamId, KichThuocId, và MauSacId không
+            var existingSPCT = await _context.SanPhamChiTiet
+                .FirstOrDefaultAsync(x => x.ID != model.Id &&
+                                        x.SanPhamId == spct.SanPhamId &&
+                                        x.KichThuocId == model.KichThuocId &&
+                                        x.MauSacId == model.MauSacId &&
+                                        x.ThuongHieuId == model.ThuongHieuId);
+
+            if (existingSPCT != null)
+            {
+                return false; // Trả về false nếu đã tồn tại SPCT với cùng thông tin
+            }
+
             // Nếu muốn update cả bảng SanPham thì lấy entity SanPham ra và update
             var sanPham = await _context.SanPham.FirstOrDefaultAsync(x => x.Id == spct.SanPhamId);
             if (sanPham != null)

@@ -19,5 +19,15 @@ namespace SneakFit.Application.Catalog.HoaDonClient
         Task<Dictionary<TrangThaiHoaDon, int>> GetCountByStatusAsync();
         Task<bool> UpdateStatus(Guid id, SneakFit.Data.Enums.TrangThaiHoaDon newStatus);
         Task<bool> UpdatePaymentStatus(Guid id, SneakFit.Data.Enums.TrangThaiThanhToan newPaymentStatus);
+        
+        // Các method mới để xử lý hủy hóa đơn và hoàn lại số lượng
+        // Hủy hóa đơn với hoàn lại số lượng
+        Task<ApiResult<bool>> CancelOrderWithRollback(Guid id);
+
+        // Trả hàng với hoàn lại số lượng  
+        Task<ApiResult<bool>> ReturnOrderWithRollback(Guid id);
+
+        // Hủy hóa đơn khi thanh toán thất bại
+        Task<ApiResult<bool>> CancelOrderOnPaymentFailure(Guid id);
     }
 }

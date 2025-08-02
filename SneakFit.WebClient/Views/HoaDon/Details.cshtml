@@ -39,7 +39,38 @@
                     <div class="col-md-6">
                         <p><strong>Ngày đặt hàng:</strong> @Model.HoaDonClient.NgayTao.ToString("dd/MM/yyyy HH:mm")</p>
                         <p><strong>Phương thức thanh toán:</strong> @Model.HoaDonClient.PhuongThucThanhToan</p>
-                        <p><strong>Trạng thái:</strong> @Model.HoaDonClient.TrangThai</p>
+                        <p>
+                            <strong>Trạng thái:</strong>
+                            @{
+                                var trangThai = Model.HoaDonClient.TrangThai;
+                                string trangThaiTexts = trangThai switch
+                                {
+                                    SneakFit.Data.Enums.TrangThaiHoaDon.ChoXacNhan => "Chờ xác nhận",
+                                    SneakFit.Data.Enums.TrangThaiHoaDon.DaXacNhan => "Đã xác nhận",
+                                    SneakFit.Data.Enums.TrangThaiHoaDon.ChoVanChuyen => "Chờ vận chuyển",
+                                    SneakFit.Data.Enums.TrangThaiHoaDon.DangVanChuyen => "Đang vận chuyển",
+                                    SneakFit.Data.Enums.TrangThaiHoaDon.DaThanhToan => "Đã thanh toán",
+                                    SneakFit.Data.Enums.TrangThaiHoaDon.ThanhCong => "Thành công",
+                                    SneakFit.Data.Enums.TrangThaiHoaDon.DaHuy => "Đã hủy",
+                                    SneakFit.Data.Enums.TrangThaiHoaDon.TraHang => "Trả hàng",
+                                    _ => "Không xác định"
+                                };
+                                string trangThaiClasss = trangThai switch
+                                {
+                                    SneakFit.Data.Enums.TrangThaiHoaDon.ChoXacNhan => "badge bg-warning",
+                                    SneakFit.Data.Enums.TrangThaiHoaDon.DaXacNhan => "badge bg-primary",
+                                    SneakFit.Data.Enums.TrangThaiHoaDon.ChoVanChuyen => "badge bg-info",
+                                    SneakFit.Data.Enums.TrangThaiHoaDon.DangVanChuyen => "badge bg-secondary",
+                                    SneakFit.Data.Enums.TrangThaiHoaDon.DaThanhToan => "badge bg-success",
+                                    SneakFit.Data.Enums.TrangThaiHoaDon.ThanhCong => "badge bg-success",
+                                    SneakFit.Data.Enums.TrangThaiHoaDon.DaHuy => "badge bg-danger",
+                                    SneakFit.Data.Enums.TrangThaiHoaDon.TraHang => "badge bg-dark",
+                                    _ => "badge bg-secondary"
+                                };
+                            }
+                            <span class="@trangThaiClasss">@trangThaiTexts</span>
+                        </p>
+
                         <p><strong>Trạng thái thanh toán:</strong> 
                             @{
                                 var trangThaiThanhToan = Model.HoaDonClient.TrangThaiThanhToan;

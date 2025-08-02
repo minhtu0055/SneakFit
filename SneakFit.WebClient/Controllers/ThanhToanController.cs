@@ -526,14 +526,24 @@ namespace SneakFit.WebClient.Controllers
                 // Xử lý trường hợp payment=fail (thanh toán thất bại)
                 if (payment == "fail")
                 {
-                    // Cập nhật trạng thái hóa đơn thành đã hủy và trạng thái thanh toán thành ThanhToanLoi
+                    // Sử dụng service method mới để xử lý hủy hóa đơn khi thanh toán thất bại
                     if (id.HasValue)
                     {
-                        await _hoaDonClientApiClient.UpdateStatus(id.Value, SneakFit.Data.Enums.TrangThaiHoaDon.DaHuy);
-                        // Cập nhật trạng thái thanh toán thành ThanhToanLoi khi hủy thanh toán VnPay/MoMo
-                        await _hoaDonClientApiClient.UpdatePaymentStatus(id.Value, SneakFit.Data.Enums.TrangThaiThanhToan.ThanhToanLoi);
+                        // Hủy hóa đơn khi thanh toán thất bại và hoàn lại số lượng sản phẩm trong hóa đơn đã mua
+                        var result = await _hoaDonClientApiClient.CancelOrderOnPaymentFailure(id.Value);
+                        if (!result.IsSuccessed)
+                        {
+                            TempData["PaymentError"] = $"Thanh toán thất bại. Lỗi khi hủy đơn hàng: {result.Message}";
+                        }
+                        else
+                        {
+                            TempData["PaymentError"] = "Thanh toán thất bại. Đơn hàng đã được hủy và số lượng sản phẩm đã được hoàn lại vào kho.";
+                        }
                     }
-                    TempData["PaymentError"] = "Thanh toán thất bại. Đơn hàng đã được hủy.";
+                    else
+                    {
+                        TempData["PaymentError"] = "Thanh toán thất bại.";
+                    }
                     return RedirectToAction("Index", "Home");
                 }
 
@@ -583,53 +593,52 @@ namespace SneakFit.WebClient.Controllers
         [HttpPost]
         public async Task<IActionResult> CancelOrder(Guid id)
         {
-            // Lấy thông tin hóa đơn để kiểm tra phương thức thanh toán
-            var hoaDon = await _hoaDonClientApiClient.GetById(id);
-            if (hoaDon != null)
+            try
             {
-                // Nếu là COD, cập nhật trạng thái thanh toán thành ChuaThanhToan
-                if (hoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD)
+                // Hủy hóa đơn với hoàn lại số lượng
+                var result = await _hoaDonClientApiClient.CancelOrderWithRollback(id);
+                
+                if (result.IsSuccessed)
                 {
-                    await _hoaDonClientApiClient.UpdatePaymentStatus(id, SneakFit.Data.Enums.TrangThaiThanhToan.ChuaThanhToan);
+                    TempData["SuccessMessage"] = result.Message;
                 }
+                else
+                {
+                    TempData["ErrorMessage"] = result.Message;
+                }
+                
+                return RedirectToAction("Details", "HoaDon", new { id });
             }
-            
-            await _hoaDonClientApiClient.UpdateStatus(id, SneakFit.Data.Enums.TrangThaiHoaDon.DaHuy);
-            //return RedirectToAction("Details", "HoaDon", new { id });
-            return RedirectToAction("_OrderDetails", "Account", new { id });
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Lỗi khi hủy đơn hàng: {ex.Message}";
+                return RedirectToAction("Details", "HoaDon", new { id });
+            }
         }
 
         [HttpPost]
         public async Task<IActionResult> ReturnOrder(Guid id)
         {
-            //await _hoaDonClientApiClient.UpdateStatus(id, SneakFit.Data.Enums.TrangThaiHoaDon.TraHang);
-            ////return RedirectToAction("Details", "HoaDon", new { id });
-            //return RedirectToAction("_OrderDetails", "Account", new { id });
-
             try
             {
-                // Lấy chi tiết hóa đơn để biết các sản phẩm và số lượng cần trả
-                var chiTietHoaDon = await _hoaDonChiTietClientApiClient.GetByHoaDonId(id);
-
-                if (chiTietHoaDon != null && chiTietHoaDon.Any())
+                // Trả hàng với hoàn lại số lượng  
+                var result = await _hoaDonClientApiClient.ReturnOrderWithRollback(id);
+                
+                if (result.IsSuccessed)
                 {
-                    // Trả số lượng cho từng sản phẩm chi tiết
-                    foreach (var chiTiet in chiTietHoaDon)
-                    {
-                        await _spctApiClient.UpdateSoLuong(chiTiet.SanPhamChiTietId, chiTiet.SoLuong);
-                    }
+                    TempData["SuccessMessage"] = result.Message;
                 }
-
-                // Cập nhật trạng thái hóa đơn thành Trả hàng
-                await _hoaDonClientApiClient.UpdateStatus(id, SneakFit.Data.Enums.TrangThaiHoaDon.TraHang);
-                await _hoaDonClientApiClient.UpdatePaymentStatus(id, SneakFit.Data.Enums.TrangThaiThanhToan.HoanTien);
-
-                return RedirectToAction("_OrderDetails", "Account", new { id });
+                else
+                {
+                    TempData["ErrorMessage"] = result.Message;
+                }
+                
+                return RedirectToAction("Details", "HoaDon", new { id });
             }
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = $"Lỗi khi trả hàng: {ex.Message}";
-                return RedirectToAction("_OrderDetails", "Account", new { id });
+                return RedirectToAction("Details", "HoaDon", new { id });
             }
         }
 

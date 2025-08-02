@@ -1,5 +1,55 @@
 ﻿@model List<SneakFit.ViewModels.Catalog.HoaDonClient.HoaDonClientViewModel>
 
+@{
+    var selected = ViewData["selectedTrangThai"]?.ToString();
+}
+<!-- Bộ lọc trạng thái - Luôn hiển thị -->
+<div class="section-box mb-4" style="padding-top: 10px">
+    <div class="row">
+        <div class="col-md-12">
+            <h6 class="mb-3"></h6>
+            <div class="order-filter-wrapper" style="padding-top: 8px">
+                <div class="d-flex flex-nowrap gap-2">
+                    <button type="button" class="btn btn-outline-secondary btn-sm filter-btn @(selected == "ChoXacNhan" ? "active" : "")"
+                            data-status="ChoXacNhan" onclick="filterOrders('ChoXacNhan')">
+                        Chờ xác nhận
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm filter-btn @(selected == "DaXacNhan" ? "active" : "")"
+                            data-status="DaXacNhan" onclick="filterOrders('DaXacNhan')">
+                        Đã xác nhận
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm filter-btn @(selected == "ChoVanChuyen" ? "active" : "")"
+                            data-status="ChoVanChuyen" onclick="filterOrders('ChoVanChuyen')">
+                        Chờ vận chuyển
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm filter-btn @(selected == "DangVanChuyen" ? "active" : "")"
+                            data-status="DangVanChuyen" onclick="filterOrders('DangVanChuyen')">
+                        Đang vận chuyển
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm filter-btn @(selected == "DaThanhToan" ? "active" : "")"
+                            data-status="DaThanhToan" onclick="filterOrders('DaThanhToan')">
+                        Đã thanh toán
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm filter-btn @(selected == "ThanhCong" ? "active" : "")"
+                            data-status="ThanhCong" onclick="filterOrders('ThanhCong')">
+                        Thành công
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm filter-btn @(selected == "DaHuy" ? "active" : "")"
+                            data-status="DaHuy" onclick="filterOrders('DaHuy')">
+                        Đã hủy
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm filter-btn @(selected == "TraHang" ? "active" : "")"
+                            data-status="TraHang" onclick="filterOrders('TraHang')">
+                        Trả hàng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Nội dung đơn hàng -->
 @if (Model == null || !Model.Any())
 {
     <div class="section-box text-center p-4">
@@ -29,7 +79,7 @@ else
                             <td style="border-right: none; ">@item.NgayTao.ToString("dd/MM/yyyy HH:mm")</td>
                             <td style="border-right: none; ">@item.TongTien.ToString("N0") ₫</td>
                             <td style="border-right: none; ">
-                                <span class="status-badge">@item.TrangThai</span>
+                                <span class="status-badge status-@item.TrangThai.ToString().ToLower()">@item.TrangThai</span>
                             </td>
                             <td>
                                 <button type="button" class="btn btn-outline-primary btn-sm" onclick="loadOrderDetails('@item.Id')">Xem Chi Tiết</button>
@@ -40,4 +90,94 @@ else
             </table>
         </div>
     </div>
-} 
+}
+
+<style>
+    .order-filter-wrapper {
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 8px; /* tránh bị cắt viền */
+    }
+
+        .order-filter-wrapper::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .order-filter-wrapper::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 4px;
+        }
+
+    .filter-btn {
+        transition: all 0.3s ease;
+        border-radius: 20px;
+        font-weight: 500;
+        border-color: #6c757d;
+        color: #6c757d;
+    }
+
+        .filter-btn:hover {
+            background: linear-gradient(90deg, #163172, #3B82F6);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(90deg, #163172, #3B82F6);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+    .status-badge {
+        padding: 4px 8px;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 0.875rem;
+        display: inline-block;
+        color: white;
+    }
+
+    /* Màu sắc cho từng trạng thái */
+    .status-choxacnhan {
+        background-color: #ffc107;
+        color: #212529;
+    }
+
+    .status-daxacnhan {
+        background-color: #17a2b8;
+        color: white;
+    }
+
+    .status-chovanchuyen {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .status-dangvanchuyen {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .status-dathanhtoan {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .status-thanhcong {
+        background-color: #28a745;
+        color: white;
+    }
+
+    .status-dahuy {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .status-trahang {
+        background-color: #ffc107;
+        color: #212529;
+    }
+
+</style>

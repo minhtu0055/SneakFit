@@ -13,6 +13,7 @@ using SneakFit.ViewModels.Catalog.HoaDonChiTietClient;
 using SneakFit.WebClient.Models;
 using SneakFit.Data.Entities;
 using SneakFit.ApiIntegration.Services;
+using SneakFit.ViewModels.System.DiaChi;
 
 namespace SneakFit.WebClient.Controllers
 {
@@ -23,80 +24,25 @@ namespace SneakFit.WebClient.Controllers
         private readonly IVoucherApiClient _voucherApiClient;
         private readonly ISpctApiClient _spctApiClient;
         private readonly IUserApiClient _userApiClient;
+        private readonly IDiaChiApiClient _diaChiApiClient;
 
         public AccountController(IUserApiClient userApiClient,
             IHoaDonClientApiClient hoaDonClientApiClient,
             IHoaDonChiTietClientApiClient hoaDonChiTietClientApiClient,
             IVoucherApiClient voucherApiClient,
-            ISpctApiClient spctApiClient)
+            ISpctApiClient spctApiClient,
+            IDiaChiApiClient diaChiApiClient)
         {
             _hoaDonClientApiClient = hoaDonClientApiClient;
             _hoaDonChiTietClientApiClient = hoaDonChiTietClientApiClient;
             _voucherApiClient = voucherApiClient;
             _spctApiClient = spctApiClient;
             _userApiClient = userApiClient;
+            _diaChiApiClient = diaChiApiClient;
         }
 
         [AllowAnonymous]
         public IActionResult Login() => View();
-
-        [HttpPost]
-        [AllowAnonymous]
-        public async Task<IActionResult> Login(LoginRequest model)
-        {
-            if (!ModelState.IsValid) return View(model);
-
-            var result = await _userApiClient.Authenticate(model);
-            if (!result.IsSuccessed)
-            {
-                ModelState.AddModelError("", result.Message);
-                return View(model);
-            }
-
-            // Lưu token vào session
-            HttpContext.Session.SetString("Token", result.ResultObj);
-
-            // Tách JWT để lấy Id người dùng
-            var handler = new JwtSecurityTokenHandler();
-            var token = handler.ReadJwtToken(result.ResultObj);
-            var userId = token.Claims.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
-
-            if (string.IsNullOrEmpty(userId))
-            {
-                ModelState.AddModelError("", "Không thể lấy thông tin người dùng từ token.");
-                return View(model);
-            }
-
-            // Gọi API lấy thông tin chi tiết user
-            var userInfo = await _userApiClient.GetById(Guid.Parse(userId));
-            if (!userInfo.IsSuccessed)
-            {
-                ModelState.AddModelError("", "Không thể lấy thông tin người dùng.");
-                return View(model);
-            }
-
-            var user = userInfo.ResultObj;
-
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.HoVaTen),
-                new Claim("AvatarUrl", user.UrlHinhAnh ?? "/assets/img/default-avatar.png"),
-                new Claim(ClaimTypes.Email, user.Email),
-            };
-
-            foreach (var role in user.Roles)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, role));
-            }
-
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var principal = new ClaimsPrincipal(identity);
-
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-
-            return RedirectToAction("MyProfile");
-        }
 
         private Guid GetUserId()
         {
@@ -108,37 +54,73 @@ namespace SneakFit.WebClient.Controllers
             return Guid.Parse(userIdStr);
         }
         // AJAX action để lấy danh sách đơn hàng theo trạng thái
-        public async Task<IActionResult> GetOrdersByStatus(int? trangThai = null)
+        public async Task<IActionResult> GetOrdersByStatus(string trangThai = null, int pageIndex = 1)
         {
             try
             {
                 var userId = GetUserId();
+
+                // Xử lý tham số trangThai
+                SneakFit.Data.Enums.TrangThaiHoaDon? trangThaiEnum = null;
+                string selectedTrangThaiString = trangThai;
+
+                if (!string.IsNullOrEmpty(trangThai) && trangThai != "all")
+                {
+                    // Thử parse như string trước
+                    if (Enum.TryParse<SneakFit.Data.Enums.TrangThaiHoaDon>(trangThai, out var parsedTrangThai))
+                    {
+                        trangThaiEnum = parsedTrangThai;
+                        selectedTrangThaiString = trangThai; // Giữ nguyên string gốc
+                    }
+                    else
+                    {
+                        // Nếu không parse được string, thử parse như int
+                        if (int.TryParse(trangThai, out var trangThaiInt))
+                        {
+                            if (Enum.IsDefined(typeof(SneakFit.Data.Enums.TrangThaiHoaDon), trangThaiInt))
+                            {
+                                trangThaiEnum = (SneakFit.Data.Enums.TrangThaiHoaDon)trangThaiInt;
+                                // Chuyển đổi int thành string tương ứng
+                                selectedTrangThaiString = trangThaiEnum.ToString();
+                            }
+                        }
+                    }
+                }
+                else if (trangThai == "all")
+                {
+                    selectedTrangThaiString = "all";
+                }
+
                 var request = new PhanTrangHoaDonClient
                 {
-                    PageIndex = 1,
-                    PageSize = 100, // Lấy nhiều hơn để hiển thị đầy đủ
+                    PageIndex = pageIndex,
+                    PageSize = 10,
                     Keyword = "",
-                    Trangthaihoadon = (SneakFit.Data.Enums.TrangThaiHoaDon?)trangThai,
+                    Trangthaihoadon = trangThaiEnum,
                     NgayBatDau = null,
                     NgayKetThuc = null,
                     UserId = userId
                 };
-
                 var hoaDons = await _hoaDonClientApiClient.GetAllPaging(request);
-
-                if (hoaDons == null || hoaDons.Items == null || !hoaDons.Items.Any())
+                ViewBag.PageIndex = pageIndex;
+                ViewBag.PageSize = request.PageSize;
+                ViewBag.TotalRecords = hoaDons?.TotalRecords ?? 0;
+                if (hoaDons == null || hoaDons.Items == null)
                 {
                     return PartialView("_OrdersList", new List<HoaDonClientViewModel>());
                 }
-
                 var filtered = hoaDons.Items
-                    .OrderByDescending(x => x.NgayTao)
-                    .ToList();
+                .Where(x => x.UserId == userId &&
+                            (trangThaiEnum == null || x.TrangThai == trangThaiEnum))
+                .OrderByDescending(x => x.NgayTao)
+                .ToList();
 
+                ViewData["selectedTrangThai"] = selectedTrangThaiString;
                 return PartialView("_OrdersList", filtered);
             }
             catch (Exception ex)
             {
+                TempData["ErrorMessage"] = $"Lỗi khi lấy danh sách hóa đơn";
                 return PartialView("_OrdersList", new List<HoaDonClientViewModel>());
             }
         }
@@ -163,6 +145,18 @@ namespace SneakFit.WebClient.Controllers
                 if (userResult.IsSuccessed)
                 {
                     model.User = userResult.ResultObj;
+                }
+
+                // ✅ LẤY TẤT CẢ ĐỊA CHỈ CỦA USER
+                try
+                {
+                    var diaChiList = await _diaChiApiClient.GetAllByUser();
+                    model.DiaChiList = diaChiList ?? new List<DiaChiViewModel>();
+                }
+                catch (Exception ex)
+                {
+                    // Nếu không lấy được danh sách địa chỉ, tạo list rỗng
+                    model.DiaChiList = new List<DiaChiViewModel>();
                 }
 
                 // Lấy tất cả hóa đơn để tính số lượng theo trạng thái
@@ -210,7 +204,7 @@ namespace SneakFit.WebClient.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"Lỗi khi lấy danh sách hóa đơn: {ex.Message}";
+                TempData["ErrorMessage"] = $"Lỗi khi lấy danh sách hóa đơn";
                 model.hoaDonClientViewModels = new(); // fallback an toàn
             }
 

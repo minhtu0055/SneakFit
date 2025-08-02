@@ -233,5 +233,150 @@ namespace SneakFit.Application.Catalog.HoaDonClient
             // Đưa về Dictionary cho dễ dùng
             return counts.ToDictionary(x => x.TrangThai, x => x.Count);
         }
+
+        public async Task<ApiResult<bool>> CancelOrderWithRollback(Guid id)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                // Lấy thông tin hóa đơn
+                var hoaDon = await _context.HoaDon
+                    .Include(h => h.HoaDonChiTiet)
+                    .FirstOrDefaultAsync(h => h.Id == id);
+
+                if (hoaDon == null)
+                {
+                    await transaction.RollbackAsync();
+                    return new ApiResult<bool> { IsSuccessed = false, Message = "Không tìm thấy hóa đơn." };
+                }
+
+                // Kiểm tra trạng thái hóa đơn
+                if (hoaDon.TrangThai == TrangThaiHoaDon.DaHuy)
+                {
+                    await transaction.RollbackAsync();
+                    return new ApiResult<bool> { IsSuccessed = false, Message = "Hóa đơn đã được hủy trước đó." };
+                }
+
+                // Hoàn lại số lượng sản phẩm
+                foreach (var chiTiet in hoaDon.HoaDonChiTiet)
+                {
+                    var sanPhamChiTiet = await _context.SanPhamChiTiet.FindAsync(chiTiet.SanPhamChiTietId);
+                    if (sanPhamChiTiet != null)
+                    {
+                        sanPhamChiTiet.SoLuong += chiTiet.SoLuong;
+                    }
+                }
+
+                // Cập nhật trạng thái hóa đơn
+                hoaDon.TrangThai = TrangThaiHoaDon.DaHuy;
+                
+                // Nếu là COD, cập nhật trạng thái thanh toán
+                if (hoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD)
+                {
+                    hoaDon.TrangThaiThanhToan = TrangThaiThanhToan.ChuaThanhToan;
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return new ApiResult<bool> { IsSuccessed = true, ResultObj = true, Message = "Hủy đơn hàng thành công. Số lượng sản phẩm đã được hoàn lại vào kho." };
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return new ApiResult<bool> { IsSuccessed = false, Message = $"Lỗi khi hủy đơn hàng: {ex.Message}" };
+            }
+        }
+
+        public async Task<ApiResult<bool>> ReturnOrderWithRollback(Guid id)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                // Lấy thông tin hóa đơn
+                var hoaDon = await _context.HoaDon
+                    .Include(h => h.HoaDonChiTiet)
+                    .FirstOrDefaultAsync(h => h.Id == id);
+
+                if (hoaDon == null)
+                {
+                    await transaction.RollbackAsync();
+                    return new ApiResult<bool> { IsSuccessed = false, Message = "Không tìm thấy hóa đơn." };
+                }
+
+                // Kiểm tra trạng thái hóa đơn
+                if (hoaDon.TrangThai == TrangThaiHoaDon.TraHang)
+                {
+                    await transaction.RollbackAsync();
+                    return new ApiResult<bool> { IsSuccessed = false, Message = "Hóa đơn đã được trả hàng trước đó." };
+                }
+
+                // Hoàn lại số lượng sản phẩm
+                foreach (var chiTiet in hoaDon.HoaDonChiTiet)
+                {
+                    var sanPhamChiTiet = await _context.SanPhamChiTiet.FindAsync(chiTiet.SanPhamChiTietId);
+                    if (sanPhamChiTiet != null)
+                    {
+                        sanPhamChiTiet.SoLuong += chiTiet.SoLuong;
+                    }
+                }
+
+                // Cập nhật trạng thái hóa đơn
+                hoaDon.TrangThai = TrangThaiHoaDon.TraHang;
+                hoaDon.TrangThaiThanhToan = TrangThaiThanhToan.HoanTien;
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return new ApiResult<bool> { IsSuccessed = true, ResultObj = true, Message = "Trả hàng thành công. Số lượng sản phẩm đã được hoàn lại vào kho." };
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return new ApiResult<bool> { IsSuccessed = false, Message = $"Lỗi khi trả hàng: {ex.Message}" };
+            }
+        }
+
+        public async Task<ApiResult<bool>> CancelOrderOnPaymentFailure(Guid id)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                // Lấy thông tin hóa đơn
+                var hoaDon = await _context.HoaDon
+                    .Include(h => h.HoaDonChiTiet)
+                    .FirstOrDefaultAsync(h => h.Id == id);
+
+                if (hoaDon == null)
+                {
+                    await transaction.RollbackAsync();
+                    return new ApiResult<bool> { IsSuccessed = false, Message = "Không tìm thấy hóa đơn." };
+                }
+
+                // Hoàn lại số lượng sản phẩm
+                foreach (var chiTiet in hoaDon.HoaDonChiTiet)
+                {
+                    var sanPhamChiTiet = await _context.SanPhamChiTiet.FindAsync(chiTiet.SanPhamChiTietId);
+                    if (sanPhamChiTiet != null)
+                    {
+                        sanPhamChiTiet.SoLuong += chiTiet.SoLuong;
+                    }
+                }
+
+                // Cập nhật trạng thái hóa đơn
+                hoaDon.TrangThai = TrangThaiHoaDon.DaHuy;
+                hoaDon.TrangThaiThanhToan = TrangThaiThanhToan.ThanhToanLoi;
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return new ApiResult<bool> { IsSuccessed = true, ResultObj = true, Message = "Hủy đơn hàng do thanh toán thất bại. Số lượng sản phẩm đã được hoàn lại vào kho." };
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return new ApiResult<bool> { IsSuccessed = false, Message = $"Lỗi khi hủy đơn hàng: {ex.Message}" };
+            }
+        }
     }
 }

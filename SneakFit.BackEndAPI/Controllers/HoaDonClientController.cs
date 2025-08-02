@@ -88,5 +88,32 @@ namespace SneakFit.BackEndAPI.Controllers
 
             return Ok(new { success = true });
         }
+
+        [HttpPost("{id}/cancel-with-rollback")]
+        public async Task<IActionResult> CancelOrderWithRollback(Guid id)
+        {
+            var result = await _HoaDonClientService.CancelOrderWithRollback(id);
+            if (!result.IsSuccessed)
+                return BadRequest(result);
+            return Ok(result);
+        }
+
+        [HttpPost("{id}/return-with-rollback")]
+        public async Task<IActionResult> ReturnOrderWithRollback(Guid id)
+        {
+            var result = await _HoaDonClientService.ReturnOrderWithRollback(id);
+            if (!result.IsSuccessed)
+                return BadRequest(result);
+            return Ok(result);
+        }
+
+        [HttpPost("{id}/cancel-payment-failure")]
+        public async Task<IActionResult> CancelOrderOnPaymentFailure(Guid id)
+        {
+            var result = await _HoaDonClientService.CancelOrderOnPaymentFailure(id);
+            if (!result.IsSuccessed)
+                return BadRequest(result);
+            return Ok(result);
+        }
     }
 }
