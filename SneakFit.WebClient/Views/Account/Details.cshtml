@@ -265,7 +265,7 @@
             <!-- Hành động -->
             <div class="section-box actions text-center">
                 <a href="@Url.Action("Index", "HoaDon")" class="btn btn-primary">Quay về danh sách</a>
-                @if ((int)Model.HoaDonClient.TrangThai == 0) // ChoXacNhan
+                @if ((int)Model.HoaDonClient.TrangThai == 0 && Model.HoaDonClient.PhuongThucThanhToan == SneakFit.Data.Enums.PhuongThucThanhToan.COD) // ChoXacNhan và COD
                 {
                     <form method="post" action="@Url.Action("CancelOrder", "ThanhToan", new { id = Model.HoaDonClient.Id })" style="display:inline-block;">
                         <button type="submit" class="btn btn-warning" onclick="return confirm('Bạn có chắc chắn muốn hủy hóa đơn này?');">Hủy hóa đơn</button>

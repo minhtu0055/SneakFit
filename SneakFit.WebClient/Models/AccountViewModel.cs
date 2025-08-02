@@ -1,5 +1,6 @@
 ﻿using SneakFit.Data.Enums;
 using SneakFit.ViewModels.Catalog.HoaDonClient;
+using SneakFit.ViewModels.System.DiaChi;
 using SneakFit.ViewModels.System.User;
 
 namespace SneakFit.WebClient.Models
@@ -11,5 +12,6 @@ namespace SneakFit.WebClient.Models
         public DoiMatKhauRequest DoiMatKhauRequest { get; set; } = new DoiMatKhauRequest();
         public List<HoaDonClientViewModel> hoaDonClientViewModels { get; set; } = new();
         public Dictionary<TrangThaiHoaDon, int> SoLuongTheoTrangThai { get; set; } = new();
+        public List<DiaChiViewModel> DiaChiList { get; set; } = new();
     }
 }

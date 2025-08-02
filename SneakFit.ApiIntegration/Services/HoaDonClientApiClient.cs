@@ -104,6 +104,19 @@ namespace SneakFit.ApiIntegration.Services
             var response = await client.PatchAsync($"/api/HoaDonClient/{id}/trangthai", content);
             return response.IsSuccessStatusCode;
         }
+
+        public async Task<bool> UpdatePaymentStatus(Guid id, SneakFit.Data.Enums.TrangThaiThanhToan newPaymentStatus)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", sessions);
+
+            var content = new StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(newPaymentStatus), Encoding.UTF8, "application/json");
+            var response = await client.PatchAsync($"/api/HoaDonClient/{id}/trangthai-thanhtoan", content);
+            return response.IsSuccessStatusCode;
+        }
         public async Task<Dictionary<string, int>> GetCountByStatusAsync()
         {
             var client = _httpClientFactory.CreateClient();
@@ -124,6 +137,93 @@ namespace SneakFit.ApiIntegration.Services
             else
             {
                 throw new Exception($"Không thể lấy dữ liệu số lượng theo trạng thái: {body}");
+            }
+        }
+
+        public async Task<ApiResult<bool>> CancelOrderWithRollback(Guid id)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var response = await client.PostAsync($"/api/HoaDonClient/{id}/cancel-with-rollback", null);
+            var body = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                return JsonConvert.DeserializeObject<ApiResult<bool>>(body);
+            }
+            else
+            {
+                try
+                {
+                    var errorResult = JsonConvert.DeserializeObject<ApiErrorResult<bool>>(body);
+                    return new ApiResult<bool> { IsSuccessed = false, Message = errorResult?.Message ?? "Lỗi không xác định" };
+                }
+                catch
+                {
+                    return new ApiResult<bool> { IsSuccessed = false, Message = $"Lỗi server: {body}" };
+                }
+            }
+        }
+
+        public async Task<ApiResult<bool>> ReturnOrderWithRollback(Guid id)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var response = await client.PostAsync($"/api/HoaDonClient/{id}/return-with-rollback", null);
+            var body = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                return JsonConvert.DeserializeObject<ApiResult<bool>>(body);
+            }
+            else
+            {
+                try
+                {
+                    var errorResult = JsonConvert.DeserializeObject<ApiErrorResult<bool>>(body);
+                    return new ApiResult<bool> { IsSuccessed = false, Message = errorResult?.Message ?? "Lỗi không xác định" };
+                }
+                catch
+                {
+                    return new ApiResult<bool> { IsSuccessed = false, Message = $"Lỗi server: {body}" };
+                }
+            }
+        }
+
+        public async Task<ApiResult<bool>> CancelOrderOnPaymentFailure(Guid id)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var response = await client.PostAsync($"/api/HoaDonClient/{id}/cancel-payment-failure", null);
+            var body = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                return JsonConvert.DeserializeObject<ApiResult<bool>>(body);
+            }
+            else
+            {
+                try
+                {
+                    var errorResult = JsonConvert.DeserializeObject<ApiErrorResult<bool>>(body);
+                    return new ApiResult<bool> { IsSuccessed = false, Message = errorResult?.Message ?? "Lỗi không xác định" };
+                }
+                catch
+                {
+                    return new ApiResult<bool> { IsSuccessed = false, Message = $"Lỗi server: {body}" };
+                }
             }
         }
     }

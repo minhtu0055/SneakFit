@@ -34,7 +34,7 @@
 <!-- Category Product List Section -->
 <section id="category-product-list" class="category-product-list section">
     <div class="container" data-aos="fade-up" data-aos-delay="100">
-        <div class="row gy-4">
+        <div class="row gy-4" id="product-grid">
             @if (Model.AllSpct != null && Model.AllSpct.Any())
             {
                 // Group SPCT by SanPhamId to get unique products for current page
@@ -52,7 +52,7 @@
 
                 foreach (var product in uniqueProducts)
                 {
-                    <div class="col-lg-6">
+                    <div class="col-lg-6 product-item">
                         <div class="product-box" style="height: 550px">
                             <div class="product-thumb" style="padding-bottom: 0px">
                                 <div class="img" style="height: 404px">
@@ -179,3 +179,17 @@
         </nav>
     </div>
 </section> 
+
+<style>
+    .clear-all-filters-btn {
+        background: linear-gradient(90deg, #1E3A8A, #60A5FA);
+        color: #FFFFFF;
+    }
+
+        .clear-all-filters-btn:hover {
+            background: linear-gradient(90deg, #60A5FA, #1E3A8A);
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3);
+            transform: translateY(-2px);
+            color: #FFFFFF;
+        }
+</style>

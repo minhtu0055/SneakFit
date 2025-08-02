@@ -162,16 +162,12 @@ namespace SneakFit.WebClient.Controllers
             // Áp dụng các bộ lọc bổ sung
             var filteredSpct = allSpct.AsQueryable();
 
-            // Lọc theo khoảng giá
-            System.Diagnostics.Debug.WriteLine($"Price filter - giaThapNhat: {giaThapNhat}, giaCaoNhat: {giaCaoNhat}");
             if (giaThapNhat.HasValue && giaThapNhat.Value > 0)
             {
-                System.Diagnostics.Debug.WriteLine($"Applying min price filter: >= {giaThapNhat.Value}");
                 filteredSpct = filteredSpct.Where(spct => spct.GiaKhuyenMai >= giaThapNhat.Value);
             }
             if (giaCaoNhat.HasValue && giaCaoNhat.Value < 10000000)
             {
-                System.Diagnostics.Debug.WriteLine($"Applying max price filter: <= {giaCaoNhat.Value}");
                 filteredSpct = filteredSpct.Where(spct => spct.GiaKhuyenMai <= giaCaoNhat.Value);
             }
 
@@ -189,13 +185,9 @@ namespace SneakFit.WebClient.Controllers
             }
 
             // Lọc theo danh mục (nếu có chọn)
-            System.Diagnostics.Debug.WriteLine($"Category filter - selectedCategoryIds count: {selectedCategoryIds.Count}");
             if (selectedCategoryIds.Any())
             {
-                System.Diagnostics.Debug.WriteLine($"Category IDs: {string.Join(", ", selectedCategoryIds)}");
-                System.Diagnostics.Debug.WriteLine($"Before category filter: {filteredSpct.Count()} items");
                 filteredSpct = filteredSpct.Where(spct => selectedCategoryIds.Contains(spct.DanhMucId));
-                System.Diagnostics.Debug.WriteLine($"After category filter: {filteredSpct.Count()} items");
             }
 
             // Áp dụng sắp xếp
@@ -513,42 +505,6 @@ namespace SneakFit.WebClient.Controllers
             return PartialView("_ProductList", viewModel);
         }
 
-        //[HttpPost]
-        //public async Task<IActionResult> AddToCart(Guid sanPhamChiTietId, int soLuong = 1)
-        //{
-        //    // Nếu chưa login => giả lập userId tạm
-        //    var userIdStr = User?.Claims?.FirstOrDefault(x => x.Type == "UserId" || x.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-        //    Guid userId;
-
-        //    if (string.IsNullOrEmpty(userIdStr))
-        //    {
-        //        // DEMO: Hardcode userId test nếu chưa làm login
-        //        userId = Guid.Parse("69BD714F-9576-45BA-B5B7-F00649BE00DE"); // Gán tạm
-        //                                                                     // Nếu muốn bắt buộc phải login thì return lỗi:
-        //                                                                     // return Json(new { success = false, requireLogin = true, message = "Bạn cần đăng nhập để mua hàng" });
-        //    }
-        //    else
-        //    {
-        //        userId = Guid.Parse(userIdStr);
-        //    }
-
-        //    try
-        //    {
-        //        var request = new ThemVaoGioHangRequest
-        //        {
-        //            UserId = userId,
-        //            SanPhamChiTietId = sanPhamChiTietId,
-        //            SoLuong = soLuong
-        //        };
-
-        //        var result = await _gioHangApiClient.ThemVaoGioHang(request);
-        //        return Json(new { success = true, message = "Đã thêm vào giỏ hàng!", cart = result });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return Json(new { success = false, message = $"Có lỗi: {ex.Message}" });
-        //    }
-        //}
         [HttpPost]
         public async Task<IActionResult> AddToCart(Guid sanPhamChiTietId, int soLuong = 1)
         {
@@ -667,6 +623,15 @@ namespace SneakFit.WebClient.Controllers
                     spct.GiaKhuyenMai = spct.Gia;
                     spct.KhuyenMaiPhanTram = 0;
                 }
+
+                // 🔧 Gắn thêm thông tin chi tiết SPCT
+                var chatLieu = await _chatLieuApiClient.GetById(spct.ChatLieuId);
+                var deGiay = await _deGiayApiClient.GetById(spct.DeGiayId);
+                var thuongHieu = await _thuongHieuApiClient.GetById(spct.ThuongHieuId);
+
+                spct.TenChatLieu = chatLieu?.TenChatLieu ?? "";
+                spct.TenDeGiay = deGiay?.TenDeGiay ?? "";
+                spct.TenThuongHieu = thuongHieu?.TenThuongHieu ?? "";
             }
 
             var viewModel = new SanPhamDetailViewModel
