@@ -587,7 +587,12 @@
                 <div class="d-flex justify-content-between align-items-center mt-4">
                 <div>
                     @if (
-                        Model.LoaiHoaDon == LoaiHoaDon.Online ||
+                        (Model.LoaiHoaDon == LoaiHoaDon.Online &&
+                        (Model.TrangThai == TrangThaiHoaDon.ChoXacNhan ||
+                        Model.TrangThai == TrangThaiHoaDon.DaXacNhan ||
+                        Model.TrangThai == TrangThaiHoaDon.ChoVanChuyen ||
+                        Model.TrangThai == TrangThaiHoaDon.DangVanChuyen ||
+                        Model.TrangThai == TrangThaiHoaDon.DaThanhToan)) ||
                         (
                             (Model.TrangThai == TrangThaiHoaDon.ChoXacNhan ||
                             Model.TrangThai == TrangThaiHoaDon.DaXacNhan ||
@@ -600,7 +605,7 @@
                     )
                     {
                         <button class="btn btn-primary me-2" id="btnXacNhan">Xác nhận</button>
-                        <button class="btn btn-warning me-2" id="btnQuayLai">Quay lại</button>
+                        <!-- <button class="btn btn-warning me-2" id="btnQuayLai">Quay lại</button> -->
                     }
                     @if (Model.TrangThai == TrangThaiHoaDon.ChoXacNhan && Model.GiaoHang == true)
                     {
@@ -705,7 +710,7 @@
                     <div class="mt-4" style="max-width: 500px; margin-left: auto;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                             <span style="font-weight: bold; min-width: 150px;">Tổng tiền hàng:</span>
-                        <span style="font-weight: bold; min-width: 120px;">@((Model.TongTien + (Model.VoucherDiscount ?? 0)).ToString("N0")) VNĐ</span>
+                            <span style="font-weight: bold; min-width: 120px;">@(Model.LoaiHoaDon == LoaiHoaDon.TaiQuay ? (Model.TongTien + (Model.VoucherDiscount ?? 0)).ToString("N0") : (Model.TongTien + (Model.VoucherDiscount ?? 0) - Model.PhiVanChuyen).ToString("N0")) VNĐ</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                             <span style="font-weight: bold; min-width: 150px;">Phí vận chuyển:</span>
@@ -718,7 +723,8 @@
                         <hr style="margin: 16px 0;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                             <span style="font-weight: bold; min-width: 150px;">Tổng tiền thanh toán:</span>
-                            <span style="font-weight: bold; min-width: 120px;">@((Model.TongTien + Model.PhiVanChuyen).ToString("N0")) VNĐ</span>
+@*                             <span style="font-weight: bold; min-width: 120px;">@((Model.TongTien + Model.PhiVanChuyen).ToString("N0")) VNĐ</span> *@
+                            <span style="font-weight: bold; min-width: 120px;">@(Model.LoaiHoaDon == LoaiHoaDon.TaiQuay ? (Model.TongTien + Model.PhiVanChuyen).ToString("N0") : Model.TongTien.ToString("N0")) VNĐ</span>
                         </div>
                     </div>
                 </div>

@@ -59,7 +59,7 @@
     <div class="summary-section">
         <div class="summary-item">
             <span>Tổng Tiền hàng:</span>
-            <span>@((Model.TongTien + (Model.VoucherDiscount ?? 0)).ToString("N0")) VNĐ</span>
+            <span>@(Model.LoaiHoaDon == LoaiHoaDon.TaiQuay ? (Model.TongTien + (Model.VoucherDiscount ?? 0)).ToString("N0") : (Model.TongTien + (Model.VoucherDiscount ?? 0) - Model.PhiVanChuyen).ToString("N0")) ₫</span>
         </div>
         <div class="summary-item">
             <span>Giảm giá:</span>
@@ -71,7 +71,7 @@
         </div>
         <div class="summary-item total">
             <span>Tổng hóa đơn:</span>
-            <span>@((Model.TongTien + Model.PhiVanChuyen).ToString("N0")) ₫</span>
+            <span>@(Model.LoaiHoaDon == LoaiHoaDon.TaiQuay ? (Model.TongTien + Model.PhiVanChuyen).ToString("N0") : Model.TongTien.ToString("N0")) ₫</span>
         </div>
         <div class="summary-item">
             <span>Tổng số lượng sản phẩm:</span>
