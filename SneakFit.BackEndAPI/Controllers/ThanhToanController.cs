@@ -35,9 +35,13 @@ namespace SneakFit.BackEndAPI.Controllers
                 vnp_Params[key] = Request.Query[key];
             }
             var result = await _thanhToanService.XuLyVnPayCallbackAsync(vnp_Params);
-            if (result)
+            
+            // Lấy orderId từ parameters
+            var orderId = vnp_Params.ContainsKey("vnp_TxnRef") ? vnp_Params["vnp_TxnRef"] : null;
+            
+            if (result && !string.IsNullOrEmpty(orderId))
             {
-                return Redirect("https://localhost:7039/HoaDon/ThanhToanThanhCong");
+                return Redirect($"https://localhost:7039/BanHang/Index?payment=success&hoaDonId={orderId}");
             }
             else
             {

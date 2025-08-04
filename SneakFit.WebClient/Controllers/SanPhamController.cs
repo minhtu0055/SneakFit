@@ -505,6 +505,43 @@ namespace SneakFit.WebClient.Controllers
             return PartialView("_ProductList", viewModel);
         }
 
+        //[HttpPost]
+        //public async Task<IActionResult> AddToCart(Guid sanPhamChiTietId, int soLuong = 1)
+        //{
+        //    // Nếu chưa login => giả lập userId tạm
+        //    var userIdStr = User?.Claims?.FirstOrDefault(x => x.Type == "UserId" || x.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        //    Guid userId;
+
+        //    if (string.IsNullOrEmpty(userIdStr))
+        //    {
+        //        // DEMO: Hardcode userId test nếu chưa làm login
+        //        userId = Guid.Parse("69BD714F-9576-45BA-B5B7-F00649BE00DE"); // Gán tạm
+        //                                                                     // Nếu muốn bắt buộc phải login thì return lỗi:
+        //                                                                     // return Json(new { success = false, requireLogin = true, message = "Bạn cần đăng nhập để mua hàng" });
+        //    }
+        //    else
+        //    {
+        //        userId = Guid.Parse(userIdStr);
+        //    }
+
+        //    try
+        //    {
+        //        var request = new ThemVaoGioHangRequest
+        //        {
+        //            UserId = userId,
+        //            SanPhamChiTietId = sanPhamChiTietId,
+        //            SoLuong = soLuong
+        //        };
+
+        //        var result = await _gioHangApiClient.ThemVaoGioHang(request);
+        //        return Json(new { success = true, message = "Đã thêm vào giỏ hàng!", cart = result });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return Json(new { success = false, message = $"Có lỗi: {ex.Message}" });
+        //    }
+        //}
+
         [HttpPost]
         public async Task<IActionResult> AddToCart(Guid sanPhamChiTietId, int soLuong = 1)
         {
@@ -569,8 +606,25 @@ namespace SneakFit.WebClient.Controllers
                     SoLuong = soLuong
                 };
 
+                //var result = await _gioHangApiClient.ThemVaoGioHang(request);
+                //return Json(new { success = true, message = "Đã thêm vào giỏ hàng!", cart = result });
+
+                //cập nhật số lượng giỏ hàng khi thêm
                 var result = await _gioHangApiClient.ThemVaoGioHang(request);
-                return Json(new { success = true, message = "Đã thêm vào giỏ hàng!", cart = result });
+                if (result != null)
+                {
+                    // Lấy lại giỏ hàng để cập nhật số lượng mới
+                    var updatedGioHang = await _gioHangApiClient.GetByUserId(userId);
+                    int newCartCount = updatedGioHang?.GioHangChiTiets?.Count ?? 0;
+
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Đã thêm vào giỏ hàng!",
+                        cartCount = newCartCount
+                    });
+                }
+                return Json(new { success = false, message = "Thêm vào giỏ hàng thất bại!" });
             }
             catch (Exception ex)
             {

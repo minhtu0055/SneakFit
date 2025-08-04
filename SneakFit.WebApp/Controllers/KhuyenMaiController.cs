@@ -82,8 +82,19 @@ namespace SneakFit.Admin.Controllers
             }
             catch (Exception ex)
             {
-                TempData["ErrorMsg"] = ex.Message; // Dùng TempData để truyền thông báo sang Index
-                return RedirectToAction("Index");
+                // ✅ Gán lỗi vào ModelState để hiện trong form
+                ModelState.AddModelError(string.Empty, ex.Message);
+
+                // ✅ Load lại ViewBag (bắt buộc nếu return View)
+                var sanPhams = await _sanPhamApiClient.GetAll();
+                ViewBag.SanPhams = new SelectList(sanPhams, "Id", "TenSanPham");
+                ViewBag.LoaiGiamGia = new List<SelectListItem>()
+                {
+                    new SelectListItem("Giảm theo phần trăm", ((int)LoaiGiamGia.PhamTram).ToString()),
+                    new SelectListItem("Giảm theo số tiền", ((int)LoaiGiamGia.SoTien).ToString())
+                };
+
+                return View(request); // ✅ Quay lại form Create với lỗi hiển thị
             }
         }
 
