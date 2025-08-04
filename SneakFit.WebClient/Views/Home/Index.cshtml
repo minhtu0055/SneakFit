@@ -496,6 +496,24 @@
     </div>
 
 </section><!-- /Product List Section -->
+<!-- Modal thông báo trung tâm -->
+<div class="modal fade" id="centerToastModal" tabindex="-1" aria-labelledby="centerToastModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center p-4" style="border: 3px solid #8b5cf6; border-radius: 10px;">
+            <div class="modal-body">
+                <div class="mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="#22c55e" class="bi bi-check-circle" viewBox="0 0 16 16">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+                        <path d="M10.97 5.97a.75.75 0 0 1 1.07 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L5.324 9.384a.75.75 0 1 1 1.06-1.06l1.094 1.094 3.492-4.438z" />
+                    </svg>
+                </div>
+                <h5 class="modal-title mb-2" id="centerToastModalLabel">Thành công</h5>
+                <p id="centerToastMessage" class="mb-0"></p>
+                <button type="button" class="btn btn-primary mt-4 px-4" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-color/2.1.2/jquery.color.min.js"></script>
@@ -1108,7 +1126,7 @@
             updateQuantityUI();
         });
 
-        $('#btnAddToCart').click(function () {
+                 $('#btnAddToCart').click(function () {
             var spctId = $('#selectedSpctId').val();
             var soLuong = parseInt($('#quantityInput').val()) || 1;
             var max = parseInt($('#quantityInput').attr('max')) || 1;
@@ -1131,15 +1149,28 @@
                         return;
                     }
                     if (res.success) {
-                        $('#productModal').modal('hide');
-                        alert(res.message || 'Đã thêm vào giỏ hàng thành công!');
-                        location.reload();
+                        $('#centerToastMessage').text(res.message || 'Đã thêm vào giỏ hàng thành công!');
+                        var toastModal = new bootstrap.Modal(document.getElementById('centerToastModal'));
+                        toastModal.show();
+                        setTimeout(function () {
+                            toastModal.hide();
+                        }, 3000); // Tự động ẩn sau 3 giây
                     } else {
-                        alert(res.message || 'Có lỗi xảy ra!');
+                        $('#centerToastMessage').text(res.message || 'Có lỗi xảy ra!');
+                        var toastModal = new bootstrap.Modal(document.getElementById('centerToastModal'));
+                        toastModal.show();
+                        setTimeout(function () {
+                            toastModal.hide();
+                        }, 3000); // Tự động ẩn sau 3 giây
                     }
                 },
                 error: function () {
-                    alert('Lỗi hệ thống, vui lòng thử lại!');
+                    $('#centerToastMessage').text('Lỗi hệ thống, vui lòng thử lại!');
+                    var toastModal = new bootstrap.Modal(document.getElementById('centerToastModal'));
+                    toastModal.show();
+                    setTimeout(function () {
+                        toastModal.hide();
+                    }, 3000); // Tự động ẩn sau 3 giây
                 }
             });
         });
@@ -1679,4 +1710,29 @@
         .btn-checkout i {
             margin-right: 8px;
         }
+
+    /* Modal Styles */
+    .modal {
+        z-index: 1050;
+    }
+
+    /* Đảm bảo modal thông báo luôn hiển thị trên cùng */
+    #centerToastModal {
+        z-index: 1060;
+    }
+
+        /* Đảm bảo backdrop của modal thông báo cũng có z-index cao hơn */
+        #centerToastModal ~ .modal-backdrop {
+            z-index: 1055;
+        }
+
+    .modal-backdrop {
+        z-index: 1040;
+    }
+
+    .modal.show {
+        display: block !important;
+    }
+
+    // ... existing code ...
 </style>

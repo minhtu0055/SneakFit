@@ -71,7 +71,9 @@
                             <span class="@trangThaiClasss">@trangThaiTexts</span>
                         </p>
 
-                        <p><strong>Trạng thái thanh toán:</strong> 
+                        <p>
+                            <strong>Trạng thái thanh toán:</strong>
+
                             @{
                                 var trangThaiThanhToan = Model.HoaDonClient.TrangThaiThanhToan;
                                 var trangThaiText = trangThaiThanhToan switch
@@ -220,8 +222,8 @@
                 <a href="@Url.Action("Index", "HoaDon")" class="btn btn-primary">Quay về danh sách</a>
                 @if ((int)Model.HoaDonClient.TrangThai == 0 && Model.HoaDonClient.PhuongThucThanhToan == SneakFit.Data.Enums.PhuongThucThanhToan.COD) // ChoXacNhan và COD
                 {
-                    <form method="post" action="@Url.Action("CancelOrder", "ThanhToan", new { id = Model.HoaDonClient.Id })" style="display:inline-block;">
-                        <button type="submit" class="btn btn-warning" onclick="return confirm('Bạn có chắc chắn muốn hủy hóa đơn này?');">Hủy hóa đơn</button>
+                    <form method="post" action="@Url.Action("CancelOrder", "ThanhToan", new { id = Model.HoaDonClient.Id })" style="display:inline-block;" id="cancelOrderForm">
+                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#cancelModal">Hủy hóa đơn</button>
                     </form>
                 }
                 @if ((int)Model.HoaDonClient.TrangThai == 5) // ThanhCong
@@ -233,11 +235,35 @@
             </div>
         }
     </div>
+
+    <!-- Modal for Cancel Confirmation -->
+    <div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <span class="check-icon"><i class="bi bi-question-circle-fill text-info"></i></span>
+                    <h5 class="mt-3">Xác nhận hủy hóa đơn</h5>
+                    <p>Bạn có chắc chắn muốn hủy hóa đơn này không?</p>
+                    <div class="mt-3">
+                        <button type="button" class="btn btn-primary confirm-cancel-btn" onclick="submitCancelForm()">OK</button>
+                        <button type="button" class="btn btn-secondary cancel-modal-btn" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </main>
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function submitCancelForm() {
+            document.getElementById('cancelOrderForm').submit();
+        }
+    </script>
 }
 
 <style>
@@ -428,6 +454,7 @@
     .text-muted.text-decoration-line-through {
         color: #9ca3af !important;
     }
+
     /* Voucher Used Section Custom Style */
     .voucher-used-box {
         border: 1.5px solid #60A5FA;
@@ -543,4 +570,31 @@
         font-weight: 500;
         margin-left: 4px;
     }
+
+    .check-icon {
+        display: inline-block;
+        font-size: 2.5rem;
+    }
+
+    .confirm-cancel-btn {
+        background: linear-gradient(90deg, #60A5FA, #1E3A8A);
+        border: none;
+    }
+
+        .confirm-cancel-btn:hover {
+            background: linear-gradient(90deg, #163172, #3B82F6);
+            box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3);
+            transform: translateY(-2px);
+        }
+
+    .cancel-modal-btn {
+        background: linear-gradient(90deg, #95a5a6, #7f8c8d);
+        border: none;
+    }
+
+        .cancel-modal-btn:hover {
+            background: linear-gradient(90deg, #6d7a7d, #5d6b70);
+            box-shadow: 0 4px 15px rgba(117, 132, 139, 0.3);
+            transform: translateY(-2px);
+        }
 </style>
