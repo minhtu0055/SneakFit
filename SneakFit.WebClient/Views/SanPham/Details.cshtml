@@ -455,6 +455,11 @@
                         setTimeout(function () {
                             toastModal.hide();
                         }, 3000); // Tự động ẩn sau 3 giây
+
+                        // Bổ sung từ code ban đầu: Cập nhật số lượng badge
+                        if (res.cartCount !== undefined) {
+                            $('.badge').text(res.cartCount); // Cập nhật số lượng trên badge
+                        }
                     } else {
                         $('#centerToastMessage').text(res.message || 'Có lỗi xảy ra!');
                         var toastModal = new bootstrap.Modal(document.getElementById('centerToastModal'));
