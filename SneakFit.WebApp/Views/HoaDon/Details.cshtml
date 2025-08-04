@@ -478,7 +478,7 @@
             transition: all 0.2s ease;
         }
 
-        media (max-width: 768px) {
+        @@media (max-width: 768px) {
             .progress-timeline {
                 flex-direction: column;
                 align-items: center;
@@ -503,9 +503,35 @@
                 margin-top: 30px;
             }
         }
+
+        /* CSS cho print invoice - chỉ sử dụng template mới */
+        #printInvoiceTemplate {
+            display: none; /* Ẩn template in khỏi màn hình thường */
+        }
+
+        @@media print {
+            /* Ẩn tất cả các phần tử khác */
+            body * {
+                visibility: hidden;
+            }
+            
+            /* Chỉ hiển thị template in */
+            #printInvoiceTemplate, #printInvoiceTemplate * {
+                visibility: visible;
+            }
+            
+            /* Định vị template in */
+            #printInvoiceTemplate {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                display: block !important;
+            }
+        }
     </style>
 </head>
-<div class="">
+<div class="body">
     <h4 class="fw-bold py-3 mb-4">Chi tiết hóa đơn #@Model.MaHoaDon</h4>
     <!-- Status Timeline -->
     <div class="card mb-4">
@@ -582,7 +608,8 @@
                     }
                 </div>
                 <div>
-                    <button class="btn btn-primary" id="btnLichSu">Lịch sử</button>
+                    <button class="btn btn-primary me-2" id="btnInHoaDon" onclick="printInvoice()">In</button>
+                    <button class="btn btn-primary" id="btnLichSu">Lịch sử</button>                  
                 </div>
             </div>      
         </div>
@@ -597,42 +624,32 @@
                 <div class="card-body">
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">Trạng thái: </label>
-                            <p class="form-control-static">@GetStatusDisplayName(Model.TrangThai)</p>
+                            <label class="fw-semibold">Trạng thái: </label>
+                            <span class="form-control-static">@GetStatusDisplayName(Model.TrangThai)</span>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Tên khách hàng: </label>
-                            <p class="form-control-static">@Model.HoTen</p>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Loại: </label>
-                            <p class="form-control-static">	@GetStatusName(Model.LoaiHoaDon)</p>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Số điện thoại: </label>
-                            <p class="form-control-static">@Model.SoDienThoai</p>
+                            <label class="fw-semibold">Tên khách hàng: </label>
+                            <span class="form-control-static">@Model.HoTen</span>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">Phí vận chuyển: </label>
-                            <p class="form-control-static">@Model.PhiVanChuyen.ToString("N0") VNĐ</p>
+                            <label class="fw-semibold">Loại: </label>
+                            <span class="form-control-static">@GetStatusName(Model.LoaiHoaDon)</span>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Tổng tiền: </label>
-                            <p class="form-control-static">@Model.TongTien.ToString("N0") VNĐ</p>
+                            <label class="fw-semibold">Số điện thoại: </label>
+                            <span class="form-control-static">@Model.SoDienThoai</span>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">Địa chỉ: </label>
-                            <p class="form-control-static">@Model.DiaChi</p>
+                            <label class="fw-semibold">Địa chỉ: </label>
+                            <span class="form-control-static">@Model.DiaChi</span>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Phương thức thanh toán: </label>
-                            <p class="form-control-static">@GetStatusTTName(Model.PhuongThucThanhToan)</p>
+                            <label class="fw-semibold">Phương thức thanh toán: </label>
+                            <span class="form-control-static">@GetStatusTTName(Model.PhuongThucThanhToan)</span>
                         </div>
                     </div>                 
                 </div>
@@ -683,19 +700,35 @@
                                     <td>@((item.GiaBan * item.SoLuong).ToString("N0")) VNĐ</td>
                                 </tr>
                             }
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td colspan="6" class="text-end fw-bold">Tổng cộng:</td>
-                                <td class="fw-bold">@Model.TongTien.ToString("N0") VNĐ</td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                        </tbody>                       
+                    </table>                 
+                    <div class="mt-4" style="max-width: 500px; margin-left: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span style="font-weight: bold; min-width: 150px;">Tổng tiền hàng:</span>
+                        <span style="font-weight: bold; min-width: 120px;">@((Model.TongTien + (Model.VoucherDiscount ?? 0)).ToString("N0")) VNĐ</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span style="font-weight: bold; min-width: 150px;">Phí vận chuyển:</span>
+                            <span style="font-weight: bold; min-width: 120px;">@Model.PhiVanChuyen.ToString("N0") VNĐ</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span style="font-weight: bold; min-width: 150px;">Giảm giá:</span>
+                            <span style="font-weight: bold; min-width: 120px;">@((Model.VoucherDiscount ?? 0).ToString("N0")) VNĐ</span>
+                        </div>
+                        <hr style="margin: 16px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span style="font-weight: bold; min-width: 150px;">Tổng tiền thanh toán:</span>
+                            <span style="font-weight: bold; min-width: 120px;">@((Model.TongTien + Model.PhiVanChuyen).ToString("N0")) VNĐ</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+@await Html.PartialAsync("_PrintInvoiceTemplate", Model)
+
 
 <!-- Modal Lịch Sử Hóa Đơn -->
 <div class="modal fade" id="lichSuModal" tabindex="-1" aria-labelledby="lichSuModalLabel" aria-hidden="true">
@@ -851,8 +884,9 @@
                     },
                     success: function (res) {
                         if (res.success) {
-                            toastr.success('Cập nhật trạng thái thành công!');
                             setTimeout(function () { location.reload(); }, 1000);
+                            toastr.success('Cập nhật trạng thái thành công!');
+                            
                         } else {
                             toastr.error(res.message || 'Có lỗi xảy ra!');
                         }
@@ -911,6 +945,20 @@
             var month = (d.getMonth() + 1).toString().padStart(2, '0');
             var year = d.getFullYear();
             return hours + ':' + minutes + ':' + seconds + ' ' + day + '/' + month + '/' + year;
+        }
+
+        // Hàm in hóa đơn
+        function printInvoice() {
+            // Hiển thị template in
+            document.getElementById('printInvoiceTemplate').style.display = 'block';
+            
+            // Mở print dialog
+            window.print();
+            
+            // Ẩn template sau khi in
+            setTimeout(function() {
+                document.getElementById('printInvoiceTemplate').style.display = 'none';
+            }, 1000);
         }
     </script>
 }

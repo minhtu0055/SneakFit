@@ -1,0 +1,193 @@
+@using SneakFit.Data.Enums
+@model SneakFit.ViewModels.Catalog.HoaDon.HoaDonViewModel
+
+<!-- Template cho in hóa đơn -->
+<div class="print-invoice" id="printInvoiceTemplate">
+    <div class="headers">
+        <div>
+            <div class="company-name">SNEAK FIT</div>
+            <div class="company-details">
+                Cao đẳng FPT Polytechnic Phương Canh, Từ Liêm, Hà Nội, Việt Nam<br>
+                SDT: 0912311205
+            </div>
+            <div class="invoice-info">
+                <strong>Mã hóa đơn:</strong> @Model.MaHoaDon<br>
+                <strong>Ngày tạo:</strong> @Model.NgayTao.ToString("dd/MM/yyyy HH:mm:ss")
+            </div>
+        </div>
+    </div>
+    
+    <div class="customer-section">
+            <strong>Khách hàng:</strong> @Model.HoTen<br>
+            <strong>Số điện thoại:</strong> @Model.SoDienThoai<br>
+            <strong>Địa chỉ:</strong> @Model.DiaChi
+    </div>
+    
+    <div class="order-content">
+        <h4>Nội dung đơn hàng (Tổng số lượng sản phẩm @Model.HoaDonChiTiet.Sum(x => x.SoLuong))</h4>
+        <table class="invoice-table">
+            <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Tên</th>
+                    <th>Giá</th>
+                    <th>Số lượng</th>
+                    <th>Trạng thái</th>
+                    <th>Tổng</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    int stt = 1;
+                }
+                @foreach (var item in Model.HoaDonChiTiet)
+                {
+                    <tr>
+                        <td>@stt</td>
+                        <td>@item.TenSanPham</td>
+                        <td>@item.GiaBan.ToString("N0") ₫</td>
+                        <td>@item.SoLuong</td>
+                        <td>Thành công</td>
+                        <td>@((item.GiaBan * item.SoLuong).ToString("N0")) ₫</td>
+                    </tr>
+                    stt++;
+                }
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="summary-section">
+        <div class="summary-item">
+            <span>Tổng Tiền hàng:</span>
+            <span>@((Model.TongTien + (Model.VoucherDiscount ?? 0)).ToString("N0")) VNĐ</span>
+        </div>
+        <div class="summary-item">
+            <span>Giảm giá:</span>
+            <span>@((Model.VoucherDiscount ?? 0).ToString("N0")) ₫</span>
+        </div>
+        <div class="summary-item">
+            <span>Phí ship:</span>
+            <span>@Model.PhiVanChuyen.ToString("N0") ₫</span>
+        </div>
+        <div class="summary-item total">
+            <span>Tổng hóa đơn:</span>
+            <span>@((Model.TongTien + Model.PhiVanChuyen).ToString("N0")) ₫</span>
+        </div>
+        <div class="summary-item">
+            <span>Tổng số lượng sản phẩm:</span>
+            <span>@Model.HoaDonChiTiet.Sum(x => x.SoLuong)</span>
+        </div>
+    </div>
+</div>
+
+<style>
+.print-invoice {
+    font-family: Arial, sans-serif;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background: white;
+}
+
+.headers {
+    margin-bottom: 10px;
+    border-bottom: 2px solid #333;
+    padding-bottom: 20px;
+    text-align: center;
+}
+
+.company-name {
+    font-size: 32px;
+    font-weight: bold;
+    color: #000;
+    margin-bottom: 10px;
+}
+
+.company-details {
+    font-size: 14px;
+    color: #333;
+    line-height: 1.4;
+}
+.invoice-info {
+    font-size: 14px;
+    line-height: 1.4;
+    margin-top: 15px;
+    text-align: center;
+}
+
+.customer-section {
+    margin-bottom: 10px;
+    background: #f8f8f8;
+    padding: 10px;
+    text-align: left !important;
+    border-bottom: 2px solid #333;
+}
+
+.order-content {
+    margin-bottom: 10px;
+}
+
+.order-content h4 {
+    margin-bottom: 10px;
+    font-size: 16px;
+    color: #333;
+}
+
+.invoice-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.invoice-table th,
+.invoice-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+.invoice-table th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+}
+
+.invoice-table td {
+    font-size: 14px;
+}
+
+.summary-section {
+    background: #f8f8f8;
+    padding: 5px 20px 5px 20px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.summary-item.total {
+    font-weight: bold;
+    font-size: 16px;
+    border-top: 1px solid #ddd;
+    padding-top: 10px;
+    margin-top: 10px;
+}
+
+@@media print {
+    .print-invoice {
+        padding: 0;
+        margin: 0;
+    }
+    
+    body {
+        margin: 0;
+        padding: 0;
+    }
+}
+</style>
+
+ 

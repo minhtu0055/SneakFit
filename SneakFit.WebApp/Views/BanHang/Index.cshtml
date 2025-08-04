@@ -320,8 +320,8 @@
                         </button>
                         <button id="btnThemSanPham" class="btn btn-primary">
                             <i class="bx bx-plus me-1"></i> Thêm sản phẩm
-                        </button>                     
-                    </div>            
+                        </button>
+                    </div>
                 </div>
                 <div class="card-body">
                     <table class="table table-bordered">
@@ -338,15 +338,40 @@
                         </thead>
                         <tbody id="hoaDonChiTietTable">
                             <tr class="no-data">
-                                <td colspan="6" class="text-center">Không có sản phẩm nào trong giỏ</td>
+                                <td colspan="7" class="text-center">Không có sản phẩm nào trong giỏ</td>
                             </tr>
                         </tbody>
                         <tfoot>
                             <tr>
                                 <td colspan="4" class="text-end"><strong>Tổng tiền:</strong></td>
                                 <td colspan="2"><span id="tongTien">0 VNĐ</span></td>
+                                <td></td>
                             </tr>
                         </tfoot>
+                    </table>
+
+                    <!-- Phân trang cho hóa đơn chờ -->
+                    <div id="paginationContainer" class="d-none">
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="pagination-info">
+                                Hiển thị <span id="startItem">0</span> - <span id="endItem">0</span> của <span id="totalItems">0</span> sản phẩm
+                            </div>
+                            <nav aria-label="Phân trang hóa đơn chờ">
+                                <ul class="pagination pagination-sm mb-0">
+                                    <li class="page-item" id="prevPage">
+                                        <a class="page-link" href="#" aria-label="Trang trước">
+                                            <i class="bx bx-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                    <li class="page-item" id="nextPage">
+                                        <a class="page-link" href="#" aria-label="Trang sau">
+                                            <i class="bx bx-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
                     </table>
                 </div>
             </div>
@@ -456,7 +481,7 @@
                                     <input type="text" class="form-control" id="diaChiCuThe" readonly placeholder="Địa chỉ cụ thể">
                                 </div>
                                 <div class="d-flex align-items-center justify-content-end">
-                                    <img src="~/assets/img/GHN.webp" alt="GHN" class="me-2" style="width: 160px; object-fit: contain; border-radius: 6px;" >
+                                    <img src="~/assets/img/GHN.webp" alt="GHN" class="me-2" style="width: 160px; object-fit: contain; border-radius: 6px;">
                                 </div>
                             </div>
                         </div>
@@ -649,24 +674,24 @@
         </div>
     </div>
 </div>
- <!-- Modal Quét QR -->
- <div class="modal fade" id="qrScanModal" tabindex="-1" aria-labelledby="qrScanModalLabel" aria-hidden="true">
-     <div class="modal-dialog modal-dialog-centered">
-         <div class="modal-content">
-             <div class="modal-header">
-                 <h5 class="modal-title" id="qrScanModalLabel">Quét mã QR sản phẩm</h5>
-                 <button type="button" class="close-btn" data-bs-dismiss="modal" aria-label="Close">×</button>
-             </div>
-             <div class="modal-body text-center">
-                 <div id="qr-video-container" style="position:relative;">
-                     <video id="qr-video" width="100%" height="240" autoplay></video>
-                     <canvas id="qr-canvas" style="display:none;"></canvas>
-                 </div>
-                 <div id="qr-result" class="mt-2 text-success fw-bold"></div>
-             </div>
-         </div>
-     </div>
- </div>
+<!-- Modal Quét QR -->
+<div class="modal fade" id="qrScanModal" tabindex="-1" aria-labelledby="qrScanModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="qrScanModalLabel">Quét mã QR sản phẩm</h5>
+                <button type="button" class="close-btn" data-bs-dismiss="modal" aria-label="Close">×</button>
+            </div>
+            <div class="modal-body text-center">
+                <div id="qr-video-container" style="position:relative;">
+                    <video id="qr-video" width="100%" height="240" autoplay></video>
+                    <canvas id="qr-canvas" style="display:none;"></canvas>
+                </div>
+                <div id="qr-result" class="mt-2 text-success fw-bold"></div>
+            </div>
+        </div>
+    </div>
+</div>
 @section Scripts {
     <script>
             let danhSachHoaDon = [];
@@ -677,6 +702,11 @@
             let totalRecords = 0;
             let pageCount = 0;
             let currentKeyword = "";
+
+            // Biến phân trang cho hóa đơn chờ
+            let currentInvoicePage = 1;
+            let itemsPerInvoicePage = 5; // Số sản phẩm hiển thị trên mỗi trang
+            let totalInvoicePages = 1;
             let video = document.getElementById('qr-video');
             let canvas = document.getElementById('qr-canvas');
             let ctx = canvas ? canvas.getContext('2d') : null;
@@ -934,7 +964,7 @@
                             $("#tienThua").text("0 VNĐ");
                             $("#tienKhachDua").removeClass("is-invalid");
                             $("#tienKhachDua").closest('.mb-3').find('small.text-muted').text("Vui lòng nhập đủ tiền khách đưa!");
-                            
+
                             // Reset ghi chú khi tạo hóa đơn mới
                             $("#ghiChu").val("");
                         } else {
@@ -1104,18 +1134,34 @@
                 $("#customerEmail").text(hoaDonHienTai.khachHang.email || "-");
                 // $("#khachHangId").val(hoaDonHienTai.khachHang.id || "");
 
+                // Tính toán phân trang
+                const totalItems = hoaDonHienTai.sanPham.length;
+                totalInvoicePages = Math.ceil(totalItems / itemsPerInvoicePage);
+
+                // Đảm bảo currentInvoicePage không vượt quá tổng số trang
+                if (currentInvoicePage > totalInvoicePages) {
+                    currentInvoicePage = totalInvoicePages || 1;
+                }
+
+                // Lấy sản phẩm cho trang hiện tại
+                const startIndex = (currentInvoicePage - 1) * itemsPerInvoicePage;
+                const endIndex = Math.min(startIndex + itemsPerInvoicePage, totalItems);
+                const sanPhamTrangHienTai = hoaDonHienTai.sanPham.slice(startIndex, endIndex);
+
                 const tableBody = $("#hoaDonChiTietTable").empty();
                 if (hoaDonHienTai.sanPham.length === 0) {
-                    tableBody.append('<tr class="no-data"><td colspan="6" class="text-center">Không có sản phẩm nào trong giỏ</td></tr>');
+                    tableBody.append('<tr class="no-data"><td colspan="7" class="text-center">Không có sản phẩm nào trong giỏ</td></tr>');
+                    $("#paginationContainer").addClass("d-none");
                 } else {
-                    hoaDonHienTai.sanPham.forEach((sp, index) => {
+                    sanPhamTrangHienTai.forEach((sp, index) => {
+                        const actualIndex = startIndex + index; // Index thực tế trong danh sách gốc
                         let anhSanPham = 'https://localhost:7277/images/Default_Logo.png';
                         if (sp.images && sp.images.length > 0) {
                             anhSanPham = sp.images[0].startsWith('http') ? sp.images[0] : `https://localhost:7277${sp.images[0]}`;
                         }
                         const row = `
                             <tr>
-                                <td>${index + 1}</td>
+                                <td>${actualIndex + 1}</td>
                                 <td style="width:70px; position:relative;">
                                     <div style="position:relative; display:inline-block;">
                                         <img src="${anhSanPham}" alt="${sp.tenSanPham}" width="80" height="80" style="object-fit:cover; border-radius:8px; border:1px solid #eee;">
@@ -1128,16 +1174,16 @@
                                 </td>
                                 <td>
                                     <div class="input-group input-group-sm">
-                                        <button class="btn btn-outline-secondary btn-giam-sl" data-index="${index}" data-hoa-don-chi-tiet-id="${sp.id}">-</button>
-                                        <input type="number" class="form-control text-center input-so-luong" value="${sp.soLuong}" min="1" max="${sp.soLuongTon || 999}" data-index="${index}" data-hoa-don-chi-tiet-id="${sp.id}">
-                                        <button class="btn btn-outline-secondary btn-tang-sl" data-index="${index}" data-hoa-don-chi-tiet-id="${sp.id}">+</button>
+                                        <button class="btn btn-outline-secondary btn-giam-sl" data-index="${actualIndex}" data-hoa-don-chi-tiet-id="${sp.id}">-</button>
+                                        <input type="number" class="form-control text-center input-so-luong" value="${sp.soLuong}" min="1" max="${sp.soLuongTon || 999}" data-index="${actualIndex}" data-hoa-don-chi-tiet-id="${sp.id}">
+                                        <button class="btn btn-outline-secondary btn-tang-sl" data-index="${actualIndex}" data-hoa-don-chi-tiet-id="${sp.id}">+</button>
                                     </div>
                                     <small class="text-muted">Tồn: ${sp.soLuongTon || 0}</small>
                                 </td>
                                 <td style="text-align: center;">${formatCurrency(sp.giaBan)}</td>
                                 <td style="text-align: center;">${formatCurrency(sp.giaBan * sp.soLuong)}</td>
                                 <td style="text-align: center;">
-                                    <button class="btn btn-sm btn-danger btn-xoa-sp" data-index="${index}" data-hoa-don-chi-tiet-id="${sp.id}">
+                                    <button class="btn btn-sm btn-danger btn-xoa-sp" data-index="${actualIndex}" data-hoa-don-chi-tiet-id="${sp.id}">
                                         <i class="bx bx-trash"></i>
                                     </button>
                                 </td>
@@ -1170,6 +1216,20 @@
                         const hoaDonChiTietId = $(this).data("hoa-don-chi-tiet-id");
                         xoaSanPham(index, hoaDonChiTietId);
                     });
+                }
+
+                // Cập nhật thông tin phân trang
+                if (totalItems > 0) {
+                    $("#startItem").text(startIndex + 1);
+                    $("#endItem").text(endIndex);
+                    $("#totalItems").text(totalItems);
+                    $("#paginationContainer").removeClass("d-none");
+
+                    // Cập nhật trạng thái nút phân trang
+                    $("#prevPage").toggleClass("disabled", currentInvoicePage <= 1);
+                    $("#nextPage").toggleClass("disabled", currentInvoicePage >= totalInvoicePages);
+                } else {
+                    $("#paginationContainer").addClass("d-none");
                 }
 
                 let tongTien = 0;
@@ -1428,6 +1488,8 @@
                                 if (res && res.success) {
                                     // Xóa khỏi danh sách local
                                     hoaDonHienTai.sanPham.splice(index, 1);
+                                    // Reset về trang 1 khi xóa sản phẩm
+                                    currentInvoicePage = 1;
                                     tinhTongTien();
                                     capNhatHoaDonHienTai();
                                     toastr.success("Xóa sản phẩm khỏi hóa đơn thành công");
@@ -1520,9 +1582,9 @@
                     $.ajax({
                         url: '/SPCT/GetSPCTForModal',
                         type: 'GET',
-                        data: { 
-                            tuKhoa: currentKeyword, 
-                            pageIndex: currentPage, 
+                        data: {
+                            tuKhoa: currentKeyword,
+                            pageIndex: currentPage,
                             pageSize: pageSize,
                             mauSacId: $("#filterMauSac").val() || null,
                             kichThuocId: $("#filterKichThuoc").val() || null
@@ -1663,6 +1725,8 @@
                     }),
                     success: function (res) {
                         // Sau khi thêm/cập nhật thành công, load lại chi tiết hóa đơn hiện tại
+                        // Reset về trang 1 khi thêm sản phẩm mới
+                        currentInvoicePage = 1;
                         loadChiTietHoaDonHienTai();
                         toastr.success("Thêm sản phẩm thành công vào hóa đơn chờ");
                     },
@@ -2274,7 +2338,7 @@
                         toastr.error("Lỗi khi tính phí vận chuyển");
                     }
                 });
-            }         
+            }
             // Sự kiện nút Thanh toán
             $(".btn-warning.w-100").click(function () {
                 if (!hoaDonHienTai || !hoaDonHienTai.id) {
@@ -2375,7 +2439,13 @@
                                 data: JSON.stringify(data),
                                 success: function (res) {
                                     if (res && res.success) {
-                                        toastr.success("Thanh toán thành công!");
+                                        toastr.success("Thanh toán thành công!");                                                        
+                                        
+                                        // In hóa đơn nếu có hoaDonId
+                                        if (res.hoaDonId) {
+                                            printInvoice(res.hoaDonId);
+                                        }
+                                        
                                         // Xóa hóa đơn đã thanh toán khỏi danh sách local
                                         danhSachHoaDon = danhSachHoaDon.filter(hd => hd.id !== hoaDonHienTai.id);
                                         if (danhSachHoaDon.length === 0) {
@@ -2414,8 +2484,15 @@
             $(document).ready(function() {
                 const urlParams = new URLSearchParams(window.location.search);
                 const paymentStatus = urlParams.get('payment');
+                const hoaDonId = urlParams.get('hoaDonId');
                 if (paymentStatus === 'success') {
                     toastr.success('Thanh toán VNPay thành công!');
+                    // In hóa đơn nếu có hoaDonId
+                    if (hoaDonId) {
+                        setTimeout(function() {
+                            printInvoice(hoaDonId);
+                        }, 1000);
+                    }
                     // Xóa query string để tránh toast lặp lại khi reload
                     window.history.replaceState({}, document.title, window.location.pathname);
                 } else if (paymentStatus === 'fail') {
@@ -2712,7 +2789,7 @@
 
                     // Hiển thị giá trị giảm giá trong modal
             $('#giamGiaValue').text(formatCurrency(giamGia));
-         
+
             // Hiển thị thông báo voucher đã áp dụng
             if (giamGia > 0) {
                 let voucherName = $(element).find('.voucher-code').text();
@@ -2845,7 +2922,7 @@
                 this.value = val;
             });
 
-                    
+
 
             // Mở modal chọn địa chỉ
             $("#btnChonDiaChi").click(function (e) {
@@ -3136,6 +3213,28 @@
                 });
             }
 
+            // Hàm xử lý phân trang cho hóa đơn chờ
+            function goToInvoicePage(page) {
+                if (page < 1 || page > totalInvoicePages) return;
+                currentInvoicePage = page;
+                capNhatHoaDonHienTai();
+            }
+
+            // Xử lý sự kiện phân trang
+            $(document).on('click', '#prevPage', function(e) {
+                e.preventDefault();
+                if (currentInvoicePage > 1) {
+                    goToInvoicePage(currentInvoicePage - 1);
+                }
+            });
+
+            $(document).on('click', '#nextPage', function(e) {
+                e.preventDefault();
+                if (currentInvoicePage < totalInvoicePages) {
+                    goToInvoicePage(currentInvoicePage + 1);
+                }
+            });
+
             $(function () {
                 // Mở modal khi bấm nút QR
                 $('#qrScanBtn').on('click', function () {
@@ -3155,7 +3254,30 @@
                 });
             });
 
-           
+            // Hàm in hóa đơn
+            function printInvoice(hoaDonId) {
+                $.ajax({
+                    url: '/HoaDon/GetHoaDonForPrint',
+                    type: 'GET',
+                    data: { id: hoaDonId },
+                    success: function (html) {
+                        // Tạo một cửa sổ mới để in
+                        var printWindow = window.open('', '_blank', 'width=800,height=600');
+                        printWindow.document.write(html);
+                        printWindow.document.close();
+                        
+                        // Đợi một chút để đảm bảo nội dung đã load
+                        setTimeout(function() {
+                            printWindow.print();
+                            printWindow.close();
+                        }, 500);
+                    },
+                    error: function (xhr) {
+                        console.error('Lỗi khi lấy dữ liệu hóa đơn để in:', xhr);
+                        toastr.error('Lỗi khi in hóa đơn!');
+                    }
+                });
+            }
     </script>
 }
 @await Html.PartialAsync("~/Views/KhachHang/_CreateModal.cshtml")
