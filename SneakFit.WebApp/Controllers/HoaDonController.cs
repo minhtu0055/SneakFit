@@ -148,7 +148,11 @@ namespace SneakFit.Admin.Controllers
             {
                 var result = await _hoaDonApiClient.ThanhToan(request);
                 if (result)
-                    return Ok(new { success = true });
+                {
+                    // Lấy thông tin hóa đơn đã thanh toán để in
+                    var hoaDon = await _hoaDonApiClient.GetById(request.Id);
+                    return Ok(new { success = true, hoaDonId = request.Id });
+                }
                 return BadRequest(new { success = false, message = "Thanh toán thất bại!" });
             }
             catch (Exception ex)
@@ -230,6 +234,26 @@ namespace SneakFit.Admin.Controllers
         public IActionResult ThanhToanThanhCong()
         {
             return View();
+        }
+        
+        [HttpGet]
+        public async Task<IActionResult> GetHoaDonForPrint(Guid id)
+        {
+            try
+            {
+                var hoaDon = await _hoaDonApiClient.GetById(id);
+                if (hoaDon == null)
+                    return NotFound();
+                    
+                var chiTiet = await _hoaDonChiTietApiClient.GetByHoaDonId(id);
+                hoaDon.HoaDonChiTiet = chiTiet;
+                
+                return PartialView("_PrintInvoiceTemplate", hoaDon);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
     }
 }

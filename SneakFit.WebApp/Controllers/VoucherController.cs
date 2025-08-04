@@ -287,6 +287,7 @@ namespace SneakFit.Admin.Controllers
             }
         }
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> PublicVouchers(decimal tongTienHoaDon)
         {
             try
@@ -301,6 +302,7 @@ namespace SneakFit.Admin.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> PrivateVouchers(Guid userId, decimal tongTienHoaDon)
         {
             try
