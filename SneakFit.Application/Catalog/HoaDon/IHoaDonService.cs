@@ -20,7 +20,7 @@ namespace SneakFit.Application.Catalog.HoaDon
         Task<List<HoaDonViewModel>> GetHoaDonChoByNguoiTao(string nguoiTao);
         Task<bool> Delete(Guid id);
         Task<bool> RevertToPreviousStatusAsync(Guid hoaDonId, string nguoiThucHien);
-        Task<bool> UpdateStatusAndLogAsync(Guid hoaDonId, TrangThaiHoaDon newStatus, Guid userId, string nguoiChinhSua);
+        Task<bool> UpdateStatusAndLogAsync(Guid hoaDonId, TrangThaiHoaDon newStatus, Guid userId, string nguoiChinhSua, string ghiChu);
         // Lịch sử hóa đơn
         Task<List<LichSuHoaDonViewModel>> GetByHoaDonIdAsync(Guid hoaDonId);
         Task<Guid> CreateAsync(CreateLichSuHoaDonRequest request);

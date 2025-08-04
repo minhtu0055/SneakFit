@@ -45,19 +45,29 @@ namespace SneakFit.WebClient.Controllers
 
                 if (!TryValidateModel(model.Login))
                 {
+                    TempData["ErrorMessage"] = "Thông tin đăng nhập không hợp lệ.";
                     ViewBag.ActiveTab = "login";
                     return View(model);
                 }
                 var result = await _userApiClient.Authenticate(model.Login);
                 if (result.ResultObj == null)
                 {
-                    ModelState.AddModelError("", result.Message);
+                    TempData["ErrorMessage"] = result.Message;
+                    ViewBag.ActiveTab = "login";
                     return View(model);
                 }
+                // ✅ Validate token và kiểm tra Role
                 var userPrincipal = this.ValidateToken(result.ResultObj);
+                var roles = userPrincipal.FindAll(ClaimTypes.Role).Select(c => c.Value).ToList();
+
+                if (!roles.Any(r => r.Equals("KHÁCH HÀNG", StringComparison.OrdinalIgnoreCase)))
+                {
+                    TempData["ErrorMessage"] = "Tài khoản không có quyền truy cập. Chỉ KHÁCH HÀNG được đăng nhập.";
+                    ViewBag.ActiveTab = "login";
+                    return View(model);
+                }
                 var authProperties = new AuthenticationProperties
                 {
-                    ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(10),
                     IsPersistent = false
                 };
                 HttpContext.Session.SetString("Token", result.ResultObj);
@@ -86,6 +96,7 @@ namespace SneakFit.WebClient.Controllers
             // Kiểm tra model hợp lệ
             if (!ModelState.IsValid)
             {
+                TempData["ErrorMessage"] = "Thông tin đăng ký không hợp lệ.";
                 ViewBag.ActiveTab = "register";
                 return View("Index", model); // Dùng lại view Index.cshtml
             }

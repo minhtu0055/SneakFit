@@ -239,7 +239,7 @@ namespace SneakFit.ApiIntegration.Services
         }
 
 
-        public async Task<bool> UpdateStatusAndLogAsync(Guid hoaDonId, TrangThaiHoaDon newStatus, Guid userId, string? nguoiChinhSua = null)
+        public async Task<bool> UpdateStatusAndLogAsync(Guid hoaDonId, TrangThaiHoaDon newStatus, Guid userId, string? nguoiChinhSua = null, string ghiChu = null)
         {
             var client = _httpClientFactory.CreateClient();
             client.BaseAddress = new Uri(_configuration["BaseAddress"]);
@@ -251,7 +251,8 @@ namespace SneakFit.ApiIntegration.Services
             {
                 NewStatus = newStatus,
                 UserId = userId,
-                NguoiChinhSua = nguoiChinhSua
+                NguoiChinhSua = nguoiChinhSua,
+                GhiChu = ghiChu
             };
             var json = JsonConvert.SerializeObject(request);
             var httpContent = new StringContent(json, Encoding.UTF8, "application/json");

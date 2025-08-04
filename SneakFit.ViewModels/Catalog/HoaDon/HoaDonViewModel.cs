@@ -40,5 +40,6 @@ namespace SneakFit.ViewModels.Catalog.HoaDon
         public string TenXa { get; set; }
         public string TenDiaChi { get; set; }
         public string ? ReturnUrl { get; set; }
+        public decimal? VoucherDiscount { get; set; } // Số tiền giảm từ voucher
     }
 }

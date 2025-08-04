@@ -66,6 +66,11 @@ namespace SneakFit.Admin.Controllers
                 return NotFound();
             var chiTiet = await _hoaDonChiTietApiClient.GetByHoaDonId(id);
             hoaDon.HoaDonChiTiet = chiTiet;
+            
+            // Lấy lịch sử hóa đơn để hiển thị thời gian thực tế cho từng trạng thái
+            var lichSuHoaDon = await _hoaDonApiClient.GetHistoryByHoaDonId(id);
+            ViewBag.LichSuHoaDon = lichSuHoaDon;
+            
             return View(hoaDon);
         }
         [HttpPost]
@@ -143,7 +148,11 @@ namespace SneakFit.Admin.Controllers
             {
                 var result = await _hoaDonApiClient.ThanhToan(request);
                 if (result)
-                    return Ok(new { success = true });
+                {
+                    // Lấy thông tin hóa đơn đã thanh toán để in
+                    var hoaDon = await _hoaDonApiClient.GetById(request.Id);
+                    return Ok(new { success = true, hoaDonId = request.Id });
+                }
                 return BadRequest(new { success = false, message = "Thanh toán thất bại!" });
             }
             catch (Exception ex)
@@ -208,11 +217,11 @@ namespace SneakFit.Admin.Controllers
             }
         }
         [HttpPost]
-        public async Task<IActionResult> UpdateStatusAndLog(Guid hoaDonId, TrangThaiHoaDon newStatus, Guid userId, string? nguoiChinhSua = null)
+        public async Task<IActionResult> UpdateStatusAndLog(Guid hoaDonId, TrangThaiHoaDon newStatus, Guid userId, string? nguoiChinhSua = null, string ghiChu = null)
         {
             try
             {
-                var result = await _hoaDonApiClient.UpdateStatusAndLogAsync(hoaDonId, newStatus, userId, nguoiChinhSua);
+                var result = await _hoaDonApiClient.UpdateStatusAndLogAsync(hoaDonId, newStatus, userId, nguoiChinhSua, ghiChu);
                 if (result)
                     return Ok(new { success = true });
                 return BadRequest(new { success = false, message = "Không thể cập nhật trạng thái hóa đơn!" });
@@ -222,6 +231,29 @@ namespace SneakFit.Admin.Controllers
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
+        public IActionResult ThanhToanThanhCong()
+        {
+            return View();
+        }
         
+        [HttpGet]
+        public async Task<IActionResult> GetHoaDonForPrint(Guid id)
+        {
+            try
+            {
+                var hoaDon = await _hoaDonApiClient.GetById(id);
+                if (hoaDon == null)
+                    return NotFound();
+                    
+                var chiTiet = await _hoaDonChiTietApiClient.GetByHoaDonId(id);
+                hoaDon.HoaDonChiTiet = chiTiet;
+                
+                return PartialView("_PrintInvoiceTemplate", hoaDon);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
     }
 }

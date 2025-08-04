@@ -1,23 +1,101 @@
 ﻿@using SneakFit.Data.Enums
+@using SneakFit.ViewModels.Catalog.LichSuHoaDon
 @model SneakFit.ViewModels.Catalog.HoaDon.HoaDonViewModel
+@inject IConfiguration Configuration
 @{
     ViewData["Title"] = "Chi tiết đơn hàng";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var isTaiQuay = (int)Model.LoaiHoaDon == 2 && (Model.GiaoHang != true);
+    
+    // Lấy lịch sử hóa đơn từ ViewBag hoặc Model (sẽ được set trong controller)
+    var lichSuHoaDon = ViewBag.LichSuHoaDon as List<LichSuHoaDonViewModel> ?? new List<LichSuHoaDonViewModel>();
+    
+    // Tạo dictionary để map trạng thái với thời gian từ lịch sử
+    var statusTimeMap = new Dictionary<TrangThaiHoaDon, DateTime>();
+    
+    // Thêm thời gian tạo hóa đơn cho trạng thái đầu tiên
+    statusTimeMap[TrangThaiHoaDon.ChoXacNhan] = Model.NgayTao;
+    
+    // Map thời gian từ lịch sử cho các trạng thái khác
+    foreach (var lichSu in lichSuHoaDon.OrderBy(x => x.NgayTao))
+    {
+        if (!statusTimeMap.ContainsKey(lichSu.TrangThaiMoi))
+        {
+            statusTimeMap[lichSu.TrangThaiMoi] = lichSu.NgayTao;
+        }
+    }
+    
+    // Đặc biệt xử lý cho hóa đơn tại quầy với trạng thái thành công
+    if (isTaiQuay && Model.NgayThanhToan.HasValue)
+    {
+        statusTimeMap[TrangThaiHoaDon.ThanhCong] = Model.NgayThanhToan.Value;
+    }
+    
+    // Hàm helper để lấy thời gian cho trạng thái
+    DateTime GetTimeForStatus(TrangThaiHoaDon status)
+    {
+        if (statusTimeMap.ContainsKey(status))
+        {
+            return statusTimeMap[status];
+        }
+        
+        // Nếu không có lịch sử cho trạng thái này, sử dụng logic fallback
+        if (status == TrangThaiHoaDon.ChoXacNhan)
+        {
+            return Model.NgayTao; // Thời gian tạo hóa đơn
+        }
+        
+        // Đặc biệt xử lý cho hóa đơn tại quầy với trạng thái thành công
+        if (isTaiQuay && status == TrangThaiHoaDon.ThanhCong && Model.NgayThanhToan.HasValue)
+        {
+            return Model.NgayThanhToan.Value;
+        }
+        
+        // Với các trạng thái khác, nếu chưa có lịch sử thì không hiển thị thời gian
+        return Model.NgayTao; // Fallback về thời gian tạo hóa đơn
+    }
+    
     var steps = isTaiQuay
         ? new[] {
-            new { Status = TrangThaiHoaDon.ChoXacNhan, Color = "royal-blue", Icon = "icon-file", Title = "Chờ xác nhận", Time = Model.NgayTao.ToString("HH:mm:ss dd/MM/yyyy") },
-            new { Status = TrangThaiHoaDon.ThanhCong, Color = "emerald", Icon = "icon-check", Title = "Thành công", Time = Model.NgayTao.ToString("HH:mm:ss dd/MM/yyyy") }
+            new { Status = TrangThaiHoaDon.ChoXacNhan, Color = "royal-blue", Icon = "icon-file", Title = "Chờ xác nhận", Time = GetTimeForStatus(TrangThaiHoaDon.ChoXacNhan).ToString("HH:mm:ss dd/MM/yyyy") },
+            new { Status = TrangThaiHoaDon.ThanhCong, Color = "emerald", Icon = "icon-check", Title = "Thành công", Time = Model.NgayThanhToan?.ToString("HH:mm:ss dd/MM/yyyy") ?? GetTimeForStatus(TrangThaiHoaDon.ThanhCong).ToString("HH:mm:ss dd/MM/yyyy") }
         }
         : new[] {
-            new { Status = TrangThaiHoaDon.ChoXacNhan, Color = "royal-blue", Icon = "icon-file", Title = "Chờ xác nhận", Time = Model.NgayTao.ToString("HH:mm:ss dd/MM/yyyy") },
-            new { Status = TrangThaiHoaDon.DaXacNhan, Color = "indigo", Icon = "icon-file-check", Title = "Đã xác nhận", Time = Model.NgayTao.ToString("HH:mm:ss dd/MM/yyyy") },
-            new { Status = TrangThaiHoaDon.ChoVanChuyen, Color = "purple", Icon = "icon-truck", Title = "Chờ vận chuyển", Time = Model.NgayTao.ToString("HH:mm:ss dd/MM/yyyy") },
-            new { Status = TrangThaiHoaDon.DangVanChuyen, Color = "orange", Icon = "icon-delivery", Title = "Đang vận chuyển", Time = Model.NgayTao.ToString("HH:mm:ss dd/MM/yyyy") },
-            new { Status = TrangThaiHoaDon.DaThanhToan, Color = "emerald", Icon = "icon-payment", Title = "Đã thanh toán", Time = Model.NgayTao.ToString("HH:mm:ss dd/MM/yyyy") },
-            new { Status = TrangThaiHoaDon.ThanhCong, Color = "emerald", Icon = "icon-check", Title = "Thành công", Time = Model.NgayTao.ToString("HH:mm:ss dd/MM/yyyy") }
+            new { Status = TrangThaiHoaDon.ChoXacNhan, Color = "royal-blue", Icon = "icon-file", Title = "Chờ xác nhận", Time = GetTimeForStatus(TrangThaiHoaDon.ChoXacNhan).ToString("HH:mm:ss dd/MM/yyyy") },
+            new { Status = TrangThaiHoaDon.DaXacNhan, Color = "indigo", Icon = "icon-file-check", Title = "Đã xác nhận", Time = GetTimeForStatus(TrangThaiHoaDon.DaXacNhan).ToString("HH:mm:ss dd/MM/yyyy") },
+            new { Status = TrangThaiHoaDon.ChoVanChuyen, Color = "purple", Icon = "icon-truck", Title = "Chờ vận chuyển", Time = GetTimeForStatus(TrangThaiHoaDon.ChoVanChuyen).ToString("HH:mm:ss dd/MM/yyyy") },
+            new { Status = TrangThaiHoaDon.DangVanChuyen, Color = "orange", Icon = "icon-delivery", Title = "Đang vận chuyển", Time = GetTimeForStatus(TrangThaiHoaDon.DangVanChuyen).ToString("HH:mm:ss dd/MM/yyyy") },
+            new { Status = TrangThaiHoaDon.DaThanhToan, Color = "emerald", Icon = "icon-payment", Title = "Đã thanh toán", Time = GetTimeForStatus(TrangThaiHoaDon.DaThanhToan).ToString("HH:mm:ss dd/MM/yyyy") },
+            new { Status = TrangThaiHoaDon.ThanhCong, Color = "emerald", Icon = "icon-check", Title = "Thành công", Time = GetTimeForStatus(TrangThaiHoaDon.ThanhCong).ToString("HH:mm:ss dd/MM/yyyy") }
         };
-    var visibleSteps = steps.Where(s => (int)s.Status <= (int)Model.TrangThai).ToList();
+    // Chỉ hiển thị các bước có thời gian thực tế hoặc đã đạt đến
+    var visibleSteps = steps.Where(s => 
+        (int)s.Status <= (int)Model.TrangThai || 
+        statusTimeMap.ContainsKey(s.Status) ||
+        s.Status == TrangThaiHoaDon.ChoXacNhan // Luôn hiển thị bước đầu tiên
+    ).Distinct().OrderBy(s => (int)s.Status).ToList();
+    
+    // Nếu hóa đơn mới tạo và chưa có lịch sử, chỉ hiển thị bước đầu tiên
+    if (lichSuHoaDon.Count == 0 && Model.TrangThai == TrangThaiHoaDon.ChoXacNhan)
+    {
+        visibleSteps = visibleSteps.Where(s => s.Status == TrangThaiHoaDon.ChoXacNhan).ToList();
+    }
+    // Nếu hóa đơn đã hoàn thành nhưng chưa có lịch sử đầy đủ, hiển thị tất cả các bước đến trạng thái hiện tại
+    else if (lichSuHoaDon.Count == 0 && Model.TrangThai > TrangThaiHoaDon.ChoXacNhan)
+    {
+        visibleSteps = visibleSteps.Where(s => (int)s.Status <= (int)Model.TrangThai).ToList();
+    }
+    // Nếu có lịch sử, hiển thị các bước có lịch sử và các bước đến trạng thái hiện tại
+    else if (lichSuHoaDon.Count > 0)
+    {
+        var statusesWithHistory = lichSuHoaDon.Select(x => x.TrangThaiMoi).Distinct().ToList();
+        statusesWithHistory.Add(TrangThaiHoaDon.ChoXacNhan); // Luôn thêm bước đầu tiên
+        
+        visibleSteps = visibleSteps.Where(s => 
+            statusesWithHistory.Contains(s.Status) || 
+            (int)s.Status <= (int)Model.TrangThai
+        ).Distinct().OrderBy(s => (int)s.Status).ToList();
+    }
 }
 <head>
     <style>
@@ -96,6 +174,69 @@
             right: 0;
             bottom: 0;
             clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%, 10px 50%);
+        }
+
+        /* CSS cho modal lịch sử */
+        #lichSuModal .modal-content {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        #lichSuModal .modal-header {
+            border-bottom: 1px solid #e9ecef;
+            padding: 20px 25px;
+        }
+
+        #lichSuModal .modal-title {
+            font-weight: 600;
+            color: #333;
+            font-size: 18px;
+        }
+
+        #lichSuModal .modal-body {
+            padding: 25px;
+        }
+
+        #lichSuModal .table {
+            margin-bottom: 0;
+        }
+
+        #lichSuModal .table th {
+            border: none;
+            font-weight: 600;
+            color: #495057;
+            font-size: 14px;
+            padding: 15px 10px;
+        }
+
+        #lichSuModal .table td {
+            border: none;
+            padding: 15px 10px;
+            vertical-align: middle;
+        }
+
+        #lichSuModal .table tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+        #lichSuModal .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        #lichSuModal .table tbody tr:last-child {
+            border-bottom: none !important;
+        }
+
+        #lichSuModal .status-icon {
+            font-size: 16px;
+            width: 20px;
+            display: inline-block;
+        }
+
+        #lichSuModal .modal-footer {
+            border-top: 1px solid #e9ecef;
+            padding: 20px 25px;
         }
 
         .arrow-segment:first-child::before {
@@ -219,6 +360,12 @@
             background-color: #e0e0e0 !important;
             opacity: 0.6;
         }
+        
+        /* Màu sắc cho arrow segment inactive */
+        .arrow-segment.inactive::before {
+            background-color: #e0e0e0 !important;
+            opacity: 0.6;
+        }
 
         .step-title {
             font-weight: 600;
@@ -331,7 +478,7 @@
             transition: all 0.2s ease;
         }
 
-        media (max-width: 768px) {
+        @@media (max-width: 768px) {
             .progress-timeline {
                 flex-direction: column;
                 align-items: center;
@@ -356,9 +503,35 @@
                 margin-top: 30px;
             }
         }
+
+        /* CSS cho print invoice - chỉ sử dụng template mới */
+        #printInvoiceTemplate {
+            display: none; /* Ẩn template in khỏi màn hình thường */
+        }
+
+        @@media print {
+            /* Ẩn tất cả các phần tử khác */
+            body * {
+                visibility: hidden;
+            }
+            
+            /* Chỉ hiển thị template in */
+            #printInvoiceTemplate, #printInvoiceTemplate * {
+                visibility: visible;
+            }
+            
+            /* Định vị template in */
+            #printInvoiceTemplate {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                display: block !important;
+            }
+        }
     </style>
 </head>
-<div class="">
+<div class="body">
     <h4 class="fw-bold py-3 mb-4">Chi tiết hóa đơn #@Model.MaHoaDon</h4>
     <!-- Status Timeline -->
     <div class="card mb-4">
@@ -368,7 +541,10 @@
                     <div class="arrow-progress">
                         @foreach (var step in visibleSteps)
                         {
-                            <div class="arrow-segment @step.Color">
+                            var isCompleted = (int)step.Status <= (int)Model.TrangThai;
+                            var arrowClass = isCompleted ? step.Color : "inactive";
+                            
+                            <div class="arrow-segment @arrowClass">
                                 <div class="arrow-dot"></div>
                             </div>
                         }
@@ -377,27 +553,59 @@
                     <!-- Các bước với màu sắc và connector tương ứng -->
                     @foreach (var step in visibleSteps)
                     {
+                        var isCompleted = (int)step.Status <= (int)Model.TrangThai;
+                        var hasRealTime = statusTimeMap.ContainsKey(step.Status);
+                        var stepClass = isCompleted ? step.Color : "inactive";
+                        
+                        // Đặc biệt xử lý cho hóa đơn tại quầy với trạng thái thành công
+                        var timeDisplay = "";
+                        if (isTaiQuay && step.Status == TrangThaiHoaDon.ThanhCong && Model.NgayThanhToan.HasValue)
+                        {
+                            timeDisplay = Model.NgayThanhToan.Value.ToString("HH:mm:ss dd/MM/yyyy");
+                        }
+                        else if (hasRealTime)
+                        {
+                            timeDisplay = step.Time;
+                        }
+                        else if (isCompleted)
+                        {
+                            timeDisplay = step.Time;
+                        }
+                        else
+                        {
+                            timeDisplay = "Chưa thực hiện";
+                        }
+                        
                         <div class="progress-step">
-                            <div class="step-icon @step.Color @step.Icon"></div>
-                            <div class="step-connector @step.Color"></div>
+                            <div class="step-icon @stepClass @step.Icon"></div>
+                            <div class="step-connector @stepClass"></div>
                             <div class="step-title">@step.Title</div>
-                            <div class="step-time">@step.Time</div>
+                            <div class="step-time">@timeDisplay</div>
                         </div>
                     }
                 </div>  
                 <div class="d-flex justify-content-between align-items-center mt-4">
                 <div>
                     @if (
+                        (Model.LoaiHoaDon == LoaiHoaDon.Online &&
                         (Model.TrangThai == TrangThaiHoaDon.ChoXacNhan ||
-                         Model.TrangThai == TrangThaiHoaDon.DaXacNhan ||
-                         Model.TrangThai == TrangThaiHoaDon.ChoVanChuyen ||
-                         Model.TrangThai == TrangThaiHoaDon.DangVanChuyen ||
-                         Model.TrangThai == TrangThaiHoaDon.DaThanhToan)
-                        && Model.GiaoHang == true && Model.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan
+                        Model.TrangThai == TrangThaiHoaDon.DaXacNhan ||
+                        Model.TrangThai == TrangThaiHoaDon.ChoVanChuyen ||
+                        Model.TrangThai == TrangThaiHoaDon.DangVanChuyen ||
+                        Model.TrangThai == TrangThaiHoaDon.DaThanhToan)) ||
+                        (
+                            (Model.TrangThai == TrangThaiHoaDon.ChoXacNhan ||
+                            Model.TrangThai == TrangThaiHoaDon.DaXacNhan ||
+                            Model.TrangThai == TrangThaiHoaDon.ChoVanChuyen ||
+                            Model.TrangThai == TrangThaiHoaDon.DangVanChuyen ||
+                            Model.TrangThai == TrangThaiHoaDon.DaThanhToan)
+                            && Model.GiaoHang == true
+                            && Model.TrangThaiThanhToan == TrangThaiThanhToan.DaThanhToan
+                        )
                     )
                     {
                         <button class="btn btn-primary me-2" id="btnXacNhan">Xác nhận</button>
-                        <button class="btn btn-warning me-2" id="btnQuayLai">Quay lại</button>
+                        <!-- <button class="btn btn-warning me-2" id="btnQuayLai">Quay lại</button> -->
                     }
                     @if (Model.TrangThai == TrangThaiHoaDon.ChoXacNhan && Model.GiaoHang == true)
                     {
@@ -405,7 +613,8 @@
                     }
                 </div>
                 <div>
-                    <button class="btn btn-primary" id="btnLichSu">Lịch sử</button>
+                    <button class="btn btn-primary me-2" id="btnInHoaDon" onclick="printInvoice()">In</button>
+                    <button class="btn btn-primary" id="btnLichSu">Lịch sử</button>                  
                 </div>
             </div>      
         </div>
@@ -420,42 +629,32 @@
                 <div class="card-body">
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">Trạng thái: </label>
-                            <p class="form-control-static">@GetStatusDisplayName(Model.TrangThai)</p>
+                            <label class="fw-semibold">Trạng thái: </label>
+                            <span class="form-control-static">@GetStatusDisplayName(Model.TrangThai)</span>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Tên khách hàng: </label>
-                            <p class="form-control-static">@Model.HoTen</p>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Loại: </label>
-                            <p class="form-control-static">	@GetStatusName(Model.LoaiHoaDon)</p>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Số điện thoại: </label>
-                            <p class="form-control-static">@Model.SoDienThoai</p>
+                            <label class="fw-semibold">Tên khách hàng: </label>
+                            <span class="form-control-static">@Model.HoTen</span>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">Phí vận chuyển: </label>
-                            <p class="form-control-static">@Model.PhiVanChuyen.ToString("N0") VNĐ</p>
+                            <label class="fw-semibold">Loại: </label>
+                            <span class="form-control-static">@GetStatusName(Model.LoaiHoaDon)</span>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Tổng tiền: </label>
-                            <p class="form-control-static">@Model.TongTien.ToString("N0") VNĐ</p>
+                            <label class="fw-semibold">Số điện thoại: </label>
+                            <span class="form-control-static">@Model.SoDienThoai</span>
                         </div>
                     </div>
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <label class="form-label">Địa chỉ: </label>
-                            <p class="form-control-static">@Model.DiaChi</p>
+                            <label class="fw-semibold">Địa chỉ: </label>
+                            <span class="form-control-static">@Model.DiaChi</span>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Phương thức thanh toán: </label>
-                            <p class="form-control-static">@GetStatusTTName(Model.PhuongThucThanhToan)</p>
+                            <label class="fw-semibold">Phương thức thanh toán: </label>
+                            <span class="form-control-static">@GetStatusTTName(Model.PhuongThucThanhToan)</span>
                         </div>
                     </div>                 
                 </div>
@@ -484,8 +683,15 @@
                             @foreach (var item in Model.HoaDonChiTiet)
                             {
                                 <tr>
-                                    <td>                                
-                                           @item.SanPhamChiTietId                                      
+                                    <td>
+                                        @if (item.Images != null && item.Images.Count > 0)
+                                        {
+                                            <img src="@($"{Configuration["BaseAddress"]}{item.Images[0]}")" alt="Ảnh sản phẩm" style="width: 80px; height: 80px; object-fit: cover;" onerror="this.src='/assets/img/Default_Logo.png'" />
+                                        }
+                                        else
+                                        {
+                                            <img src="/assets/img/Default_Logo.png" alt="No Image" style="width: 80px; height: 80px; object-fit: cover;" />
+                                        }
                                     </td>
                                     <td>
                                         <div class="d-flex flex-column">
@@ -499,45 +705,83 @@
                                     <td>@((item.GiaBan * item.SoLuong).ToString("N0")) VNĐ</td>
                                 </tr>
                             }
-                        </tbody>
-                        <tfoot>
-                            <tr>
-                                <td colspan="6" class="text-end fw-bold">Tổng cộng:</td>
-                                <td class="fw-bold">@Model.TongTien.ToString("N0") VNĐ</td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                        </tbody>                       
+                    </table>                 
+                    <div class="mt-4" style="max-width: 500px; margin-left: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span style="font-weight: bold; min-width: 150px;">Tổng tiền hàng:</span>
+                            <span style="font-weight: bold; min-width: 120px;">@(Model.LoaiHoaDon == LoaiHoaDon.TaiQuay ? (Model.TongTien + (Model.VoucherDiscount ?? 0)).ToString("N0") : (Model.TongTien + (Model.VoucherDiscount ?? 0) - Model.PhiVanChuyen).ToString("N0")) VNĐ</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span style="font-weight: bold; min-width: 150px;">Phí vận chuyển:</span>
+                            <span style="font-weight: bold; min-width: 120px;">@Model.PhiVanChuyen.ToString("N0") VNĐ</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span style="font-weight: bold; min-width: 150px;">Giảm giá:</span>
+                            <span style="font-weight: bold; min-width: 120px;">@((Model.VoucherDiscount ?? 0).ToString("N0")) VNĐ</span>
+                        </div>
+                        <hr style="margin: 16px 0;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span style="font-weight: bold; min-width: 150px;">Tổng tiền thanh toán:</span>
+@*                             <span style="font-weight: bold; min-width: 120px;">@((Model.TongTien + Model.PhiVanChuyen).ToString("N0")) VNĐ</span> *@
+                            <span style="font-weight: bold; min-width: 120px;">@(Model.LoaiHoaDon == LoaiHoaDon.TaiQuay ? (Model.TongTien + Model.PhiVanChuyen).ToString("N0") : Model.TongTien.ToString("N0")) VNĐ</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+@await Html.PartialAsync("_PrintInvoiceTemplate", Model)
+
+
 <!-- Modal Lịch Sử Hóa Đơn -->
 <div class="modal fade" id="lichSuModal" tabindex="-1" aria-labelledby="lichSuModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="lichSuModalLabel">Lịch sử hóa đơn</h5>
+        <h5 class="modal-title" id="lichSuModalLabel">Lịch sử chi tiết</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <table class="table table-bordered">
-          <thead>
-            <tr>
-              <th>Thời gian</th>
-              <th>Người chỉnh sửa</th>
-              <th>Trạng thái cũ</th>
-              <th>Trạng thái mới</th>
-            </tr>
-          </thead>
-          <tbody id="lichSuTableBody">
-            <!-- Lịch sử sẽ được render ở đây -->
-          </tbody>
-        </table>
+        <div class="table-responsive">
+          <table class="table table-borderless">
+            <thead>
+              <tr class="border-bottom">
+                <th class="text-center" style="width: 20%;">Trạng thái</th>
+                <th class="text-center" style="width: 25%;">Thời gian</th>
+                <th class="text-center" style="width: 25%;">Người xác nhận</th>
+                <th class="text-center" style="width: 40%;">Ghi chú</th>
+              </tr>
+            </thead>
+            <tbody id="lichSuTableBody">
+              <!-- Lịch sử sẽ được render ở đây -->
+            </tbody>
+          </table>
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal nhập ghi chú khi chuyển trạng thái -->
+<div class="modal fade" id="modalGhiChu" tabindex="-1" aria-labelledby="modalGhiChuLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalGhiChuLabel">Xác nhận Đơn hàng</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <textarea class="form-control" id="txtGhiChu" rows="3" placeholder="Nhập ghi chú..." required></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Hủy</button>
+        <button type="button" class="btn btn-primary" id="btnXacNhanGhiChu">Xác nhận</button>
       </div>
     </div>
   </div>
@@ -558,46 +802,54 @@
             toastr.error('@TempData["error"]');
             </text>
         }
-
         // Xử lý nút Lịch sử
         $(document).ready(function () {
             $('#btnLichSu').on('click', function () {
                 var hoaDonId = '@Model.Id';
-                $('#lichSuTableBody').html('<tr><td colspan="4">Đang tải...</td></tr>');
+                $('#lichSuTableBody').html('<tr><td colspan="4" class="text-center">Đang tải...</td></tr>');
                 $.ajax({
                     url: '/HoaDon/GetHistoryByHoaDonId?hoaDonId=' + hoaDonId,
                     method: 'GET',
                     success: function (data) {
                         if (data && data.length > 0) {
+                            // Sắp xếp dữ liệu theo thời gian từ cũ đến mới
+                            data.sort(function(a, b) {
+                                return new Date(a.ngayTao) - new Date(b.ngayTao);
+                            });                           
                             var rows = '';
                             data.forEach(function (item) {
-                                rows += '<tr>' +
-                                    '<td>' + formatDateTime(item.ngayTao) + '</td>' +
-                                    '<td>' + (item.nguoiChinhSua || '') + '</td>' +
-                                    '<td>' + getStatusName(item.trangThaiCu) + '</td>' +
-                                    '<td>' + getStatusName(item.trangThaiMoi) + '</td>' +
+                                rows += '<tr class="border-bottom">' +
+                                    '<td class="text-center">' +
+                                        '<div class="d-flex align-items-center justify-content-center">' +
+                                            '<span>' + getStatusName(item.trangThaiMoi || '') + '</span>' +
+                                        '</div>' +
+                                    '</td>' +
+                                    '<td class="text-center">' + formatDateTime(item.ngayTao) + '</td>' +
+                                    '<td class="text-center">' + (item.nguoiChinhSua || '') + '</td>' +
+                                    '<td class="text-center">' + (item.ghiChu || '') + '</td>' +
                                     '</tr>';
                             });
                             $('#lichSuTableBody').html(rows);
                         } else {
-                            $('#lichSuTableBody').html('<tr><td colspan="4">Không có lịch sử.</td></tr>');
+                            $('#lichSuTableBody').html('<tr><td colspan="4" class="text-center">Không có lịch sử.</td></tr>');
                         }
                         $('#lichSuModal').modal('show');
                     },
                     error: function () {
-                        $('#lichSuTableBody').html('<tr><td colspan="4">Lỗi khi tải lịch sử.</td></tr>');
+                        $('#lichSuTableBody').html('<tr><td colspan="4" class="text-center">Lỗi khi tải lịch sử.</td></tr>');
                         $('#lichSuModal').modal('show');
                     }
                 });
             });
 
             // Xử lý nút Xác nhận (chuyển trạng thái tiếp theo và lưu lịch sử)
+            var nextStatus = null;
             $('#btnXacNhan').on('click', function () {
                 var hoaDonId = '@Model.Id';
                 var userId = '@(Model.UserId ?? Guid.Empty)';
                 var nguoiChinhSua = '@User.Identity.Name';
                 var currentStatus = @((int)Model.TrangThai);
-                var nextStatus = currentStatus;
+                nextStatus = currentStatus;
                 // Xác định trạng thái tiếp theo
                 switch (currentStatus) {
                     case 0: nextStatus = 1; break; // ChoXacNhan -> DaXacNhan
@@ -607,6 +859,25 @@
                     case 4: nextStatus = 5; break; // DaThanhToan -> ThanhCong
                     default: toastr.error('Không thể chuyển trạng thái!'); return;
                 }
+                // Hiển thị modal nhập ghi chú
+                $('#txtGhiChu').val('');
+                $('#modalGhiChu').modal('show');
+            });
+
+            // Xác nhận ghi chú và gửi ajax
+            $('#btnXacNhanGhiChu').on('click', function () {
+                var hoaDonId = '@Model.Id';
+                var userId = '@(Model.UserId ?? Guid.Empty)';
+                var nguoiChinhSua = '@User.Identity.Name';
+                var ghiChu = $('#txtGhiChu').val();
+                if (!ghiChu || ghiChu.trim() === '') {
+                    toastr.error('Vui lòng nhập ghi chú!');
+                    return;
+                }
+                if (nextStatus === null) {
+                    toastr.error('Không xác định trạng thái tiếp theo!');
+                    return;
+                }
                 $.ajax({
                     url: '/HoaDon/UpdateStatusAndLog',
                     method: 'POST',
@@ -614,18 +885,22 @@
                         hoaDonId: hoaDonId,
                         newStatus: nextStatus,
                         userId: userId,
-                        nguoiChinhSua: nguoiChinhSua
+                        nguoiChinhSua: nguoiChinhSua,
+                        ghiChu: ghiChu
                     },
                     success: function (res) {
                         if (res.success) {
-                            toastr.success('Cập nhật trạng thái thành công!');
                             setTimeout(function () { location.reload(); }, 1000);
+                            toastr.success('Cập nhật trạng thái thành công!');
+                            
                         } else {
                             toastr.error(res.message || 'Có lỗi xảy ra!');
                         }
+                        $('#modalGhiChu').modal('hide');
                     },
                     error: function () {
                         toastr.error('Có lỗi xảy ra!');
+                        $('#modalGhiChu').modal('hide');
                     }
                 });
             });
@@ -669,7 +944,27 @@
         function formatDateTime(dateStr) {
             var d = new Date(dateStr);
             if (isNaN(d)) return '';
-            return d.toLocaleString('vi-VN');
+            var hours = d.getHours().toString().padStart(2, '0');
+            var minutes = d.getMinutes().toString().padStart(2, '0');
+            var seconds = d.getSeconds().toString().padStart(2, '0');
+            var day = d.getDate().toString().padStart(2, '0');
+            var month = (d.getMonth() + 1).toString().padStart(2, '0');
+            var year = d.getFullYear();
+            return hours + ':' + minutes + ':' + seconds + ' ' + day + '/' + month + '/' + year;
+        }
+
+        // Hàm in hóa đơn
+        function printInvoice() {
+            // Hiển thị template in
+            document.getElementById('printInvoiceTemplate').style.display = 'block';
+            
+            // Mở print dialog
+            window.print();
+            
+            // Ẩn template sau khi in
+            setTimeout(function() {
+                document.getElementById('printInvoiceTemplate').style.display = 'none';
+            }, 1000);
         }
     </script>
 }

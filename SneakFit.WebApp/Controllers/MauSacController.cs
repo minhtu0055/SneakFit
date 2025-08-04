@@ -100,6 +100,7 @@ namespace SneakFit.Admin.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
             var mauSacs = await _mauSacApiClient.GetAll();

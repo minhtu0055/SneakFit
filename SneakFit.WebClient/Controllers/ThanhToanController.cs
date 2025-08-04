@@ -389,7 +389,9 @@ namespace SneakFit.WebClient.Controllers
                 DiaChi = !string.IsNullOrEmpty(model.DiaChiMoi) ? model.DiaChiMoi : model.DiaChi,
                 PhiVanChuyen = phiVanChuyen,
                 PhuongThucThanhToan = model.PhuongThucThanhToan.Value,
-                TrangThaiThanhToan = TrangThaiThanhToan.ChuaThanhToan,
+                TrangThaiThanhToan = (model.PhuongThucThanhToan == PhuongThucThanhToan.COD) 
+                    ? TrangThaiThanhToan.ChuaThanhToan 
+                    : TrangThaiThanhToan.DaThanhToan,
                 //LoaiHoaDon = (model.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || model.PhuongThucThanhToan == PhuongThucThanhToan.MoMo)
                 //    ? LoaiHoaDon.Online : LoaiHoaDon.TaiQuay, // nếu thanh toán tại quầy = hóa đơn tại quầy
                 LoaiHoaDon = LoaiHoaDon.Online,
@@ -524,7 +526,24 @@ namespace SneakFit.WebClient.Controllers
                 // Xử lý trường hợp payment=fail (thanh toán thất bại)
                 if (payment == "fail")
                 {
-                    TempData["PaymentError"] = "Thanh toán thất bại. Đơn hàng đã được hủy.";
+                    // Sử dụng service method mới để xử lý hủy hóa đơn khi thanh toán thất bại
+                    if (id.HasValue)
+                    {
+                        // Hủy hóa đơn khi thanh toán thất bại và hoàn lại số lượng sản phẩm trong hóa đơn đã mua
+                        var result = await _hoaDonClientApiClient.CancelOrderOnPaymentFailure(id.Value);
+                        if (!result.IsSuccessed)
+                        {
+                            TempData["PaymentError"] = $"Thanh toán thất bại. Lỗi khi hủy đơn hàng: {result.Message}";
+                        }
+                        else
+                        {
+                            TempData["PaymentError"] = "Thanh toán thất bại. Đơn hàng đã được hủy và số lượng sản phẩm đã được hoàn lại vào kho.";
+                        }
+                    }
+                    else
+                    {
+                        TempData["PaymentError"] = "Thanh toán thất bại.";
+                    }
                     return RedirectToAction("Index", "Home");
                 }
 
@@ -574,15 +593,53 @@ namespace SneakFit.WebClient.Controllers
         [HttpPost]
         public async Task<IActionResult> CancelOrder(Guid id)
         {
-            await _hoaDonClientApiClient.UpdateStatus(id, SneakFit.Data.Enums.TrangThaiHoaDon.DaHuy);
-            return RedirectToAction("Details", "HoaDon", new { id });
+            try
+            {
+                // Hủy hóa đơn với hoàn lại số lượng
+                var result = await _hoaDonClientApiClient.CancelOrderWithRollback(id);
+                
+                if (result.IsSuccessed)
+                {
+                    TempData["SuccessMessage"] = result.Message;
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = result.Message;
+                }
+                
+                return RedirectToAction("Details", "HoaDon", new { id });
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Lỗi khi hủy đơn hàng: {ex.Message}";
+                return RedirectToAction("Details", "HoaDon", new { id });
+            }
         }
 
         [HttpPost]
         public async Task<IActionResult> ReturnOrder(Guid id)
         {
-            await _hoaDonClientApiClient.UpdateStatus(id, SneakFit.Data.Enums.TrangThaiHoaDon.TraHang);
-            return RedirectToAction("Details", "HoaDon", new { id });
+            try
+            {
+                // Trả hàng với hoàn lại số lượng  
+                var result = await _hoaDonClientApiClient.ReturnOrderWithRollback(id);
+                
+                if (result.IsSuccessed)
+                {
+                    TempData["SuccessMessage"] = result.Message;
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = result.Message;
+                }
+                
+                return RedirectToAction("Details", "HoaDon", new { id });
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"Lỗi khi trả hàng: {ex.Message}";
+                return RedirectToAction("Details", "HoaDon", new { id });
+            }
         }
 
 

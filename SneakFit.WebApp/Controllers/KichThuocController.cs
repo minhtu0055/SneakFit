@@ -99,6 +99,7 @@ namespace SneakFit.Admin.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
             var kichThuocs = await _kichThuocApiClient.GetAll(); // Gọi sang API backend

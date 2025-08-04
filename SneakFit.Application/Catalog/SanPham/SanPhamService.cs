@@ -117,6 +117,12 @@ namespace SneakFit.Application.Catalog.SanPham
             if (danhMuc == null)
                 throw new Exception($"Không tìm thấy danh mục với id = {request.DanhMucId}");
 
+            // Fix lỗi trùng tên sp
+            var existingProduct = await _context.SanPham
+                .FirstOrDefaultAsync(x => x.TenSanPham == request.TenSanPham);
+            if (existingProduct != null)
+                throw new Exception($"Sản phẩm với tên '{request.TenSanPham}' đã tồn tại.");
+
             var newSanPham = new Data.Entities.SanPham()
             {
                 Id = Guid.NewGuid(),
@@ -146,6 +152,12 @@ namespace SneakFit.Application.Catalog.SanPham
             var entity = await _context.SanPham
                 .Include(x => x.DanhMuc)
                 .FirstOrDefaultAsync(x => x.Id == request.Id);
+
+            // Fix lỗi trùng tên sp]
+            var existingProduct = await _context.SanPham
+                .FirstOrDefaultAsync(x => x.TenSanPham == request.TenSanPham);
+            if (existingProduct != null)
+                throw new Exception($"Sản phẩm với tên '{request.TenSanPham}' đã tồn tại.");
 
             if (entity == null)
                 return null;
@@ -291,6 +303,19 @@ namespace SneakFit.Application.Catalog.SanPham
         {
             var spct = await _context.SanPhamChiTiet.FirstOrDefaultAsync(x => x.ID == model.Id);
             if (spct == null) return false;
+
+            // Kiểm tra xem có SPCT khác với cùng SanPhamId, KichThuocId, và MauSacId không
+            var existingSPCT = await _context.SanPhamChiTiet
+                .FirstOrDefaultAsync(x => x.ID != model.Id &&
+                                        x.SanPhamId == spct.SanPhamId &&
+                                        x.KichThuocId == model.KichThuocId &&
+                                        x.MauSacId == model.MauSacId &&
+                                        x.ThuongHieuId == model.ThuongHieuId);
+
+            if (existingSPCT != null)
+            {
+                return false; // Trả về false nếu đã tồn tại SPCT với cùng thông tin
+            }
 
             // Nếu muốn update cả bảng SanPham thì lấy entity SanPham ra và update
             var sanPham = await _context.SanPham.FirstOrDefaultAsync(x => x.Id == spct.SanPhamId);

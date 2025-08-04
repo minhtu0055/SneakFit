@@ -16,8 +16,8 @@
 				<div class="col-md-12 col-xs-12">
 					<form asp-action="Index" method="get">
 						<div class="row">
-							<div class="col-md-6">
-								<input type="text" value="@ViewBag.TuKhoa" name="tuKhoa" class="form-control" placeholder="Tìm kiếm..." />
+							<div class="col-md-4">
+							<input type="text" value="@ViewBag.keyword" name="keyword" class="form-control" placeholder="Tìm kiếm..." />
 							</div>
 						<div class="col-md-4">
 							<div class="input-group">
@@ -120,7 +120,7 @@
 							@item.NgayTao.ToString("dd/MM/yyyy HH:mm")
 						</td>
 						<td>
-							@String.Format("{0:N0}", item.TongTien) VNĐ
+							@String.Format("{0:N0}", item.TongTien + item.PhiVanChuyen) VNĐ
 						</td>
 						<td>
 							<div class="dropdown">

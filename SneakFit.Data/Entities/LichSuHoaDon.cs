@@ -18,5 +18,6 @@ namespace SneakFit.Data.Entities
         public TrangThaiHoaDon TrangThaiMoi { get; set; } // Trạng thái mới
         public DateTime NgayTao { get; set; } // Ngày chỉnh sửa lịch sử
         public string NguoiChinhSua { get; set; } // Người chỉnh sửa lịch sử
+        public string GhiChu { get; set; } // Người chỉnh sửa lịch sử
     }
 }

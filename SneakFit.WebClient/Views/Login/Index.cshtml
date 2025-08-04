@@ -43,12 +43,12 @@
 
                             <!-- Login Form -->
                             <div class="tab-pane fade @(ViewBag.ActiveTab == "register" ? "" : "show active")" id="login-register-login-form" role="tabpanel">
-                                @if (TempData["ErrorMessage"] != null)
+                                @*                                 @if (TempData["ErrorMessage"] != null)
                                 {
                                     <div class="alert alert-danger">
                                         @TempData["ErrorMessage"]
                                     </div>
-                                }
+                                } *@
                                 <form asp-action="Index" asp-controller="Login" method="post">
 
                                     <div class="mb-4">
@@ -96,125 +96,265 @@
                                 }
                                 <form asp-action="Register" asp-controller="Login" method="post" enctype="multipart/form-data">
                                     @Html.AntiForgeryToken()
-                                    <div class="row align-items-center">
-                                        <div class="col-md-4 text-center mb-3">
+
+                                    <!-- Profile Picture Section -->
+                                    <div class="row mb-4">
+                                        <div class="col-12 text-center">
                                             <label for="registerFileInput">
-                                                <span style="display:inline-block;width:140px;height:140px;background:#f0f0f0;border-radius:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
-                                                    <img id="registerPreviewImage" src="" alt="Ảnh" style="display:none;width:140px;height:140px;object-fit:cover;border-radius:20px;" />
-                                                    <span id="registerCameraIcon" style="font-size:48px;color:#888;">
+                                                <div class="profile-upload-container">
+                                                    <img id="registerPreviewImage" src="~/assets/img/avatars/hinhanhnew.png" alt="Ảnh" class="profile-preview" />
+                                                    <div id="registerCameraIcon" class="camera-icon">
                                                         <i class="bi bi-camera"></i>
-                                                    </span>
-                                                </span>
+                                                    </div>
+                                                </div>
                                             </label>
                                             <input asp-for="Register.HinhAnh" id="registerFileInput" type="file" accept="image/*" class="form-control d-none" onchange="registerPreviewFile(this)" />
                                         </div>
-                                        <div class="col-md-8">
-                                            <div class="row g-3">
-                                                <div class="row align-items-center">
-                                                    <div class="col-md-6">
-                                                        <div class="mb-3 row">
-                                                            <label asp-for="Register.HoVaTen" class="form-label">Họ và tên <span class="text-danger">*</span></label>
-                                                            <div class="col-sm-10">
-                                                                <input asp-for="Register.HoVaTen" class="form-control" placeholder="Vui lòng nhập Họ Tên..." required />
-                                                                <span class="invalid-feedback">Vui lòng nhập họ và tên</span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="mb-3 row">
-                                                            <label asp-for="Register.UserName" class="form-label">Tài khoản <span class="text-danger">*</span></label>
-                                                            <div class="col-sm-10">
-                                                                <input asp-for="Register.UserName" class="form-control" placeholder="Nhập tài khoản..." required />
-                                                                <span class="invalid-feedback">Vui lòng nhập tài khoản</span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="mb-3 row">
-                                                            <label asp-for="Register.Email" class="form-label">Email <span class="text-danger">*</span></label>
-                                                            <div class="col-sm-10">
-                                                                <input asp-for="Register.Email" class="form-control" placeholder="Nhập Gmail..." required />
-                                                                <span class="invalid-feedback">Vui lòng nhập email hợp lệ</span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="mb-3 row">
-                                                            <label asp-for="Register.SoDienThoai" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
-                                                            <div class="col-sm-10">
-                                                                <input asp-for="Register.SoDienThoai" class="form-control" placeholder="Nhập số điện thoại..." required pattern="[0-9]{10}" />
-                                                                <span class="invalid-feedback">Vui lòng nhập số điện thoại hợp lệ (10 số)</span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="mb-3">
-                                                            <label asp-for="Register.NgaySinh" class="form-label">Ngày sinh <span class="text-danger">*</span></label>
-                                                            <div class="input-group">
-                                                                <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
-                                                                <input asp-for="Register.NgaySinh" type="date" class="form-control" required />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="mb-3 row">
-                                                            <label asp-for="Register.GioiTinh" class="form-label">Giới tính <span class="text-danger">*</span></label>
-                                                            <div class="col-sm-10">
-                                                                <div class="form-check form-check-inline">
-                                                                    <input class="form-check-input" type="radio" asp-for="Register.GioiTinh" id="nam" value="true" checked>
-                                                                    <label class="form-check-label" for="nam">Nam</label>
-                                                                </div>
-                                                                <div class="form-check form-check-inline">
-                                                                    <input class="form-check-input" type="radio" asp-for="Register.GioiTinh" id="nu" value="false">
-                                                                    <label class="form-check-label" for="nu">Nữ</label>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="mb-3 row">
-                                                            <label asp-for="Register.DiaChi.TenDiaChi" class="form-label">Địa chỉ cụ thể<span class="text-danger">*</span></label>
-                                                            <div class="col-sm-10">
-                                                                <div class="input-group has-validation">
-                                                                    <input asp-for="Register.DiaChi.TenDiaChi" class="form-control" placeholder="Nhập địa chỉ chi tiết..." required />
-                                                                    <span class="invalid-feedback">Vui lòng nhập địa chỉ chi tiết</span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="mb-3 row">
-                                                            <label asp-for="Register.DiaChi.TenThanhPho" class="form-label">Thành phố/Tỉnh <span class="text-danger">*</span></label>
-                                                            <div class="col-sm-10">
-                                                                <select id="province" class="form-select" required>
-                                                                    <option value="">Chọn Tỉnh/Thành phố</option>
-                                                                </select>
-                                                                <input type="hidden" asp-for="Register.DiaChi.TenThanhPho" id="provinceName" />
-                                                                <input type="hidden" asp-for="Register.DiaChi.MaTinh" id="provinceCode" />
-                                                                <span class="invalid-feedback">Vui lòng chọn tỉnh/thành phố</span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="mb-3 row">
-                                                            <label asp-for="Register.DiaChi.TenHuyen" class="form-label">Quận/Huyện<span class="text-danger">*</span></label>
-                                                            <div class="col-sm-10">
-                                                                <select id="district" class="form-select" required disabled>
-                                                                    <option value="">Chọn Quận/Huyện</option>
-                                                                </select>
-                                                                <input type="hidden" asp-for="Register.DiaChi.TenHuyen" id="districtName" />
-                                                                <input type="hidden" asp-for="Register.DiaChi.MaHuyen" id="districtCode" />
-                                                                <span class="invalid-feedback">Vui lòng chọn quận/huyện</span>
-                                                            </div>
-                                                        </div>
-                                                        <div class="mb-3 row">
-                                                            <label asp-for="Register.DiaChi.TenXa" class="form-label">Thôn/Xã<span class="text-danger">*</span></label>
-                                                            <div class="col-sm-10">
-                                                                <select id="ward" class="form-select" required disabled>
-                                                                    <option value="">Chọn Phường/Xã</option>
-                                                                </select>
-                                                                <input type="hidden" asp-for="Register.DiaChi.TenXa" id="wardName" />
-                                                                <input type="hidden" asp-for="Register.DiaChi.MaXa" id="wardCode" />
-                                                                <span class="invalid-feedback">Vui lòng chọn phường/xã</span>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                    </div>
+
+                                    <!-- Form Fields Section -->
+                                    <div class="row g-4">
+                                        <!-- First Row -->
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label asp-for="Register.HoVaTen" class="form-label fw-bold">
+                                                    Họ và tên <span class="text-danger">*</span>
+                                                </label>
+                                                <input asp-for="Register.HoVaTen" class="form-control form-control-lg" placeholder="Vui lòng nhập họ tên..." required />
+                                                <span asp-validation-for="Register.HoVaTen" class="text-danger"></span>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="row mt-4">
-                                        <div class="col-12 text-center">
-                                            <button type="submit" class="btn btn-primary btn-lg px-5">Đăng ký</button>
+
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label asp-for="Register.UserName" class="form-label fw-bold">
+                                                    Tài khoản <span class="text-danger">*</span>
+                                                </label>
+                                                <input asp-for="Register.UserName" class="form-control form-control-lg" placeholder="Nhập tài khoản..." required />
+                                                <span asp-validation-for="Register.UserName" class="text-danger"></span>
+                                            </div>
                                         </div>
-                                    </div>
+
+                                        <!-- Second Row -->
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label asp-for="Register.Email" class="form-label fw-bold">
+                                                    Email <span class="text-danger">*</span>
+                                                </label>
+                                                <input asp-for="Register.Email" type="email" class="form-control form-control-lg" placeholder="Nhập email..." required />
+                                                <span asp-validation-for="Register.Email" class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label asp-for="Register.SoDienThoai" class="form-label fw-bold">
+                                                    Số điện thoại <span class="text-danger">*</span>
+                                                </label>
+                                                <input asp-for="Register.SoDienThoai" class="form-control form-control-lg" placeholder="Nhập số điện thoại..." required pattern="[0-9]{10}" />
+                                                <span asp-validation-for="Register.SoDienThoai" class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Third Row -->
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label asp-for="Register.NgaySinh" class="form-label fw-bold">
+                                                    Ngày sinh <span class="text-danger">*</span>
+                                                </label>
+                                                <div class="input-group input-group-lg">
+                                                    <span class="input-group-text">
+                                                        <i class="bi bi-calendar-event"></i>
+                                                    </span>
+                                                    <input asp-for="Register.NgaySinh" type="date" class="form-control" required />
+                                                </div>
+                                                <span asp-validation-for="Register.NgaySinh" class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label asp-for="Register.GioiTinh" class="form-label fw-bold">
+                                                    Giới tính <span class="text-danger">*</span>
+                                                </label>
+                                                <div class="gender-options">
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" asp-for="Register.GioiTinh" id="nam" value="true" checked>
+                                                        <label class="form-check-label" for="nam">Nam</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" asp-for="Register.GioiTinh" id="nu" value="false">
+                                                        <label class="form-check-label" for="nu">Nữ</label>
+                                                    </div>
+                                                </div>
+                                                <span asp-validation-for="Register.GioiTinh" class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Fourth Row - Address -->
+                                        @* <div class="col-12">
+                                            <div class="form-group">
+                                                <label asp-for="Register.DiaChi.TenDiaChi" class="form-label fw-bold">
+                                                    Địa chỉ cụ thể <span class="text-danger">*</span>
+                                                </label>
+                                                <input asp-for="Register.DiaChi.TenDiaChi" class="form-control form-control-lg" placeholder="Nhập địa chỉ chi tiết..." required />
+                                                <span asp-validation-for="Register.DiaChi.TenDiaChi" class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Fifth Row - Location Dropdowns -->
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label asp-for="Register.DiaChi.TenThanhPho" class="form-label fw-bold">
+                                                    Thành phố/Tỉnh <span class="text-danger">*</span>
+                                                </label>
+                                                <select id="province" class="form-select form-select-lg" required>
+                                                    <option value="">Chọn Tỉnh/Thành phố</option>
+                                                </select>
+                                                <input type="hidden" asp-for="Register.DiaChi.TenThanhPho" id="provinceName" />
+                                                <input type="hidden" asp-for="Register.DiaChi.MaTinh" id="provinceCode" />
+                                                <span asp-validation-for="Register.DiaChi.TenThanhPho" class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label asp-for="Register.DiaChi.TenHuyen" class="form-label fw-bold">
+                                                    Quận/Huyện <span class="text-danger">*</span>
+                                                </label>
+                                                <select id="district" class="form-select form-select-lg" required disabled>
+                                                    <option value="">Chọn Quận/Huyện</option>
+                                                </select>
+                                                <input type="hidden" asp-for="Register.DiaChi.TenHuyen" id="districtName" />
+                                                <input type="hidden" asp-for="Register.DiaChi.MaHuyen" id="districtCode" />
+                                                <span asp-validation-for="Register.DiaChi.TenHuyen" class="text-danger"></span>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label asp-for="Register.DiaChi.TenXa" class="form-label fw-bold">
+                                                    Thôn/Xã <span class="text-danger">*</span>
+                                                </label>
+                                                <select id="ward" class="form-select form-select-lg" required disabled>
+                                                    <option value="">Chọn Phường/Xã</option>
+                                                </select>
+                                                <input type="hidden" asp-for="Register.DiaChi.TenXa" id="wardName" />
+                                                <input type="hidden" asp-for="Register.DiaChi.MaXa" id="wardCode" />
+                                                <span asp-validation-for="Register.DiaChi.TenXa" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div> *@
+
+                                        <!-- Submit Button -->
+                                        <div class="row mt-5">
+                                            <div class="col-12 text-center">
+                                                <button type="submit" class="btn btn-primary btn-lg px-5 py-3">
+                                                    <i class="bi bi-person-plus me-2"></i>Đăng ký
+                                                </button>
+                                            </div>
+                                        </div>
                                 </form>
+
+                                <style>
+                                    .profile-upload-container {
+                                        position: relative;
+                                        display: inline-block;
+                                        width: 150px;
+                                        height: 150px;
+                                        background: #f8f9fa;
+                                        border: 3px dashed #dee2e6;
+                                        border-radius: 50%;
+                                        cursor: pointer;
+                                        transition: all 0.3s ease;
+                                        overflow: hidden;
+                                    }
+
+                                        .profile-upload-container:hover {
+                                            border-color: #007bff;
+                                            background: #e3f2fd;
+                                        }
+
+                                    .profile-preview {
+                                        width: 100%;
+                                        height: 100%;
+                                        object-fit: cover;
+                                        border-radius: 50%;
+                                        display: none;
+                                    }
+
+                                    .camera-icon {
+                                        position: absolute;
+                                        top: 50%;
+                                        left: 50%;
+                                        transform: translate(-50%, -50%);
+                                        font-size: 48px;
+                                        color: #6c757d;
+                                    }
+
+                                    .form-group {
+                                        margin-bottom: 1.5rem;
+                                    }
+
+                                    .form-label {
+                                        margin-bottom: 0.5rem;
+                                        color: #495057;
+                                    }
+
+                                    .form-control-lg, .form-select-lg {
+                                        padding: 0.75rem 1rem;
+                                        font-size: 1rem;
+                                        border-radius: 0.5rem;
+                                        border: 2px solid #e9ecef;
+                                        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+                                    }
+
+                                        .form-control-lg:focus, .form-select-lg:focus {
+                                            border-color: #007bff;
+                                            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+                                        }
+
+                                    .input-group-lg .input-group-text {
+                                        padding: 0.75rem 1rem;
+                                        font-size: 1rem;
+                                        border-radius: 0.5rem 0 0 0.5rem;
+                                    }
+
+                                    .gender-options {
+                                        padding: 0.75rem 1rem;
+                                        background: #f8f9fa;
+                                        border: 2px solid #e9ecef;
+                                        border-radius: 0.5rem;
+                                        min-height: 60px;
+                                        display: flex;
+                                        align-items: center;
+                                    }
+
+                                    .form-check-inline {
+                                        margin-right: 1.5rem;
+                                    }
+
+                                    .form-check-input {
+                                        margin-right: 0.5rem;
+                                    }
+
+                                    .btn-lg {
+                                        font-size: 1.1rem;
+                                        font-weight: 600;
+                                        border-radius: 0.5rem;
+                                        transition: all 0.3s ease;
+                                    }
+
+                                        .btn-lg:hover {
+                                            transform: translateY(-2px);
+                                            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+                                        }
+
+                                    .text-danger {
+                                        font-weight: bold;
+                                    }
+                                </style>
+
                                 @* /* hiển thị ảnh */ *@
                                 <script>
                                     function registerPreviewFile(input) {
@@ -244,6 +384,11 @@
 
 </main>
 @section Scripts {
+    <!-- Toastr CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
+
+    <!-- Toastr JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
     <partial name="_ValidationScriptsPartial" />
@@ -252,48 +397,41 @@
         $(document).ready(function () {
 
             // THÔNG BÁO LỖI
-            // Hiển thị toast nếu có TempData
+            // Hiển thị Toastr từ TempData
             var loginSuccess = '@TempData["LoginSuccess"]';
-            if (loginSuccess && loginSuccess !== '') {
+            var successMessage = '@TempData["SuccessMessage"]';
+            var errorMessage = '@TempData["ErrorMessage"]';
+
+            if (loginSuccess) {
                 toastr.success(loginSuccess);
             }
-            // Giữ tab đăng ký khi có lỗi đăng ký
+            if (successMessage) {
+                toastr.success(successMessage);
+            }
+            if (errorMessage) {
+                toastr.error(errorMessage);
+            }
+
+            // Hiển thị lỗi đăng ký từ ModelState
+            var registerErrors = [];
+            @if (ViewBag.ActiveTab == "register" && !ViewData.ModelState.IsValid)
+            {
+                foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <text>registerErrors.push('@error.ErrorMessage'); </text>
+                }
+            }
+            if (registerErrors.length > 0) {
+                registerErrors.forEach(function (msg) {
+                    toastr.error(msg);
+                });
+            }
+
+            // Giữ tab đang active
             var activeTab = '@ViewBag.ActiveTab';
             if (activeTab === 'register') {
                 var tab = new bootstrap.Tab(document.querySelector('button[data-bs-target="#login-register-registration-form"]'));
                 tab.show();
-            }
-
-            // Lấy TempData
-            var successMessage = '@TempData["SuccessMessage"]';
-            var errorMessage = '@TempData["ErrorMessage"]';
-
-            if (successMessage) {
-                toastr.success(successMessage);
-            }
-
-            if (errorMessage) {
-                toastr.error(errorMessage);
-            }
-
-            // Toastr cho lỗi đăng nhập
-            if (errorMessage) {
-                toastr.error(errorMessage);
-            }
-
-            // Toastr cho lỗi đăng ký (ModelState)
-            var registerErrors = [];
-        @if (ViewBag.ActiveTab == "register" && !ViewData.ModelState.IsValid)
-        {
-            foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-            {
-                <text>registerErrors.push('@error.ErrorMessage'); </text>
-            }
-        }
-                    if (registerErrors.length > 0) {
-                registerErrors.forEach(function (msg) {
-                    toastr.error(msg);
-                });
             }
 
             //SUBMIT LOGIN
@@ -358,14 +496,6 @@
                     }
                 });
             });
-
-
-
-
-
-
-
-
 
             // API ĐỊA CHỈ
             // Khi chọn tỉnh/thành phố

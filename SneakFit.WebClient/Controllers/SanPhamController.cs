@@ -162,16 +162,12 @@ namespace SneakFit.WebClient.Controllers
             // Áp dụng các bộ lọc bổ sung
             var filteredSpct = allSpct.AsQueryable();
 
-            // Lọc theo khoảng giá
-            System.Diagnostics.Debug.WriteLine($"Price filter - giaThapNhat: {giaThapNhat}, giaCaoNhat: {giaCaoNhat}");
             if (giaThapNhat.HasValue && giaThapNhat.Value > 0)
             {
-                System.Diagnostics.Debug.WriteLine($"Applying min price filter: >= {giaThapNhat.Value}");
                 filteredSpct = filteredSpct.Where(spct => spct.GiaKhuyenMai >= giaThapNhat.Value);
             }
             if (giaCaoNhat.HasValue && giaCaoNhat.Value < 10000000)
             {
-                System.Diagnostics.Debug.WriteLine($"Applying max price filter: <= {giaCaoNhat.Value}");
                 filteredSpct = filteredSpct.Where(spct => spct.GiaKhuyenMai <= giaCaoNhat.Value);
             }
 
@@ -189,13 +185,9 @@ namespace SneakFit.WebClient.Controllers
             }
 
             // Lọc theo danh mục (nếu có chọn)
-            System.Diagnostics.Debug.WriteLine($"Category filter - selectedCategoryIds count: {selectedCategoryIds.Count}");
             if (selectedCategoryIds.Any())
             {
-                System.Diagnostics.Debug.WriteLine($"Category IDs: {string.Join(", ", selectedCategoryIds)}");
-                System.Diagnostics.Debug.WriteLine($"Before category filter: {filteredSpct.Count()} items");
                 filteredSpct = filteredSpct.Where(spct => selectedCategoryIds.Contains(spct.DanhMucId));
-                System.Diagnostics.Debug.WriteLine($"After category filter: {filteredSpct.Count()} items");
             }
 
             // Áp dụng sắp xếp
@@ -685,6 +677,15 @@ namespace SneakFit.WebClient.Controllers
                     spct.GiaKhuyenMai = spct.Gia;
                     spct.KhuyenMaiPhanTram = 0;
                 }
+
+                // 🔧 Gắn thêm thông tin chi tiết SPCT
+                var chatLieu = await _chatLieuApiClient.GetById(spct.ChatLieuId);
+                var deGiay = await _deGiayApiClient.GetById(spct.DeGiayId);
+                var thuongHieu = await _thuongHieuApiClient.GetById(spct.ThuongHieuId);
+
+                spct.TenChatLieu = chatLieu?.TenChatLieu ?? "";
+                spct.TenDeGiay = deGiay?.TenDeGiay ?? "";
+                spct.TenThuongHieu = thuongHieu?.TenThuongHieu ?? "";
             }
 
             var viewModel = new SanPhamDetailViewModel

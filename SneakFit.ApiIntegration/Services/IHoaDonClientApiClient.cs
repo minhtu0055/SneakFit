@@ -11,6 +11,12 @@ namespace SneakFit.ApiIntegration.Services
         Task<HoaDonClientViewModel> Create(ThemHoaDonClient request);
         Task<HoaDonClientViewModel> Update(SuaHoaDonClient request);
         Task<bool> UpdateStatus(Guid id, SneakFit.Data.Enums.TrangThaiHoaDon newStatus);
+        Task<bool> UpdatePaymentStatus(Guid id, SneakFit.Data.Enums.TrangThaiThanhToan newPaymentStatus);
         Task<Dictionary<string, int>> GetCountByStatusAsync();
+        
+        // Các method mới để xử lý hủy hóa đơn và hoàn lại số lượng
+        Task<ApiResult<bool>> CancelOrderWithRollback(Guid id);
+        Task<ApiResult<bool>> ReturnOrderWithRollback(Guid id);
+        Task<ApiResult<bool>> CancelOrderOnPaymentFailure(Guid id);
     }
 }

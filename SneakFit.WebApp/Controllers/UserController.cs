@@ -235,12 +235,14 @@ namespace SneakFit.Admin.Controllers
             }
             return roleAssignRequest;
         }
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult DoiMatKhau()
         {
             return View();
         }
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> DoiMatKhau(DoiMatKhauRequest request)
         {
             if (!ModelState.IsValid)

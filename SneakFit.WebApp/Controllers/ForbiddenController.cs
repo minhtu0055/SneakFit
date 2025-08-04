@@ -9,9 +9,6 @@ namespace SneakFit.Admin.Controllers
             ViewBag.Message = "Hãy liên hệ Minh Tú để giải quyết.";
             return View();
         }
-        public IActionResult ThanhToanThanhCong()
-        {
-            return View();
-        }
+       
     }
 }

@@ -50,6 +50,9 @@
         <!-- Thông tin sản phẩm -->
         <div class="col-lg-7 col-md-6">
             <h2 class="fw-bold mb-2">@Model.SanPham.TenSanPham</h2>
+            <p><strong>Thương hiệu:</strong> <span id="thuong-hieu-text">Vui lòng chọn màu sắc và size</span></p>
+            <p><strong>Chất liệu:</strong> <span id="chat-lieu-text">Vui lòng chọn màu sắc và size</span></p>
+            <p><strong>Đế giày:</strong> <span id="de-giay-text">Vui lòng chọn màu sắc và size</span></p>
             <!-- Giá sản phẩm -->
             <div class="mb-3" id="giaSPBox" style="min-height: 38px;">
                 <span id="GiaApDungKhuyenMai" class="gia-km"></span>
@@ -119,6 +122,10 @@
             </div>
         </div>
     </div>
+    <!-- Thêm thông tin sản phẩm ở dưới ảnh -->
+    <div class="row">
+        <p><strong>Mô tả:</strong> @Model.SanPham.Mota</p>
+    </div>
 </div>
 
 @section Scripts {
@@ -166,6 +173,31 @@
             let spct = null;
             if (selectedColorId && selectedSizeId) {
                 spct = spctData.find(x => x.MauSacId == selectedColorId && x.KichThuocId == selectedSizeId);
+            } else {
+                // Khi chưa chọn màu và size, lấy SPCT có giá thấp nhất
+                let minGia = Number.MAX_SAFE_INTEGER;
+                spctData.forEach(x => {
+                    let giaHienTai = (x.GiaKhuyenMai && x.GiaKhuyenMai < x.GiaGoc) ? x.GiaKhuyenMai : x.GiaGoc;
+                    if (giaHienTai < minGia && x.TrangThai) {
+                        minGia = giaHienTai;
+                        spct = x;
+                    }
+                });
+                // Nếu không tìm thấy SPCT có giá thấp nhất, lấy SPCT đầu tiên
+                if (!spct && spctData.length > 0) {
+                    spct = spctData[0];
+                }
+            }
+
+            // Cập nhật thông tin Thương hiệu, Chất liệu, Đế giày
+            if (spct) {
+                $('#thuong-hieu-text').text(spct.TenThuongHieu || 'Không có dữ liệu');
+                $('#chat-lieu-text').text(spct.TenChatLieu || 'Không có dữ liệu');
+                $('#de-giay-text').text(spct.TenDeGiay || 'Không có dữ liệu');
+            } else {
+                $('#thuong-hieu-text').text('Vui lòng chọn màu sắc và size');
+                $('#chat-lieu-text').text('Vui lòng chọn màu sắc và size');
+                $('#de-giay-text').text('Vui lòng chọn màu sắc và size');
             }
 
             // Update giá bán:

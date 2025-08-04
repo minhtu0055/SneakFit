@@ -390,6 +390,7 @@ namespace SneakFit.Admin.Controllers
 
         // Action để lấy dữ liệu SPCT cho modal bán hàng
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetSPCTForModal(string tuKhoa = "",Guid? kichThuocId = null, Guid? mauSacId = null, Guid? danhMucId = null, int pageIndex = 1, int pageSize = 10)
         {
             try
@@ -450,6 +451,7 @@ namespace SneakFit.Admin.Controllers
             }
         }
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetById(Guid id)
         {
             var spct = await _spctApiClient.GetById(id);

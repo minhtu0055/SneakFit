@@ -50,6 +50,7 @@ namespace SneakFit.Application.Catalog.HoaDon
             }
             int totalRow = await query.CountAsync();
             var data = await query
+                .OrderByDescending(h => h.NgayTao)
                 .Skip((request.PageIndex - 1) * request.PageSize)
                 .Take(request.PageSize)
                 .Select(h => new HoaDonViewModel
@@ -90,6 +91,26 @@ namespace SneakFit.Application.Catalog.HoaDon
                 .Include(h => h.Voucher)
                 .FirstOrDefaultAsync(h => h.Id == id);
             if (hoaDon == null) return null;
+
+            // Tính toán VoucherDiscount
+            decimal? voucherDiscount = null;
+            if (hoaDon.Voucher != null)
+            {
+                decimal tongTienSanPham = hoaDon.HoaDonChiTiet?.Sum(hdc => hdc.GiaBan * hdc.SoLuong) ?? 0;
+                
+                if (hoaDon.Voucher.LoaiGiamGia == LoaiGiamGia.PhamTram)
+                {
+                    // Giảm theo phần trăm
+                    decimal giamGia = (tongTienSanPham * hoaDon.Voucher.GiaTriGiamGia) / 100;
+                    voucherDiscount = Math.Min(giamGia, hoaDon.Voucher.GiaTriToiDa);
+                }
+                else if (hoaDon.Voucher.LoaiGiamGia == LoaiGiamGia.SoTien)
+                {
+                    // Giảm theo số tiền cố định
+                    voucherDiscount = hoaDon.Voucher.GiaTriGiamGia;
+                }
+            }
+
             return new HoaDonViewModel
             {
                 Id = hoaDon.Id,
@@ -109,6 +130,7 @@ namespace SneakFit.Application.Catalog.HoaDon
                 TrangThaiThanhToan = hoaDon.TrangThaiThanhToan,
                 VoucherId = hoaDon.VoucherId,
                 TienKhachDua = hoaDon.TienKhachDua,
+                VoucherDiscount = voucherDiscount,
                 MaTinh = _context.DiaChi.Where(dc => dc.UserId == hoaDon.UserId && dc.Mac_Dinh).Select(dc => dc.MaTinh).FirstOrDefault(),
                 TenTinh = _context.DiaChi.Where(dc => dc.UserId == hoaDon.UserId && dc.Mac_Dinh).Select(dc => dc.TenThanhPho).FirstOrDefault(),
                 MaHuyen = _context.DiaChi.Where(dc => dc.UserId == hoaDon.UserId && dc.Mac_Dinh).Select(dc => dc.MaHuyen).FirstOrDefault(),
@@ -329,7 +351,8 @@ namespace SneakFit.Application.Catalog.HoaDon
                     TrangThaiCu = x.TrangThaiCu,
                     TrangThaiMoi = x.TrangThaiMoi,
                     NgayTao = x.NgayTao,
-                    NguoiChinhSua = x.NguoiChinhSua
+                    NguoiChinhSua = x.NguoiChinhSua,
+                    GhiChu = x.GhiChu
                 });
 
             return await query.ToListAsync();
@@ -352,8 +375,11 @@ namespace SneakFit.Application.Catalog.HoaDon
             return entity.Id;
         }
                 
-        public async Task<bool> UpdateStatusAndLogAsync(Guid hoaDonId, TrangThaiHoaDon newStatus, Guid userId, string nguoiChinhSua)
+        public async Task<bool> UpdateStatusAndLogAsync(Guid hoaDonId, TrangThaiHoaDon newStatus, Guid userId, string nguoiChinhSua, string ghiChu)
         {
+            if (string.IsNullOrWhiteSpace(ghiChu))
+                return false; // hoặc throw new ArgumentException("Ghi chú không được để trống!");
+
             var hoaDon = await _context.HoaDon.FindAsync(hoaDonId);
             if (hoaDon == null)
                 return false;
@@ -372,7 +398,8 @@ namespace SneakFit.Application.Catalog.HoaDon
                 TrangThaiMoi = newStatus,
                 NgayTao = DateTime.Now,
                 NguoiChinhSua = nguoiChinhSua,
-                UserId = userId
+                UserId = userId,
+                GhiChu = ghiChu
             };
             _context.LichSuHoaDon.Add(history);
 
