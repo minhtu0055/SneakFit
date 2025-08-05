@@ -908,20 +908,20 @@
                 const diaChi = $("#diaChiCuThe").val() || null;
 
                 const hoaDonRequest = {
-                    tongTien: 0,
-                    trangThai: 0, // ChoXacNhan
-                    userId: khachHangId || null,
-                    diaChi: diaChi,
-                    soDienThoai: soDienThoai,
-                    email: email,
-                    hoTen: hoTen,
-                    ghiChu: null,
-                    phuongThucThanhToan: 1, // Tiền mặt
-                    loaiHoaDon: 2, // TaiQuay
-                    ngayThanhToan: null,
-                    phiVanChuyen: 0,
-                    trangThaiThanhToan: 1, // ChuaThanhToan
-                    voucherId: null
+                    TongTien: 0,
+                    TrangThai: 0, // ChoXacNhan
+                    UserId: khachHangId || null,
+                    DiaChi: diaChi,
+                    SoDienThoai: soDienThoai,
+                    Email: email,
+                    HoTen: hoTen,
+                    GhiChu: null,
+                    PhuongThucThanhToan: 1, // Tiền mặt
+                    LoaiHoaDon: 2, // TaiQuay
+                    NgayThanhToan: null,
+                    PhiVanChuyen: 0,
+                    TrangThaiThanhToan: 1, // ChuaThanhToan
+                    VoucherId: null
                 };
 
                 const $btn = $("#btnTaoHoaDon");
@@ -943,7 +943,7 @@
                                 tongTien: result.tongTien,
                                 khachHang: {
                                     id: khachHangId || null,
-                                    hoTen: hoTen || '',
+                                    hoTen: hoTen || 'Khách hàng lẻ',
                                     soDienThoai: soDienThoai || '',
                                     email: email || ''
                                 },
@@ -1016,7 +1016,38 @@
                     localStorage.setItem('hoaDonHienTaiId', hoaDonId);
                     capNhatTabHoaDon();
                     capNhatHoaDonHienTai();
+                                        
+                    // Refresh thông tin hóa đơn từ server để đảm bảo dữ liệu mới nhất
+                    refreshHoaDonInfo(hoaDonId);
                 }
+            }
+
+            // Hàm refresh thông tin hóa đơn từ server
+            function refreshHoaDonInfo(hoaDonId) {
+                $.ajax({
+                    url: '/HoaDon/GetHoaDonCho',
+                    type: 'GET',
+                    success: function (result) {
+                        if (result && result.length > 0) {
+                            const hoaDonFromServer = result.find(hd => hd.id === hoaDonId);
+                            if (hoaDonFromServer && hoaDonHienTai) {
+                                // Cập nhật thông tin khách hàng từ server
+                                hoaDonHienTai.khachHang = {
+                                    id: hoaDonFromServer.userId,
+                                    hoTen: hoaDonFromServer.hoTen || 'Khách hàng lẻ',
+                                    soDienThoai: hoaDonFromServer.soDienThoai || '',
+                                    email: hoaDonFromServer.email || ''
+                                };
+                                                         
+                                // Cập nhật lại UI
+                                capNhatHoaDonHienTai();
+                            }
+                        }
+                    },
+                    error: function (xhr) {
+                        console.error("Lỗi khi refresh thông tin hóa đơn:", xhr);
+                    }
+                });
             }
 
             function loadHoaDonCho() {
@@ -1039,7 +1070,7 @@
                                     tongTien: hd.tongTien,
                                     khachHang: {
                                         id: hd.userId,
-                                        hoTen: hd.hoTen || '',
+                                        hoTen: hd.hoTen || 'Khách hàng lẻ',
                                         soDienThoai: hd.soDienThoai || '',
                                         email: hd.email || ''
                                     },
@@ -1063,14 +1094,25 @@
                             Promise.all(promises).then(list => {
                                 danhSachHoaDon = list; // Không map lại nữa!
                                 let hoaDonIdDaLuu = localStorage.getItem('hoaDonHienTaiId');
+                                                               
                                 if (hoaDonIdDaLuu) {
                                     hoaDonHienTai = danhSachHoaDon.find(hd => hd.id === hoaDonIdDaLuu) || danhSachHoaDon[0];
                                 } else {
                                     hoaDonHienTai = danhSachHoaDon[0];
                                 }
-                                capNhatTabHoaDon();
-                                capNhatHoaDonHienTai();
-                                toastr.success("Đã tải " + danhSachHoaDon.length + " hóa đơn chờ");
+                                
+                
+                capNhatTabHoaDon();
+                capNhatHoaDonHienTai();
+                
+                // Đảm bảo thông tin khách hàng được hiển thị đúng sau khi tải
+                setTimeout(() => {
+                    if (hoaDonHienTai && hoaDonHienTai.id) {
+                        capNhatHoaDonHienTai();
+                    }
+                }, 100);
+                
+                toastr.success("Đã tải " + danhSachHoaDon.length + " hóa đơn chờ");
                             });
                         } else {
                             taoHoaDonMoi();
@@ -1129,10 +1171,17 @@
             function capNhatHoaDonHienTai() {
                 if (!hoaDonHienTai) return;
 
-                $("#customerName").text(hoaDonHienTai.khachHang.hoTen || "Khách hàng lẻ");
-                $("#customerPhone").text(hoaDonHienTai.khachHang.soDienThoai || "-");
-                $("#customerEmail").text(hoaDonHienTai.khachHang.email || "-");
-                // $("#khachHangId").val(hoaDonHienTai.khachHang.id || "");
+
+                // Cập nhật thông tin khách hàng
+                const khachHang = hoaDonHienTai.khachHang || {};
+                const hoTen = khachHang.hoTen || "Khách hàng lẻ";
+                const soDienThoai = khachHang.soDienThoai || "-";
+                const email = khachHang.email || "-";
+                const khachHangId = khachHang.id || null;
+                $("#customerName").text(hoTen);
+                $("#customerPhone").text(soDienThoai);
+                $("#customerEmail").text(email);
+                $("#khachHangId").val(khachHangId || "");
 
                 // Tính toán phân trang
                 const totalItems = hoaDonHienTai.sanPham.length;
@@ -1242,9 +1291,10 @@
                 $("#tongTien").text(formatCurrency(tongTien));
                 $(".tam-tinh-value").text(formatCurrency(tongTien));
 
-                if (hoaDonHienTai.khachHang.id) {
+                // Cập nhật hiển thị thông tin khách hàng
+                if (khachHangId && khachHangId !== null && khachHangId !== "") {
                     // Có khách hàng thực sự
-                    $("#selectedCustomerName").text(hoaDonHienTai.khachHang.hoTen);
+                    $("#selectedCustomerName").text(hoTen);
                     $("#selectedCustomerTag").removeClass("d-none");
                     $("#customerPhoneRow, #customerEmailRow").show();
                     $("#giaoHangToggleRow").removeClass("d-none");
@@ -2035,10 +2085,11 @@
                 if (hoaDonHienTai) {
                     hoaDonHienTai.khachHang = {
                         id: customer.id,
-                        hoTen: customer.hoVaTen,
+                        hoTen: customer.hoVaTen || "Khách hàng lẻ",
                         soDienThoai: customer.soDienThoai,
                         email: customer.email
                     };
+                    
                 }
 
                 toastr.success(`Đã chọn khách hàng: ${customer.hoVaTen}`);
@@ -2046,33 +2097,40 @@
                 $("#searchKhachHang").val("");
 
                 if (hoaDonHienTai && hoaDonHienTai.id) {
+                    const updateData = {
+                        Id: hoaDonHienTai.id,
+                        HoTen: customer.hoVaTen,
+                        SoDienThoai: customer.soDienThoai,
+                        Email: customer.email,
+                        UserId: customer.id,
+                        TongTien: Math.max(hoaDonHienTai.tongTien - (hoaDonHienTai.giamGia || 0), 0),
+                        TrangThai: hoaDonHienTai.trangThai || 0,
+                        DiaChi: hoaDonHienTai.diaChi || "",
+                        GhiChu: hoaDonHienTai.ghiChu || "",
+                        PhuongThucThanhToan: hoaDonHienTai.phuongThucThanhToan || 1,
+                        LoaiHoaDon: hoaDonHienTai.loaiHoaDon || 2,
+                        NgayThanhToan: hoaDonHienTai.ngayThanhToan || null,
+                        MaHoaDon: hoaDonHienTai.tenHoaDon || "",
+                        PhiVanChuyen: hoaDonHienTai.phiVanChuyen || 0,
+                        TrangThaiThanhToan: hoaDonHienTai.trangThaiThanhToan || 1,
+                        VoucherId: hoaDonHienTai.voucherId || null,
+                        GiaoHang: hoaDonHienTai.isGiaoHang || false,
+                        TienKhachDua: parseInt($("#tienKhachDua").val().replace(/[^0-9]/g, "")) || 0
+                    };
+                    
+                    
                     $.ajax({
                         url: '/HoaDon/UpdateHoaDonCho',
                         type: 'PUT',
                         contentType: 'application/json',
-                        data: JSON.stringify({
-                            Id: hoaDonHienTai.id,
-                            HoTen: customer.hoVaTen,
-                            SoDienThoai: customer.soDienThoai,
-                            Email: customer.email,
-                            UserId: customer.id,
-                            TongTien: Math.max(hoaDonHienTai.tongTien - (hoaDonHienTai.giamGia || 0), 0),
-                            TrangThai: hoaDonHienTai.trangThai || 0,
-                            DiaChi: hoaDonHienTai.diaChi || "",
-                            GhiChu: hoaDonHienTai.ghiChu || "",
-                            PhuongThucThanhToan: hoaDonHienTai.phuongThucThanhToan || 1,
-                            LoaiHoaDon: hoaDonHienTai.loaiHoaDon || 2,
-                            NgayThanhToan: hoaDonHienTai.ngayThanhToan || null,
-                            MaHoaDon: hoaDonHienTai.tenHoaDon || "",
-                            PhiVanChuyen: hoaDonHienTai.phiVanChuyen || 0,
-                            TrangThaiThanhToan: hoaDonHienTai.trangThaiThanhToan || 1,
-                            VoucherId: hoaDonHienTai.voucherId || null,
-                            GiaoHang: hoaDonHienTai.isGiaoHang || false,
-                            TienKhachDua: parseInt($("#tienKhachDua").val().replace(/[^0-9]/g, "")) || 0
-                        }),
+                        data: JSON.stringify(updateData),
                         success: function(res) {
                             if (res && res.success) {
                                 toastr.success("Cập nhật khách hàng cho hóa đơn thành công!");
+                                // Refresh thông tin hóa đơn từ server sau khi cập nhật
+                                setTimeout(() => {
+                                    refreshHoaDonInfo(hoaDonHienTai.id);
+                                }, 500);
                             } else {
                                 toastr.error(res.message || "Cập nhật thất bại!");
                             }
@@ -2127,7 +2185,7 @@
                 if (hoaDonHienTai) {
                     hoaDonHienTai.isGiaoHang = false;
                     hoaDonHienTai.diaChiGiaoHang = null;
-                    hoaDonHienTai.khachHang = { id: null, hoTen: "", soDienThoai: "", email: "" };
+                    hoaDonHienTai.khachHang = { id: null, hoTen: "Khách hàng lẻ", soDienThoai: "", email: "" };
                     hoaDonHienTai.phiVanChuyen = 0;
                 }
             }
@@ -2255,11 +2313,6 @@
             function tinhPhiVanChuyen() {
                 const districtCode = $('#districtCode').val();
                 const wardCode = $('#wardCode').val();
-                console.log('districtCode:', districtCode, 'wardCode:', wardCode); // Thêm dòng này
-                if (!districtCode || !wardCode) {
-                    console.log('Chưa chọn đủ địa chỉ để tính phí vận chuyển');
-                    return;
-                }
 
                 // Hiển thị loading
                 $('#phiVanChuyenRow').removeClass('d-none');
@@ -2373,7 +2426,7 @@
                     DiaChi: hoaDonHienTai.diaChi || "",
                     SoDienThoai: hoaDonHienTai.khachHang?.soDienThoai || "",
                     Email: hoaDonHienTai.khachHang?.email || "",
-                    HoTen: hoaDonHienTai.khachHang?.hoTen || "",
+                    HoTen: hoaDonHienTai.khachHang?.hoTen || "Khách hàng lẻ",
                     GhiChu: ghiChu,
                     PhuongThucThanhToan: phuongThucThanhToan,
                     LoaiHoaDon: 2, // Tại quầy
@@ -2626,7 +2679,6 @@
             $(document).ready(function() {
                 // Gọi lại mỗi khi mở modal
                 $('#modalThemMoiKHForm').on('shown.bs.modal', function () {
-                    console.log('Modal đã mở, khởi tạo dropdowns...');
                     initDiaChiDropdowns();
                     initFormValidation();
                     $('#formThemMoiKH')[0].reset();

@@ -151,7 +151,7 @@ namespace SneakFit.Application.Catalog.HoaDonClient
 
         public async Task<HoaDonClientViewModel> Create(ThemHoaDonClient request)
         {
-            var maHoaDon = $"HD{DateTime.Now:yyyyMMddHHmmss}{new Random().Next(1000, 9999)}";
+            var maHoaDon = $"HD{DateTime.Now:MMddHHmmss}{new Random().Next(1000, 9999)}";
             var hoaDon = new Data.Entities.HoaDon
             {
                 Id = Guid.NewGuid(),

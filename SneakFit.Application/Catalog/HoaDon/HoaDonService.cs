@@ -390,6 +390,13 @@ namespace SneakFit.Application.Catalog.HoaDon
 
             hoaDon.TrangThai = newStatus;
 
+            // Kiểm tra nếu là hóa đơn online và trạng thái mới là "Đã thanh toán"
+            if (hoaDon.LoaiHoaDon == Data.Enums.LoaiHoaDon.Online && hoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD && newStatus == Data.Enums.TrangThaiHoaDon.DaThanhToan)
+            {
+                hoaDon.TrangThaiThanhToan = Data.Enums.TrangThaiThanhToan.DaThanhToan;
+                hoaDon.NgayThanhToan = DateTime.Now;
+            }
+
             var history = new Data.Entities.LichSuHoaDon
             {
                 Id = Guid.NewGuid(),

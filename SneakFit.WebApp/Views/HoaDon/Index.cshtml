@@ -120,7 +120,7 @@
 							@item.NgayTao.ToString("dd/MM/yyyy HH:mm")
 						</td>
 						<td>
-							@String.Format("{0:N0}", item.TongTien + item.PhiVanChuyen) VNĐ
+							@(item.LoaiHoaDon == LoaiHoaDon.TaiQuay ? (item.TongTien + item.PhiVanChuyen).ToString("N0") : item.TongTien.ToString("N0")) VNĐ
 						</td>
 						<td>
 							<div class="dropdown">

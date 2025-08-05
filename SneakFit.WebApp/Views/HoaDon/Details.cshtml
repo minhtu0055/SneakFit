@@ -7,6 +7,11 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
     var isTaiQuay = (int)Model.LoaiHoaDon == 2 && (Model.GiaoHang != true);
     
+    // Kiểm tra xem có phải hóa đơn cần ẩn trạng thái "Đã thanh toán" không
+    // (Online VNPay hoặc tại quầy có giao hàng + VNPay)
+    var shouldSkipPaidStatus = ((int)Model.LoaiHoaDon == 1 && Model.PhuongThucThanhToan == PhuongThucThanhToan.VnPay) ||
+                               ((int)Model.LoaiHoaDon == 2 && Model.GiaoHang == true );
+    
     // Lấy lịch sử hóa đơn từ ViewBag hoặc Model (sẽ được set trong controller)
     var lichSuHoaDon = ViewBag.LichSuHoaDon as List<LichSuHoaDonViewModel> ?? new List<LichSuHoaDonViewModel>();
     
@@ -68,6 +73,13 @@
             new { Status = TrangThaiHoaDon.DaThanhToan, Color = "emerald", Icon = "icon-payment", Title = "Đã thanh toán", Time = GetTimeForStatus(TrangThaiHoaDon.DaThanhToan).ToString("HH:mm:ss dd/MM/yyyy") },
             new { Status = TrangThaiHoaDon.ThanhCong, Color = "emerald", Icon = "icon-check", Title = "Thành công", Time = GetTimeForStatus(TrangThaiHoaDon.ThanhCong).ToString("HH:mm:ss dd/MM/yyyy") }
         };
+    
+    // Lọc bỏ trạng thái "Đã thanh toán" cho hóa đơn cần ẩn trạng thái này
+    if (shouldSkipPaidStatus)
+    {
+        steps = steps.Where(s => s.Status != TrangThaiHoaDon.DaThanhToan).ToArray();
+    }
+    
     // Chỉ hiển thị các bước có thời gian thực tế hoặc đã đạt đến
     var visibleSteps = steps.Where(s => 
         (int)s.Status <= (int)Model.TrangThai || 
@@ -592,7 +604,7 @@
                         Model.TrangThai == TrangThaiHoaDon.DaXacNhan ||
                         Model.TrangThai == TrangThaiHoaDon.ChoVanChuyen ||
                         Model.TrangThai == TrangThaiHoaDon.DangVanChuyen ||
-                        Model.TrangThai == TrangThaiHoaDon.DaThanhToan)) ||
+                        (Model.TrangThai == TrangThaiHoaDon.DaThanhToan && !shouldSkipPaidStatus))) ||
                         (
                             (Model.TrangThai == TrangThaiHoaDon.ChoXacNhan ||
                             Model.TrangThai == TrangThaiHoaDon.DaXacNhan ||
@@ -849,13 +861,21 @@
                 var userId = '@(Model.UserId ?? Guid.Empty)';
                 var nguoiChinhSua = '@User.Identity.Name';
                 var currentStatus = @((int)Model.TrangThai);
+                var shouldSkipPaidStatus = @(shouldSkipPaidStatus.ToString().ToLower());
                 nextStatus = currentStatus;
+                
                 // Xác định trạng thái tiếp theo
                 switch (currentStatus) {
                     case 0: nextStatus = 1; break; // ChoXacNhan -> DaXacNhan
                     case 1: nextStatus = 2; break; // DaXacNhan -> ChoVanChuyen
                     case 2: nextStatus = 3; break; // ChoVanChuyen -> DangVanChuyen
-                    case 3: nextStatus = 4; break; // DangVanChuyen -> DaThanhToan
+                    case 3: 
+                        if (shouldSkipPaidStatus) {
+                            nextStatus = 5; // DangVanChuyen -> ThanhCong (bỏ qua DaThanhToan)
+                        } else {
+                            nextStatus = 4; // DangVanChuyen -> DaThanhToan
+                        }
+                        break;
                     case 4: nextStatus = 5; break; // DaThanhToan -> ThanhCong
                     default: toastr.error('Không thể chuyển trạng thái!'); return;
                 }
