@@ -12,6 +12,99 @@
     }
 }
 
+/* Discount Badge Animation */
+@keyframes discount-pulse {
+    0% {
+        transform: scale(1) rotate(0deg);
+        box-shadow: 0 2px 8px rgba(23,102,179,0.15);
+    }
+
+    25% {
+        transform: scale(1.05) rotate(2deg);
+        box-shadow: 0 4px 12px rgba(23,102,179,0.25);
+    }
+
+    50% {
+        transform: scale(1.1) rotate(0deg);
+        box-shadow: 0 6px 16px rgba(23,102,179,0.35);
+    }
+
+    75% {
+        transform: scale(1.05) rotate(-2deg);
+        box-shadow: 0 4px 12px rgba(23,102,179,0.25);
+    }
+
+    100% {
+        transform: scale(1) rotate(0deg);
+        box-shadow: 0 2px 8px rgba(23,102,179,0.15);
+    }
+}
+
+@keyframes discount-bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+
+    40% {
+        transform: translateY(-10px);
+    }
+
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+@keyframes discount-glow {
+    0% {
+        box-shadow: 0 2px 8px rgba(23,102,179,0.15), 0 0 0 0 rgba(23,102,179,0.7);
+    }
+
+    70% {
+        box-shadow: 0 2px 8px rgba(23,102,179,0.15), 0 0 0 10px rgba(23,102,179,0);
+    }
+
+    100% {
+        box-shadow: 0 2px 8px rgba(23,102,179,0.15), 0 0 0 0 rgba(23,102,179,0);
+    }
+}
+
+/* Best Seller Product Hover Effects */
+@keyframes product-hover-lift {
+    0% {
+        transform: translateY(0);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    100% {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+    }
+}
+
+@keyframes product-image-zoom {
+    0% {
+        transform: scale(1);
+    }
+
+    100% {
+        transform: scale(1.05);
+    }
+}
+
+@keyframes badge-shine {
+    0% {
+        background: linear-gradient(45deg, #1766b3, #1E3A8A);
+    }
+
+    50% {
+        background: linear-gradient(45deg, #1E3A8A, #60A5FA);
+    }
+
+    100% {
+        background: linear-gradient(45deg, #1766b3, #1E3A8A);
+    }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .ecommerce-hero-1 .floating-product {
@@ -260,4 +353,256 @@
     justify-content: center;
     align-items: center;
     background: transparent;
+}
+
+/* Discount Badge Enhanced Styles */
+.ecommerce-hero-1 .discount-badge {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    background: linear-gradient(45deg, #1766b3, #1E3A8A);
+    color: #fff;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+    box-shadow: 0 2px 8px rgba(23,102,179,0.15);
+    animation: discount-pulse 3s ease-in-out infinite, discount-glow 2s ease-in-out infinite;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+    z-index: 10;
+    overflow: visible;
+    /* Fix: Đảm bảo transform-origin ở trung tâm */
+    transform-origin: center center;
+}
+
+    .ecommerce-hero-1 .discount-badge::before {
+        content: '';
+        position: absolute;
+        /* Fix: Căn chỉnh chính xác với trung tâm badge */
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        /* Fix: Bỏ transform translate vì đã set left: 0, top: 0 */
+        border-radius: 50%;
+        box-shadow: 0 0 16px 4px #60A5FA22;
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0.35;
+        transition: opacity 0.3s, box-shadow 0.3s;
+        animation: none;
+        background: radial-gradient(circle, #60A5FA22 60%, transparent 100%);
+        /* Fix: Đồng bộ transform-origin */
+        transform-origin: center center;
+    }
+
+    .ecommerce-hero-1 .discount-badge:hover::before {
+        opacity: 0.7;
+        box-shadow: 0 0 48px 16px #60A5FA55;
+        animation: sparkle 0.8s linear infinite;
+        background: radial-gradient(circle, #60A5FA44 60%, transparent 100%);
+    }
+
+    .ecommerce-hero-1 .discount-badge::after {
+        display: none;
+    }
+
+    .ecommerce-hero-1 .discount-badge:hover {
+        animation: discount-bounce 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55), badge-shine 1s ease-in-out infinite;
+        background: linear-gradient(120deg, #1E3A8A, #60A5FA, #1766b3);
+        box-shadow: 0 8px 28px rgba(23,102,179,0.35), 0 0 16px 4px #60A5FA66;
+        filter: brightness(1.08) saturate(1.2) drop-shadow(0 0 8px #60A5FA88);
+        /* Fix: Giảm độ scale và bỏ rotate để tránh lệch */
+        transform: scale(1.08);
+    }
+
+    .ecommerce-hero-1 .discount-badge .percent,
+    .ecommerce-hero-1 .discount-badge .text {
+        position: relative;
+        z-index: 1;
+        transition: color 0.2s, text-shadow 0.2s;
+    }
+
+    .ecommerce-hero-1 .discount-badge:hover .percent,
+    .ecommerce-hero-1 .discount-badge:hover .text {
+        text-shadow: 0 2px 8px #60A5FA88, 0 0 2px #fff;
+        color: #fff;
+        animation: discount-bounce 0.6s ease-in-out;
+    }
+
+    .ecommerce-hero-1 .discount-badge .giam-tag {
+        background: #e3f0ff;
+        color: #1766b3;
+    }
+
+/* Best Seller Product Card Enhanced Styles */
+.best-sellers .product-card {
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+    .best-sellers .product-card:hover {
+        animation: product-hover-lift 0.3s ease forwards;
+    }
+
+    .best-sellers .product-card .product-image {
+        position: relative;
+        overflow: hidden;
+        border-radius: 12px 12px 0 0;
+    }
+
+        .best-sellers .product-card .product-image img {
+            transition: transform 0.5s cubic-bezier(0.4, 0.2, 0.2, 1), box-shadow 0.4s, filter 0.4s;
+            filter: brightness(1) saturate(1);
+            width: 100%;
+            object-fit: cover;
+            opacity: 1;
+        }
+
+    .best-sellers .product-card:hover .product-image img,
+    .best-sellers .product-card.hover-active .product-image img {
+        transform: scale(1.18) rotate(-5deg);
+        box-shadow: 0 16px 48px 0 rgba(23,102,179,0.28), 0 0 16px 2px #60A5FA44;
+        filter: brightness(1.08) saturate(1.2) drop-shadow(0 0 8px #60A5FA88);
+    }
+
+    .best-sellers .product-card:hover,
+    .best-sellers .product-card.hover-active {
+        transform: translateY(-8px) scale(1.04);
+        box-shadow: 0 16px 32px rgba(23,102,179,0.18);
+    }
+
+    .best-sellers .product-card .badge {
+        animation: badge-shine 2s ease-in-out infinite;
+        font-weight: 600;
+        font-size: 0.8rem;
+        padding: 6px 10px;
+        border-radius: 8px;
+        z-index: 5;
+    }
+
+    .best-sellers .product-card:hover .badge {
+        animation: discount-bounce 0.6s ease-in-out, badge-shine 1s ease-in-out infinite;
+    }
+
+    .best-sellers .product-card .product-info {
+        padding: 15px;
+        background: #fff;
+    }
+
+    .best-sellers .product-card .product-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+        line-height: 1.3;
+    }
+
+    .best-sellers .product-card .product-category {
+        font-size: 0.9rem;
+        color: #1766b3;
+        font-weight: 500;
+    }
+
+    .best-sellers .product-card .product-price {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #e53935;
+        margin-top: 8px;
+    }
+
+    .best-sellers .product-card .stock-amount {
+        font-size: 0.85rem;
+        color: #666;
+        font-weight: 500;
+    }
+
+/* Swiper Navigation for Best Sellers */
+.best-seller-slider .swiper-button-next,
+.best-seller-slider .swiper-button-prev {
+    background: rgba(23, 102, 179, 0.8);
+    color: #fff;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+    .best-seller-slider .swiper-button-next:hover,
+    .best-seller-slider .swiper-button-prev:hover {
+        background: rgba(23, 102, 179, 1);
+        transform: scale(1.1);
+    }
+
+    .best-seller-slider .swiper-button-next::after,
+    .best-seller-slider .swiper-button-prev::after {
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+/* Responsive adjustments for best sellers */
+@media (max-width: 768px) {
+    .best-sellers .product-card .product-image img {
+        height: 180px;
+    }
+
+    .best-sellers .product-card .product-title {
+        font-size: 0.9rem;
+    }
+
+    .best-sellers .product-card .product-price {
+        font-size: 1rem;
+    }
+}
+
+/* Additional hover and click effects for best seller products */
+.best-sellers .product-card.hover-active {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+}
+
+.best-sellers .product-card .product-image img.zoomed {
+    transform: scale(1.05);
+}
+
+.best-sellers .product-card .badge.badge-active {
+    animation: discount-bounce 0.6s ease-in-out, badge-shine 1s ease-in-out infinite;
+}
+
+.best-sellers .product-card.clicked {
+    transform: scale(0.98);
+    transition: transform 0.2s ease;
+}
+
+/* Enhanced discount badge hover effects */
+.ecommerce-hero-1 .discount-badge:hover .percent {
+    animation: discount-bounce 0.6s ease-in-out;
+}
+
+.ecommerce-hero-1 .discount-badge:hover .text {
+    animation: discount-bounce 0.6s ease-in-out 0.1s;
+}
+
+/* Sparkle effect for discount badge */
+@keyframes sparkle {
+    0%, 100% {
+        opacity: 0.7;
+        transform: scale(0) rotate(0deg);
+        box-shadow: 0 0 16px 4px #60A5FA66;
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1) rotate(180deg);
+        box-shadow: 0 0 32px 8px #60A5FA99;
+    }
 }
