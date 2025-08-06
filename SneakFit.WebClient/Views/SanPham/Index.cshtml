@@ -78,9 +78,9 @@
                             </div>
 
                             <div class="range-slider position-relative" style="height: 40px;">
-                                <input type="range" id="min-range" class="position-absolute start-0 w-100 min-range"
+                                <input type="range" id="min-range" class="styled-range position-absolute start-0 w-100 min-range"
                                        min="0" max="10000000" step="10000" value="@currentMinPrice" style="z-index: 2;">
-                                <input type="range" id="max-range" class="position-absolute start-0 w-100 max-range"
+                                <input type="range" id="max-range" class="styled-range position-absolute start-0 w-100 max-range"
                                        min="0" max="10000000" step="10000" value="@currentMaxPrice" style="z-index: 1;">
                             </div>
 
@@ -178,7 +178,7 @@
                                             </span>
                                             <input type="text" name="tuKhoa" value="@currentKeyword"
                                                    class="form-control search-input"
-                                                   placeholder="Tìm sản phẩm theo tên, thương hiệu, danh mục...">
+                                                   placeholder="Tìm sản phẩm theo tên">
                                             <button class="btn btn-primary search-btn" type="submit">
                                                 <i class="bi bi-search me-1"></i>Tìm Kiếm
                                             </button>
@@ -480,11 +480,14 @@
                 $('.brand-checkbox').prop('checked', false);
                 $('.min-range').val(0);
                 $('.max-range').val(10000000);
+                $('#min-price-input').val(0);
+                $('#max-price-input').val(10000000);
                 updatePriceDisplay();
                 updateSelectedColors();
                 updateSelectedBrands();
                 updateSelectedCategories();
                 loadFilteredProducts();
+                updateSliderBackground();
             });
 
             // Xóa từng tag bộ lọc riêng lẻ
@@ -522,7 +525,14 @@
                 updateSelectedColors();
                 updateSelectedBrands();
                 updateSelectedCategories();
-                loadFilteredProducts();
+                // Đảm bảo cập nhật hiển thị giá trước khi gọi AJAX
+                updatePriceDisplay();
+
+                // Cập nhật lại tag bộ lọc trước khi gọi AJAX
+                updateActiveFilters();
+
+                loadFilteredProducts();           // gọi lại AJAX
+                updateSliderBackground();
             });
 
             // Chuyển đổi chế độ xem
@@ -673,16 +683,16 @@
                     });
                 }
 
-                if (minPrice > 0 || maxPrice < 10000000) {
+                if (parseInt(minPrice) > 0 || parseInt(maxPrice) < 10000000) {
                     hasActiveFilters = true;
                     const minPriceFormatted = parseInt(minPrice).toLocaleString();
                     const maxPriceFormatted = parseInt(maxPrice).toLocaleString();
                     filterHtml += `<span class="filter-tag">
-                        <i class="bi bi-currency-dollar me-1"></i>${minPriceFormatted}đ - ${maxPriceFormatted}đ
-                        <button class="filter-remove" data-type="price">
-                            <i class="bi bi-x"></i>
-                        </button>
-                    </span>`;
+                                <i class="bi bi-currency-dollar me-1"></i>${minPriceFormatted}đ - ${maxPriceFormatted}đ
+                                <button class="filter-remove" data-type="price" data-id="">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </span>`;
                 }
 
                 if (hasActiveFilters) {
@@ -756,6 +766,8 @@
                         case 'price':
                             $('.min-range').val(0);
                             $('.max-range').val(10000000);
+                            $('#min-price-input').val(0);
+                            $('#max-price-input').val(10000000);
                             updatePriceDisplay();
                             break;
                         case 'brand':
@@ -769,7 +781,14 @@
                     updateSelectedColors();
                     updateSelectedBrands();
                     updateSelectedCategories();
+
+                    // Đảm bảo cập nhật hiển thị giá trước khi gọi AJAX
+                    updatePriceDisplay();
+
+                    // Cập nhật lại tag bộ lọc trước khi gọi AJAX
+                    updateActiveFilters();
                     loadFilteredProducts();
+                    updateSliderBackground();
                 });
 
                 // Khởi tạo lại xóa tất cả bộ lọc
@@ -780,16 +799,50 @@
                     $('.brand-checkbox').prop('checked', false);
                     $('.min-range').val(0);
                     $('.max-range').val(10000000);
+                    $('#min-price-input').val(0);
+                    $('#max-price-input').val(10000000);
                     updatePriceDisplay();
                     updateSelectedColors();
                     updateSelectedBrands();
                     updateSelectedCategories();
                     loadFilteredProducts();
+                    updateSliderBackground();
                 });
             }
 
             // Khởi tạo hiển thị giá
             updatePriceDisplay();
+
+            // Cập nhật nền của thanh trượt
+            function updateSliderBackground() {
+                const min = parseInt($('.min-range').attr('min'));
+                const max = parseInt($('.max-range').attr('max'));
+
+                const minVal = parseInt($('.min-range').val());
+                const maxVal = parseInt($('.max-range').val());
+
+                const range = max - min;
+                const minPercent = ((minVal - min) / range) * 100;
+                const maxPercent = ((maxVal - min) / range) * 100;
+
+                const gradient = `linear-gradient(to right,
+                            #ddd ${minPercent}%,
+                            #007bff ${minPercent}%,
+                            #007bff ${maxPercent}%,
+                            #ddd ${maxPercent}%)`;
+
+                $('.range-slider input[type="range"]').css('background', gradient);
+            }
+
+            // Gọi hàm mỗi khi giá thay đổi
+            $('.min-range, .max-range').on('input change', function () {
+                updateSliderBackground();
+            });
+
+            // Gọi khi trang load
+            $(document).ready(function () {
+                updateSliderBackground();
+            });
         });
     </script>
 }
@@ -1419,4 +1472,38 @@
         .view-btn i {
             font-size: 1.1rem;
         }
+
+    /* thanh trượt có màu */
+    input[type="range"].styled-range {
+        -webkit-appearance: none;
+        height: 8px;
+        border-radius: 4px;
+        background: #ddd;
+        pointer-events: none; /* không cho kéo nếu không xử lý JS */
+    }
+
+    input[type="range"].styled-range::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #007bff;
+        cursor: pointer;
+        pointer-events: auto; /* bật lại pointer cho thumb */
+        position: relative;
+        z-index: 3;
+    }
+
+    input[type="range"].styled-range::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #007bff;
+        cursor: pointer;
+        pointer-events: auto;
+    }
+    .min-range {
+        background: none !important;
+    }
 </style>

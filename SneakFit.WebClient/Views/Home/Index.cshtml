@@ -79,7 +79,7 @@
                     <div class="floating-product product-3 floating" style="animation-delay:1.8s;">
                         <img src="~/assets/img/Giay1-removebg-preview.png" alt="Giày 3">
                     </div>
-                    <div class="discount-badge" data-aos="zoom-in" data-aos-delay="500">
+                    <div class="discount-badge" data-aos="zoom-in" data-aos-delay="500" style="will-change: transform, filter;">
                         <span class="percent">30%</span>
                         <span class="text">OFF</span>
                     </div>
@@ -140,7 +140,7 @@
 
 </section><!-- /Info Cards Section --> *@
 <!-- Category Cards Section -->
-<section id="category-cards" class="category-cards section">
+@* <section id="category-cards" class="category-cards section">
 
     <div class="container" data-aos="fade-up" data-aos-delay="100">
 
@@ -289,7 +289,7 @@
 
     </div>
 
-</section><!-- /Category Cards Section -->
+</section> *@<!-- /Category Cards Section -->
 <!-- Best Sellers Section -->
 <section id="best-sellers" class="best-sellers section">
     <div class="container" data-aos="fade-up" data-aos-delay="100">
@@ -297,7 +297,7 @@
             <h2>Bán chạy nhất</h2>
             <p>Những sản phẩm bán chạy nhất trong tháng</p>
         </div>
-        <div class="best-seller-slider swiper init-swiper">
+        <div class="best-seller-slider swiper init-swiper" style="border-radius: 12px;">
             <script type="application/json" class="swiper-config">
                 {
                   "loop": true,
@@ -317,13 +317,12 @@
                     "320": { "slidesPerView": 1, "spaceBetween": 10 },
                     "576": { "slidesPerView": 2, "spaceBetween": 15 },
                     "768": { "slidesPerView": 3, "spaceBetween": 20 },
-
                     "992": { "slidesPerView": 4, "spaceBetween": 20 },
                     "1200": { "slidesPerView": 5, "spaceBetween": 20 }
                   }
                 }
             </script>
-            <div class="swiper-wrapper">
+            <div class="swiper-wrapper" style="margin: 8px;">
                 @if (Model.BestSellerSpct != null && Model.BestSellerSpct.Any())
                 {
                     foreach (var item in Model.BestSellerSpct)
@@ -331,7 +330,14 @@
                         <div class="swiper-slide">
                             <div class="product-card" data-aos="fade-up">
                                 <div class="product-image position-relative">
-                                    <img src="@item.Anh" alt="@item.TenSanPham" class="img-fluid main-img" loading="lazy" style="height:220px;object-fit:cover;">
+                                    @if (!string.IsNullOrEmpty(item.Anh))
+                                    {
+                                        <img src="@(ViewBag.BaseAddress + item.Anh)" alt="@item.TenSanPham" class="img-fluid main-img" loading="lazy" onerror="this.src='/assets/img/SneakFit_Logo.png'" style="will-change: transform, filter;">
+                                    }
+                                    else
+                                    {
+                                        <img src="~/assets/img/SneakFit_Logo.png" alt="@item.TenSanPham" class="img-fluid main-img" loading="lazy" style="will-change: transform, filter;">
+                                    }
                                     <span class="badge bg-danger position-absolute top-0 start-0 m-2">Best Seller</span>
                                 </div>
                                 <div class="product-info">
@@ -400,7 +406,7 @@
                     var listGia = Model.AllSpct
                     .Where(x => x.SanPhamId == item.Id && x.Gia > 0)
                     .ToList();
-                    
+
                     var minGiaGoc = listGia.Any() ? listGia.Min(x => x.GiaGoc) : 0M;
                     var minGiaKm = listGia.Any() ? listGia.Min(x => x.GiaKhuyenMai) : 0M;
                     var maxPhanTramGiam = listGia.Any() ? listGia.Max(x => x.KhuyenMaiPhanTram) : 0M;
@@ -416,13 +422,13 @@
                             <div class="product-image position-relative">
                                 @if (!string.IsNullOrEmpty(item.ImageDaiDien))
                                 {
-                                    <img src="@(ViewBag.BaseAddress + item.ImageDaiDien)" alt="@item.TenSanPham" class="img-fluid main-img" loading="lazy" onerror="this.src='/assets/img/SneakFit_Logo.png'">
-                                    <img src="@(ViewBag.BaseAddress + item.ImageDaiDien)" alt="@item.TenSanPham Hover" class="img-fluid hover-img" loading="lazy" onerror="this.src='/assets/img/SneakFit_Logo.png'">
+                                    <img src="@(ViewBag.BaseAddress + item.ImageDaiDien)" alt="@item.TenSanPham" class="img-fluid main-img" loading="lazy" onerror="this.src='/assets/img/SneakFit_Logo.png'" style="will-change: transform, filter;">
+                                    <img src="@(ViewBag.BaseAddress + item.ImageDaiDien)" alt="@item.TenSanPham Hover" class="img-fluid hover-img" loading="lazy" onerror="this.src='/assets/img/SneakFit_Logo.png'" style="will-change: transform, filter;">
                                 }
                                 else
                                 {
-                                    <img src="~/assets/img/SneakFit_Logo.png" alt="@item.TenSanPham" class="img-fluid main-img" loading="lazy">
-                                    <img src="~/assets/img/SneakFit_Logo.png" alt="@item.TenSanPham Hover" class="img-fluid hover-img" loading="lazy">
+                                    <img src="~/assets/img/SneakFit_Logo.png" alt="@item.TenSanPham" class="img-fluid main-img" loading="lazy" style="will-change: transform, filter;">
+                                    <img src="~/assets/img/SneakFit_Logo.png" alt="@item.TenSanPham Hover" class="img-fluid hover-img" loading="lazy" style="will-change: transform, filter;">
                                 }
 
                                 @if (!string.IsNullOrEmpty(nhanKM))
@@ -697,6 +703,33 @@
                 title.append(span);
             });
         }
+
+        // ===== BEST SELLER PRODUCT HOVER EFFECTS =====
+        $(document).ready(function() {
+            // Add hover effects for best seller products
+            $('.best-sellers .product-card').hover(
+                function() {
+                    // Mouse enter
+                    $(this).addClass('hover-active');
+                    $(this).find('.product-image img').addClass('zoomed');
+                    $(this).find('.badge').addClass('badge-active');
+                },
+                function() {
+                    // Mouse leave
+                    $(this).removeClass('hover-active');
+                    $(this).find('.product-image img').removeClass('zoomed');
+                    $(this).find('.badge').removeClass('badge-active');
+                }
+            );
+
+            // Add click effect for best seller products
+            $('.best-sellers .product-card').click(function() {
+                $(this).addClass('clicked');
+                setTimeout(() => {
+                    $(this).removeClass('clicked');
+                }, 200);
+            });
+        });
 
         // ===== MODAL FUNCTIONS =====
         let currentProductId = null;
@@ -1734,5 +1767,4 @@
         display: block !important;
     }
 
-    // ... existing code ...
 </style>
