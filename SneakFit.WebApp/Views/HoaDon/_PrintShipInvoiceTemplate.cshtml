@@ -1,5 +1,6 @@
 @using SneakFit.Data.Enums
 @model SneakFit.ViewModels.Catalog.HoaDon.HoaDonViewModel
+@inject IConfiguration Configuration
 
 <!-- Template cho in hóa đơn ship khi thanh toán tại quầy -->
 <div class="print-invoice" id="printShipInvoiceTemplate">
@@ -17,7 +18,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="customer-section">
         <div class="customer-info">
             <strong>Thông tin khách hàng:</strong><br>
@@ -32,13 +33,14 @@
             <strong>Đơn vị vận chuyển:</strong> Giao Hàng Nhanh (GHN)
         </div>
     </div>
-    
+
     <div class="order-content">
         <h4>Nội dung đơn hàng (Tổng số lượng sản phẩm @Model.HoaDonChiTiet.Sum(x => x.SoLuong))</h4>
         <table class="invoice-table">
             <thead>
                 <tr>
                     <th>STT</th>
+                    <th>Hình ảnh</th>
                     <th>Tên sản phẩm</th>
                     <th>Kích thước</th>
                     <th>Màu sắc</th>
@@ -50,12 +52,38 @@
             <tbody>
                 @{
                     int stt = 1;
+                    var baseUrl = Configuration["BaseAddress"]?.TrimEnd('/');
+                    var defaultImage = $"{baseUrl}/images/Default_Logo.png";
                 }
                 @foreach (var item in Model.HoaDonChiTiet)
                 {
                     <tr>
                         <td>@stt</td>
-                        <td>@item.TenSanPham</td>
+                        <td class="product-image">
+                            @{
+                                var hasImage = item.Images != null && item.Images.Any() && !string.IsNullOrWhiteSpace(item.Images.First());
+                                var imgSrc = hasImage ? $"{baseUrl}{item.Images.First()}" : defaultImage;
+                            }
+                            <img src="@imgSrc" alt="@item.TenSanPham" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #dee2e6;" onerror="this.onerror=null;this.src='@defaultImage'" />
+                        </td>
+                        <td>
+                            <strong>@item.TenSanPham</strong><br>
+                            <small>(@item.MauSac, @(item.KichThuoc?.ToString() ?? "N/A"))</small>
+                            @{
+                                var thuongHieu = item.GetType().GetProperty("TenThuongHieu")?.GetValue(item) as string;
+                                var chatLieu = item.GetType().GetProperty("TenChatLieu")?.GetValue(item) as string;
+                                var deGiay = item.GetType().GetProperty("TenDeGiay")?.GetValue(item) as string;
+                                var metaParts = new List<string>();
+                                if (!string.IsNullOrWhiteSpace(thuongHieu)) metaParts.Add($"Thương hiệu: {thuongHieu}");
+                                if (!string.IsNullOrWhiteSpace(chatLieu)) metaParts.Add($"Chất liệu: {chatLieu}");
+                                if (!string.IsNullOrWhiteSpace(deGiay)) metaParts.Add($"Đế giày: {deGiay}");
+                                var metaText = string.Join(" • ", metaParts);
+                            }
+                            @if (!string.IsNullOrWhiteSpace(metaText))
+                            {
+                                <div class="product-meta">@metaText</div>
+                            }
+                        </td>
                         <td>@(item.KichThuoc?.ToString() ?? "N/A")</td>
                         <td>@item.MauSac</td>
                         <td>@item.GiaBan.ToString("N0") ₫</td>
@@ -67,7 +95,7 @@
             </tbody>
         </table>
     </div>
-    
+
     <div class="summary-section">
         <div class="summary-item">
             <span>Tổng tiền hàng:</span>
@@ -93,20 +121,42 @@
             <span>@Model.HoaDonChiTiet.Sum(x => x.SoLuong)</span>
         </div>
     </div>
-    
+
     <div class="payment-info">
         <div class="payment-method">
-            <strong>Phương thức thanh toán:</strong> Thanh toán tại quầy (Tiền mặt/Chuyển khoản)
+            @{
+                var isCash = Model.PhuongThucThanhToan == PhuongThucThanhToan.TienMat;
+                var methodText = isCash ? "Thanh toán tại quầy - Tiền mặt" : "Thanh toán tại quầy - Chuyển khoản";
+            }
+            <strong>Phương thức thanh toán:</strong> @methodText
         </div>
         <div class="payment-status">
-            <strong>Trạng thái:</strong> <span class="status-paid">Đã thanh toán</span>
+            <strong>Trạng thái:</strong>
+            @switch (Model.TrangThaiThanhToan)
+            {
+                case TrangThaiThanhToan.DaThanhToan:
+                    <span class="status-paid">Đã thanh toán</span>
+                    break;
+                case TrangThaiThanhToan.ChuaThanhToan:
+                    <span class="status-unpaid">Chưa thanh toán</span>
+                    break;
+                case TrangThaiThanhToan.ThanhToanLoi:
+                    <span class="status-error">Thanh toán lỗi</span>
+                    break;
+                case TrangThaiThanhToan.HoanTien:
+                    <span class="status-refund">Hoàn tiền</span>
+                    break;
+                default:
+                    <span class="status-unpaid">@Model.TrangThaiThanhToan</span>
+                    break;
+            }
         </div>
     </div>
-    
+
     <div class="footer-note">
         <p><strong>Lưu ý:</strong></p>
         <ul>
-            <li>Đơn hàng sẽ được xử lý và giao trong 1-3 ngày làm việc</li>
+            <li>Đơn hàng sẽ được xử lý và giao trong 2-4 ngày làm việc</li>
             <li>Quý khách vui lòng kiểm tra kỹ hàng hóa khi nhận</li>
             <li>Liên hệ hotline 0383212289 nếu có vấn đề về đơn hàng</li>
         </ul>
@@ -118,155 +168,173 @@
 }
 
 <style>
-.print-invoice {
-    font-family: Arial, sans-serif;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    background: white;
-}
+    .print-invoice {
+        font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background: white;
+    }
 
-.headers {
-    margin-bottom: 10px;
-    border-bottom: 2px solid #333;
-    padding-bottom: 20px;
-    text-align: center;
-}
+    .headers {
+        margin-bottom: 10px;
+        border-bottom: 2px solid #6d28d9;
+        padding-bottom: 20px;
+        text-align: center;
+    }
 
-.company-name {
-    font-size: 32px;
-    font-weight: bold;
-    color: #000;
-    margin-bottom: 10px;
-}
+    .company-name {
+        font-size: 32px;
+        font-weight: 800;
+        color: #5b4b8a;
+        margin-bottom: 10px;
+    }
 
-.company-details {
-    font-size: 14px;
-    color: #333;
-    line-height: 1.4;
-}
+    .company-details {
+        font-size: 14px;
+        color: #333;
+        line-height: 1.4;
+    }
 
-.invoice-info {
-    font-size: 14px;
-    line-height: 1.4;
-    margin-top: 15px;
-    text-align: center;
-}
+    .invoice-info {
+        font-size: 14px;
+        line-height: 1.4;
+        margin-top: 15px;
+        text-align: center;
+    }
 
-.ship-label {
-    background: #007bff;
-    color: white;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: bold;
-}
+    .ship-label {
+        background: #007bff;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: bold;
+    }
 
-.customer-section {
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: space-between;
-    gap: 20px;
-}
+    .customer-section {
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+    }
 
-.customer-info, .shipping-info {
-    flex: 1;
-    background: #f8f8f8;
-    padding: 15px;
-    border-radius: 5px;
-    border: 1px solid #ddd;
-}
+    .customer-info, .shipping-info {
+        flex: 1;
+        background: #f8f8f8;
+        padding: 15px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+    }
 
-.order-content {
-    margin-bottom: 10px;
-}
+    .order-content {
+        margin-bottom: 10px;
+    }
 
-.order-content h4 {
-    margin-bottom: 10px;
-    font-size: 16px;
-    color: #333;
-}
+        .order-content h4 {
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #333;
+            border-bottom: 2px solid #6d28d9;
+            padding-bottom: 8px;
+        }
 
-.invoice-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
-}
+    .invoice-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
 
-.invoice-table th,
-.invoice-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-    font-size: 13px;
-}
+        .invoice-table th,
+        .invoice-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            font-size: 13px;
+        }
 
-.invoice-table th {
-    background-color: #f5f5f5;
-    font-weight: bold;
-}
+        .invoice-table th {
+            background: linear-gradient(45deg, #6d28d9, #3b82f6);
+            color: #fff;
+            font-weight: 700;
+        }
 
-.summary-section {
-    background: #f8f8f8;
-    padding: 15px;
-    border-radius: 5px;
-    margin-bottom: 15px;
-    border: 1px solid #ddd;
-}
+    .summary-section {
+        background: #fafafa;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ececec;
+    }
 
-.summary-item {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 5px;
-    font-size: 14px;
-}
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 5px;
+        font-size: 14px;
+    }
 
-.summary-item.discount {
-    color: #28a745;
-    font-weight: bold;
-}
+        .summary-item.discount {
+            color: #28a745;
+            font-weight: bold;
+        }
 
-.summary-item.total {
-    font-weight: bold;
-    font-size: 16px;
-    border-top: 1px solid #ddd;
-    padding-top: 10px;
-    margin-top: 10px;
-    color: #dc3545;
-}
+        .summary-item.total {
+            font-weight: 800;
+            font-size: 16px;
+            border-top: 1px solid #6d28d9;
+            padding-top: 10px;
+            margin-top: 10px;
+            color: #1e293b;
+        }
 
-.payment-info {
-    background: #e7f3ff;
-    padding: 15px;
-    border-radius: 5px;
-    margin-bottom: 15px;
-    border-left: 4px solid #007bff;
-}
+    .payment-info {
+        background: #eef2ff;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 15px;
+        border-left: 4px solid #6d28d9;
+    }
 
-.payment-method, .payment-status {
-    margin-bottom: 8px;
-}
+    .payment-method, .payment-status {
+        margin-bottom: 8px;
+    }
 
-.status-paid {
-    color: #28a745;
-    font-weight: bold;
-}
+    .status-paid {
+        color: #28a745;
+        font-weight: bold;
+    }
 
-.footer-note {
-    background: #fff3cd;
-    padding: 15px;
-    border-radius: 5px;
-    border-left: 4px solid #ffc107;
-    font-size: 13px;
-}
+    .status-unpaid {
+        color: #dc2626;
+        font-weight: bold;
+    }
 
-.footer-note ul {
-    margin: 10px 0 0 20px;
-    padding: 0;
-}
+    .status-error {
+        color: #ef4444;
+        font-weight: bold;
+    }
 
-.footer-note li {
-    margin-bottom: 5px;
-}
+    .status-refund {
+        color: #0ea5e9;
+        font-weight: bold;
+    }
+
+    .footer-note {
+        background: #f6f5fb;
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 4px solid #3b82f6;
+        font-size: 13px;
+    }
+
+        .footer-note ul {
+            margin: 10px 0 0 20px;
+            padding: 0;
+        }
+
+        .footer-note li {
+            margin-bottom: 5px;
+        }
 
 </style>
