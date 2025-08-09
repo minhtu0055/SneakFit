@@ -248,12 +248,66 @@ namespace SneakFit.Admin.Controllers
                 var chiTiet = await _hoaDonChiTietApiClient.GetByHoaDonId(id);
                 hoaDon.HoaDonChiTiet = chiTiet;
                 
-                return PartialView("_PrintInvoiceTemplate", hoaDon);
+                // Xác định template phù hợp dựa trên loại hóa đơn và có giao hàng không
+                string templateName = GetPrintTemplate(hoaDon.LoaiHoaDon, hoaDon.GiaoHang);
+                
+                return PartialView(templateName, hoaDon);
             }
             catch (Exception ex)
             {
                 return BadRequest(new { success = false, message = ex.Message });
             }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetHoaDonForPrintShip(Guid id)
+        {
+            try
+            {
+                var hoaDon = await _hoaDonApiClient.GetById(id);
+                if (hoaDon == null)
+                    return NotFound();
+                    
+                var chiTiet = await _hoaDonChiTietApiClient.GetByHoaDonId(id);
+                hoaDon.HoaDonChiTiet = chiTiet;
+                
+                return PartialView("_PrintShipInvoiceTemplate", hoaDon);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetHoaDonForPrintOnline(Guid id)
+        {
+            try
+            {
+                var hoaDon = await _hoaDonApiClient.GetById(id);
+                if (hoaDon == null)
+                    return NotFound();
+                    
+                var chiTiet = await _hoaDonChiTietApiClient.GetByHoaDonId(id);
+                hoaDon.HoaDonChiTiet = chiTiet;
+                
+                return PartialView("_PrintOnlineInvoiceTemplate", hoaDon);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        private string GetPrintTemplate(LoaiHoaDon loaiHoaDon, bool? giaoHang = false)
+        {
+            return loaiHoaDon switch
+            {
+                LoaiHoaDon.Online => "_PrintOnlineInvoiceTemplate",
+                LoaiHoaDon.TaiQuay when giaoHang == true => "_PrintShipInvoiceTemplate",
+                LoaiHoaDon.TaiQuay => "_PrintInvoiceTemplate",
+                _ => "_PrintInvoiceTemplate"
+            };
         }
     }
 }

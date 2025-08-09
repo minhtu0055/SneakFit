@@ -1,0 +1,272 @@
+@using SneakFit.Data.Enums
+@model SneakFit.ViewModels.Catalog.HoaDon.HoaDonViewModel
+
+<!-- Template cho in hóa đơn ship khi thanh toán tại quầy -->
+<div class="print-invoice" id="printShipInvoiceTemplate">
+    <div class="headers">
+        <div>
+            <div class="company-name">SNEAK FIT</div>
+            <div class="company-details">
+                Cao đẳng FPT Polytechnic Phương Canh, Từ Liêm, Hà Nội, Việt Nam<br>
+                SDT: 0383212289
+            </div>
+            <div class="invoice-info">
+                <strong>Mã hóa đơn:</strong> @Model.MaHoaDon<br>
+                <strong>Ngày tạo:</strong> @Model.NgayTao.ToString("dd/MM/yyyy HH:mm:ss")<br>
+                <strong>Loại hóa đơn:</strong> <span class="ship-label">BÁN HÀNG TẠI QUẦY - SHIP HÀNG</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="customer-section">
+        <div class="customer-info">
+            <strong>Thông tin khách hàng:</strong><br>
+            <strong>Họ tên:</strong> @Model.HoTen<br>
+            <strong>Số điện thoại:</strong> @Model.SoDienThoai<br>
+            <strong>Email:</strong> @Model.Email
+        </div>
+        <div class="shipping-info">
+            <strong>Thông tin giao hàng:</strong><br>
+            <strong>Địa chỉ giao hàng:</strong> @Model.DiaChi<br>
+            <strong>Phí vận chuyển:</strong> @Model.PhiVanChuyen.ToString("N0") ₫<br>
+            <strong>Đơn vị vận chuyển:</strong> Giao Hàng Nhanh (GHN)
+        </div>
+    </div>
+    
+    <div class="order-content">
+        <h4>Nội dung đơn hàng (Tổng số lượng sản phẩm @Model.HoaDonChiTiet.Sum(x => x.SoLuong))</h4>
+        <table class="invoice-table">
+            <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Tên sản phẩm</th>
+                    <th>Kích thước</th>
+                    <th>Màu sắc</th>
+                    <th>Giá</th>
+                    <th>Số lượng</th>
+                    <th>Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    int stt = 1;
+                }
+                @foreach (var item in Model.HoaDonChiTiet)
+                {
+                    <tr>
+                        <td>@stt</td>
+                        <td>@item.TenSanPham</td>
+                        <td>@(item.KichThuoc?.ToString() ?? "N/A")</td>
+                        <td>@item.MauSac</td>
+                        <td>@item.GiaBan.ToString("N0") ₫</td>
+                        <td>@item.SoLuong</td>
+                        <td>@((item.GiaBan * item.SoLuong).ToString("N0")) ₫</td>
+                    </tr>
+                    stt++;
+                }
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="summary-section">
+        <div class="summary-item">
+            <span>Tổng tiền hàng:</span>
+            <span>@((Model.TongTien + (Model.VoucherDiscount ?? 0) - Model.PhiVanChuyen).ToString("N0")) ₫</span>
+        </div>
+        @if (Model.VoucherDiscount.HasValue && Model.VoucherDiscount > 0)
+        {
+            <div class="summary-item discount">
+                <span>Giảm giá (Voucher):</span>
+                <span>-@((Model.VoucherDiscount ?? 0).ToString("N0")) ₫</span>
+            </div>
+        }
+        <div class="summary-item">
+            <span>Phí vận chuyển:</span>
+            <span>@Model.PhiVanChuyen.ToString("N0") ₫</span>
+        </div>
+        <div class="summary-item total">
+            <span>Tổng hóa đơn:</span>
+            <span>@Model.TongTien.ToString("N0") ₫</span>
+        </div>
+        <div class="summary-item">
+            <span>Tổng số lượng sản phẩm:</span>
+            <span>@Model.HoaDonChiTiet.Sum(x => x.SoLuong)</span>
+        </div>
+    </div>
+    
+    <div class="payment-info">
+        <div class="payment-method">
+            <strong>Phương thức thanh toán:</strong> Thanh toán tại quầy (Tiền mặt/Chuyển khoản)
+        </div>
+        <div class="payment-status">
+            <strong>Trạng thái:</strong> <span class="status-paid">Đã thanh toán</span>
+        </div>
+    </div>
+    
+    <div class="footer-note">
+        <p><strong>Lưu ý:</strong></p>
+        <ul>
+            <li>Đơn hàng sẽ được xử lý và giao trong 1-3 ngày làm việc</li>
+            <li>Quý khách vui lòng kiểm tra kỹ hàng hóa khi nhận</li>
+            <li>Liên hệ hotline 0383212289 nếu có vấn đề về đơn hàng</li>
+        </ul>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="~/css/PrintShipping.css" />
+}
+
+<style>
+.print-invoice {
+    font-family: Arial, sans-serif;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background: white;
+}
+
+.headers {
+    margin-bottom: 10px;
+    border-bottom: 2px solid #333;
+    padding-bottom: 20px;
+    text-align: center;
+}
+
+.company-name {
+    font-size: 32px;
+    font-weight: bold;
+    color: #000;
+    margin-bottom: 10px;
+}
+
+.company-details {
+    font-size: 14px;
+    color: #333;
+    line-height: 1.4;
+}
+
+.invoice-info {
+    font-size: 14px;
+    line-height: 1.4;
+    margin-top: 15px;
+    text-align: center;
+}
+
+.ship-label {
+    background: #007bff;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.customer-section {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.customer-info, .shipping-info {
+    flex: 1;
+    background: #f8f8f8;
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.order-content {
+    margin-bottom: 10px;
+}
+
+.order-content h4 {
+    margin-bottom: 10px;
+    font-size: 16px;
+    color: #333;
+}
+
+.invoice-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.invoice-table th,
+.invoice-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+    font-size: 13px;
+}
+
+.invoice-table th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+}
+
+.summary-section {
+    background: #f8f8f8;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.summary-item.discount {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.summary-item.total {
+    font-weight: bold;
+    font-size: 16px;
+    border-top: 1px solid #ddd;
+    padding-top: 10px;
+    margin-top: 10px;
+    color: #dc3545;
+}
+
+.payment-info {
+    background: #e7f3ff;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    border-left: 4px solid #007bff;
+}
+
+.payment-method, .payment-status {
+    margin-bottom: 8px;
+}
+
+.status-paid {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.footer-note {
+    background: #fff3cd;
+    padding: 15px;
+    border-radius: 5px;
+    border-left: 4px solid #ffc107;
+    font-size: 13px;
+}
+
+.footer-note ul {
+    margin: 10px 0 0 20px;
+    padding: 0;
+}
+
+.footer-note li {
+    margin-bottom: 5px;
+}
+
+</style>

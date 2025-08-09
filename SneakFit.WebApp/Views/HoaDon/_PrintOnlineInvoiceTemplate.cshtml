@@ -1,0 +1,451 @@
+@using SneakFit.Data.Enums
+@model SneakFit.ViewModels.Catalog.HoaDon.HoaDonViewModel
+
+<!-- Template cho in hóa đơn bán hàng online -->
+<div class="print-invoice" id="printOnlineInvoiceTemplate">
+    <div class="headers">
+        <div>
+            <div class="company-name">SNEAK FIT</div>
+            <div class="company-details">
+                Cao đẳng FPT Polytechnic Phương Canh, Từ Liêm, Hà Nội, Việt Nam<br>
+                SDT: 0383212289 | Website: sneakfit.vn | Email: support@sneakfit.vn
+            </div>
+            <div class="invoice-info">
+                <strong>Mã hóa đơn:</strong> @Model.MaHoaDon<br>
+                <strong>Ngày đặt hàng:</strong> @Model.NgayTao.ToString("dd/MM/yyyy HH:mm:ss")<br>
+                <strong>Loại hóa đơn:</strong> <span class="online-label">ĐƠN HÀNG ONLINE</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="order-status">
+        <div class="status-info">
+            <strong>Trạng thái đơn hàng:</strong> 
+            @switch (Model.TrangThai)
+            {
+                case TrangThaiHoaDon.ChoXacNhan:
+                    <span class="status-pending">Chờ xác nhận</span>
+                    break;
+                case TrangThaiHoaDon.DaXacNhan:
+                    <span class="status-confirmed">Đã xác nhận</span>
+                    break;
+                case TrangThaiHoaDon.ChoVanChuyen:
+                    <span class="status-shipping">Chờ vận chuyển</span>
+                    break;
+                case TrangThaiHoaDon.DangVanChuyen:
+                    <span class="status-shipping">Đang vận chuyển</span>
+                    break;
+                case TrangThaiHoaDon.DaThanhToan:
+                    <span class="status-paid">Đã thanh toán</span>
+                    break;
+                case TrangThaiHoaDon.ThanhCong:
+                    <span class="status-delivered">Thành công</span>
+                    break;
+                case TrangThaiHoaDon.DaHuy:
+                    <span class="status-cancelled">Đã hủy</span>
+                    break;
+                case TrangThaiHoaDon.TraHang:
+                    <span class="status-return">Trả hàng</span>
+                    break;
+                default:
+                    <span class="status-unknown">@Model.TrangThai</span>
+                    break;
+            }
+        </div>
+    </div>
+    
+    <div class="customer-section">
+        <div class="customer-info">
+            <strong>Thông tin khách hàng:</strong><br>
+            <strong>Họ tên:</strong> @Model.HoTen<br>
+            <strong>Số điện thoại:</strong> @Model.SoDienThoai<br>
+            <strong>Email:</strong> @Model.Email
+        </div>
+        <div class="shipping-info">
+            <strong>Thông tin giao hàng:</strong><br>
+            <strong>Địa chỉ:</strong> @Model.DiaChi<br>
+            <strong>Phí vận chuyển:</strong> @Model.PhiVanChuyen.ToString("N0") ₫<br>
+            <strong>Đơn vị vận chuyển:</strong> Giao Hàng Nhanh (GHN)<br>
+            @if (!string.IsNullOrEmpty(Model.GhiChu))
+            {
+                <strong>Ghi chú:</strong> @Model.GhiChu<br>
+            }
+        </div>
+    </div>
+    
+    <div class="order-content">
+        <h4>Chi tiết đơn hàng (Tổng: @Model.HoaDonChiTiet.Sum(x => x.SoLuong) sản phẩm)</h4>
+        <table class="invoice-table">
+            <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Hình ảnh</th>
+                    <th>Tên sản phẩm</th>
+                    <th>Kích thước</th>
+                    <th>Màu sắc</th>
+                    <th>Đơn giá</th>
+                    <th>SL</th>
+                    <th>Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    int stt = 1;
+                }
+                @foreach (var item in Model.HoaDonChiTiet)
+                {
+                    <tr>
+                        <td>@stt</td>
+                        <td class="product-image">
+                            @if (item.Images != null && item.Images.Any())
+                            {
+                                <img src="/images/products/@item.Images.First()" alt="@item.TenSanPham" />
+                            }
+                            else
+                            {
+                                <div class="no-image">No Image</div>
+                            }
+                        </td>
+                        <td>
+                            <strong>@item.TenSanPham</strong><br>
+                            <small>ID: @item.SanPhamChiTietId</small>
+                        </td>
+                        <td>@(item.KichThuoc?.ToString() ?? "N/A")</td>
+                        <td>@item.MauSac</td>
+                        <td>@item.GiaBan.ToString("N0") ₫</td>
+                        <td>@item.SoLuong</td>
+                        <td><strong>@((item.GiaBan * item.SoLuong).ToString("N0")) ₫</strong></td>
+                    </tr>
+                    stt++;
+                }
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="summary-section">
+        <div class="summary-left">
+            <div class="payment-method">
+                <strong>Phương thức thanh toán:</strong><br>
+                @switch (Model.PhuongThucThanhToan)
+                {
+                    case PhuongThucThanhToan.VnPay:
+                        <span class="payment-vnpay">VNPay (Thanh toán online)</span>
+                        break;
+                    case PhuongThucThanhToan.MoMo:
+                        <span class="payment-momo">MoMo (Ví điện tử)</span>
+                        break;
+                    case PhuongThucThanhToan.COD:
+                        <span class="payment-cod">COD (Thanh toán khi nhận hàng)</span>
+                        break;
+                    case PhuongThucThanhToan.TienMat:
+                        <span class="payment-cash">Tiền mặt</span>
+                        break;
+                    default:
+                        <span>@Model.PhuongThucThanhToan</span>
+                        break;
+                }
+            </div>
+        </div>
+        
+        <div class="summary-right">
+            <div class="summary-item">
+                <span>Tổng tiền hàng:</span>
+                <span>@((Model.TongTien + (Model.VoucherDiscount ?? 0) - Model.PhiVanChuyen).ToString("N0")) ₫</span>
+            </div>
+            @if (Model.VoucherDiscount.HasValue && Model.VoucherDiscount > 0)
+            {
+                <div class="summary-item discount">
+                    <span>Giảm giá (Voucher):</span>
+                    <span>-@((Model.VoucherDiscount ?? 0).ToString("N0")) ₫</span>
+                </div>
+            }
+            <div class="summary-item">
+                <span>Phí vận chuyển:</span>
+                <span>@Model.PhiVanChuyen.ToString("N0") ₫</span>
+            </div>
+            <div class="summary-item total">
+                <span>Tổng thanh toán:</span>
+                <span>@Model.TongTien.ToString("N0") ₫</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer-section">
+        <div class="return-policy">
+            <h5>Chính sách đổi trả:</h5>
+            <ul>
+                <li>Đổi trả trong vòng 7 ngày kể từ ngày nhận hàng</li>
+                <li>Sản phẩm chưa qua sử dụng, còn nguyên tem mác</li>
+                <li>Có hóa đơn mua hàng và đầy đủ phụ kiện</li>
+            </ul>
+        </div>
+        
+        <div class="contact-info">
+            <h5>Liên hệ hỗ trợ:</h5>
+            <p>Hotline: 0383212289 (24/7)<br>
+            Email: support@sneakfit.vn<br>
+            Website: www.sneakfit.vn</p>
+        </div>
+    </div>
+    
+    <div class="thank-you">
+        <p><strong>Cảm ơn quý khách đã tin tướng và mua sắm tại SNEAK FIT!</strong></p>
+        <p>Chúng tôi cam kết mang đến những sản phẩm chất lượng và dịch vụ tốt nhất.</p>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="~/css/PrintShippingOnline.css" />
+}
+
+<style>
+.print-invoice {
+    font-family: Arial, sans-serif;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    background: white;
+    line-height: 1.4;
+}
+
+.headers {
+    margin-bottom: 20px;
+    border-bottom: 3px solid #007bff;
+    padding-bottom: 20px;
+    text-align: center;
+}
+
+.company-name {
+    font-size: 36px;
+    font-weight: bold;
+    color: #007bff;
+    margin-bottom: 10px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+.company-details {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.6;
+}
+
+.invoice-info {
+    font-size: 14px;
+    line-height: 1.6;
+    margin-top: 15px;
+    text-align: center;
+}
+
+.online-label {
+    background: linear-gradient(45deg, #28a745, #20c997);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.order-status {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid #007bff;
+}
+
+.status-pending { color: #ffc107; font-weight: bold; }
+.status-confirmed { color: #17a2b8; font-weight: bold; }
+.status-shipping { color: #fd7e14; font-weight: bold; }
+.status-delivered { color: #28a745; font-weight: bold; }
+.status-cancelled { color: #dc3545; font-weight: bold; }
+.status-paid { color: #28a745; font-weight: bold; }
+.status-return { color: #e83e8c; font-weight: bold; }
+.status-unknown { color: #6c757d; font-weight: bold; }
+
+.customer-section {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 20px;
+}
+
+.customer-info, .shipping-info {
+    flex: 1;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.order-content {
+    margin-bottom: 20px;
+}
+
+.order-content h4 {
+    margin-bottom: 15px;
+    font-size: 18px;
+    color: #333;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 8px;
+}
+
+.invoice-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.invoice-table th,
+.invoice-table td {
+    border: 1px solid #dee2e6;
+    padding: 10px;
+    text-align: left;
+    font-size: 13px;
+}
+
+.invoice-table th {
+    background: linear-gradient(45deg, #007bff, #0056b3);
+    color: white;
+    font-weight: bold;
+    text-align: center;
+}
+
+.invoice-table tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.product-image {
+    text-align: center;
+    width: 60px;
+}
+
+.product-image img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+}
+
+.no-image {
+    width: 50px;
+    height: 50px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: #6c757d;
+}
+
+.summary-section {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.summary-left {
+    flex: 1;
+}
+
+.summary-right {
+    flex: 1;
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.payment-method {
+    background: #e7f3ff;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+}
+
+.payment-vnpay { color: #1e88e5; font-weight: bold; }
+.payment-momo { color: #d81b60; font-weight: bold; }
+.payment-cod { color: #ff8f00; font-weight: bold; }
+.payment-cash { color: #28a745; font-weight: bold; }
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.summary-item.discount {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.summary-item.total {
+    font-weight: bold;
+    font-size: 18px;
+    border-top: 2px solid #007bff;
+    padding-top: 10px;
+    margin-top: 10px;
+    color: #dc3545;
+}
+
+.footer-section {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.return-policy, .contact-info {
+    flex: 1;
+    background: #fff3cd;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #ffc107;
+}
+
+.return-policy h5, .contact-info h5 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #856404;
+    font-size: 14px;
+}
+
+.return-policy ul {
+    margin: 0;
+    padding-left: 20px;
+    font-size: 13px;
+}
+
+.return-policy li {
+    margin-bottom: 5px;
+}
+
+.contact-info p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.thank-you {
+    background: linear-gradient(45deg, #007bff, #0056b3);
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.thank-you p {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+}
+
+.thank-you p:last-child {
+    margin-bottom: 0;
+    font-size: 13px;
+    opacity: 0.9;
+}
+
+</style>

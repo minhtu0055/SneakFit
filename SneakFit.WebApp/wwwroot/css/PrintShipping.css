@@ -1,0 +1,19 @@
+﻿@media print {
+    .print-invoice {
+        padding: 0;
+        margin: 0;
+    }
+
+    .customer-section {
+        display: block;
+    }
+
+    .customer-info, .shipping-info {
+        margin-bottom: 15px;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+    }
+}
