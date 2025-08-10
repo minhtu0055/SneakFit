@@ -132,13 +132,13 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content text-center p-4" style="border: 3px solid #8b5cf6; border-radius: 10px;">
             <div class="modal-body">
-                <div class="mb-3">
+                <div class="mb-3" id="modalIcon">
                     <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="#22c55e" class="bi bi-check-circle" viewBox="0 0 16 16">
                         <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
                         <path d="M10.97 5.97a.75.75 0 0 1 1.07 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L5.324 9.384a.75.75 0 1 1 1.06-1.06l1.094 1.094 3.492-4.438z" />
                     </svg>
                 </div>
-                <h5 class="modal-title mb-2" id="centerToastModalLabel">Thành công</h5>
+                <h5 class="modal-title mb-2" id="centerToastModalLabel">Thông báo</h5>
                 <p id="centerToastMessage" class="mb-0"></p>
                 <button type="button" class="btn btn-primary mt-4 px-4" data-bs-dismiss="modal">OK</button>
             </div>
@@ -427,12 +427,31 @@
         //sửa lại khi thêm vào giỏ hàng số lượng sẽ cập nhật luôn
 
          $('#btnAddToCart').click(function () {
+            // Kiểm tra xem đã chọn màu sắc và kích thước chưa
+            if (!selectedColorId || !selectedSizeId) {
+                $('#centerToastModalLabel').text('Thông báo');
+                $('#centerToastMessage').text('Vui lòng chọn Phân loại hàng');
+                $('#modalIcon').html('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="#d7263d" class="bi bi-x-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>');
+                var toastModal = new bootstrap.Modal(document.getElementById('centerToastModal'));
+                toastModal.show();
+                setTimeout(function () {
+                    toastModal.hide();
+                }, 3000); // Tự động ẩn sau 3 giây
+                return;
+            }
+
             var spctId = $('#selectedSpctId').val();
             var soLuong = parseInt($('#quantityInput').val()) || 1;
             var max = parseInt($('#quantityInput').attr('max')) || 1;
 
             if (soLuong > max) {
-                alert("Bạn đã đạt số lượng tối đa trong kho cho sản phẩm này!");
+                $('#centerToastModalLabel').text('Thông báo');
+                $('#centerToastMessage').text('Bạn đã đạt số lượng tối đa trong kho cho sản phẩm này!');
+                var toastModal = new bootstrap.Modal(document.getElementById('centerToastModal'));
+                toastModal.show();
+                setTimeout(function () {
+                    toastModal.hide();
+                }, 3000); // Tự động ẩn sau 3 giây
                 return;
             }
 
@@ -449,7 +468,9 @@
                         return;
                     }
                     if (res.success) {
+                        $('#centerToastModalLabel').text('Thành công');
                         $('#centerToastMessage').text(res.message || 'Đã thêm vào giỏ hàng thành công!');
+                        $('#modalIcon').html('<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="#22c55e" class="bi bi-check-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/><path d="M10.97 5.97a.75.75 0 0 1 1.07 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L5.324 9.384a.75.75 0 1 1 1.06-1.06l1.094 1.094 3.492-4.438z"/></svg>');
                         var toastModal = new bootstrap.Modal(document.getElementById('centerToastModal'));
                         toastModal.show();
                         setTimeout(function () {
@@ -461,6 +482,7 @@
                             $('.badge').text(res.cartCount); // Cập nhật số lượng trên badge
                         }
                     } else {
+                        $('#centerToastModalLabel').text('Thông báo');
                         $('#centerToastMessage').text(res.message || 'Có lỗi xảy ra!');
                         var toastModal = new bootstrap.Modal(document.getElementById('centerToastModal'));
                         toastModal.show();
@@ -470,6 +492,7 @@
                     }
                 },
                 error: function () {
+                    $('#centerToastModalLabel').text('Thông báo');
                     $('#centerToastMessage').text('Lỗi hệ thống, vui lòng thử lại!');
                     var toastModal = new bootstrap.Modal(document.getElementById('centerToastModal'));
                     toastModal.show();

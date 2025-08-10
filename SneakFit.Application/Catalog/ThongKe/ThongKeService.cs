@@ -507,13 +507,23 @@ namespace SneakFit.Application.Catalog.ThongKe
             //    .Where(x => x.NgayThanhToan >= fromDate && x.NgayThanhToan < toDate)
             //    .ToListAsync();
 
-              var donTrongKhoang = await _context.HoaDon
-                .Where(x =>
-                    (x.TrangThai == TrangThaiHoaDon.DaHuy && x.NgayTao >= fromDate && x.NgayTao < toDate)
-                    ||
-                    (x.TrangThai != TrangThaiHoaDon.DaHuy && x.NgayThanhToan >= fromDate && x.NgayThanhToan < toDate)
-                )
-                .ToListAsync();
+            var donTrongKhoang = await _context.HoaDon
+            .Where(x =>
+                (x.TrangThai == TrangThaiHoaDon.ChoXacNhan ||
+                 x.TrangThai == TrangThaiHoaDon.DaXacNhan ||
+                 x.TrangThai == TrangThaiHoaDon.ChoVanChuyen ||
+                 x.TrangThai == TrangThaiHoaDon.DangVanChuyen ||
+                 x.TrangThai == TrangThaiHoaDon.DaHuy) &&
+                x.NgayTao >= fromDate && x.NgayTao < toDate
+                ||
+                (x.TrangThai != TrangThaiHoaDon.ChoXacNhan &&
+                 x.TrangThai != TrangThaiHoaDon.DaXacNhan &&
+                 x.TrangThai != TrangThaiHoaDon.ChoVanChuyen &&
+                 x.TrangThai != TrangThaiHoaDon.DangVanChuyen &&
+                 x.TrangThai != TrangThaiHoaDon.DaHuy &&
+                 x.NgayThanhToan >= fromDate && x.NgayThanhToan < toDate)
+            )
+            .ToListAsync();
 
 
             var tong = donTrongKhoang.Count;
