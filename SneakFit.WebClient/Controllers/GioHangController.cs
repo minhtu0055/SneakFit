@@ -80,7 +80,25 @@ namespace SneakFit.WebClient.Controllers
                     GiaGoc = x.DonGia,
                     GiaKhuyenMai = x.DonGia,
                     SoLuong = x.SoLuong,
+                    TrangThai = true, // Mặc định là true, sẽ được cập nhật sau
                 }).ToList() ?? new List<GioHangItemViewModel>();
+
+                // Kiểm tra trạng thái sản phẩm và cập nhật thông tin
+                foreach (var item in list)
+                {
+                    var spct = await _spctApiClient.GetById(item.SanPhamChiTietId);
+                    if (spct != null)
+                    {
+                        item.TrangThai = spct.TrangThai;
+                        item.SoLuongTon = spct.SoLuong;
+                    }
+                    else
+                    {
+                        item.TrangThai = false; // Sản phẩm không tồn tại
+                        item.SoLuongTon = 0;
+                    }
+                }
+                // Giữ lại tất cả sản phẩm trong giỏ hàng, không xóa
 
                 var khuyenMais = await _khuyenMaiApiClient.GetAllPaging(new PhanTrangKhuyenMai
                 {
@@ -559,7 +577,8 @@ namespace SneakFit.WebClient.Controllers
                     KichThuoc = x.KichThuoc.ToString() ?? "N/A",
                     GiaGoc = x.DonGia,
                     GiaKhuyenMai = x.DonGia,
-                    SoLuong = x.SoLuong
+                    SoLuong = x.SoLuong,
+                    TrangThai = true // Mặc định là true, sẽ được cập nhật sau
                 }).ToList() ?? new List<GioHangItemViewModel>();
 
                 if (!cartItems.Any())
@@ -568,15 +587,39 @@ namespace SneakFit.WebClient.Controllers
                     return RedirectToAction("Index");
                 }
 
-                var selectedItems = cartItems.Where(x => selectedIdList.Contains(x.SanPhamChiTietId)).ToList();
-                if (!selectedItems.Any())
+                // Kiểm tra trạng thái sản phẩm trước khi chuyển đến thanh toán
+                var validSelectedItems = new List<GioHangItemViewModel>();
+                var invalidProducts = new List<string>();
+
+                foreach (var item in cartItems.Where(x => selectedIdList.Contains(x.SanPhamChiTietId)))
                 {
-                    TempData["ErrorMessage"] = "Không tìm thấy sản phẩm đã chọn.";
+                    var spct = await _spctApiClient.GetById(item.SanPhamChiTietId);
+                    if (spct != null && spct.TrangThai)
+                    {
+                        item.TrangThai = spct.TrangThai;
+                        item.SoLuongTon = spct.SoLuong;
+                        validSelectedItems.Add(item);
+                    }
+                    else if (spct != null && !spct.TrangThai)
+                    {
+                        invalidProducts.Add($"{item.TenSanPham} (sản phẩm đã ngưng hoạt động)");
+                    }
+                }
+
+                if (invalidProducts.Any())
+                {
+                    TempData["ErrorMessage"] = $"Sản phẩm sau không thể thanh toán: {string.Join(", ", invalidProducts)}. Vui lòng xóa những sản phẩm này khỏi giỏ hàng.";
+                    return RedirectToAction("Index");
+                }
+
+                if (!validSelectedItems.Any())
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy sản phẩm hợp lệ để thanh toán.";
                     return RedirectToAction("Index");
                 }
 
                 // Lưu vào Session thay vì TempData
-                HttpContext.Session.SetString("SelectedCartItems", JsonSerializer.Serialize(selectedItems));
+                HttpContext.Session.SetString("SelectedCartItems", JsonSerializer.Serialize(validSelectedItems));
                 HttpContext.Session.SetString("UserId", userId.ToString());
 
                 return RedirectToAction("Checkout", "ThanhToan");

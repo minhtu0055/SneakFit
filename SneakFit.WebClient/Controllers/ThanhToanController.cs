@@ -239,7 +239,7 @@ namespace SneakFit.WebClient.Controllers
                 return RedirectToAction("Index", "GioHang");
             }
 
-            // Check tồn kho (giữ nguyên)
+            // Check tồn kho và trạng thái sản phẩm
             var invalidProducts = new List<string>();
             foreach (var item in cartItems)
             {
@@ -247,6 +247,11 @@ namespace SneakFit.WebClient.Controllers
                 if (spct == null)
                 {
                     invalidProducts.Add($"{item.TenSanPham} (không tìm thấy sản phẩm)");
+                    continue;
+                }
+                if (!spct.TrangThai)
+                {
+                    invalidProducts.Add($"{item.TenSanPham} (sản phẩm đã ngưng hoạt động)");
                     continue;
                 }
                 if (spct.SoLuong < item.SoLuong)
@@ -257,7 +262,11 @@ namespace SneakFit.WebClient.Controllers
 
             if (invalidProducts.Any())
             {
-                ModelState.AddModelError("", $"Sản phẩm sau không đủ tồn kho: {string.Join(", ", invalidProducts)}");
+                var errorMessage = invalidProducts.Any(x => x.Contains("ngưng hoạt động")) 
+                    ? $"Sản phẩm sau không thể thanh toán: {string.Join(", ", invalidProducts)}. Vui lòng mua sản phẩm khác."
+                    : $"Sản phẩm sau không đủ tồn kho: {string.Join(", ", invalidProducts)}";
+                
+                ModelState.AddModelError("", errorMessage);
                 model.GioHangItems = cartItems;
                 model.TongTienSanPham = cartItems.Sum(x => x.GiaKhuyenMai * x.SoLuong);
                 return View(model);
@@ -424,11 +433,15 @@ namespace SneakFit.WebClient.Controllers
                         GiaBan = item.GiaKhuyenMai,
                     });
 
-                    var delta = -item.SoLuong;
-                    var success = await _spctApiClient.UpdateSoLuong(item.SanPhamChiTietId, delta);
-                    if (!success)
+                    // Chỉ trừ số lượng khi thanh toán online (VNPay/MoMo), không trừ khi COD
+                    if (model.PhuongThucThanhToan == PhuongThucThanhToan.VnPay || model.PhuongThucThanhToan == PhuongThucThanhToan.MoMo)
                     {
-                        throw new InvalidOperationException($"Không thể cập nhật số lượng cho sản phẩm {item.TenSanPham}.");
+                        var delta = -item.SoLuong;
+                        var success = await _spctApiClient.UpdateSoLuong(item.SanPhamChiTietId, delta);
+                        if (!success)
+                        {
+                            throw new InvalidOperationException($"Không thể cập nhật số lượng cho sản phẩm {item.TenSanPham}.");
+                        }
                     }
                 }
 

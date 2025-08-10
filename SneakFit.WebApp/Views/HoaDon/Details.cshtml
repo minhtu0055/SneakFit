@@ -516,31 +516,7 @@
             }
         }
 
-        /* CSS cho print invoice - chỉ sử dụng template mới */
-        #printInvoiceTemplate {
-            display: none; /* Ẩn template in khỏi màn hình thường */
-        }
-
-        @@media print {
-            /* Ẩn tất cả các phần tử khác */
-            body * {
-                visibility: hidden;
-            }
-            
-            /* Chỉ hiển thị template in */
-            #printInvoiceTemplate, #printInvoiceTemplate * {
-                visibility: visible;
-            }
-            
-            /* Định vị template in */
-            #printInvoiceTemplate {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                display: block !important;
-            }
-        }
+        /* Print styles sẽ được xử lý bởi JavaScript và template riêng biệt */
     </style>
 </head>
 <div class="body">
@@ -625,7 +601,8 @@
                     }
                 </div>
                 <div>
-                    <button class="btn btn-primary me-2" id="btnInHoaDon" onclick="printInvoice()">In</button>
+                    @* <button class="btn btn-primary me-2" id="btnInHoaDon" onclick="printInvoice()">In</button> *@
+                    <button class="btn btn-primary me-2" id="btnInHoaDon">In</button>
                     <button class="btn btn-primary" id="btnLichSu">Lịch sử</button>                  
                 </div>
             </div>      
@@ -745,7 +722,7 @@
     </div>
 </div>
 
-@await Html.PartialAsync("_PrintInvoiceTemplate", Model)
+<!-- Template in sẽ được load động qua JavaScript -->
 
 
 <!-- Modal Lịch Sử Hóa Đơn -->
@@ -800,6 +777,7 @@
 </div>
 
 @section Scripts {
+    <script src="~/js/invoice-print.js"></script>
     <script>
         // Show success/error messages
         @if (TempData["success"] != null)
@@ -973,19 +951,36 @@
             return hours + ':' + minutes + ':' + seconds + ' ' + day + '/' + month + '/' + year;
         }
 
-        // Hàm in hóa đơn
-        function printInvoice() {
-            // Hiển thị template in
-            document.getElementById('printInvoiceTemplate').style.display = 'block';
+        // Xử lý nút In hóa đơn với logic mới
+        $('#btnInHoaDon').on('click', function() {
+            var hoaDonId = '@Model.Id';
+            var loaiHoaDon = @((int)Model.LoaiHoaDon);
+            var coGiaoHang = @(Model.GiaoHang?.ToString().ToLower() ?? "false");
             
-            // Mở print dialog
-            window.print();
+            console.log('Thông tin hóa đơn:', {
+                hoaDonId: hoaDonId,
+                loaiHoaDon: loaiHoaDon,
+                coGiaoHang: coGiaoHang
+            });
             
-            // Ẩn template sau khi in
-            setTimeout(function() {
-                document.getElementById('printInvoiceTemplate').style.display = 'none';
-            }, 1000);
-        }
+            // Kiểm tra xem invoicePrinter có tồn tại không
+            if (typeof window.invoicePrinter === 'undefined') {
+                toastr.error('Lỗi: Không tìm thấy module in hóa đơn!');
+                return;
+            }
+            
+            // Xác định loại template in dựa trên loại hóa đơn và giao hàng
+            if (loaiHoaDon === 1) { // Online
+                console.log('In hóa đơn Online');
+                window.invoicePrinter.printOnlineInvoice(hoaDonId);
+            } else if (loaiHoaDon === 2 && coGiaoHang === true) { // Tại quầy có ship
+                console.log('In hóa đơn Ship');
+                window.invoicePrinter.printShipInvoice(hoaDonId);
+            } else { // Tại quầy không ship
+                console.log('In hóa đơn Tại quầy');
+                window.invoicePrinter.printInvoice(hoaDonId);
+            }
+        });
     </script>
 }
 @functions {

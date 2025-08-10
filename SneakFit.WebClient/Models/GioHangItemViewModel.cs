@@ -12,6 +12,7 @@
         public int PhanTramGiamGia { get; set; }
         public int SoLuong { get; set; }
         public int SoLuongTon { get; set; }
+        public bool TrangThai { get; set; } // Thêm thuộc tính trạng thái sản phẩm
         public decimal ThanhTien => (GiaKhuyenMai > 0 && GiaKhuyenMai < GiaGoc ? GiaKhuyenMai : GiaGoc) * SoLuong;
     }
 }

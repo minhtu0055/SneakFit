@@ -43,10 +43,17 @@
                             int idx = 0;
                             foreach (var item in Model)
                             {
-                                <div class="cart-item" data-aos="fade-up" data-aos-delay="@(100 + idx * 100)">
+                                <div class="cart-item @(!item.TrangThai ? "disabled-product" : "")" data-aos="fade-up" data-aos-delay="@(100 + idx * 100)">
                                     <div class="row align-items-center gy-4">
                                         <div class="col-lg-1 col-12 text-center mb-3 mb-lg-0">
-                                            <input type="checkbox" class="item-checkbox" data-id="@item.SanPhamChiTietId" data-price="@item.ThanhTien" />
+                                            @if (item.TrangThai)
+                                            {
+                                                <input type="checkbox" class="item-checkbox" data-id="@item.SanPhamChiTietId" data-price="@item.ThanhTien" />
+                                            }
+                                            else
+                                            {
+                                                <input type="checkbox" disabled title="Sản phẩm đã ngưng hoạt động" />
+                                            }
                                         </div>
                                         <div class="col-lg-5 col-12 mb-3 mb-lg-0">
                                             <div class="product-info d-flex align-items-center">
@@ -57,6 +64,12 @@
                                                 </div>
                                                 <div class="product-details ms-3">
                                                     <h6 class="product-title">@item.TenSanPham</h6>
+                                                    @if (!item.TrangThai)
+                                                    {
+                                                        <div class="alert alert-danger py-1 px-2 mb-2" style="font-size: 0.8rem;">
+                                                            <i class="bi bi-exclamation-circle"></i> Sản phẩm đã ngưng hoạt động
+                                                        </div>
+                                                    }
                                                     <div class="product-meta">
                                                         <span class="product-color">Color: @item.MauSac</span>
                                                         <span class="product-size">Size: @item.KichThuoc</span>
@@ -108,10 +121,20 @@
                             }
                         }
 
+                        <!-- Cảnh báo sản phẩm ngưng hoạt động -->
+                        @if (Model.Any(x => !x.TrangThai))
+                        {
+                            <div class="alert alert-warning mt-3" role="alert">
+                                <i class="bi bi-exclamation-triangle"></i>
+                                <strong>Cảnh báo:</strong> Một số sản phẩm trong giỏ hàng đã ngưng hoạt động và sẽ không thể thanh toán. 
+                                @* Vui lòng xóa những sản phẩm này hoặc chờ chúng hoạt động trở lại. *@
+                            </div>
+                        }
+
                         <!-- Coupon/Action Bar -->
                         <div class="cart-actions mt-3">
                             <div class="row g-3 align-items-center">
-                                <div class="col-lg-6 col-md-6">
+                                @* <div class="col-lg-6 col-md-6">
                                     <div class="coupon-form">
                                         <div class="input-group">
                                             <input type="text" class="form-control" placeholder="Nhập mã voucher" id="couponCode">
@@ -119,8 +142,8 @@
                                         </div>
                                         <div id="coupon-message" class="text-success mt-2" style="display: none;"></div>
                                     </div>
-                                </div>
-                                <div class="col-lg-6 col-md-6 text-md-end">
+                                </div> *@
+                                <div class="col-lg-6 col-md-6 text-md-end" style="margin-left: 400px">
                                     <div class="d-flex justify-content-md-end gap-2">
                                         <button class="btn btn-outline-accent" type="button" onclick="location.reload();">
                                             <i class="bi bi-arrow-clockwise"></i> Reload
@@ -192,6 +215,22 @@
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .disabled-product {
+            opacity: 0.6;
+            background-color: #f8f9fa;
+        }
+        
+        .disabled-product .product-title {
+            color: #6c757d;
+        }
+        
+        .disabled-product .alert-danger {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+    </style>
     <script>
         let isProcessing = false;
         let cartQuantities = {};
@@ -486,15 +525,16 @@
                 });
             });
 
-            // Checkbox: Chọn tất cả
+            // Checkbox: Chọn tất cả (chỉ chọn sản phẩm đang hoạt động)
             $(document).on('change', '#select-all', function () {
                 var isChecked = $(this).is(':checked');
-                $('.item-checkbox').prop('checked', isChecked).trigger('change'); // Trigger change để tính tổng
+                $('.item-checkbox:not(:disabled)').prop('checked', isChecked).trigger('change'); // Chỉ chọn sản phẩm đang hoạt động
             });
 
             // Checkbox: Cập nhật trạng thái "Chọn tất cả" và tính tổng khi thay đổi
             $(document).on('change', '.item-checkbox', function () {
-                var allChecked = $('.item-checkbox').length === $('.item-checkbox:checked').length;
+                var activeCheckboxes = $('.item-checkbox:not(:disabled)');
+                var allChecked = activeCheckboxes.length > 0 && activeCheckboxes.length === activeCheckboxes.filter(':checked').length;
                 $('#select-all').prop('checked', allChecked);
                 calculateTotals(); // Tính lại tổng khi checkbox thay đổi
             });

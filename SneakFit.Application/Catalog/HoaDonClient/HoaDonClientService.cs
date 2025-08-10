@@ -206,11 +206,50 @@ namespace SneakFit.Application.Catalog.HoaDonClient
 
         public async Task<bool> UpdateStatus(Guid id, SneakFit.Data.Enums.TrangThaiHoaDon newStatus)
         {
-            var hoaDon = await _context.HoaDon.FindAsync(id);
-            if (hoaDon == null) return false;
-            hoaDon.TrangThai = newStatus;
-            await _context.SaveChangesAsync();
-            return true;
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                var hoaDon = await _context.HoaDon
+                    .Include(h => h.HoaDonChiTiet)
+                    .FirstOrDefaultAsync(h => h.Id == id);
+                
+                if (hoaDon == null) 
+                {
+                    await transaction.RollbackAsync();
+                    return false;
+                }
+
+                // Nếu là đơn hàng COD và chuyển từ ChoXacNhan sang DaXacNhan, trừ số lượng sản phẩm
+                if (hoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD && 
+                    hoaDon.TrangThai == TrangThaiHoaDon.ChoXacNhan && 
+                    newStatus == TrangThaiHoaDon.DaXacNhan)
+                {
+                    // Trừ số lượng sản phẩm
+                    foreach (var chiTiet in hoaDon.HoaDonChiTiet)
+                    {
+                        var sanPhamChiTiet = await _context.SanPhamChiTiet.FindAsync(chiTiet.SanPhamChiTietId);
+                        if (sanPhamChiTiet != null)
+                        {
+                            if (sanPhamChiTiet.SoLuong < chiTiet.SoLuong)
+                            {
+                                await transaction.RollbackAsync();
+                                return false; // Không đủ số lượng
+                            }
+                            sanPhamChiTiet.SoLuong -= chiTiet.SoLuong;
+                        }
+                    }
+                }
+
+                hoaDon.TrangThai = newStatus;
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                await transaction.RollbackAsync();
+                return false;
+            }
         }
 
         public async Task<bool> UpdatePaymentStatus(Guid id, SneakFit.Data.Enums.TrangThaiThanhToan newPaymentStatus)
