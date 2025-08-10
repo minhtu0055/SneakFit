@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using SneakFit.ViewModels.Catalog.SanPhamChiTiet;
 using SneakFit.ViewModels.Common;
@@ -233,6 +234,7 @@ namespace SneakFit.ApiIntegration.Services
             var body = await response.Content.ReadAsStringAsync();
 
             Console.WriteLine($"Phản hồi từ /api/spct/{id}/soluong: {body}"); // Log để debug
+            Console.WriteLine($"Status code: {response.StatusCode}");
 
             if (response.IsSuccessStatusCode)
             {
@@ -241,13 +243,20 @@ namespace SneakFit.ApiIntegration.Services
                     var result = JsonConvert.DeserializeObject<ApiSuccessResult<object>>(body);
                     if (result?.ResultObj != null && result.IsSuccessed)
                     {
-                        dynamic obj = result.ResultObj;
-                        return obj.success; // Trích xuất trường 'success' từ ResultObj
+                        // Sử dụng JObject để truy cập thuộc tính một cách an toàn
+                        var jObject = JObject.FromObject(result.ResultObj);
+                        if (jObject.TryGetValue("success", out var successValue))
+                        {
+                            return successValue.Value<bool>();
+                        }
+                        // Nếu không có trường success, kiểm tra IsSuccessed
+                        return result.IsSuccessed;
                     }
                     return false;
                 }
                 catch (JsonException ex)
                 {
+                    Console.WriteLine($"Lỗi deserialize: {ex.Message}");
                     //_logger.LogWarning(ex, $"Không thể deserialize phản hồi thành công: {body}");
                     return false;
                 }
