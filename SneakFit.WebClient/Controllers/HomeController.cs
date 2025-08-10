@@ -278,7 +278,8 @@ namespace SneakFit.WebClient.Controllers
                     {
                         id = sanPham.Id,
                         name = sanPham.TenSanPham,
-                        image = sanPham.ImageDaiDien
+                        image = sanPham.ImageDaiDien,
+                        mota = sanPham.Mota  // Thêm dòng này
                     },
                     spctList = spctList.Select(spct => new
                     {
@@ -295,7 +296,12 @@ namespace SneakFit.WebClient.Controllers
                         khuyenMaiId = spct.KhuyenMaiId,
                         soLuong = spct.SoLuong,
                         trangThai = spct.TrangThai,
-                        images = spct.Images
+                        images = spct.Images,
+                        // Thêm 3 dòng này:
+                        tenThuongHieu = spct.TenThuongHieu,
+                        tenChatLieu = spct.TenChatLieu,
+                        tenDeGiay = spct.TenDeGiay,
+                        moTa = spct.MoTa
                     }).ToList(),
                     colors = mausacs.Select(color => new
                     {

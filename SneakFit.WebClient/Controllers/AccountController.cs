@@ -151,7 +151,10 @@ namespace SneakFit.WebClient.Controllers
                 try
                 {
                     var diaChiList = await _diaChiApiClient.GetAllByUser();
-                    model.DiaChiList = diaChiList ?? new List<DiaChiViewModel>();
+                    // Sắp xếp để địa chỉ mặc định (MacDinh = true) hiển thị trước
+                    model.DiaChiList = (diaChiList ?? new List<DiaChiViewModel>())
+                        .OrderByDescending(x => x.MacDinh)
+                        .ToList();
                 }
                 catch (Exception ex)
                 {

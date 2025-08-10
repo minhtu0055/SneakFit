@@ -352,6 +352,17 @@ namespace SneakFit.Application.Catalog.SanPhamChiTiet
                 }
 
                 entity.SoLuong = newSoLuong;
+                
+                // ✅ THÊM LOGIC MỚI: Tự động cập nhật trạng thái dựa trên số lượng
+                if (newSoLuong == 0)
+                {
+                    entity.TrangThai = false; // Ngừng kinh doanh khi hết hàng
+                }
+                else if (newSoLuong > 0 && !entity.TrangThai)
+                {
+                    entity.TrangThai = true; // Tự động kích hoạt lại khi có hàng (tuỳ chọn)
+                }
+                
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
                 return new ApiResult<bool> { IsSuccessed = true, ResultObj = true };
@@ -359,7 +370,6 @@ namespace SneakFit.Application.Catalog.SanPhamChiTiet
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                //_logger.LogError(ex, $"Lỗi khi cập nhật số lượng cho sản phẩm {id}");
                 return new ApiResult<bool> { IsSuccessed = false, Message = $"Lỗi server: {ex.Message}" };
             }
         }

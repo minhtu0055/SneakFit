@@ -188,6 +188,162 @@
             sessionStorage.removeItem('selectedAddressId');
             selectedAddressId = null;
 
+            // Validation functions
+            function validatePhoneNumber(phone) {
+                const phoneRegex = /^0[0-9]{9}$/;
+                return phoneRegex.test(phone);
+            }
+
+            function validateRequired(value, fieldName) {
+                return value && value.trim().length > 0;
+            }
+
+            function showFieldError(fieldId, message) {
+                $(`#${fieldId}`).addClass('is-invalid').removeClass('is-valid');
+                $(`#${fieldId}-error`).text(message);
+            }
+
+            function showFieldSuccess(fieldId) {
+                $(`#${fieldId}`).addClass('is-valid').removeClass('is-invalid');
+                $(`#${fieldId}-error`).text('');
+            }
+
+            function clearAllErrors() {
+                $('.form-control, .form-select').removeClass('is-invalid is-valid');
+                $('.invalid-feedback').text('');
+                $('.validation-icon').removeClass('bi-check-circle-fill bi-x-circle-fill valid invalid');
+            }
+
+            // Enhanced phone number validation with auto-0 and number-only input (NO real-time validation)
+            $('#modal-phone-number').on('input', function() {
+                let phone = $(this).val();
+
+                // Remove all non-numeric characters
+                phone = phone.replace(/[^0-9]/g, '');
+
+                // Auto-add 0 if empty or doesn't start with 0
+                if (phone.length === 0) {
+                    phone = '0';
+                } else if (phone.length > 0 && phone.charAt(0) !== '0') {
+                    phone = '0' + phone;
+                }
+
+                // Limit to 10 digits
+                if (phone.length > 10) {
+                    phone = phone.substring(0, 10);
+                }
+
+                // Update the input value
+                $(this).val(phone);
+
+                // Clear any existing validation states during input
+                $(this).removeClass('is-invalid is-valid');
+                $('#phone-validation-icon').removeClass('bi-check-circle-fill bi-x-circle-fill valid invalid');
+                $('#phone-number-error').text('');
+            });
+
+            // Validation on blur (when user leaves the field)
+            $('#modal-phone-number').on('blur', function() {
+                const phone = $(this).val();
+                const icon = $('#phone-validation-icon');
+
+                if (phone.length === 0 || phone === '0') {
+                    $(this).removeClass('is-invalid is-valid');
+                    icon.removeClass('bi-check-circle-fill bi-x-circle-fill valid invalid');
+                    $('#phone-number-error').text('');
+                    return;
+                }
+
+                if (validatePhoneNumber(phone)) {
+                    $(this).removeClass('is-invalid').addClass('is-valid');
+                    icon.removeClass('bi-x-circle-fill invalid').addClass('bi-check-circle-fill valid');
+                    $('#phone-number-error').text('');
+                } else {
+                    $(this).removeClass('is-valid').addClass('is-invalid');
+                    icon.removeClass('bi-check-circle-fill valid').addClass('bi-x-circle-fill invalid');
+                    if (phone.length < 10) {
+                        $('#phone-number-error').text('Số điện thoại phải có 10 chữ số');
+                    } else {
+                        $('#phone-number-error').text('Số điện thoại không hợp lệ');
+                    }
+                }
+            });
+
+            // Validation for required fields on blur (not real-time)
+            $('#modal-receiver-name, #modal-detail-address').on('blur', function() {
+                const value = $(this).val();
+                const fieldId = $(this).attr('id');
+
+                if (validateRequired(value, fieldId)) {
+                    showFieldSuccess(fieldId);
+                } else {
+                    showFieldError(fieldId, 'Trường này là bắt buộc');
+                }
+            });
+
+            // Validation for dropdowns on change
+            $('#modal-province, #modal-district, #modal-ward').on('change', function() {
+                const value = $(this).val();
+                const fieldId = $(this).attr('id');
+
+                if (validateRequired(value, fieldId)) {
+                    showFieldSuccess(fieldId);
+                } else {
+                    showFieldError(fieldId, 'Vui lòng chọn ' + $(this).prev('label').text().toLowerCase());
+                }
+            });
+
+            // Prevent paste of non-numeric characters
+            $('#modal-phone-number').on('paste', function(e) {
+                e.preventDefault();
+                const pastedText = (e.originalEvent || e).clipboardData.getData('text/plain');
+                const numericOnly = pastedText.replace(/[^0-9]/g, '');
+
+                let currentValue = $(this).val();
+                const numericCurrent = currentValue.replace(/[^0-9]/g, '');
+
+                // Combine and process
+                let combined = numericCurrent + numericOnly;
+                if (combined.length > 0 && combined.charAt(0) !== '0') {
+                    combined = '0' + combined;
+                }
+                if (combined.length > 10) {
+                    combined = combined.substring(0, 10);
+                }
+
+                $(this).val(combined);
+                $(this).trigger('input'); // Trigger validation
+            });
+
+            // Prevent keydown of non-numeric keys (except navigation keys)
+            $('#modal-phone-number').on('keydown', function(e) {
+                // Allow: backspace, delete, tab, escape, enter, navigation keys
+                if ([8, 9, 27, 13, 46, 37, 38, 39, 40].indexOf(e.keyCode) !== -1 ||
+                    // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                    (e.keyCode === 65 && e.ctrlKey === true) ||
+                    (e.keyCode === 67 && e.ctrlKey === true) ||
+                    (e.keyCode === 86 && e.ctrlKey === true) ||
+                    (e.keyCode === 88 && e.ctrlKey === true)) {
+                    return;
+                }
+
+                // Allow only numeric keys (0-9)
+                if ((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105)) {
+                    return;
+                }
+
+                // Prevent all other keys
+                e.preventDefault();
+            });
+
+            // Auto-focus and add 0 when field gets focus
+            $('#modal-phone-number').on('focus', function() {
+                if ($(this).val().length === 0) {
+                    $(this).val('0');
+                    $(this).trigger('input');
+                }
+            });
+
             // Hàm chung để load dữ liệu cho dropdown
             function loadDropdown(url, selector, defaultOption, valueField, textField, callback) {
                 $.ajax({
@@ -512,23 +668,61 @@
                 });
             }
 
-            // Lưu địa chỉ mới
+            // Lưu địa chỉ mới với validation
             function saveNewAddress() {
-                const receiverName = $('#modal-receiver-name').val();
-                const phoneNumber = $('#modal-phone-number').val();
+                clearAllErrors();
+
+                const receiverName = $('#modal-receiver-name').val().trim();
+                const phoneNumber = $('#modal-phone-number').val().trim();
                 const province = $('#modal-province option:selected').data('name');
                 const provinceId = $('#modal-province').val();
                 const district = $('#modal-district option:selected').data('name');
                 const districtId = $('#modal-district').val();
                 const ward = $('#modal-ward option:selected').data('name');
                 const wardCode = $('#modal-ward').val();
-                const detailAddress = $('#modal-detail-address').val();
-                const isDefault = $('#modal-set-default').is(':checked');
+                const detailAddress = $('#modal-detail-address').val().trim();
 
-                if (!receiverName || !phoneNumber || !province || !district || !ward || !detailAddress) {
-                    alert('Vui lòng điền đầy đủ thông tin địa chỉ.');
+                let hasError = false;
+
+                // Validate required fields
+                if (!validateRequired(receiverName, 'receiver-name')) {
+                    showFieldError('modal-receiver-name', 'Vui lòng nhập tên người nhận');
+                    hasError = true;
+                }
+
+                if (!validateRequired(phoneNumber, 'phone-number')) {
+                    showFieldError('modal-phone-number', 'Vui lòng nhập số điện thoại');
+                    hasError = true;
+                } else if (!validatePhoneNumber(phoneNumber)) {
+                    showFieldError('modal-phone-number', 'Số điện thoại phải bắt đầu bằng 0 và có 10 chữ số');
+                    hasError = true;
+                }
+
+                if (!validateRequired(province, 'province')) {
+                    showFieldError('modal-province', 'Vui lòng chọn tỉnh/thành');
+                    hasError = true;
+                }
+
+                if (!validateRequired(district, 'district')) {
+                    showFieldError('modal-district', 'Vui lòng chọn quận/huyện');
+                    hasError = true;
+                }
+
+                if (!validateRequired(ward, 'ward')) {
+                    showFieldError('modal-ward', 'Vui lòng chọn phường/xã');
+                    hasError = true;
+                }
+
+                if (!validateRequired(detailAddress, 'detail-address')) {
+                    showFieldError('modal-detail-address', 'Vui lòng nhập địa chỉ chi tiết');
+                    hasError = true;
+                }
+
+                if (hasError) {
                     return;
                 }
+
+                const isDefault = $('#modal-set-default').is(':checked');
 
                 const newAddress = {
                     tenNguoiNhan: receiverName,
@@ -559,24 +753,193 @@
                 });
             }
 
-            // Lưu thay đổi địa chỉ
+            // Validation cho form sửa địa chỉ
+            // Enhanced phone number validation with auto-0 and number-only input (NO real-time validation)
+            $('#edit-phone-number').on('input', function() {
+                let phone = $(this).val();
+
+                // Remove all non-numeric characters
+                phone = phone.replace(/[^0-9]/g, '');
+
+                // Auto-add 0 if empty or doesn't start with 0
+                if (phone.length === 0) {
+                    phone = '0';
+                } else if (phone.length > 0 && phone.charAt(0) !== '0') {
+                    phone = '0' + phone;
+                }
+
+                // Limit to 10 digits
+                if (phone.length > 10) {
+                    phone = phone.substring(0, 10);
+                }
+
+                // Update the input value
+                $(this).val(phone);
+
+                // Clear any existing validation states during input
+                $(this).removeClass('is-invalid is-valid');
+                $('#edit-phone-validation-icon').removeClass('bi-check-circle-fill bi-x-circle-fill valid invalid');
+                $('#edit-phone-number-error').text('');
+            });
+
+            // Validation on blur (when user leaves the field) - Form sửa địa chỉ
+            $('#edit-phone-number').on('blur', function() {
+                const phone = $(this).val();
+                const icon = $('#edit-phone-validation-icon');
+
+                if (phone.length === 0 || phone === '0') {
+                    $(this).removeClass('is-invalid is-valid');
+                    icon.removeClass('bi-check-circle-fill bi-x-circle-fill valid invalid');
+                    $('#edit-phone-number-error').text('');
+                    return;
+                }
+
+                if (validatePhoneNumber(phone)) {
+                    $(this).removeClass('is-invalid').addClass('is-valid');
+                    icon.removeClass('bi-x-circle-fill invalid').addClass('bi-check-circle-fill valid');
+                    $('#edit-phone-number-error').text('');
+                } else {
+                    $(this).removeClass('is-valid').addClass('is-invalid');
+                    icon.removeClass('bi-check-circle-fill valid').addClass('bi-x-circle-fill invalid');
+                    if (phone.length < 10) {
+                        $('#edit-phone-number-error').text('Số điện thoại phải có 10 chữ số');
+                    } else {
+                        $('#edit-phone-number-error').text('Số điện thoại không hợp lệ');
+                    }
+                }
+            });
+
+            // Validation for required fields on blur (not real-time) - Form sửa địa chỉ
+            $('#edit-receiver-name, #edit-detail-address').on('blur', function() {
+                const value = $(this).val();
+                const fieldId = $(this).attr('id');
+
+                if (validateRequired(value, fieldId)) {
+                    showFieldSuccess(fieldId);
+                } else {
+                    showFieldError(fieldId, 'Trường này là bắt buộc');
+                }
+            });
+
+            // Validation for dropdowns on change - Form sửa địa chỉ
+            $('#edit-province, #edit-district, #edit-ward').on('change', function() {
+                const value = $(this).val();
+                const fieldId = $(this).attr('id');
+
+                if (validateRequired(value, fieldId)) {
+                    showFieldSuccess(fieldId);
+                } else {
+                    showFieldError(fieldId, 'Vui lòng chọn ' + $(this).prev('label').text().toLowerCase());
+                }
+            });
+
+            // Prevent paste of non-numeric characters - Form sửa địa chỉ
+            $('#edit-phone-number').on('paste', function(e) {
+                e.preventDefault();
+                const pastedText = (e.originalEvent || e).clipboardData.getData('text/plain');
+                const numericOnly = pastedText.replace(/[^0-9]/g, '');
+
+                let currentValue = $(this).val();
+                const numericCurrent = currentValue.replace(/[^0-9]/g, '');
+
+                // Combine and process
+                let combined = numericCurrent + numericOnly;
+                if (combined.length > 0 && combined.charAt(0) !== '0') {
+                    combined = '0' + combined;
+                }
+                if (combined.length > 10) {
+                    combined = combined.substring(0, 10);
+                }
+
+                $(this).val(combined);
+                $(this).trigger('input'); // Trigger validation
+            });
+
+            // Prevent keydown of non-numeric keys (except navigation keys) - Form sửa địa chỉ
+            $('#edit-phone-number').on('keydown', function(e) {
+                // Allow: backspace, delete, tab, escape, enter, navigation keys
+                if ([8, 9, 27, 13, 46, 37, 38, 39, 40].indexOf(e.keyCode) !== -1 ||
+                    // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                    (e.keyCode === 65 && e.ctrlKey === true) ||
+                    (e.keyCode === 67 && e.ctrlKey === true) ||
+                    (e.keyCode === 86 && e.ctrlKey === true) ||
+                    (e.keyCode === 88 && e.ctrlKey === true)) {
+                    return;
+                }
+
+                // Allow only numeric keys (0-9)
+                if ((e.keyCode >= 48 && e.keyCode <= 57) || (e.keyCode >= 96 && e.keyCode <= 105)) {
+                    return;
+                }
+
+                // Prevent all other keys
+                e.preventDefault();
+            });
+
+            // Auto-focus and add 0 when field gets focus - Form sửa địa chỉ
+            $('#edit-phone-number').on('focus', function() {
+                if ($(this).val().length === 0) {
+                    $(this).val('0');
+                    $(this).trigger('input');
+                }
+            });
+
+            // Lưu thay đổi địa chỉ với validation
             function saveEditedAddress() {
+                clearAllErrors();
+
                 const addressId = $('#editAddressModal').data('address-id');
-                const receiverName = $('#edit-receiver-name').val();
-                const phoneNumber = $('#edit-phone-number').val();
+                const receiverName = $('#edit-receiver-name').val().trim();
+                const phoneNumber = $('#edit-phone-number').val().trim();
                 const province = $('#edit-province option:selected').data('name');
                 const provinceId = $('#edit-province').val();
                 const district = $('#edit-district option:selected').data('name');
                 const districtId = $('#edit-district').val();
                 const ward = $('#edit-ward option:selected').data('name');
                 const wardCode = $('#edit-ward').val();
-                const detailAddress = $('#edit-detail-address').val();
-                const isDefault = $('#edit-set-default').is(':checked');
+                const detailAddress = $('#edit-detail-address').val().trim();
 
-                if (!receiverName || !phoneNumber || !province || !district || !ward || !detailAddress) {
-                    alert('Vui lòng điền đầy đủ thông tin địa chỉ.');
+                let hasError = false;
+
+                // Validate required fields
+                if (!validateRequired(receiverName, 'receiver-name')) {
+                    showFieldError('edit-receiver-name', 'Vui lòng nhập tên người nhận');
+                    hasError = true;
+                }
+
+                if (!validateRequired(phoneNumber, 'phone-number')) {
+                    showFieldError('edit-phone-number', 'Vui lòng nhập số điện thoại');
+                    hasError = true;
+                } else if (!validatePhoneNumber(phoneNumber)) {
+                    showFieldError('edit-phone-number', 'Số điện thoại phải bắt đầu bằng 0 và có 10 chữ số');
+                    hasError = true;
+                }
+
+                if (!validateRequired(province, 'province')) {
+                    showFieldError('edit-province', 'Vui lòng chọn tỉnh/thành');
+                    hasError = true;
+                }
+
+                if (!validateRequired(district, 'district')) {
+                    showFieldError('edit-district', 'Vui lòng chọn quận/huyện');
+                    hasError = true;
+                }
+
+                if (!validateRequired(ward, 'ward')) {
+                    showFieldError('edit-ward', 'Vui lòng chọn phường/xã');
+                    hasError = true;
+                }
+
+                if (!validateRequired(detailAddress, 'detail-address')) {
+                    showFieldError('edit-detail-address', 'Vui lòng nhập địa chỉ chi tiết');
+                    hasError = true;
+                }
+
+                if (hasError) {
                     return;
                 }
+
+                const isDefault = $('#edit-set-default').is(':checked');
 
                 const updatedAddress = {
                     tenNguoiNhan: receiverName,
@@ -601,7 +964,6 @@
                             $('#editAddressModal').modal('hide');
                             $('#changeAddressModal').modal('show');
                         });
-                        // KHÔNG gọi setCheckoutAddress ở đây!
                     },
                     error: function (xhr) {
                         alert('Lỗi khi cập nhật địa chỉ.');
@@ -983,28 +1345,37 @@
             <div class="modal-body">
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label class="form-label">Tên người nhận</label>
+                        <label class="form-label">Tên người nhận <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="modal-receiver-name" placeholder="Nhập tên người nhận" />
+                        <div class="invalid-feedback" id="receiver-name-error"></div>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Số điện thoại</label>
-                        <input type="text" class="form-control" id="modal-phone-number" placeholder="Nhập số điện thoại" />
+                        <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                        <div class="phone-input">
+                            <input type="text" class="form-control" id="modal-phone-number" placeholder="Nhập số điện thoại" maxlength="10" />
+                            <i class="bi validation-icon" id="phone-validation-icon"></i>
+                        </div>
+                        <div class="invalid-feedback" id="phone-number-error"></div>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Tỉnh / Thành</label>
+                        <label class="form-label">Tỉnh / Thành <span class="text-danger">*</span></label>
                         <select id="modal-province" class="form-select"></select>
+                        <div class="invalid-feedback" id="province-error"></div>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Quận / Huyện</label>
+                        <label class="form-label">Quận / Huyện <span class="text-danger">*</span></label>
                         <select id="modal-district" class="form-select"></select>
+                        <div class="invalid-feedback" id="district-error"></div>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Phường / Xã</label>
+                        <label class="form-label">Phường / Xã <span class="text-danger">*</span></label>
                         <select id="modal-ward" class="form-select"></select>
+                        <div class="invalid-feedback" id="ward-error"></div>
                     </div>
                     <div class="col-md-12">
-                        <label class="form-label">Địa chỉ chi tiết</label>
+                        <label class="form-label">Địa chỉ chi tiết <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="modal-detail-address" placeholder="Số nhà, tên đường..." />
+                        <div class="invalid-feedback" id="detail-address-error"></div>
                     </div>
                     <div class="col-md-12 mt-3">
                         <label class="form-check-label">
@@ -1033,28 +1404,37 @@
             <div class="modal-body">
                 <div class="row g-3">
                     <div class="col-md-6">
-                        <label class="form-label">Tên người nhận</label>
+                        <label class="form-label">Tên người nhận <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="edit-receiver-name" placeholder="Nhập tên người nhận" />
+                        <div class="invalid-feedback" id="edit-receiver-name-error"></div>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Số điện thoại</label>
-                        <input type="text" class="form-control" id="edit-phone-number" placeholder="Nhập số điện thoại" />
+                        <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                        <div class="phone-input">
+                            <input type="text" class="form-control" id="edit-phone-number" placeholder="Nhập số điện thoại" maxlength="10" />
+                            <i class="bi validation-icon" id="edit-phone-validation-icon"></i>
+                        </div>
+                        <div class="invalid-feedback" id="edit-phone-number-error"></div>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Tỉnh / Thành</label>
+                        <label class="form-label">Tỉnh / Thành <span class="text-danger">*</span></label>
                         <select id="edit-province" class="form-select"></select>
+                        <div class="invalid-feedback" id="edit-province-error"></div>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Quận / Huyện</label>
+                        <label class="form-label">Quận / Huyện <span class="text-danger">*</span></label>
                         <select id="edit-district" class="form-select"></select>
+                        <div class="invalid-feedback" id="edit-district-error"></div>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Phường / Xã</label>
+                        <label class="form-label">Phường / Xã <span class="text-danger">*</span></label>
                         <select id="edit-ward" class="form-select"></select>
+                        <div class="invalid-feedback" id="edit-ward-error"></div>
                     </div>
                     <div class="col-md-12">
-                        <label class="form-label">Địa chỉ chi tiết</label>
+                        <label class="form-label">Địa chỉ chi tiết <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="edit-detail-address" placeholder="Số nhà, tên đường..." />
+                        <div class="invalid-feedback" id="edit-detail-address-error"></div>
                     </div>
                     <div class="col-md-12 mt-3">
                         <label class="form-check-label">
@@ -2020,4 +2400,73 @@
             transform: scale(1.05);
             color: #FFFFFF;
         }
+
+    /* Validation styles */
+    .form-control.is-invalid {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+
+    .form-control.is-valid {
+        border-color: #198754;
+        box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+    }
+
+    .form-select.is-invalid {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+
+    .form-select.is-valid {
+        border-color: #198754;
+        box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
+    }
+
+    .invalid-feedback {
+        display: block;
+        width: 100%;
+        margin-top: 0.25rem;
+        font-size: 0.875em;
+        color: #dc3545;
+    }
+
+    .valid-feedback {
+        display: block;
+        width: 100%;
+        margin-top: 0.25rem;
+        font-size: 0.875em;
+        color: #198754;
+    }
+
+    /* Phone number validation */
+    .phone-input {
+        position: relative;
+    }
+
+        .phone-input .form-control {
+            padding-right: 40px;
+        }
+
+        .phone-input .validation-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+            .phone-input .validation-icon.valid {
+                color: #198754;
+            }
+
+            .phone-input .validation-icon.invalid {
+                color: #dc3545;
+            }
+
+    /* Required field indicator */
+    .text-danger {
+        color: #dc3545 !important;
+    }
+
 </style>
