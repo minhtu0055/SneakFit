@@ -199,5 +199,22 @@ namespace SneakFit.BackEndAPI.Controllers
             var products = await _sanPhamChiTetService.GetAllPagings(request);
             return Ok(new ApiSuccessResult<PagedResult<SPCTViewModels>>(products));
         }
+
+        [HttpGet("FindByCondition")]
+        public async Task<IActionResult> FindByCondition([FromQuery] Guid sanPhamId, [FromQuery] Guid mauSacId, [FromQuery] Guid kichThuocId)
+        {
+            try
+            {
+                var spct = await _sanPhamChiTetService.FindByCondition(sanPhamId, mauSacId, kichThuocId);
+                if (spct == null)
+                    return NotFound("Không tìm thấy sản phẩm chi tiết với điều kiện đã cho");
+                return Ok(spct);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi khi tìm SPCT theo điều kiện");
+                return BadRequest(new { message = "Có lỗi xảy ra khi tìm kiếm" });
+            }
+        }
     }
 }

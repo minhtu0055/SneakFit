@@ -443,6 +443,24 @@ namespace SneakFit.ApiIntegration.Services
             catch { }
             throw new Exception(errorMsg);
         }
+
+        public async Task<SPCTViewModels> FindByCondition(Guid sanPhamId, Guid mauSacId, Guid kichThuocId)
+        {
+            var client = _httpClientFactory.CreateClient();
+            client.BaseAddress = new Uri(_configuration["BaseAddress"]);
+            var sessions = _httpContextAccessor.HttpContext.Session.GetString("Token");
+            if (!string.IsNullOrEmpty(sessions))
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessions);
+
+            var response = await client.GetAsync($"/api/spct/FindByCondition?sanPhamId={sanPhamId}&mauSacId={mauSacId}&kichThuocId={kichThuocId}");
+            var body = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                var spct = JsonConvert.DeserializeObject<SPCTViewModels>(body);
+                return spct;
+            }
+            return null;
+        }
         public async Task<PagedResult<SPCTViewModels>> GetAllPagings(PhanTrangSPCT request)
         {
             try
