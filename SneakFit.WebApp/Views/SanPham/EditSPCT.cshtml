@@ -11,7 +11,7 @@
             <i class="fa fa-filter"></i> Bộ lọc
         </div>
         <div class="card-body">
-            <form id="filterForm" method="get">
+            <form id="filterForm" method="get" onsubmit="formatPriceValues()">
                 <!-- Hàng 1: Tên sản phẩm -->
                 <div class="row mb-2">
                     <div class="col-md-12">
@@ -72,7 +72,7 @@
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <input type="number" class="form-control gia-ban" name="GiaTu" placeholder="Giá từ" value="@Context.Request.Query["GiaTu"]" />
+                        <input type="text" class="form-control gia-ban-filter" name="GiaTu" placeholder="Giá từ (VD: 1.000.000)" value="@Context.Request.Query["GiaTu"]" />
                     </div>
                 </div>
                 <!-- Hàng 3: Kích cỡ, Màu sắc, Trạng thái, Khoảng giá Đến -->
@@ -137,7 +137,7 @@
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <input type="number" class="form-control gia-ban" name="GiaDen" placeholder="Giá đến" value="@Context.Request.Query["GiaDen"]" />
+                        <input type="text" class="form-control gia-ban-filter" name="GiaDen" placeholder="Giá đến (VD: 5.000.000)" value="@Context.Request.Query["GiaDen"]" />
                     </div>
                 </div>
                 <!-- Hàng 4: Tìm kiếm, Làm mới, QR Code -->
@@ -147,7 +147,7 @@
                         <button type="reset" class="btn btn-dark" onclick="window.location.href=window.location.pathname">
                             <i class="bx bx-reset"></i> Reset
                         </button>
-                        <button type="button" class="btn btn-primary">QR Code sản phẩm</button>
+                        <button type="button" id="btnShowQRCodes" class="btn btn-primary">QR Code sản phẩm</button>
                     </div>
                 </div>
             </form>
@@ -184,7 +184,11 @@
                     }
                     @foreach (var item in Model.DanhSachSPCT)
                     {
-                        <tr data-id="@item.Id" data-so-luong="@item.SoLuong" data-gia-ban="@item.Gia">
+                        var tenSanPham = (sanPhams != null && sanPhams.ContainsKey(item.SanPhamId)) ? sanPhams[item.SanPhamId] : "";
+                        var kichThuoc = ViewBag.KichThuocs[item.KichThuocId];
+                        var mauSac = ViewBag.MauSacs[item.MauSacId];
+                        <tr data-id="@item.Id" data-so-luong="@item.SoLuong" data-gia-ban="@item.Gia"
+                            data-pname="@tenSanPham" data-color="@mauSac" data-size="@kichThuoc">
                             <td><input type="checkbox" class="row-check" /></td>
                             <td>@stt</td>
                             <td>
@@ -220,11 +224,6 @@
                                 }
                             </td>
                             <td>
-                                @{
-                                    var tenSanPham = (sanPhams != null && sanPhams.ContainsKey(item.SanPhamId)) ? sanPhams[item.SanPhamId] : "";
-                                    var kichThuoc = ViewBag.KichThuocs[item.KichThuocId];
-                                    var mauSac = ViewBag.MauSacs[item.MauSacId];
-                                }
                                 @($"{tenSanPham} [ {kichThuoc} - {mauSac} ]")
                             </td>
                             <td style="width: 100px;">
@@ -360,6 +359,31 @@
     </div>
 </div>
 
+<!-- Modal danh sách QR -->
+<div class="modal fade" id="qrListModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">QR các sản phẩm đã chọn</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @* <div class="alert alert-info mb-3">
+                    <i class="bi bi-info-circle"></i>
+                    <strong>Hướng dẫn:</strong> Chọn các sản phẩm cần in QR, sau đó nhấn "Tải ZIP" để tải tất cả QR codes trong một file ZIP. File ZIP sẽ chứa tất cả QR codes với tên file theo định dạng "Tên sản phẩm - Màu sắc - Kích thước.png".
+                </div> *@
+                <div id="qrListContainer" class="row g-3"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btnDownloadQRCodes">
+                    <i class="bi bi-download"></i> Tải
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Modal thêm mới Thương hiệu -->
 <div class="modal fade" id="modalAddThuongHieu" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
@@ -459,7 +483,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
             </div>
             <div class="modal-body text-center">
-                <img id="reviewImage" src="" style="max-width:100%; max-height:70vh; border-radius:8px; padding-bottom: 24px"; />
+                <img id="reviewImage" src="" style="max-width:100%; max-height:70vh; border-radius:8px; padding-bottom: 24px" ; />
             </div>
         </div>
     </div>
@@ -472,8 +496,26 @@
     <!-- Thêm thư viện color picker -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-minicolors/2.3.6/jquery.minicolors.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-minicolors/2.3.6/jquery.minicolors.min.js"></script>
+
+    <!-- Thêm thư viện JSZip để tạo file ZIP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script>
         $(document).ready(function() {
+
+            // Format giá trị từ query string khi load trang
+            function formatInitialPriceValues() {
+                $('.gia-ban-filter').each(function() {
+                    var value = $(this).val();
+                    if (value && !isNaN(value)) {
+                        var formattedValue = parseInt(value).toLocaleString('vi-VN');
+                        $(this).val(formattedValue);
+                    }
+                });
+            }
+
+            // Gọi hàm format giá trị ban đầu
+            formatInitialPriceValues();
+
             // Chọn dòng bằng double click
             $('#spctTable tbody tr').on('dblclick', function(e) {
                 // Bỏ qua nếu click vào input hoặc button
@@ -544,6 +586,14 @@
                 $(this).val(value);
             });
 
+            // Format giá tiền cho bộ lọc
+            $(document).on('input', '.gia-ban-filter', function () {
+                let value = $(this).val().replace(/\D/g, '');
+                if (value) {
+                    value = parseInt(value, 10).toLocaleString('vi-VN');
+                }
+                $(this).val(value);
+            });
             // Thay thế sự kiện #updateAll:
             $('#updateAll').off('click').on('click', function() {
                 // Kiểm tra xem có dòng nào được chọn không
@@ -739,6 +789,243 @@
                     correctLevel: QRCode.CorrectLevel.H
                 });
             }
+
+            // Tạo và tải QR theo tên file: "tên sp, màu, size.png"
+            function sanitizeFileName(name) {
+                return (name || '')
+                    .replace(/[\\/:*?"<>|]/g, '')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+            }
+
+            function generateQrDataUrl(text, size) {
+                return new Promise(function(resolve) {
+                    var temp = document.createElement('div');
+                    temp.style.position = 'absolute';
+                    temp.style.left = '-99999px';
+                    temp.style.top = '-99999px';
+                    document.body.appendChild(temp);
+                    new QRCode(temp, {
+                        text: text,
+                        width: size,
+                        height: size,
+                        colorDark: '#000000',
+                        colorLight: '#ffffff',
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                    setTimeout(function() {
+                        var img = temp.querySelector('img');
+                        if (img && img.src) {
+                            resolve(img.src);
+                            document.body.removeChild(temp);
+                            return;
+                        }
+                        var canvas = temp.querySelector('canvas');
+                        if (canvas) {
+                            resolve(canvas.toDataURL('image/png'));
+                            document.body.removeChild(temp);
+                            return;
+                        }
+                        document.body.removeChild(temp);
+                        resolve(null);
+                    }, 250);
+                });
+            }
+
+            // Hiển thị danh sách QR cho các dòng đã chọn
+            $('#btnShowQRCodes').on('click', async function() {
+                var $selected = $('.row-check:checked').closest('tr');
+                if ($selected.length === 0) {
+                    toastr.error('Vui lòng chọn ít nhất một sản phẩm chi tiết!');
+                    return;
+                }
+
+                // Hiển thị loading
+                const $btn = $(this);
+                const originalText = $btn.text();
+                $btn.text('Đang tạo QR...').prop('disabled', true);
+
+                try {
+                    $('#qrListContainer').empty();
+
+                    // Cập nhật tiêu đề modal với số lượng
+                    const modalTitle = document.querySelector('#qrListModal .modal-title');
+                    modalTitle.textContent = `QR các sản phẩm đã chọn (${$selected.length} sản phẩm)`;
+
+                    // Tạo từng QR item
+                    for (let i = 0; i < $selected.length; i++) {
+                        const row = $selected.eq(i);
+                        const id = String(row.data('id'));
+                        const pname = row.data('pname') || '';
+                        const color = row.data('color') || '';
+                        const size = row.data('size') || '';
+                        const title = `${pname} - ${color} - ${size}`;
+
+                        try {
+                            const dataUrl = await generateQrDataUrl(id, 200);
+                            if (!dataUrl) {
+                                console.warn(`Không thể tạo QR cho sản phẩm: ${title}`);
+                                continue;
+                            }
+
+                            const col = document.createElement('div');
+                            col.className = 'col-6 col-md-4 text-center';
+                            col.innerHTML = `
+                                <div class="p-2 border rounded bg-white h-100 qr-item">
+                                    <img src="${dataUrl}" alt="QR" style="width:180px;height:180px;object-fit:contain;" />
+                                    <div class="mt-2 small text-wrap fw-bold">${title}</div>
+                                </div>
+                            `;
+                            document.getElementById('qrListContainer').appendChild(col);
+                        } catch (error) {
+                            console.error(`Lỗi khi tạo QR cho sản phẩm ${title}:`, error);
+                        }
+                    }
+
+                    var modal = new bootstrap.Modal(document.getElementById('qrListModal'));
+                    modal.show();
+
+                } catch (error) {
+                    console.error('Lỗi khi tạo danh sách QR:', error);
+                    toastr.error('Có lỗi xảy ra khi tạo danh sách QR: ' + error.message);
+                } finally {
+                    // Khôi phục trạng thái button
+                    $btn.text(originalText).prop('disabled', false);
+                }
+            });
+
+            // Tải tất cả QR đang hiển thị trong modal với nền trắng và tên file "tên sp, màu, size"
+            $('#btnDownloadQRCodes').on('click', async function() {
+                const cards = document.querySelectorAll('#qrListContainer .col-6, #qrListContainer .col-md-4');
+                if (!cards || cards.length === 0) {
+                    toastr.error('Không có QR để tải!');
+                    return;
+                }
+
+                // Hiển thị loading
+                const $btn = $(this);
+                const originalText = $btn.text();
+                $btn.text('Đang tạo file ZIP...').prop('disabled', true);
+
+                try {
+                    const zip = new JSZip();
+                    const folder = zip.folder("QR_Codes");
+
+                    // Tạo timestamp cho tên file
+                    const now = new Date();
+                    const timestamp = now.getFullYear() +
+                        String(now.getMonth() + 1).padStart(2, '0') +
+                        String(now.getDate()).padStart(2, '0') + '_' +
+                        String(now.getHours()).padStart(2, '0') +
+                        String(now.getMinutes()).padStart(2, '0') +
+                        String(now.getSeconds()).padStart(2, '0');
+
+                    let processedCount = 0;
+                    const totalCount = cards.length;
+
+                    // Xử lý từng QR code
+                    for (let i = 0; i < cards.length; i++) {
+                        const card = cards[i];
+                        const img = card.querySelector('img');
+                        const caption = card.querySelector('.small');
+
+                        if (!img) continue;
+
+                        // Tạo canvas với nền trắng
+                        const canvas = document.createElement('canvas');
+                        const size = 600;
+                        canvas.width = size;
+                        canvas.height = size;
+                        const ctx = canvas.getContext('2d');
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(0, 0, size, size);
+
+                        // Đợi image load và vẽ lên canvas
+                        await new Promise((resolve) => {
+                            const qrImg = new Image();
+                            qrImg.crossOrigin = 'anonymous';
+                            qrImg.onload = function() {
+                                ctx.drawImage(qrImg, 0, 0, size, size);
+                                resolve();
+                            };
+                            qrImg.onerror = resolve; // Nếu lỗi vẫn tiếp tục
+                            qrImg.src = img.src;
+                        });
+
+                        // Chuyển canvas thành blob
+                        const blob = await new Promise(resolve => {
+                            canvas.toBlob(resolve, 'image/png');
+                        });
+
+                        // Tạo tên file
+                        const title = caption ? caption.textContent : 'QR';
+                        const fileName = (title || 'QR')
+                            .replace(/[\\/:*?"<>|]/g, '')
+                            .replace(/\s+/g, ' ')
+                            .trim() + '.png';
+
+                        // Thêm vào ZIP
+                        folder.file(fileName, blob);
+
+                        processedCount++;
+                        $btn.text(`Đang xử lý... (${processedCount}/${totalCount})`);
+                    }
+
+                    // Kiểm tra xem có QR nào được xử lý thành công không
+                    if (processedCount === 0) {
+                        toastr.error('Không có QR code nào được tạo thành công!');
+                        return;
+                    }
+
+                    // Tạo và tải file ZIP
+                    $btn.text('Đang tạo file ZIP...');
+                    const zipBlob = await zip.generateAsync({type: 'blob'});
+
+                    // Tải file ZIP
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(zipBlob);
+                    a.download = `QR_Codes_${timestamp}.zip`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+
+                    // Giải phóng memory
+                    URL.revokeObjectURL(a.href);
+
+                    toastr.success(`Đã tạo thành công file ZIP chứa ${processedCount} QR codes!`);
+
+                } catch (error) {
+                    console.error('Lỗi khi tạo file ZIP:', error);
+                    toastr.error('Có lỗi xảy ra khi tạo file ZIP: ' + error.message);
+                } finally {
+                    // Khôi phục trạng thái button
+                    $btn.text(originalText).prop('disabled', false);
+                }
+            });
+
+            $(document).on('click', '.btn-qr', async function() {
+                var $btn = $(this);
+                var id = $btn.data('id');
+                var pname = $btn.data('pname') || '';
+                var color = $btn.data('color') || '';
+                var size = $btn.data('size') || '';
+                var fileName = sanitizeFileName(`${pname}, ${color}, ${size}.png`);
+                try {
+                    var dataUrl = await generateQrDataUrl(String(id), 512);
+                    if (!dataUrl) {
+                        toastr.error('Không thể tạo mã QR!');
+                        return;
+                    }
+                    var a = document.createElement('a');
+                    a.href = dataUrl;
+                    a.download = fileName || 'QR.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                } catch (err) {
+                    toastr.error('Có lỗi khi tạo QR: ' + (err && err.message ? err.message : err));
+                }
+            });
 
             // Khi click 👁️
             $(document).on('click', '.btn-view', function() {
@@ -1240,7 +1527,7 @@
                             });
                         } else {
                             // toastr.error('Có lỗi xảy ra khi cập nhật!' + response.message);
-                            toastr.error('Có lỗi xảy ra khi cập nhật!' + response.message);
+                            toastr.error('Có lỗi xảy ra khi cập nhật! ' + response.message);
                         }
                     },
                     error: function() {
@@ -1280,7 +1567,32 @@
             }
         });
 
-        
+        function formatPriceValues() {
+            // Format giá từ
+            var giaTuInput = document.querySelector('input[name="GiaTu"]');
+            var giaTuValue = 0;
+            if (giaTuInput && giaTuInput.value) {
+                giaTuValue = parseInt(giaTuInput.value.replace(/\./g, ''));
+                giaTuInput.value = giaTuValue;
+            }
+
+            // Format giá đến
+            var giaDenInput = document.querySelector('input[name="GiaDen"]');
+            var giaDenValue = 0;
+            if (giaDenInput && giaDenInput.value) {
+                giaDenValue = parseInt(giaDenInput.value.replace(/\./g, ''));
+                giaDenInput.value = giaDenValue;
+            }
+
+            // Validation: Giá từ không được lớn hơn giá đến
+            if (giaTuValue > 0 && giaDenValue > 0 && giaTuValue > giaDenValue) {
+                alert('Giá "từ" không được lớn hơn giá "đến"!');
+                return false;
+            }
+
+            return true;
+        }
+
         // PHÂN TRANG CHO BẢNG SẢN PHẨM CHI TIẾT
         $(document).ready(function () {
             var $table = $('#spctTable');
@@ -1393,5 +1705,29 @@
     /* Đảm bảo SweetAlert2 luôn nổi trên modal */
     .swal2-container {
         z-index: 10000 !important;
+    }
+
+    /* Style cho QR code items */
+    .qr-item {
+        transition: transform 0.2s ease;
+        border: 1px solid #dee2e6;
+    }
+
+        .qr-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+    /* Loading animation cho button */
+    .btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    /* Style cho alert info */
+    .alert-info {
+        background-color: #d1ecf1;
+        border-color: #bee5eb;
+        color: #0c5460;
     }
 </style>
