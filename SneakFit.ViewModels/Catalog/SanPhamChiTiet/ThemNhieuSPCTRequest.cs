@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using SneakFit.ViewModels.Catalog.SanPhamChiTiet;
+using Microsoft.AspNetCore.Http;
 
 namespace SneakFit.ViewModels.Catalog.SanPhamChiTiet
 {
@@ -12,6 +13,7 @@ namespace SneakFit.ViewModels.Catalog.SanPhamChiTiet
         public Guid DeGiayId { get; set; }
         public bool TrangThai { get; set; }
         public List<ThemSPCTItem> Items { get; set; }
+        public List<IFormFile>? Images { get; set; } // Thêm trường Images để xử lý ảnh
     }
 
     public class ThemSPCTItem
@@ -21,4 +23,4 @@ namespace SneakFit.ViewModels.Catalog.SanPhamChiTiet
         public int SoLuong { get; set; }
         public decimal Gia { get; set; }
     }
-} 
+}
