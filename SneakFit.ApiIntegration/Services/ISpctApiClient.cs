@@ -18,5 +18,8 @@ namespace SneakFit.ApiIntegration.Services
         Task<int> RemoveImage(Guid imageId);
         Task<List<string>> GetListImages(Guid idSanPham);
         Task<int> CreateMultiple(ThemNhieuSPCTRequest request);
+        
+        // Method mới để tìm SPCT theo điều kiện
+        Task<SPCTViewModels> FindByCondition(Guid sanPhamId, Guid mauSacId, Guid kichThuocId);
     }
 }

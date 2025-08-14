@@ -1106,12 +1106,26 @@
 
                 // Hiển thị kết quả
                 let message = response.message || 'Tạo mới sản phẩm chi tiết thành công!';
+                let title = 'Thành công';
+                
+                // Kiểm tra nếu có sản phẩm được cập nhật số lượng
+                if (response.updatedCount > 0) {
+                    title = 'Thành công - Cập nhật số lượng';
+                    if (response.createdCount > 0) {
+                        message = `Tạo mới ${response.createdCount} sản phẩm chi tiết và cập nhật số lượng ${response.updatedCount} sản phẩm đã tồn tại.`;
+                    } else {
+                        message = `Cập nhật số lượng ${response.updatedCount} sản phẩm chi tiết đã tồn tại.`;
+                    }
+                } else if (response.createdCount > 0) {
+                    message = `Tạo mới ${response.createdCount} sản phẩm chi tiết thành công.`;
+                }
+                
                 if (hasError) {
                     Swal.fire('Cảnh báo', message, 'warning').then(() => {
                         window.location.href = '/SanPham/Index';
                     });
                 } else {
-                    Swal.fire('Thành công', message, 'success').then(() => {
+                    Swal.fire(title, message, 'success').then(() => {
                         window.location.href = '/SanPham/Index';
                     });
                 }

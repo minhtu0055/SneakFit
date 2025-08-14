@@ -178,8 +178,9 @@ namespace SneakFit.Admin.Controllers
 
             var errorList = new List<string>();
             var createdItems = new List<SPCTViewModels>(); // Lưu danh sách sản phẩm đã tạo
+            var updatedItems = new List<SPCTViewModels>(); // Lưu danh sách sản phẩm đã cập nhật
             int resultCount = 0; // Đếm số sản phẩm chi tiết tạo thành công
-            int duplicateCount = 0; // Đếm số sản phẩm chi tiết bị trùng lặp
+            int updatedCount = 0; // Đếm số sản phẩm chi tiết đã cập nhật số lượng
 
             foreach (var item in items)
             {
@@ -199,44 +200,52 @@ namespace SneakFit.Admin.Controllers
                 var result = await _spctApiClient.Create(request);
                 if (result.IsSuccessed)
                 {
-                    resultCount++;
-                    createdItems.Add(result.ResultObj);
-                }
-                else
-                {
-                    // Kiểm tra nếu lỗi là do trùng lặp
-                    if (result.Message.ToLower().Contains("tồn tại") || result.Message.ToLower().Contains("already exists"))
+                    if (result.Message != null && result.Message.Contains("đã tồn tại"))
                     {
-                        duplicateCount++;
+                        updatedCount++;
+                        updatedItems.Add(result.ResultObj);
                     }
                     else
                     {
-                        errorList.Add(result.Message); // Giữ lỗi khác (không phải trùng lặp)
+                        resultCount++;
+                        createdItems.Add(result.ResultObj);
                     }
+                }
+                else
+                {
+                    errorList.Add(result.Message ?? "Có lỗi xảy ra");
                 }
             }
 
             // Xử lý thông báo
-            if (resultCount > 0)
+            if (resultCount > 0 || updatedCount > 0)
             {
-                string message = $"Thêm mới {resultCount} sản phẩm chi tiết thành công.";
-                if (duplicateCount > 0)
+                string message = "";
+                if (resultCount > 0)
                 {
-                    message += $"\n {duplicateCount} sản phẩm chi tiết đã tồn tại.";
+                    message += $"Tạo mới {resultCount} sản phẩm chi tiết thành công.";
+                }
+                if (updatedCount > 0)
+                {
+                    if (message.Length > 0) message += " ";
+                    message += $"Cập nhật số lượng {updatedCount} sản phẩm chi tiết đã tồn tại.";
                 }
                 if (errorList.Count > 0)
                 {
-                    message += $"\n {string.Join("; ", errorList)}";
+                    message += $"\nLỗi: {string.Join("; ", errorList)}";
                 }
-                return Json(new { success = true, message = message, data = createdItems, duplicateCount = duplicateCount });
+                
+                return Json(new { 
+                    success = true, 
+                    message = message, 
+                    data = createdItems.Concat(updatedItems).ToList(), 
+                    createdCount = resultCount,
+                    updatedCount = updatedCount 
+                });
             }
             else
             {
-                if (duplicateCount > 0)
-                {
-                    return Json(new { success = false, message = $"{duplicateCount} sản phẩm chi tiết đã tồn tại." });
-                }
-                else if (errorList.Count > 0)
+                if (errorList.Count > 0)
                 {
                     return Json(new { success = false, message = string.Join("; ", errorList) });
                 }
