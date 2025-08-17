@@ -224,7 +224,7 @@ namespace SneakFit.Admin.Controllers
                 var result = await _hoaDonApiClient.UpdateStatusAndLogAsync(hoaDonId, newStatus, userId, nguoiChinhSua, ghiChu);
                 if (result)
                     return Ok(new { success = true });
-                return BadRequest(new { success = false, message = "Không thể cập nhật trạng thái hóa đơn!" });
+                return BadRequest(new { success = false, message = "Sản phẩm đã hết hàng!" });
             }
             catch (Exception ex)
             {

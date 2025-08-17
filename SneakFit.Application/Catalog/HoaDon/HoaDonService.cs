@@ -380,16 +380,44 @@ namespace SneakFit.Application.Catalog.HoaDon
             if (string.IsNullOrWhiteSpace(ghiChu))
                 return false; // hoặc throw new ArgumentException("Ghi chú không được để trống!");
 
-            var hoaDon = await _context.HoaDon.FindAsync(hoaDonId);
+             var hoaDon = await _context.HoaDon
+                .Include(h => h.HoaDonChiTiet)
+                .ThenInclude(hdct => hdct.SanPhamChiTiet)
+                .FirstOrDefaultAsync(h => h.Id == hoaDonId);
             if (hoaDon == null)
                 return false;
 
             var oldStatus = hoaDon.TrangThai;
             if (oldStatus == newStatus)
-                return true; // No change
+                return true;
 
             hoaDon.TrangThai = newStatus;
-
+            // Nếu là hóa dơn online cod 
+            if (hoaDon.LoaiHoaDon == Data.Enums.LoaiHoaDon.Online && hoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD && newStatus == Data.Enums.TrangThaiHoaDon.DaXacNhan)
+            {
+                if (hoaDon.HoaDonChiTiet != null)
+                {
+                    // nếu sản phẩm hết hàng thì sẽ không trừ số lượng trong kho hàng và hủy bỏ hóa đơn của khách hàng đó
+                    foreach (var hdct in hoaDon.HoaDonChiTiet)
+                    {
+                        var sanPham = await _context.SanPham.FindAsync(hdct.SanPhamChiTiet.SanPhamId);
+                        if (sanPham == null || !sanPham.TrangThai)
+                        {
+                            // Báo lỗi: Sản phẩm không hoạt động
+                            throw new Exception($"Sản phẩm {sanPham?.TenSanPham ?? ""} hiện không hoạt động, không thể xác nhận đơn hàng!");
+                        }
+                        if (hdct.SanPhamChiTiet != null)
+                        {
+                            if (hdct.SanPhamChiTiet.SoLuong < hdct.SoLuong)
+                            {
+                                throw new Exception($"Sản phẩm trong kho đã hết hàng!");
+                            }
+                            hdct.SanPhamChiTiet.SoLuong -= hdct.SoLuong;
+                        }
+                        // Nếu muốn kiểm tra hết hàng thì có thể thêm logic báo lỗi ở đây
+                    }
+                }
+            }
             // Kiểm tra nếu là hóa đơn online và trạng thái mới là "Đã thanh toán"
             if (hoaDon.LoaiHoaDon == Data.Enums.LoaiHoaDon.Online && hoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD && newStatus == Data.Enums.TrangThaiHoaDon.DaThanhToan)
             {
