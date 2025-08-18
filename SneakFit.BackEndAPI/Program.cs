@@ -21,6 +21,7 @@ using SneakFit.Application.Catalog.SanPhamChiTiet;
 using SneakFit.Application.Catalog.ThanhToan;
 using SneakFit.Application.Catalog.ThongKe;
 using SneakFit.Application.Catalog.ThuongHieu;
+using SneakFit.Application.Catalog.TraHang;
 using SneakFit.Application.Catalog.Voucher;
 using SneakFit.Application.Email;
 using SneakFit.Application.GHN;
@@ -101,8 +102,10 @@ builder.Services.AddScoped<IHoaDonClientService, HoaDonClientService>();// khai 
 builder.Services.AddScoped<IHoaDonChiTietClientService, HoaDonChiTietClientService>();// khai báo dịch vụ
 builder.Services.AddHttpClient<IGhnService, GhnService>();
 builder.Services.AddScoped<IThongKeService, ThongKeService>();
-builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IThanhToanService, ThanhToanService>();
+builder.Services.AddScoped<IReturnService, ReturnService>();
+
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllFrontend", policy =>

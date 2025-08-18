@@ -1,0 +1,76 @@
+﻿@model SneakFit.ViewModels.Catalog.TraHang.ReturnViewModel
+@using SneakFit.Data.Enums
+
+@{
+    ViewData["Title"] = "Chi tiết yêu cầu trả hàng";
+    string ToText(ReturnStatus s) => s switch
+    {
+        ReturnStatus.ChapNhanDuyetHangHoan => "Chờ phê duyệt",
+        ReturnStatus.LayHangHoan => "Đang vận chuyển về",
+        ReturnStatus.HoanHang => "Đã nhận hoàn hàng",
+        ReturnStatus.ThanhCong => "Đã hoàn hàng thành công",
+        ReturnStatus.TuChoi => "Từ chối",
+        _ => "Không xác định"
+    };
+    var isRejected = Model.Status == ReturnStatus.TuChoi; // THÊM DÒNG NÀY
+}
+
+<div class="container py-4">
+    <h4 class="mb-3">Chi tiết yêu cầu trả hàng</h4>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <p><b>Mã yêu cầu:</b> @Model.Code</p>
+            <p><b>Ngày tạo:</b> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+            <p><b>Trạng thái:</b> @ToText(Model.Status)</p>
+            <p><b>Lý do:</b> @Model.Reason</p>
+            <p><b>Hình thức:</b> Hoàn tiền qua tài khoản cá nhân</p>
+
+            @if (!string.IsNullOrEmpty(Model.ShippingCarrier))
+            {
+                <p><b>Đơn vị vận chuyển:</b> @Model.ShippingCarrier</p>
+            }
+            @if (!string.IsNullOrEmpty(Model.ShippingCode))
+            {
+                <p><b>Mã vận đơn:</b> @Model.ShippingCode</p>
+            }
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <ul class="list-group list-group-horizontal flex-wrap">
+            <li class="list-group-item @(!isRejected && Model.Status >= ReturnStatus.ChapNhanDuyetHangHoan ? "bg-success text-white" : "")">Chờ phê duyệt</li>
+            <li class="list-group-item @(!isRejected && Model.Status >= ReturnStatus.LayHangHoan ? "bg-success text-white" : "")">Đang vận chuyển về</li>
+            <li class="list-group-item @(!isRejected && Model.Status >= ReturnStatus.HoanHang ? "bg-success text-white" : "")">Đã nhận hoàn hàng</li>
+            <li class="list-group-item @(!isRejected && Model.Status >= ReturnStatus.ThanhCong ? "bg-success text-white" : "")">Đã hoàn hàng thành công</li>
+            @if (isRejected)
+            {
+                <li class="list-group-item bg-danger text-white">Đã từ chối</li>
+            }
+        </ul>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a class="btn btn-secondary" asp-action="Index">Danh sách yêu cầu</a>
+        <a class="btn btn-outline-primary" asp-controller="HoaDon" asp-action="Details" asp-route-id="@Model.OrderId">Xem hóa đơn</a>
+
+        @if (Model.Status == ReturnStatus.ChapNhanDuyetHangHoan)
+        {
+            <form asp-action="Cancel" method="post" class="d-inline">
+                <input type="hidden" name="id" value="@Model.ReturnId" />
+                <input type="hidden" name="orderId" value="@Model.OrderId" />
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Xác nhận hủy yêu cầu?');">Hủy yêu cầu</button>
+                @Html.AntiForgeryToken()
+            </form>
+        }
+    </div>
+</div>

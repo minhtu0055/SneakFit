@@ -1,0 +1,77 @@
+﻿@model SneakFit.ViewModels.Common.PagedResult<SneakFit.ViewModels.Catalog.TraHang.ReturnViewModel>
+@using SneakFit.Data.Enums
+@using System.Linq
+@{
+    ViewData["Title"] = "Yêu cầu hoàn hàng";
+    string S(ReturnStatus s) => s switch
+    {
+        ReturnStatus.ChapNhanDuyetHangHoan => "Chấp nhận duyệt hàng hoàn",
+        ReturnStatus.LayHangHoan => "Lấy hàng hoàn",
+        ReturnStatus.HoanHang => "Hoàn hàng (check hàng hoàn)",
+        ReturnStatus.ThanhCong => "Thành công",
+        ReturnStatus.TuChoi => "Từ chối",
+        _ => "Không xác định"
+    };
+
+    ReturnStatus? selected = ViewBag.Status != null ? (ReturnStatus)ViewBag.Status : (ReturnStatus?)null;
+}
+<div class="container py-3">
+    <h4 class="mb-3">Danh sách yêu cầu hoàn hàng</h4>
+
+    <form method="get" class="row g-2 mb-3">
+        <div class="col-md-2">
+            <select name="status" class="form-select">
+                <option value="">-- Tất cả --</option>
+                @foreach (var st in Enum.GetValues(typeof(ReturnStatus)).Cast<ReturnStatus>())
+                {
+                    <option value="@((int)st)" selected="@(selected == st)">@S(st)</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3"><input name="keyword" class="form-control" placeholder="Mã/ Lý do" value="@(ViewBag.Keyword ?? "")" /></div>
+        <div class="col-md-2"><input type="date" name="from" class="form-control" value="@(ViewBag.From is DateTime f ? f.ToString("yyyy-MM-dd") : "")" /></div>
+        <div class="col-md-2"><input type="date" name="to" class="form-control" value="@(ViewBag.To is DateTime t ? t.ToString("yyyy-MM-dd") : "")" /></div>
+        <div class="col-md-3"><button class="btn btn-primary">Lọc</button></div>
+    </form>
+
+    @if (Model?.Items == null || !Model.Items.Any())
+    {
+        <div class="alert alert-info">Chưa có yêu cầu nào.</div>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead><tr><th>Mã</th><th>Ngày tạo</th><th>Trạng thái</th><th></th></tr></thead>
+            <tbody>
+            @foreach (var r in Model.Items)
+            {
+                <tr>
+                    <td>@r.Code</td>
+                    <td>@r.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@S(r.Status)</td>
+                    <td><a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@r.ReturnId">Xem</a></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+
+      
+        <nav>
+            <ul class="pagination">
+                @for (int i = 1; i <= (int)Math.Ceiling((double)Model.TotalRecords / Model.PageSize); i++)
+                {
+                    <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                        <a class="page-link"
+                           asp-action="Index"
+                           asp-route-pageIndex="@i"
+                           asp-route-pageSize="@Model.PageSize"
+                           asp-route-status="@((int?)selected)"
+                           asp-route-keyword="@((string)ViewBag.Keyword)"
+                           asp-route-from="@((DateTime?)ViewBag.From)"
+                           asp-route-to="@((DateTime?)ViewBag.To)">@i</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>

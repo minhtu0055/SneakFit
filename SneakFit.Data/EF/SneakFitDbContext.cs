@@ -71,6 +71,9 @@ namespace SneakFit.Data.EF
         public DbSet<Voucher> Voucher { get; set; }
         public DbSet<VoucherUser> VoucherUser { get; set; }
         public DbSet<LichSuHoaDon> LichSuHoaDon { get; set; }
+        public DbSet<ReturnRequest> ReturnRequests { get; set; }
+        public DbSet<ReturnRequestItem> ReturnRequestItems { get; set; }
+        public DbSet<ReturnStatusHistory> ReturnStatusHistories { get; set; }
 
     }
 }

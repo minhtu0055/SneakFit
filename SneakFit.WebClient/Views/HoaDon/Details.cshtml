@@ -220,6 +220,7 @@
             <!-- Hành động -->
             <div class="section-box actions text-center">
                 <a href="@Url.Action("Index", "HoaDon")" class="btn btn-primary">Quay về danh sách</a>
+
                 @if ((int)Model.HoaDonClient.TrangThai == 0 && Model.HoaDonClient.PhuongThucThanhToan == SneakFit.Data.Enums.PhuongThucThanhToan.COD) // ChoXacNhan và COD
                 {
                     <form method="post" action="@Url.Action("CancelOrder", "ThanhToan", new { id = Model.HoaDonClient.Id })" style="display:inline-block;" id="cancelOrderForm">
@@ -228,9 +229,9 @@
                 }
                 @if ((int)Model.HoaDonClient.TrangThai == 5) // ThanhCong
                 {
-                    <form method="post" action="@Url.Action("ReturnOrder", "ThanhToan", new { id = Model.HoaDonClient.Id })" style="display:inline-block;">
-                        <button type="submit" class="btn btn-warning" onclick="return confirm('Bạn có chắc chắn muốn trả hàng cho hóa đơn này?');">Trả hàng</button>
-                    </form>
+                    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#returnModal">
+                        Yêu cầu trả hàng/hoàn tiền
+                    </button>
                 }
             </div>
         }
@@ -252,6 +253,38 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal: Yêu cầu trả hàng -->
+    <div class="modal fade" id="returnModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form asp-controller="TraHang" asp-action="Create" method="post" enctype="multipart/form-data">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="returnModalLabel">Yêu cầu trả hàng/hoàn tiền</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="OrderId" value="@Model.HoaDonClient.Id" />
+                        <div class="mb-2">
+                            <label class="form-label">Lý do</label>
+                            <textarea name="Reason" class="form-control" required></textarea>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Hình thức hoàn</label>
+                            <div class="form-control-plaintext">Admin sẽ hoàn lại qua tài khoản cá nhân</div>
+                            <input type="hidden" name="Method" value="2" />
+                        </div>
+
+
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-primary">Gửi yêu cầu</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 </main>
 
 @section Scripts {

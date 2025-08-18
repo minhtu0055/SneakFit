@@ -1,0 +1,78 @@
+﻿@model SneakFit.ViewModels.Common.PagedResult<SneakFit.ViewModels.Catalog.TraHang.ReturnViewModel>
+@using SneakFit.Data.Enums
+
+@{
+    ViewData["Title"] = "Yêu cầu trả hàng của tôi";
+    string ToText(ReturnStatus s) => s switch
+    {
+        ReturnStatus.ChapNhanDuyetHangHoan => "Chờ phê duyệt",
+        ReturnStatus.LayHangHoan => "Đang vận chuyển về",
+        ReturnStatus.HoanHang => "Đã nhận hoàn hàng",
+        ReturnStatus.ThanhCong => "Đã hoàn hàng thành công",
+        ReturnStatus.TuChoi => "Từ chối",
+        _ => "Không xác định"
+    };
+}
+
+<div class="container py-4">
+    <h4 class="mb-3">Yêu cầu trả hàng của tôi</h4>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+
+    @if (Model?.Items == null || !Model.Items.Any())
+    {
+        <div class="alert alert-info">Chưa có yêu cầu trả hàng nào.</div>
+    }
+    else
+    {
+        <table class="table table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>Mã yêu cầu</th>
+                    <th>Ngày tạo</th>
+                    <th>Trạng thái</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in Model.Items)
+                {
+                    <tr>
+                        <td>@r.Code</td>
+                        <td>@r.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>@ToText(r.Status)</td>
+                        <td><a class="btn btn-sm btn-primary" asp-action="Detail" asp-route-id="@r.ReturnId">Xem</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <nav>
+            <ul class="pagination">
+                @{
+                    var totalPages = (int)Math.Ceiling((double)(Model.TotalRecords) / Model.PageSize);
+                    var pageIndex = Model.PageIndex;
+                }
+                <li class="page-item @(pageIndex <= 1 ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-pageIndex="@(pageIndex - 1)" asp-route-pageSize="@Model.PageSize">Trước</a>
+                </li>
+                @for (int i = 1; i <= totalPages; i++)
+                {
+                    <li class="page-item @(pageIndex == i ? "active" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-pageIndex="@i" asp-route-pageSize="@Model.PageSize">@i</a>
+                    </li>
+                }
+                <li class="page-item @(pageIndex >= totalPages ? "disabled" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-pageIndex="@(pageIndex + 1)" asp-route-pageSize="@Model.PageSize">Sau</a>
+                </li>
+            </ul>
+        </nav>
+    }
+</div>
