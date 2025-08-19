@@ -37,6 +37,12 @@ namespace SneakFit.Application.Catalog.TraHang
             if (order == null) return new ApiResult<Guid> { IsSuccessed = false, Message = "Không tìm thấy hóa đơn của bạn." };
             if (order.TrangThai != TrangThaiHoaDon.ThanhCong) return new ApiResult<Guid> { IsSuccessed = false, Message = "Chỉ tạo yêu cầu khi đơn đã thành công." };
 
+            // NEW: Chặn tạo trùng cho cùng đơn hàng, NHƯNG CHO PHÉP nếu yêu cầu cũ đã bị TỪ CHỐI
+            var existed = await _db.ReturnRequests.AsNoTracking()
+                .AnyAsync(x => x.OrderId == request.OrderId && x.UserId == userId && x.Status != ReturnStatus.TuChoi);
+            if (existed)
+                return new ApiResult<Guid> { IsSuccessed = false, Message = "Bạn đã yêu cầu trả hàng/hoàn tiền cho đơn hàng này." };
+
             var entity = new ReturnRequest
             {
                 Id = Guid.NewGuid(),
@@ -66,6 +72,13 @@ namespace SneakFit.Application.Catalog.TraHang
             _db.ReturnRequests.Add(entity);
             await _db.SaveChangesAsync();
             return new ApiResult<Guid> { IsSuccessed = true, ResultObj = entity.Id, Message = "Đã tạo yêu cầu." };
+        }
+
+        // NEW: Kiểm tra tồn tại yêu cầu trả hàng cho một đơn (loại trừ TuChoi)
+        public async Task<bool> HasReturnAsync(Guid orderId, Guid userId)
+        {
+            return await _db.ReturnRequests.AsNoTracking()
+                .AnyAsync(x => x.OrderId == orderId && x.UserId == userId && x.Status != ReturnStatus.TuChoi);
         }
 
         public async Task<PagedResult<ReturnViewModel>> GetMyAsync(Guid userId, int pageIndex, int pageSize)

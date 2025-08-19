@@ -263,6 +263,9 @@ namespace SneakFit.WebClient.Controllers
                     return RedirectToAction("Index");
                 }
 
+                // Kiểm tra xem hóa đơn có yêu cầu trả hàng chưa
+                hoaDon.HasReturnRequest = await _returnApiClient.HasAsync(id);
+
                 var chiTietHoaDon = await _hoaDonChiTietClientApiClient.GetByHoaDonId(id);
                 // Lấy thông tin khuyến mãi cho từng sản phẩm chi tiết
                 foreach (var item in chiTietHoaDon)
@@ -322,6 +325,9 @@ namespace SneakFit.WebClient.Controllers
                 {
                     return Json(new { success = false, message = "Không tìm thấy đơn hàng hoặc bạn không có quyền xem đơn hàng này." });
                 }
+
+                // Kiểm tra xem hóa đơn có yêu cầu trả hàng chưa
+                hoaDon.HasReturnRequest = await _returnApiClient.HasAsync(id);
 
                 var chiTietHoaDon = await _hoaDonChiTietClientApiClient.GetByHoaDonId(id);
                 // Lấy thông tin khuyến mãi cho từng sản phẩm chi tiết

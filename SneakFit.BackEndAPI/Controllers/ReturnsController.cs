@@ -32,6 +32,15 @@ namespace SneakFit.BackEndAPI.Controllers
             return Ok(result);
         }
 
+        // NEW: Kiểm tra đơn hàng đã có yêu cầu trả hàng chưa (theo user đang đăng nhập)
+        [HttpGet("has")]
+        public async Task<IActionResult> Has([FromQuery] Guid orderId)
+        {
+            var userId = GetUserIdOrThrow();
+            var has = await _service.HasReturnAsync(orderId, userId);
+            return Ok(has);
+        }
+
         [HttpGet("my")]
         public async Task<IActionResult> GetMy([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
         {

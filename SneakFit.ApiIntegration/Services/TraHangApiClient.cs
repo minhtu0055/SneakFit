@@ -187,5 +187,23 @@ namespace SneakFit.ApiIntegration.Services
                 return new ApiResult<bool> { IsSuccessed = false, Message = $"Lỗi server: {body}" };
             }
         }
+        public async Task<bool> HasAsync(Guid orderId)
+        {
+            var client = CreateClient();
+            var response = await client.GetAsync($"/api/returns/has?orderId={orderId}");
+            var body = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                // Body có thể là "true"/"false" hoặc JSON boolean
+                if (bool.TryParse(body, out var simple)) return simple;
+                try
+                {
+                    return Newtonsoft.Json.JsonConvert.DeserializeObject<bool>(body);
+                }
+                catch { return false; }
+            }
+            return false;
+        }
     }
 }

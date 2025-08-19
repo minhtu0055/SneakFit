@@ -13,13 +13,19 @@ namespace SneakFit.WebClient.Controllers
         private readonly IHoaDonChiTietClientApiClient _hoaDonChiTietClientApiClient;
         private readonly IVoucherApiClient _voucherApiClient;
         private readonly ISpctApiClient _spctApiClient;
+        private readonly ITraHangApiClient _traHangApiClient;
 
-        public HoaDonController(IHoaDonClientApiClient hoaDonClientApiClient, IHoaDonChiTietClientApiClient hoaDonChiTietClientApiClient, IVoucherApiClient voucherApiClient, ISpctApiClient spctApiClient)
+        public HoaDonController(IHoaDonClientApiClient hoaDonClientApiClient, 
+                                IHoaDonChiTietClientApiClient hoaDonChiTietClientApiClient, 
+                                IVoucherApiClient voucherApiClient, 
+                                ISpctApiClient spctApiClient, 
+                                ITraHangApiClient traHangApiClient)
         {
             _hoaDonClientApiClient = hoaDonClientApiClient;
             _hoaDonChiTietClientApiClient = hoaDonChiTietClientApiClient;
             _voucherApiClient = voucherApiClient;
             _spctApiClient = spctApiClient;
+            _traHangApiClient = traHangApiClient;
         }
         private Guid GetUserId()
         {
@@ -80,6 +86,9 @@ namespace SneakFit.WebClient.Controllers
                     TempData["ErrorMessage"] = "Không tìm thấy đơn hàng hoặc bạn không có quyền xem đơn hàng này.";
                     return RedirectToAction("Index");
                 }
+
+                // Kiểm tra xem hóa đơn có yêu cầu trả hàng chưa
+                hoaDon.HasReturnRequest = await _traHangApiClient.HasAsync(id);
 
                 var chiTietHoaDon = await _hoaDonChiTietClientApiClient.GetByHoaDonId(id);
                 // Lấy thông tin khuyến mãi cho từng sản phẩm chi tiết

@@ -366,6 +366,17 @@
         }
 
         $(function() {
+            // Nếu không có cart-item nào, khóa "chọn tất cả" và chỉ tính lại tổng để hiển thị 0 VNĐ
+            if ($('.cart-item').length === 0) {
+                $('#select-all').prop('disabled', true);
+                // Đảm bảo không lỗi nếu thiếu các element giảm giá (vì bạn đang comment khu vực voucher)
+                window.appliedVoucher = null;
+                window.discountAmount = 0;
+                // Tính tổng lần đầu (sẽ là 0 + phí ship)
+                calculateTotals();
+                return; // Không bind các handler liên quan tới số lượng/xóa vì không cần thiết
+            }
+
             // Khởi tạo số lượng & maxQuantity
             $('.quantity-input').each(function() {
                 let $input = $(this);

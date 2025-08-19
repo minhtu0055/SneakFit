@@ -11,5 +11,6 @@ namespace SneakFit.ApiIntegration.Services
         Task<ApiSuccessResult<ReturnViewModel>> GetDetailAsync(Guid returnId);
         Task<ReturnViewModel?> GetDetailAsync(Guid id, Guid userId);
         Task<ApiResult<bool>> CancelAsync(Guid returnId);
+        Task<bool> HasAsync(Guid orderId);
     }
 }

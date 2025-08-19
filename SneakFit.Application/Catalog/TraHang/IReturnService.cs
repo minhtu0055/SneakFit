@@ -29,5 +29,8 @@ namespace SneakFit.Application.Catalog.TraHang
         // Methods mới cho chuyển đổi trạng thái với ghi chú
         Task<ApiResult<bool>> UpdateStatusWithLogAsync(Guid id, ReturnStatus newStatus, string ghiChu, string nguoiChinhSua);
         Task<List<ReturnStatusHistoryViewModel>> GetStatusHistoryAsync(Guid returnRequestId);
+
+        // NEW: Kiểm tra đơn hàng đã có yêu cầu trả hàng của user chưa
+        Task<bool> HasReturnAsync(Guid orderId, Guid userId);
     }
 }

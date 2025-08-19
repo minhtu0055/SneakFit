@@ -1,6 +1,104 @@
 @model SneakFit.ViewModels.Catalog.TraHang.ReturnViewModel
 @using SneakFit.Data.Enums
 
+@{
+    // Map trạng thái -> index (đi đến bước này, các bước sau xám)
+    // 0: Chờ duyệt | 1: Lấy hàng hoàn | 2: Hoàn hàng | 3: Thành công | -2: Từ chối
+    var rStep = Model.Status switch
+    {
+        ReturnStatus.ChapNhanDuyetHangHoan => 0,
+        ReturnStatus.LayHangHoan => 1,
+        ReturnStatus.HoanHang => 2,
+        ReturnStatus.ThanhCong => 3,
+        ReturnStatus.TuChoi => -2,
+        _ => -1
+    };
+
+    bool isRejected = (rStep == -2);
+
+    // Helper: ACTIVE nếu đã tới bước này (<= rStep), ngược lại xám
+    string UpTo(int step) => (!isRejected && rStep >= step) ? "" : "step-inactive";
+}
+
+<!-- Progress trạng thái Trả Hàng -->
+<div class="section-box confirmation-message mb-4 text-center">
+    <div class="progress-timeline" style="border-bottom: 2px solid #60A5FA;">
+        <div class="arrow-progress">
+            @if (!isRejected)
+            {
+                <!-- 4 đoạn, sáng đến bước hiện tại -->
+                <div class="arrow-segment royal-blue @UpTo(0)"><div class="arrow-dot"></div></div>
+                <div class="arrow-segment indigo      @UpTo(1)"><div class="arrow-dot"></div></div>
+                <div class="arrow-segment purple      @UpTo(2)"><div class="arrow-dot"></div></div>
+                <div class="arrow-segment emerald     @UpTo(3)"><div class="arrow-dot"></div></div>
+            }
+            else
+            {
+                <!-- Bị hủy: chỉ 2 đoạn (Chờ duyệt + Từ chối) -->
+                <div class="arrow-segment royal-blue"><div class="arrow-dot"></div></div>
+                <div class="arrow-segment danger"><div class="arrow-dot"></div></div>
+            }
+        </div>
+
+        @if (!isRejected)
+        {
+            <!-- Nhãn 4 bước, sáng đến bước hiện tại -->
+            <div class="progress-step">
+                <div class="step-icon royal-blue icon-file @UpTo(0)"></div>
+                <div class="step-connector royal-blue @UpTo(0)"></div>
+                <div class="step-title @UpTo(0)">Chờ duyệt</div>
+                <div class="step-description @UpTo(0)">Chờ duyệt hàng hoàn</div>
+            </div>
+
+            <div class="progress-step">
+                <div class="step-icon indigo icon-truck @UpTo(1)"></div>
+                <div class="step-connector indigo @UpTo(1)"></div>
+                <div class="step-title @UpTo(1)">Lấy hàng hoàn</div>
+                <div class="step-description @UpTo(1)">Đơn vị lấy hàng hoàn</div>
+            </div>
+
+            <div class="progress-step">
+                <div class="step-icon purple icon-delivery @UpTo(2)"></div>
+                <div class="step-connector purple @UpTo(2)"></div>
+                <div class="step-title @UpTo(2)">Hoàn hàng</div>
+                <div class="step-description @UpTo(2)">Kiểm tra hàng hoàn</div>
+            </div>
+
+            <div class="progress-step">
+                <div class="step-icon emerald icon-check @UpTo(3)"></div>
+                <div class="step-connector emerald @UpTo(3)"></div>
+                <div class="step-title @UpTo(3)">Thành công</div>
+                <div class="step-description @UpTo(3)">Đã hoàn tất xử lý</div>
+            </div>
+        }
+        else
+        {
+            <!-- Nhãn 2 bước: Chờ duyệt + Từ chối -->
+            <div class="progress-step">
+                <div class="step-icon royal-blue icon-file"></div>
+                <div class="step-connector royal-blue"></div>
+                <div class="step-title">Chờ duyệt</div>
+                <div class="step-description">Chờ duyệt hàng hoàn</div>
+            </div>
+
+            <div class="progress-step">
+                <div class="step-icon danger icon-x"></div>
+                <div class="step-connector danger"></div>
+                <div class="step-title">Từ chối</div>
+                <div class="step-description">Yêu cầu đã bị từ chối</div>
+            </div>
+        }
+    </div>
+
+    <p class="mb-0">
+        Mã yêu cầu trả: <strong>@Model.Code</strong>
+        @if (!string.IsNullOrEmpty(Model.ShippingCode))
+        {
+            <span class="ms-2">| Mã vận đơn: <strong>@Model.ShippingCode</strong></span>
+        }
+    </p>
+</div>
+
 <div class="section-box">
     <div class="row">
         <div class="col-md-12">
@@ -187,6 +285,29 @@
     .timeline-content {
         margin-left: 10px;
     }
+
+    /* Màu ĐỎ cho trạng thái từ chối */
+    .arrow-segment.danger::before {
+        background-color: #ef4444;
+    }
+
+    .step-icon.danger {
+        background-color: #ef4444 !important;
+    }
+
+    .step-connector.danger {
+        background-color: #ef4444 !important;
+    }
+
+    /* Icon chữ X (từ chối) */
+    .icon-x::before {
+        content: "";
+        display: block;
+        width: 24px;
+        height: 24px;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z'/%3E%3C/svg%3E") center/contain no-repeat;
+    }
+
 </style>
 
 @functions {

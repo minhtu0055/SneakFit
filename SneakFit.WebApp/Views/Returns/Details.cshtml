@@ -34,20 +34,65 @@
     var nextStatus = GetNextStatus(Model.Status);
     var canChangeStatus = nextStatus.HasValue && Model.Status != ReturnStatus.ThanhCong && Model.Status != ReturnStatus.TuChoi;
 
-    // Tạo timeline steps cho hoàn hàng
-    var steps = new[]
-    {
-        new { Status = ReturnStatus.ChapNhanDuyetHangHoan, Color = "warning", Icon = "icon-file", Title = "Chờ duyệt", Time = Model.CreatedAt.ToString("HH:mm:ss dd/MM/yyyy") },
-        new { Status = ReturnStatus.LayHangHoan, Color = "info", Icon = "icon-truck", Title = "Lấy hàng hoàn", Time = Model.Status >= ReturnStatus.LayHangHoan ? (Model.UpdatedAt?.ToString("HH:mm:ss dd/MM/yyyy") ?? "Đang xử lý") : "Chưa thực hiện" },
-        new { Status = ReturnStatus.HoanHang, Color = "primary", Icon = "icon-delivery", Title = "Hoàn hàng (check hàng hoàn)", Time = Model.Status >= ReturnStatus.HoanHang ? (Model.UpdatedAt?.ToString("HH:mm:ss dd/MM/yyyy") ?? "Đang xử lý") : "Chưa thực hiện" },
-        new { Status = ReturnStatus.ThanhCong, Color = "success", Icon = "icon-check", Title = "Thành công", Time = Model.Status == ReturnStatus.ThanhCong ? (Model.UpdatedAt?.ToString("HH:mm:ss dd/MM/yyyy") ?? "Đang xử lý") : "Chưa thực hiện" }
-    };
+    // // Tạo timeline steps cho hoàn hàng
+    // var steps = new[]
+    // {
+    //     new { Status = ReturnStatus.ChapNhanDuyetHangHoan, Color = "warning", Icon = "icon-file", Title = "Chờ duyệt", Time = Model.CreatedAt.ToString("HH:mm:ss dd/MM/yyyy") },
+    //     new { Status = ReturnStatus.LayHangHoan, Color = "info", Icon = "icon-truck", Title = "Lấy hàng hoàn", Time = Model.Status >= ReturnStatus.LayHangHoan ? (Model.UpdatedAt?.ToString("HH:mm:ss dd/MM/yyyy") ?? "Đang xử lý") : "Chưa thực hiện" },
+    //     new { Status = ReturnStatus.HoanHang, Color = "primary", Icon = "icon-delivery", Title = "Hoàn hàng (check hàng hoàn)", Time = Model.Status >= ReturnStatus.HoanHang ? (Model.UpdatedAt?.ToString("HH:mm:ss dd/MM/yyyy") ?? "Đang xử lý") : "Chưa thực hiện" },
+    //     new { Status = ReturnStatus.ThanhCong, Color = "success", Icon = "icon-check", Title = "Thành công", Time = Model.Status == ReturnStatus.ThanhCong ? (Model.UpdatedAt?.ToString("HH:mm:ss dd/MM/yyyy") ?? "Đang xử lý") : "Chưa thực hiện" }
+    // };
 
-    // Lọc các bước hiển thị
-    var visibleSteps = steps.Where(s => 
-        (int)s.Status <= (int)Model.Status || 
-        s.Status == ReturnStatus.ChapNhanDuyetHangHoan // Luôn hiển thị bước đầu tiên
-    ).Distinct().OrderBy(s => (int)s.Status).ToList();
+    // // Lọc các bước hiển thị
+    // var visibleSteps = steps.Where(s =>
+    //     (int)s.Status <= (int)Model.Status ||
+    //     s.Status == ReturnStatus.ChapNhanDuyetHangHoan // Luôn hiển thị bước đầu tiên
+    // ).Distinct().OrderBy(s => (int)s.Status).ToList();
+    // Tạo timeline steps theo trạng thái
+
+    IEnumerable<dynamic> steps;
+
+    if (Model.Status == ReturnStatus.TuChoi)
+    {
+        // Case bị từ chối: chỉ hiển thị "Chờ duyệt" và "Từ chối"
+        steps = new[]
+        {
+        new {
+            Status = ReturnStatus.ChapNhanDuyetHangHoan,
+            Color = "warning",
+            Icon = "icon-file",
+            Title = "Chờ duyệt",
+            Time = Model.CreatedAt.ToString("HH:mm:ss dd/MM/yyyy")
+        },
+        new {
+            Status = ReturnStatus.TuChoi,
+            Color = "danger",
+            Icon = "icon-times", // thêm icon chéo
+            Title = "Từ chối",
+            Time = Model.Status == ReturnStatus.TuChoi
+                ? (Model.UpdatedAt?.ToString("HH:mm:ss dd/MM/yyyy") ?? "Đang xử lý")
+                : "Chưa thực hiện"
+        }
+    };
+    }
+    else
+    {
+        // Flow bình thường 4 bước
+        steps = new[]
+        {
+        new { Status = ReturnStatus.ChapNhanDuyetHangHoan, Color = "warning", Icon = "icon-file",     Title = "Chờ duyệt",                         Time = Model.CreatedAt.ToString("HH:mm:ss dd/MM/yyyy") },
+        new { Status = ReturnStatus.LayHangHoan,           Color = "info",    Icon = "icon-truck",    Title = "Lấy hàng hoàn",                     Time = Model.Status >= ReturnStatus.LayHangHoan ? (Model.UpdatedAt?.ToString("HH:mm:ss dd/MM/yyyy") ?? "Đang xử lý") : "Chưa thực hiện" },
+        new { Status = ReturnStatus.HoanHang,              Color = "primary", Icon = "icon-delivery", Title = "Hoàn hàng (check hàng hoàn)",       Time = Model.Status >= ReturnStatus.HoanHang    ? (Model.UpdatedAt?.ToString("HH:mm:ss dd/MM/yyyy") ?? "Đang xử lý") : "Chưa thực hiện" },
+        new { Status = ReturnStatus.ThanhCong,             Color = "success", Icon = "icon-check",    Title = "Thành công",                         Time = Model.Status == ReturnStatus.ThanhCong   ? (Model.UpdatedAt?.ToString("HH:mm:ss dd/MM/yyyy") ?? "Đang xử lý") : "Chưa thực hiện" }
+    };
+    }
+
+    // Lọc/Sort hiển thị
+    var visibleSteps = steps
+        .Where(s => (int)s.Status <= (int)Model.Status || s.Status == ReturnStatus.ChapNhanDuyetHangHoan)
+        .Distinct()
+        .OrderBy(s => (int)s.Status)
+        .ToList();
 }
 
 <head>
@@ -67,9 +112,9 @@
 
         .progress-timeline {
             /* Biến dùng để canh vị trí mũi tên và chiều cao đường nối */
-            --icon-size: 70px;              /* Nhỏ lại cho gọn giống _OrderDetails */
-            --icon-gap: 10px;               /* Khoảng cách dưới icon */
-            --arrow-top: 110px;             /* Vị trí top của dải mũi tên */
+            --icon-size: 70px; /* Nhỏ lại cho gọn giống _OrderDetails */
+            --icon-gap: 10px; /* Khoảng cách dưới icon */
+            --arrow-top: 110px; /* Vị trí top của dải mũi tên */
 
             display: flex;
             align-items: flex-start;
@@ -98,36 +143,40 @@
             margin: 0 2px;
         }
 
-        .arrow-segment::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 100%;
-            background-color: #e5e7eb;
-            clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%);
-        }
+            .arrow-segment::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 100%;
+                background-color: #e5e7eb;
+                clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%);
+            }
 
-        .arrow-segment.warning::before {
-            background-color: #f59e0b;
-        }
+            .arrow-segment.warning::before {
+                background-color: #f59e0b;
+            }
 
-        .arrow-segment.info::before {
-            background-color: #3b82f6;
-        }
+            .arrow-segment.info::before {
+                background-color: #3b82f6;
+            }
 
-        .arrow-segment.primary::before {
-            background-color: #8b5cf6;
-        }
+            .arrow-segment.primary::before {
+                background-color: #8b5cf6;
+            }
 
-        .arrow-segment.success::before {
-            background-color: #10b981;
-        }
+            .arrow-segment.success::before {
+                background-color: #10b981;
+            }
 
-        .arrow-segment.inactive::before {
-            background-color: #e5e7eb;
-        }
+            .arrow-segment.inactive::before {
+                background-color: #e5e7eb;
+            }
+
+            .arrow-segment.danger::before {
+                background-color: #ef4444; 
+            }
 
         /* Chấm tròn trắng trên mũi tên */
         .arrow-dot {
@@ -165,25 +214,29 @@
             transition: all 0.3s ease;
         }
 
-        .step-icon.warning {
-            background-color: #f59e0b;
-        }
+            .step-icon.warning {
+                background-color: #f59e0b;
+            }
 
-        .step-icon.info {
-            background-color: #3b82f6;
-        }
+            .step-icon.info {
+                background-color: #3b82f6;
+            }
 
-        .step-icon.primary {
-            background-color: #8b5cf6;
-        }
+            .step-icon.primary {
+                background-color: #8b5cf6;
+            }
 
-        .step-icon.success {
-            background-color: #10b981;
-        }
+            .step-icon.success {
+                background-color: #10b981;
+            }
 
-        .step-icon.inactive {
-            background-color: #9ca3af;
-        }
+            .step-icon.inactive {
+                background-color: #9ca3af;
+            }
+
+            .step-icon.danger {
+                background-color: #ef4444;
+            }
 
         .step-connector {
             position: absolute;
@@ -198,21 +251,25 @@
             z-index: 2;
         }
 
-        .step-connector.warning {
-            background-color: #f59e0b;
-        }
+            .step-connector.warning {
+                background-color: #f59e0b;
+            }
 
-        .step-connector.info {
-            background-color: #3b82f6;
-        }
+            .step-connector.info {
+                background-color: #3b82f6;
+            }
 
-        .step-connector.primary {
-            background-color: #8b5cf6;
-        }
+            .step-connector.primary {
+                background-color: #8b5cf6;
+            }
 
-        .step-connector.success {
-            background-color: #10b981;
-        }
+            .step-connector.success {
+                background-color: #10b981;
+            }
+
+            .step-connector.danger {
+                background-color: #ef4444;
+            }
 
         .step-title {
             font-size: 14px;
@@ -267,6 +324,14 @@
             background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z'/%3E%3C/svg%3E") center/contain no-repeat;
         }
 
+        .icon-times::before {
+            content: "";
+            display: block;
+            width: 24px;
+            height: 24px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z'/%3E%3C/svg%3E") center/contain no-repeat;
+        }
+
     </style>
 </head>
 
@@ -286,7 +351,7 @@
                     {
                         var isCompleted = (int)step.Status <= (int)Model.Status;
                         var arrowClass = isCompleted ? step.Color : "inactive";
-                        
+
                         <div class="arrow-segment @arrowClass">
                             <div class="arrow-dot"></div>
                         </div>
@@ -298,7 +363,7 @@
                 {
                     var isCompleted = (int)step.Status <= (int)Model.Status;
                     var stepClass = isCompleted ? step.Color : "inactive";
-                    
+
                     <div class="progress-step">
                         <div class="step-icon @stepClass @step.Icon"></div>
                         <div class="step-connector @stepClass"></div>
@@ -307,13 +372,14 @@
                     </div>
                 }
             </div>
-            
+
             <div class="d-flex justify-content-between align-items-center mt-4">
                 <div>
                     @if (canChangeStatus)
                     {
                         <button type="button" class="btn btn-primary me-2" id="btnChuyenTrangThai">
-                            <i class="fas fa-arrow-right me-2"></i>Chuyển sang @S(nextStatus.Value)
+                            @* <i class="fas fa-arrow-right me-2"></i>Chuyển sang @S(nextStatus.Value) *@
+                            <i class="fas fa-arrow-right"></i>Xác nhận
                         </button>
                     }
                     else if (Model.Status == ReturnStatus.ThanhCong)
@@ -323,6 +389,19 @@
                     else if (Model.Status == ReturnStatus.TuChoi)
                     {
                         <span class="text-danger"><i class="fas fa-times-circle me-2"></i>Đã từ chối</span>
+                    }
+                    @if (Model.Status == ReturnStatus.ChapNhanDuyetHangHoan)
+                    {
+                        <button type="button"
+                                class="btn btn-danger"
+                                id="btnOpenReject"
+                                data-bs-toggle="modal"
+                                data-bs-target="#rejectModal">
+                            <i class="fas fa-times me-1"></i> Từ chối
+                        </button>
+                        <div class="d-none">
+                            @Html.AntiForgeryToken()
+                        </div>
                     }
                 </div>
                 <div>
@@ -380,35 +459,54 @@
 <!-- Modal nhập ghi chú khi chuyển trạng thái -->
 @if (canChangeStatus && nextStatus.HasValue)
 {
-<div class="modal fade" id="modalGhiChu" tabindex="-1" aria-labelledby="modalGhiChuLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal fade" id="modalGhiChu" tabindex="-1" aria-labelledby="modalGhiChuLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalGhiChuLabel">Chuyển trạng thái</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Trạng thái hiện tại:</label>
+                        <span class="badge bg-@GetStatusColor(Model.Status)">@S(Model.Status)</span>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Trạng thái mới:</label>
+                        <span class="badge bg-@GetStatusColor(nextStatus.Value)">@S(nextStatus.Value)</span>
+                    </div>
+                    <div class="mb-3">
+                        <label for="txtGhiChu" class="form-label">Ghi chú <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="txtGhiChu" rows="3" placeholder="Nhập ghi chú cho việc chuyển trạng thái..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary" id="btnXacNhanGhiChu">Xác nhận</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Modal hủy trả hàng -->
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="modalGhiChuLabel">Chuyển trạng thái</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="modal-header py-2">
+                <h6 class="modal-title" id="rejectModalLabel">Lý do từ chối</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
             </div>
             <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label">Trạng thái hiện tại:</label>
-                    <span class="badge bg-@GetStatusColor(Model.Status)">@S(Model.Status)</span>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Trạng thái mới:</label>
-                    <span class="badge bg-@GetStatusColor(nextStatus.Value)">@S(nextStatus.Value)</span>
-                </div>
-                <div class="mb-3">
-                    <label for="txtGhiChu" class="form-label">Ghi chú <span class="text-danger">*</span></label>
-                    <textarea class="form-control" id="txtGhiChu" rows="3" placeholder="Nhập ghi chú cho việc chuyển trạng thái..." required></textarea>
-                </div>
+                <textarea id="rejectReason" class="form-control" rows="3" placeholder="Nhập lý do..." required></textarea>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-primary" id="btnXacNhanGhiChu">Xác nhận</button>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-light me-2" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger" id="btnRejectConfirm">Xác nhận</button>
             </div>
         </div>
     </div>
 </div>
-}
 
 <!-- Modal lịch sử thay đổi trạng thái -->
 <div class="modal fade" id="lichSuModal" tabindex="-1" aria-labelledby="lichSuModalLabel" aria-hidden="true">
@@ -460,14 +558,14 @@
                 }
 
                 var returnId = '@Model.ReturnId';
-                @if (nextStatus.HasValue)
-                {
-                    <text>var newStatus = @((int)nextStatus.Value);</text>
-                }
-                else
-                {
-                    <text>var newStatus = 0;</text>
-                }
+        @if (nextStatus.HasValue)
+        {
+            <text>var newStatus = @((int)nextStatus.Value);</text>
+        }
+        else
+        {
+            <text>var newStatus = 0;</text>
+        }
                 var nguoiChinhSua = '@User.Identity.Name';
 
                 $.ajax({
@@ -503,7 +601,7 @@
             $('#btnLichSu').on('click', function () {
                 var returnId = '@Model.ReturnId';
                 $('#lichSuTableBody').html('<tr><td colspan="4" class="text-center">Đang tải...</td></tr>');
-                
+
                 $.ajax({
                     url: '/Returns/GetStatusHistory',
                     method: 'GET',
@@ -567,6 +665,62 @@
                 var year = d.getFullYear();
                 return hours + ':' + minutes + ':' + seconds + ' ' + day + '/' + month + '/' + year;
             }
+        });
+
+        // Xử lý từ chối yêu cầu trả hàng
+        $(function () {
+          const rejectUrl = '@Url.Action("Reject", "Returns")';
+          const $confirmBtn = $('#btnRejectConfirm');
+          const $reason = $('#rejectReason');
+
+          // Ctrl/Cmd + Enter để gửi nhanh
+          $reason.on('keydown', function (e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+              e.preventDefault();
+              $confirmBtn.click();
+            }
+          });
+
+          $confirmBtn.on('click', function () {
+            const reason = ($reason.val() || '').trim();
+            if (!reason) {
+              if (window.toastr) toastr.error('Vui lòng nhập lý do từ chối.');
+              else alert('Vui lòng nhập lý do từ chối.');
+              $reason.focus();
+              return;
+            }
+
+            const token = $('input[name="__RequestVerificationToken"]').val();
+            const id = '@Model.ReturnId';
+
+            $confirmBtn.prop('disabled', true);
+
+            $.ajax({
+              url: rejectUrl,
+              type: 'POST',
+              data: {
+                id: id,
+                reason: reason,
+                __RequestVerificationToken: token
+              },
+              success: function () {
+                if (window.toastr) toastr.success('Đã từ chối yêu cầu trả hàng.');
+                // Reload để cập nhật timeline/badge
+                setTimeout(function(){ location.reload(); }, 600);
+              },
+              error: function (xhr) {
+                const msg = (xhr.responseJSON && xhr.responseJSON.message) || 'Có lỗi xảy ra khi từ chối.';
+                if (window.toastr) toastr.error(msg); else alert(msg);
+                $confirmBtn.prop('disabled', false);
+              }
+            });
+          });
+
+          // Reset khi đóng modal
+          $('#rejectModal').on('hidden.bs.modal', function () {
+            $confirmBtn.prop('disabled', false);
+            $reason.val('');
+          });
         });
     </script>
 }

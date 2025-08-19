@@ -25,7 +25,7 @@
     bool isInactive = step == -1;
 }
 
-<main class="main py-4 bg-light">
+<main class="main py-4 bg-light" style="border-radius: 8px;">
     <div class="container">
         @* @if (TempData["ErrorMessage"] != null)
         {
@@ -333,9 +333,14 @@
                 }
                 @if ((int)Model.HoaDonClient.TrangThai == 5) // ThanhCong
                 {
-                    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#returnModal">
-                        Yêu cầu trả hàng/hoàn tiền
-                    </button>
+                    @if (Model.HoaDonClient.HasReturnRequest == true) // Check if return request exists
+                    {
+                        <button type="button" class="btn btn-warning disabled" onclick="alert('Bạn đã yêu cầu trả hàng/hoàn tiền')">Yêu cầu trả hàng/hoàn tiền</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#returnModal">Yêu cầu trả hàng/hoàn tiền</button>
+                    }
                 }
             </div>
         }
