@@ -32,5 +32,7 @@ namespace SneakFit.ViewModels.Catalog.HoaDonClient
         public decimal? VoucherDiscount { get; set; } // Số tiền giảm từ voucher
         // Sửa lại: property này để service set đúng tổng tiền sản phẩm (đã áp dụng khuyến mãi, chưa trừ voucher, chưa cộng phí ship)
         public decimal TongTienSanPham { get; set; }
+        // NEW: cờ để ẩn/disable nút yêu cầu trả hàng/hoàn tiền
+        public bool HasReturnRequest { get; set; }
     }
 }

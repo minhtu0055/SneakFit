@@ -10,6 +10,7 @@ using System.IdentityModel.Tokens.Jwt;
 using SneakFit.ViewModels.Catalog.HoaDonClient;
 using SneakFit.ViewModels.Catalog.Voucher;
 using SneakFit.ViewModels.Catalog.HoaDonChiTietClient;
+using SneakFit.ViewModels.Catalog.TraHang;
 using SneakFit.WebClient.Models;
 using SneakFit.Data.Entities;
 using SneakFit.ApiIntegration.Services;
@@ -25,13 +26,15 @@ namespace SneakFit.WebClient.Controllers
         private readonly ISpctApiClient _spctApiClient;
         private readonly IUserApiClient _userApiClient;
         private readonly IDiaChiApiClient _diaChiApiClient;
+        private readonly ITraHangApiClient _returnApiClient;
 
         public AccountController(IUserApiClient userApiClient,
             IHoaDonClientApiClient hoaDonClientApiClient,
             IHoaDonChiTietClientApiClient hoaDonChiTietClientApiClient,
             IVoucherApiClient voucherApiClient,
             ISpctApiClient spctApiClient,
-            IDiaChiApiClient diaChiApiClient)
+            IDiaChiApiClient diaChiApiClient,
+            ITraHangApiClient returnApiClient)
         {
             _hoaDonClientApiClient = hoaDonClientApiClient;
             _hoaDonChiTietClientApiClient = hoaDonChiTietClientApiClient;
@@ -39,6 +42,7 @@ namespace SneakFit.WebClient.Controllers
             _spctApiClient = spctApiClient;
             _userApiClient = userApiClient;
             _diaChiApiClient = diaChiApiClient;
+            _returnApiClient = returnApiClient;
         }
 
         [AllowAnonymous]
@@ -204,11 +208,42 @@ namespace SneakFit.WebClient.Controllers
                             .ToList();
                     }
                 }
+
+                // ✅ LẤY DỮ LIỆU TRẢ HÀNG
+                try
+                {
+                    var returnsResult = await _returnApiClient.GetMyReturnsAsync(1, 1000);
+                    if (returnsResult?.Items != null)
+                    {
+                        model.returnsViewModels = returnsResult.Items;
+
+                        // Tính số lượng theo trạng thái trả hàng
+                        model.SoLuongTheoTrangThaiReturns = returnsResult.Items
+                            .GroupBy(x => (int)x.Status)
+                            .ToDictionary(g => g.Key, g => g.Count());
+                    }
+                    else
+                    {
+                        // Nếu không có dữ liệu
+                        model.returnsViewModels = new();
+                        model.SoLuongTheoTrangThaiReturns = new();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Debug: Log lỗi
+                    System.Diagnostics.Debug.WriteLine($"Error loading returns: {ex.Message}");
+                    // Nếu không lấy được dữ liệu trả hàng, tạo list rỗng
+                    model.returnsViewModels = new();
+                    model.SoLuongTheoTrangThaiReturns = new();
+                }
             }
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = $"Lỗi khi lấy danh sách hóa đơn";
                 model.hoaDonClientViewModels = new(); // fallback an toàn
+                model.returnsViewModels = new(); // fallback an toàn
+                model.SoLuongTheoTrangThaiReturns = new(); // fallback an toàn
             }
 
             return View(model);
@@ -227,6 +262,9 @@ namespace SneakFit.WebClient.Controllers
                     TempData["ErrorMessage"] = "Không tìm thấy đơn hàng hoặc bạn không có quyền xem đơn hàng này.";
                     return RedirectToAction("Index");
                 }
+
+                // Kiểm tra xem hóa đơn có yêu cầu trả hàng chưa
+                hoaDon.HasReturnRequest = await _returnApiClient.HasAsync(id);
 
                 var chiTietHoaDon = await _hoaDonChiTietClientApiClient.GetByHoaDonId(id);
                 // Lấy thông tin khuyến mãi cho từng sản phẩm chi tiết
@@ -287,6 +325,9 @@ namespace SneakFit.WebClient.Controllers
                 {
                     return Json(new { success = false, message = "Không tìm thấy đơn hàng hoặc bạn không có quyền xem đơn hàng này." });
                 }
+
+                // Kiểm tra xem hóa đơn có yêu cầu trả hàng chưa
+                hoaDon.HasReturnRequest = await _returnApiClient.HasAsync(id);
 
                 var chiTietHoaDon = await _hoaDonChiTietClientApiClient.GetByHoaDonId(id);
                 // Lấy thông tin khuyến mãi cho từng sản phẩm chi tiết
@@ -375,6 +416,109 @@ namespace SneakFit.WebClient.Controllers
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             HttpContext.Session.Remove("Token");
             return RedirectToAction("Index", "Login");
+        }
+
+        // AJAX action để lấy danh sách yêu cầu trả hàng theo trạng thái
+        public async Task<IActionResult> GetReturnsByStatus(string trangThai = null, int pageIndex = 1)
+        {
+            try
+            {
+                System.Diagnostics.Debug.WriteLine($"=== GetReturnsByStatus called ===");
+                System.Diagnostics.Debug.WriteLine($"trangThai: {trangThai}");
+                System.Diagnostics.Debug.WriteLine($"pageIndex: {pageIndex}");
+
+                var userId = GetUserId();
+                System.Diagnostics.Debug.WriteLine($"userId: {userId}");
+
+                // Xử lý tham số trangThai
+                SneakFit.Data.Enums.ReturnStatus? trangThaiEnum = null;
+                string selectedTrangThaiString = trangThai;
+
+                if (!string.IsNullOrEmpty(trangThai) && trangThai != "all")
+                {
+                    // Thử parse như string trước
+                    if (Enum.TryParse<SneakFit.Data.Enums.ReturnStatus>(trangThai, out var parsedTrangThai))
+                    {
+                        trangThaiEnum = parsedTrangThai;
+                        selectedTrangThaiString = trangThai; // Giữ nguyên string gốc
+                        System.Diagnostics.Debug.WriteLine($"Parsed as string: {trangThaiEnum}");
+                    }
+                    else
+                    {
+                        // Nếu không parse được string, thử parse như int
+                        if (int.TryParse(trangThai, out var trangThaiInt))
+                        {
+                            if (Enum.IsDefined(typeof(SneakFit.Data.Enums.ReturnStatus), trangThaiInt))
+                            {
+                                trangThaiEnum = (SneakFit.Data.Enums.ReturnStatus)trangThaiInt;
+                                // Chuyển đổi int thành string tương ứng
+                                selectedTrangThaiString = trangThaiEnum.ToString();
+                                System.Diagnostics.Debug.WriteLine($"Parsed as int: {trangThaiEnum}");
+                            }
+                        }
+                    }
+                }
+                else if (trangThai == "all")
+                {
+                    selectedTrangThaiString = "all";
+                    System.Diagnostics.Debug.WriteLine($"Selected all returns");
+                }
+
+                // Gọi API để lấy dữ liệu trả hàng
+                System.Diagnostics.Debug.WriteLine($"Calling GetMyReturnsAsync...");
+                var result = await _returnApiClient.GetMyReturnsAsync(pageIndex, 1000);
+                System.Diagnostics.Debug.WriteLine($"API result: {result?.Items?.Count ?? 0} items");
+
+                if (result?.Items != null)
+                {
+                    // Filter theo trạng thái nếu có
+                    var filteredReturns = result.Items
+                        .Where(x => trangThaiEnum == null || x.Status == trangThaiEnum)
+                        .OrderByDescending(x => x.CreatedAt)
+                        .ToList();
+
+                    System.Diagnostics.Debug.WriteLine($"Filtered returns: {filteredReturns.Count} items");
+
+                    var model = new AccountViewModel
+                    {
+                        returnsViewModels = filteredReturns
+                    };
+
+                    ViewData["selectedTrangThaiReturns"] = selectedTrangThaiString;
+                    System.Diagnostics.Debug.WriteLine($"Returning partial view with {filteredReturns.Count} items");
+                    return PartialView("_ReturnsTable", model);
+                }
+
+                System.Diagnostics.Debug.WriteLine($"No items found, returning empty partial view");
+                return PartialView("_ReturnsTable", new AccountViewModel { returnsViewModels = new() });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in GetReturnsByStatus: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+                TempData["ErrorMessage"] = $"Lỗi khi lấy danh sách yêu cầu trả hàng";
+                return PartialView("_ReturnsTable", new AccountViewModel { returnsViewModels = new() });
+            }
+        }
+
+        // Hiển thị chi tiết yêu cầu trả hàng
+        public async Task<IActionResult> GetReturnDetails(Guid id)
+        {
+            try
+            {
+                // Gọi đúng endpoint /api/returns/{id} (API tự xác định user từ token)
+                var apiResult = await _returnApiClient.GetDetailAsync(id);
+                if (!apiResult.IsSuccessed || apiResult.ResultObj == null)
+                {
+                    return Json(new { success = false, message = "Không tìm thấy yêu cầu trả hàng hoặc bạn không có quyền xem." });
+                }
+
+                return PartialView("_ReturnDetails", apiResult.ResultObj);
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Lỗi khi lấy chi tiết yêu cầu trả hàng: {ex.Message}" });
+            }
         }
     }
 }

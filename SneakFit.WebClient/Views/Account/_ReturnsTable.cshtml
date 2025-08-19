@@ -1,0 +1,89 @@
+@model SneakFit.WebClient.Models.AccountViewModel
+@using SneakFit.Data.Enums
+
+@if (Model?.returnsViewModels?.Any() == true)
+{
+    <div class="section-box">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th style="border-right: none;">Mã Yêu Cầu</th>
+                        <th style="border-right: none;">Ngày Tạo</th>
+                        <th style="border-right: none;">Lý Do</th>
+                        <th style="border-right: none;">Trạng Thái</th>
+                        <th>Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.returnsViewModels)
+                    {
+                        <tr>
+                            <td style="border-right: none;">@item.Code</td>
+                            <td style="border-right: none;">@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td style="border-right: none;">@(item.Reason.Length > 50 ? item.Reason.Substring(0, 50) + "..." : item.Reason)</td>
+                            <td style="border-right: none;">
+                                <span class="status-badge bg-@GetReturnStatusColor(item.Status)">@GetReturnStatusText(item.Status)</span>
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="loadReturnDetails('@item.ReturnId')">Xem Chi Tiết</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    <div class="section-box text-center p-4">
+        <div class="mb-3">
+            <i class="bi bi-inbox text-muted" style="font-size: 3rem;"></i>
+        </div>
+        <p class="text-muted mb-3">Không có yêu cầu trả hàng nào ở trạng thái này.</p>
+        <button type="button" class="btn btn-primary" onclick="showReturnsTimeline()">
+            <i class="bi bi-arrow-left"></i> Quay lại Timeline
+        </button>
+    </div>
+}
+
+@functions {
+    public string GetReturnStatusText(ReturnStatus status)
+    {
+        switch (status)
+        {
+            case ReturnStatus.ChapNhanDuyetHangHoan:
+                return "Chờ duyệt";
+            case ReturnStatus.LayHangHoan:
+                return "Lấy hàng hoàn";
+            case ReturnStatus.HoanHang:
+                return "Hoàn hàng";
+            case ReturnStatus.ThanhCong:
+                return "Thành công";
+            case ReturnStatus.TuChoi:
+                return "Từ chối";
+            default:
+                return "Không xác định";
+        }
+    }
+
+    public string GetReturnStatusColor(ReturnStatus status)
+    {
+        switch (status)
+        {
+            case ReturnStatus.ChapNhanDuyetHangHoan:
+                return "warning";
+            case ReturnStatus.LayHangHoan:
+                return "info";
+            case ReturnStatus.HoanHang:
+                return "primary";
+            case ReturnStatus.ThanhCong:
+                return "success";
+            case ReturnStatus.TuChoi:
+                return "danger";
+            default:
+                return "secondary";
+        }
+    }
+}

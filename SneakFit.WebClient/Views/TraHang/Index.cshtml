@@ -1,0 +1,257 @@
+﻿@model SneakFit.ViewModels.Common.PagedResult<SneakFit.ViewModels.Catalog.TraHang.ReturnViewModel>
+@using SneakFit.Data.Enums
+
+@{
+    ViewData["Title"] = "Yêu cầu trả hàng của tôi";
+
+    string ToText(ReturnStatus s) => s switch
+    {
+        ReturnStatus.ChapNhanDuyetHangHoan => "Chờ phê duyệt",
+        ReturnStatus.LayHangHoan => "Đang vận chuyển về",
+        ReturnStatus.HoanHang => "Đã nhận hoàn hàng",
+        ReturnStatus.ThanhCong => "Hoàn hàng thành công",
+        ReturnStatus.TuChoi => "Từ chối",
+        _ => "Không xác định"
+    };
+
+    string ToBadge(ReturnStatus s) => s switch
+    {
+        ReturnStatus.ChapNhanDuyetHangHoan => "badge bg-warning",
+        ReturnStatus.LayHangHoan => "badge bg-info",
+        ReturnStatus.HoanHang => "badge bg-primary",
+        ReturnStatus.ThanhCong => "badge bg-success",
+        ReturnStatus.TuChoi => "badge bg-danger",
+        _ => "badge bg-secondary"
+    };
+}
+
+<main class="main py-4 bg-light" style="border-radius: 8px;">
+    <div class="container">
+        <h2 class="text-center mb-4 page-title">Yêu cầu trả hàng của tôi</h2>
+
+        @* @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger section-box">@TempData["ErrorMessage"]</div>
+        }
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success section-box">@TempData["SuccessMessage"]</div>
+        } *@
+
+        @if (Model?.Items == null || !Model.Items.Any())
+        {
+            <div class="section-box text-center p-4">
+                <p class="text-muted mb-1">Chưa có yêu cầu trả hàng nào.</p>
+                <a asp-controller="HoaDon" asp-action="Index" class="btn btn-primary mt-2">Về danh sách đơn hàng</a>
+            </div>
+        }
+        else
+        {
+            <div class="section-box">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Mã yêu cầu</th>
+                                <th>Ngày tạo</th>
+                                <th>Trạng thái</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var r in Model.Items)
+                            {
+                                <tr>
+                                    <td>@r.Code</td>
+                                    <td>@r.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>
+                                        <span class="@ToBadge(r.Status)">@ToText(r.Status)</span>
+                                    </td>
+                                    <td>
+                                        <a class="btn btn-outline-primary btn-sm" asp-action="Detail" asp-route-id="@r.ReturnId">
+                                            Xem chi tiết
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            var totalPages = (int)Math.Ceiling((double)(Model.TotalRecords) / Model.PageSize);
+            var pageIndex = Model.PageIndex;
+            @if (totalPages > 1)
+            {
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item @(pageIndex <= 1 ? "disabled" : "")">
+                            <a class="page-link" asp-action="Index" asp-route-pageIndex="@(pageIndex - 1)" asp-route-pageSize="@Model.PageSize">&laquo;</a>
+                        </li>
+                        @for (int i = 1; i <= totalPages; i++)
+                        {
+                            <li class="page-item @(pageIndex == i ? "active" : "")">
+                                <a class="page-link" asp-action="Index" asp-route-pageIndex="@i" asp-route-pageSize="@Model.PageSize">@i</a>
+                            </li>
+                        }
+                        <li class="page-item @(pageIndex >= totalPages ? "disabled" : "")">
+                            <a class="page-link" asp-action="Index" asp-route-pageIndex="@(pageIndex + 1)" asp-route-pageSize="@Model.PageSize">&raquo;</a>
+                        </li>
+                    </ul>
+                </nav>
+            }
+        }
+    </div>
+</main>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+}
+
+<style>
+    .main {
+        padding: 20px 10px;
+        background-color: #F1F5F9;
+        font-family: 'Poppins',sans-serif
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        width: 100%
+    }
+
+    .page-title {
+        color: #1E3A8A;
+        font-weight: 600
+    }
+
+    .section-box {
+        background: #fff;
+        padding: 20px;
+        border: 1px solid #60A5FA;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0,0,0,.05);
+        margin-bottom: 25px;
+        transition: all .3s ease
+    }
+
+        .section-box:hover {
+            box-shadow: 0 8px 25px rgba(0,0,0,.1);
+            transform: translateY(-2px)
+        }
+
+    .table {
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 0;
+        border-collapse: separate;
+        border-spacing: 0
+    }
+
+        .table thead th {
+            padding: 12px;
+            text-align: center;
+            background: #1E3A8A;
+            color: #fff;
+            border: 1px solid #60A5FA
+        }
+
+            .table thead th:first-child {
+                border-top-left-radius: 8px
+            }
+
+            .table thead th:last-child {
+                border-top-right-radius: 8px
+            }
+
+        .table tbody td {
+            padding: 12px;
+            text-align: center;
+            vertical-align: middle;
+            color: #4B5563;
+            border: 1px solid #60A5FA;
+            border-top: none
+        }
+
+        .table tbody tr:hover {
+            background: #F8FAFC
+        }
+
+    .btn-outline-primary {
+        border-color: #60A5FA;
+        color: #60A5FA;
+        padding: 6px 12px;
+        border-radius: 5px;
+        transition: all .3s
+    }
+
+        .btn-outline-primary:hover {
+            background: #60A5FA;
+            color: #fff;
+            transform: scale(1.05)
+        }
+
+    .btn-primary {
+        background: linear-gradient(90deg,#1E3A8A,#60A5FA);
+        border: none;
+        color: #fff;
+        padding: 10px 20px;
+        border-radius: 6px;
+        transition: all .3s
+    }
+
+        .btn-primary:hover {
+            background: linear-gradient(90deg,#3B82F6,#163172);
+            box-shadow: 0 4px 15px rgba(30,58,138,.3);
+            transform: translateY(-2px)
+        }
+
+    /* Pagination */
+    .pagination {
+        margin-top: 24px;
+        margin-bottom: 0
+    }
+
+        .pagination .page-item {
+            margin: 0 2px
+        }
+
+        .pagination .page-link {
+            color: #1E3A8A;
+            border: 1.5px solid #60A5FA;
+            border-radius: 6px;
+            font-weight: 500;
+            background: #fff;
+            transition: all .2s;
+            min-width: 38px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(30,58,138,.04)
+        }
+
+            .pagination .page-link:hover {
+                background: linear-gradient(90deg,#1E3A8A,#60A5FA);
+                color: #fff;
+                border-color: #1E3A8A;
+                transform: translateY(-2px) scale(1.07)
+            }
+
+        .pagination .active .page-link {
+            background: linear-gradient(90deg,#1E3A8A,#60A5FA);
+            color: #fff;
+            border-color: #1E3A8A;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(30,58,138,.1);
+            pointer-events: none
+        }
+
+        .pagination .disabled .page-link {
+            color: #A0AEC0;
+            background: #F1F5F9;
+            border-color: #E2E8F0;
+            pointer-events: none;
+            box-shadow: none
+        }
+</style>

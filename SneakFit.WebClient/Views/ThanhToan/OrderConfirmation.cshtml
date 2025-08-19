@@ -6,13 +6,23 @@
     ViewData["Title"] = "Xác Nhận Đơn Hàng - SneakFit";
 }
 
-<main class="main py-4 bg-light">
+<main class="main py-4 bg-light" style="border-radius: 8px;">
     <div class="container">
-        @if (TempData["ErrorMessage"] != null)
+        @* @if (TempData["ErrorMessage"] != null)
         {
             <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
         }
         else if (Model.HoaDonClient.TrangThai == SneakFit.Data.Enums.TrangThaiHoaDon.DaHuy)
+        {
+            <!-- Thông báo đơn hàng đã hủy -->
+            <div class="section-box confirmation-message mb-4 text-center">
+                <h5><i class="bi bi-x-circle-fill text-danger"></i> Đơn hàng đã bị hủy!</h5>
+                <p>Đơn hàng của bạn đã bị hủy do thanh toán thất bại.</p>
+                <p>Mã đơn hàng: <strong>@Model.HoaDonClient.MaHoaDon</strong></p>
+                <p class="text-muted">Bạn có thể đặt hàng lại nếu muốn.</p>
+            </div>
+        } *@
+        @if (Model.HoaDonClient.TrangThai == SneakFit.Data.Enums.TrangThaiHoaDon.DaHuy)
         {
             <!-- Thông báo đơn hàng đã hủy -->
             <div class="section-box confirmation-message mb-4 text-center">

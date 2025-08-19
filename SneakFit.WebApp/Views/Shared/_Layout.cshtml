@@ -182,7 +182,12 @@
                             <div class="text-truncate" data-i18n="Hoadon">Quản lý hóa đơn</div>
                         </a>
                     </li>
-                    
+                    <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Returns" ? "active open" : "")">
+                        <a asp-action="Index" asp-controller="Returns" class="menu-link">
+                            <i class="menu-icon tf-icons bx bx-rotate-left"></i>
+                            <div class="text-truncate" data-i18n="HoanHang">Quản Lý Hoàn hàng</div>
+                        </a>
+                    </li>
                     <li class="menu-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "SPCT" || ViewContext.RouteData.Values["controller"]?.ToString() == "ChatLieu" || ViewContext.RouteData.Values["controller"]?.ToString() == "KichThuoc" || ViewContext.RouteData.Values["controller"]?.ToString() == "ThuongHieu"|| ViewContext.RouteData.Values["controller"]?.ToString() == "SanPham" || ViewContext.RouteData.Values["controller"]?.ToString() == "MauSac" || ViewContext.RouteData.Values["controller"]?.ToString() == "DeGiay" ? "active open" : "" )">
                         <a href="javascript:void(0);" class="menu-link menu-toggle">
                             <i class="menu-icon tf-icons bx bx-cube-alt"></i>

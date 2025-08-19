@@ -1,0 +1,351 @@
+@model SneakFit.ViewModels.Catalog.TraHang.ReturnViewModel
+@using SneakFit.Data.Enums
+
+@{
+    // Map trạng thái -> index (đi đến bước này, các bước sau xám)
+    // 0: Chờ duyệt | 1: Lấy hàng hoàn | 2: Hoàn hàng | 3: Thành công | -2: Từ chối
+    var rStep = Model.Status switch
+    {
+        ReturnStatus.ChapNhanDuyetHangHoan => 0,
+        ReturnStatus.LayHangHoan => 1,
+        ReturnStatus.HoanHang => 2,
+        ReturnStatus.ThanhCong => 3,
+        ReturnStatus.TuChoi => -2,
+        _ => -1
+    };
+
+    bool isRejected = (rStep == -2);
+
+    // Helper: ACTIVE nếu đã tới bước này (<= rStep), ngược lại xám
+    string UpTo(int step) => (!isRejected && rStep >= step) ? "" : "step-inactive";
+}
+
+<!-- Progress trạng thái Trả Hàng -->
+<div class="section-box confirmation-message mb-4 text-center">
+    <div class="progress-timeline" style="border-bottom: 2px solid #60A5FA;">
+        <div class="arrow-progress">
+            @if (!isRejected)
+            {
+                <!-- 4 đoạn, sáng đến bước hiện tại -->
+                <div class="arrow-segment royal-blue @UpTo(0)"><div class="arrow-dot"></div></div>
+                <div class="arrow-segment indigo      @UpTo(1)"><div class="arrow-dot"></div></div>
+                <div class="arrow-segment purple      @UpTo(2)"><div class="arrow-dot"></div></div>
+                <div class="arrow-segment emerald     @UpTo(3)"><div class="arrow-dot"></div></div>
+            }
+            else
+            {
+                <!-- Bị hủy: chỉ 2 đoạn (Chờ duyệt + Từ chối) -->
+                <div class="arrow-segment royal-blue"><div class="arrow-dot"></div></div>
+                <div class="arrow-segment danger"><div class="arrow-dot"></div></div>
+            }
+        </div>
+
+        @if (!isRejected)
+        {
+            <!-- Nhãn 4 bước, sáng đến bước hiện tại -->
+            <div class="progress-step">
+                <div class="step-icon royal-blue icon-file @UpTo(0)"></div>
+                <div class="step-connector royal-blue @UpTo(0)"></div>
+                <div class="step-title @UpTo(0)">Chờ duyệt</div>
+                <div class="step-description @UpTo(0)">Chờ duyệt hàng hoàn</div>
+            </div>
+
+            <div class="progress-step">
+                <div class="step-icon indigo icon-truck @UpTo(1)"></div>
+                <div class="step-connector indigo @UpTo(1)"></div>
+                <div class="step-title @UpTo(1)">Lấy hàng hoàn</div>
+                <div class="step-description @UpTo(1)">Đơn vị lấy hàng hoàn</div>
+            </div>
+
+            <div class="progress-step">
+                <div class="step-icon purple icon-delivery @UpTo(2)"></div>
+                <div class="step-connector purple @UpTo(2)"></div>
+                <div class="step-title @UpTo(2)">Hoàn hàng</div>
+                <div class="step-description @UpTo(2)">Kiểm tra hàng hoàn</div>
+            </div>
+
+            <div class="progress-step">
+                <div class="step-icon emerald icon-check @UpTo(3)"></div>
+                <div class="step-connector emerald @UpTo(3)"></div>
+                <div class="step-title @UpTo(3)">Thành công</div>
+                <div class="step-description @UpTo(3)">Đã hoàn tất xử lý</div>
+            </div>
+        }
+        else
+        {
+            <!-- Nhãn 2 bước: Chờ duyệt + Từ chối -->
+            <div class="progress-step">
+                <div class="step-icon royal-blue icon-file"></div>
+                <div class="step-connector royal-blue"></div>
+                <div class="step-title">Chờ duyệt</div>
+                <div class="step-description">Chờ duyệt hàng hoàn</div>
+            </div>
+
+            <div class="progress-step">
+                <div class="step-icon danger icon-x"></div>
+                <div class="step-connector danger"></div>
+                <div class="step-title">Từ chối</div>
+                <div class="step-description">Yêu cầu đã bị từ chối</div>
+            </div>
+        }
+    </div>
+
+    <p class="mb-0">
+        Mã yêu cầu trả: <strong>@Model.Code</strong>
+        @if (!string.IsNullOrEmpty(Model.ShippingCode))
+        {
+            <span class="ms-2">| Mã vận đơn: <strong>@Model.ShippingCode</strong></span>
+        }
+    </p>
+</div>
+
+<div class="section-box">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        @* <i class="bi bi-arrow-return-left text-primary"></i> *@
+                        Thông tin yêu cầu trả hàng
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Mã yêu cầu:</strong> <span class="badge bg-primary">@Model.Code</span></p>
+                            <p><strong>Ngày tạo:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                            @if (Model.UpdatedAt.HasValue)
+                            {
+                                <p><strong>Cập nhật lần cuối:</strong> @Model.UpdatedAt.Value.ToString("dd/MM/yyyy HH:mm")</p>
+                            }
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Lý do trả hàng:</strong> <span class="text-danger">@Model.Reason</span></p>
+                            <p><strong>Hình thức hoàn:</strong> <span class="badge bg-success">Chuyển khoản ngân hàng</span></p>
+                            @if (!string.IsNullOrEmpty(Model.ShippingCarrier))
+                            {
+                                <p><strong>Đơn vị vận chuyển:</strong> @Model.ShippingCarrier</p>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.ShippingCode))
+                            {
+                                <p><strong>Mã vận đơn:</strong> <span class="badge bg-info">@Model.ShippingCode</span></p>
+                            }
+                            <p>
+                                <strong>Trạng thái:</strong>
+                                <span class="status-badge bg-@GetReturnStatusColor(Model.Status) fs-6 px-3 py-2" style="font-size: 0.75rem !important;">@GetReturnStatusText(Model.Status)</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thông tin đơn hàng (bảng 3 cột) -->
+            @{
+                var tongThanhToan = Model?.OrderDetails?.Sum(x => x.Price * x.Quantity) ?? 0M;
+            }
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="bi bi-receipt text-info"></i>
+                        Hoá đơn trả hàng
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Mã hoá đơn</th>
+                                    <th>Ngày đặt đơn</th>
+                                    <th>Tổng đơn</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>@(string.IsNullOrEmpty(Model.MaHoaDon) ? Model.OrderId.ToString() : Model.MaHoaDon)</td>
+                                    <td>@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>@tongThanhToan.ToString("N0") ₫</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="bi bi-info-circle text-info"></i>
+                        Trạng thái hiện tại
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <span class="status-badge bg-@GetReturnStatusColor(Model.Status) fs-6 px-3 py-2">@GetReturnStatusText(Model.Status)</span>
+                    
+                    <!-- Timeline trạng thái -->
+                    <div class="mt-3">
+                        <div class="progress-timeline-vertical">
+                            <div class="timeline-step @(Model.Status >= ReturnStatus.ChapNhanDuyetHangHoan ? "completed" : "")">
+                                <div class="timeline-icon bg-warning">
+                                    <i class="bi bi-check text-white"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <small class="text-muted">Chấp nhận duyệt hàng hoàn</small>
+                                </div>
+                            </div>
+                            <div class="timeline-step @(Model.Status >= ReturnStatus.LayHangHoan ? "completed" : "")">
+                                <div class="timeline-icon bg-info">
+                                    <i class="bi bi-check text-white"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <small class="text-muted">Lấy hàng hoàn</small>
+                                </div>
+                            </div>
+                            <div class="timeline-step @(Model.Status >= ReturnStatus.HoanHang ? "completed" : "")">
+                                <div class="timeline-icon bg-primary">
+                                    <i class="bi bi-check text-white"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <small class="text-muted">Hoàn hàng (check hàng hoàn)</small>
+                                </div>
+                            </div>
+                            <div class="timeline-step @(Model.Status >= ReturnStatus.ThanhCong ? "completed" : "")">
+                                <div class="timeline-icon bg-success">
+                                    <i class="bi bi-check text-white"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <small class="text-muted">Thành công</small>
+                                </div>
+                            </div>
+                            <div class="timeline-step @(Model.Status == ReturnStatus.TuChoi ? "completed" : "")">
+                                <div class="timeline-icon bg-danger">
+                                    <i class="bi bi-x text-white"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <small class="text-muted">Từ chối</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> *@
+    </div>
+</div>
+
+<style>
+    .progress-timeline-vertical {
+        position: relative;
+        padding-left: 20px;
+    }
+
+    .timeline-step {
+        position: relative;
+        margin-bottom: 15px;
+        opacity: 0.5;
+    }
+
+    .timeline-step.completed {
+        opacity: 1;
+    }
+
+    .timeline-step::before {
+        content: '';
+        position: absolute;
+        left: -20px;
+        top: 8px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: #e5e7eb;
+        border: 2px solid #fff;
+        box-shadow: 0 0 0 2px #e5e7eb;
+    }
+
+    .timeline-step.completed::before {
+        background-color: #10b981;
+        box-shadow: 0 0 0 2px #10b981;
+    }
+
+    .timeline-icon {
+        position: absolute;
+        left: -26px;
+        top: 4px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+    }
+
+    .timeline-content {
+        margin-left: 10px;
+    }
+
+    /* Màu ĐỎ cho trạng thái từ chối */
+    .arrow-segment.danger::before {
+        background-color: #ef4444;
+    }
+
+    .step-icon.danger {
+        background-color: #ef4444 !important;
+    }
+
+    .step-connector.danger {
+        background-color: #ef4444 !important;
+    }
+
+    /* Icon chữ X (từ chối) */
+    .icon-x::before {
+        content: "";
+        display: block;
+        width: 24px;
+        height: 24px;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z'/%3E%3C/svg%3E") center/contain no-repeat;
+    }
+
+</style>
+
+@functions {
+    public string GetReturnStatusText(ReturnStatus status)
+    {
+        switch (status)
+        {
+            case ReturnStatus.ChapNhanDuyetHangHoan:
+                return "Chờ duyệt";
+            case ReturnStatus.LayHangHoan:
+                return "Lấy hàng hoàn";
+            case ReturnStatus.HoanHang:
+                return "Hoàn hàng (check hàng hoàn)";
+            case ReturnStatus.ThanhCong:
+                return "Thành công";
+            case ReturnStatus.TuChoi:
+                return "Từ chối";
+            default:
+                return "Không xác định";
+        }
+    }
+
+    public string GetReturnStatusColor(ReturnStatus status)
+    {
+        switch (status)
+        {
+            case ReturnStatus.ChapNhanDuyetHangHoan:
+                return "warning";
+            case ReturnStatus.LayHangHoan:
+                return "info";
+            case ReturnStatus.HoanHang:
+                return "primary";
+            case ReturnStatus.ThanhCong:
+                return "success";
+            case ReturnStatus.TuChoi:
+                return "danger";
+            default:
+                return "secondary";
+        }
+    }
+}

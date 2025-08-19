@@ -83,6 +83,12 @@ namespace SneakFit.WebClient.Controllers
                     TrangThai = true, // Mặc định là true, sẽ được cập nhật sau
                 }).ToList() ?? new List<GioHangItemViewModel>();
 
+                if (gioHang?.GioHangChiTiets == null)
+                {
+                    // tránh null reference ở mọi nơi khác
+                    gioHang.GioHangChiTiets = new List<GioHangChiTietViewModel>();
+                }
+
                 // Kiểm tra trạng thái sản phẩm và cập nhật thông tin
                 foreach (var item in list)
                 {

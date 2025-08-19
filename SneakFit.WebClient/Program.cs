@@ -21,6 +21,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(300);
+    options.Cookie.Name = "SneakFit.Client.Session";
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
@@ -48,6 +49,7 @@ builder.Services.AddScoped<IUserApiClient, UserApiClient>();
 builder.Services.AddScoped<IDiaChiApiClient, DiaChiApiClient>();
 builder.Services.AddScoped<IThanhToanApiClient, ThanhToanApiClient>();
 builder.Services.AddScoped<IThongKeApiClient, ThongKeApiClient>();
+builder.Services.AddScoped<ITraHangApiClient, TraHangApiClient>();
 
 builder.Services.AddCors(options =>
 {

@@ -1,4 +1,5 @@
 ﻿@using SneakFit.ViewModels.Catalog.HoaDonClient
+@using SneakFit.ViewModels.Catalog.TraHang
 @using SneakFit.Data.Enums
 @model SneakFit.WebClient.Models.AccountViewModel
 @inject IConfiguration Configuration
@@ -20,6 +21,33 @@
     var selectedTrangThai = Context.Request.Query["trangThai"].ToString();
     var slTheoTrangThai = Model.SoLuongTheoTrangThai;
     var daChonTrangThai = !string.IsNullOrEmpty(selectedTrangThai);
+
+    // Biến cho trả hàng
+    var trangThaiReturnsSelected = Context.Request.Query["trangThaiReturns"].ToString();
+    var selectedTrangThaiReturns = Context.Request.Query["trangThaiReturns"].ToString();
+    var slTheoTrangThaiReturns = Model.SoLuongTheoTrangThaiReturns ?? new Dictionary<int, int>();
+    var daChonTrangThaiReturns = !string.IsNullOrEmpty(selectedTrangThaiReturns);
+}
+
+@functions {
+    public string GetReturnStatusText(ReturnStatus status)
+    {
+        switch (status)
+        {
+            case ReturnStatus.ChapNhanDuyetHangHoan:
+                return "Chờ duyệt";
+            case ReturnStatus.LayHangHoan:
+                return "Lấy hàng hoàn";
+            case ReturnStatus.HoanHang:
+                return "Hoàn hàng (check hàng hoàn)";
+            case ReturnStatus.ThanhCong:
+                return "Thành công";
+            case ReturnStatus.TuChoi:
+                return "Từ chối";
+            default:
+                return "Không xác định";
+        }
+    }
 }
 
 <main class="main">
@@ -69,7 +97,14 @@
                                     <a class="nav-link active" data-bs-toggle="tab" href="#orders">
                                         <i class="bi bi-box-seam"></i>
                                         <span>Đơn hàng</span>
-                                        <span class="badge">3</span>
+                                        <span class="badge">@(Model.hoaDonClientViewModels?.Count ?? 0)</span>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-bs-toggle="tab" href="#returns">
+                                        <i class="bi bi-arrow-return-left"></i>
+                                        <span>Trả hàng</span>
+                                        <span class="badge">@(Model?.returnsViewModels?.Count ?? 0)</span>
                                     </a>
                                 </li>
                                 <li class="nav-item">
@@ -280,6 +315,207 @@
                                 </div>
                             </div>
 
+                            <!-- Returns Tab -->
+                            <div class="tab-pane fade" id="returns">
+                                <div class="section-header" data-aos="fade-up">
+                                    <h2>Yêu cầu trả hàng của tôi</h2>
+                                </div>
+
+                                <div class="returns-grid">
+                                    <!-- Timeline Section - Hiển thị khi chưa chọn trạng thái -->
+                                    <div id="returns-timeline-section" class="@(daChonTrangThaiReturns ? "d-none" : "")">
+                                        <div class="card shadow rounded-4 border-0">
+                                            <div class="card-body p-4">
+                                                <div class="container">
+                                                    <div class="progress-container">
+                                                        <div class="progress-timeline">
+                                                            <!-- Mũi tên progress bar với màu sắc mới -->
+                                                            <div class="arrow-progress">
+                                                                <div class="arrow-segment warning">
+                                                                    <div class="arrow-dot"></div>
+                                                                </div>
+                                                                <div class="arrow-segment info">
+                                                                    <div class="arrow-dot"></div>
+                                                                </div>
+                                                                <div class="arrow-segment primary">
+                                                                    <div class="arrow-dot"></div>
+                                                                </div>
+                                                                <div class="arrow-segment success">
+                                                                    <div class="arrow-dot"></div>
+                                                                </div>
+                                                                <div class="arrow-segment danger">
+                                                                    <div class="arrow-dot"></div>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Các bước với màu sắc và connector tương ứng -->
+                                                            <a class="progress-step text-decoration-none @(selectedTrangThaiReturns == ((int)ReturnStatus.ChapNhanDuyetHangHoan).ToString() ? "active-step" : "")"
+                                                               href="javascript:void(0)" onclick="loadReturnsByStatus('@ReturnStatus.ChapNhanDuyetHangHoan')">
+                                                                <div class="step-icon warning icon-file">
+                                                                    @if (Model.SoLuongTheoTrangThaiReturns.ContainsKey((int)ReturnStatus.ChapNhanDuyetHangHoan) && Model.SoLuongTheoTrangThaiReturns[(int)ReturnStatus.ChapNhanDuyetHangHoan] > 0)
+                                                                    {
+                                                                        <span class="step-count">@Model.SoLuongTheoTrangThaiReturns[(int)ReturnStatus.ChapNhanDuyetHangHoan]</span>
+                                                                    }
+                                                                </div>
+                                                                <div class="step-connector warning"></div>
+                                                                <div class="step-title">Chờ duyệt</div>
+                                                            </a>
+
+                                                            <a class="progress-step text-decoration-none @(selectedTrangThaiReturns == ((int)ReturnStatus.LayHangHoan).ToString() ? "active-step" : "")"
+                                                               href="javascript:void(0)" onclick="loadReturnsByStatus('@ReturnStatus.LayHangHoan')">
+                                                                <div class="step-icon info icon-truck">
+                                                                    @if (Model.SoLuongTheoTrangThaiReturns.ContainsKey((int)ReturnStatus.LayHangHoan) && Model.SoLuongTheoTrangThaiReturns[(int)ReturnStatus.LayHangHoan] > 0)
+                                                                    {
+                                                                        <span class="step-count">@Model.SoLuongTheoTrangThaiReturns[(int)ReturnStatus.LayHangHoan]</span>
+                                                                    }
+                                                                </div>
+                                                                <div class="step-connector info"></div>
+                                                                <div class="step-title">Lấy hàng hoàn</div>
+                                                            </a>
+
+                                                            <a class="progress-step text-decoration-none @(selectedTrangThaiReturns == ((int)ReturnStatus.HoanHang).ToString() ? "active-step" : "")"
+                                                               href="javascript:void(0)" onclick="loadReturnsByStatus('@ReturnStatus.HoanHang')">
+                                                                <div class="step-icon primary icon-delivery">
+                                                                    @if (Model.SoLuongTheoTrangThaiReturns.ContainsKey((int)ReturnStatus.HoanHang) && Model.SoLuongTheoTrangThaiReturns[(int)ReturnStatus.HoanHang] > 0)
+                                                                    {
+                                                                        <span class="step-count">@Model.SoLuongTheoTrangThaiReturns[(int)ReturnStatus.HoanHang]</span>
+                                                                    }
+                                                                </div>
+                                                                <div class="step-connector primary"></div>
+                                                                <div class="step-title">Hoàn hàng</div>
+                                                            </a>
+
+                                                            <a class="progress-step text-decoration-none @(selectedTrangThaiReturns == ((int)ReturnStatus.ThanhCong).ToString() ? "active-step" : "")"
+                                                               href="javascript:void(0)" onclick="loadReturnsByStatus('@ReturnStatus.ThanhCong')">
+                                                                <div class="step-icon success icon-check">
+                                                                    @if (Model.SoLuongTheoTrangThaiReturns.ContainsKey((int)ReturnStatus.ThanhCong) && Model.SoLuongTheoTrangThaiReturns[(int)ReturnStatus.ThanhCong] > 0)
+                                                                    {
+                                                                        <span class="step-count">@Model.SoLuongTheoTrangThaiReturns[(int)ReturnStatus.ThanhCong]</span>
+                                                                    }
+                                                                </div>
+                                                                <div class="step-connector success"></div>
+                                                                <div class="step-title">Thành công</div>
+                                                            </a>
+
+                                                            <a class="progress-step text-decoration-none @(selectedTrangThaiReturns == ((int)ReturnStatus.TuChoi).ToString() ? "active-step" : "")"
+                                                               href="javascript:void(0)" onclick="loadReturnsByStatus('@ReturnStatus.TuChoi')">
+                                                                <div class="step-icon danger icon-times">
+                                                                    @if (Model.SoLuongTheoTrangThaiReturns.ContainsKey((int)ReturnStatus.TuChoi) && Model.SoLuongTheoTrangThaiReturns[(int)ReturnStatus.TuChoi] > 0)
+                                                                    {
+                                                                        <span class="step-count">@Model.SoLuongTheoTrangThaiReturns[(int)ReturnStatus.TuChoi]</span>
+                                                                    }
+                                                                </div>
+                                                                <div class="step-connector danger"></div>
+                                                                <div class="step-title">Từ chối</div>
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                @*                                                 <!-- Nút xem tất cả yêu cầu trả hàng -->
+                                                <div class="text-center mt-4">
+                                                <button type="button" class="btn btn-outline-primary" onclick="loadReturnsByStatus('all')">
+                                                <i class="bi bi-list-ul"></i> Xem tất cả yêu cầu trả hàng
+                                                </button>
+                                                <button type="button" class="btn btn-outline-secondary ms-2" onclick="testLoadReturns()">
+                                                <i class="bi bi-bug"></i> Test Load Returns
+                                                </button>
+                                                <button type="button" class="btn btn-outline-danger ms-2" onclick="testDirectCall()">
+                                                <i class="bi bi-bug"></i> Test Direct Call
+                                                </button>
+                                                </div>
+
+                                                <!-- Hiển thị khi không có yêu cầu trả hàng nào -->
+                                                @if (Model.returnsViewModels == null || !Model.returnsViewModels.Any())
+                                                {
+                                                <div class="section-box text-center p-4 mt-4">
+                                                <i class="bi bi-box-seam" style="font-size: 3rem; color: #ccc;"></i>
+                                                <p class="text-muted mt-3">Chưa có yêu cầu trả hàng nào</p>
+                                                <p class="text-muted small">Khi bạn có yêu cầu trả hàng, chúng sẽ hiển thị ở đây</p>
+                                                </div>
+                                                } *@
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Returns List Section - Hiển thị khi đã chọn trạng thái -->
+                                    <div id="returns-list-section" class="@(!daChonTrangThaiReturns ? "d-none" : "")" style="padding-top: 8px; ">
+                                        <!-- Back to Timeline Button -->
+                                        <div class="mb-3 d-flex justify-content-between align-items-center">
+                                            <button type="button" class="btn btn-outline-secondary" onclick="showReturnsTimeline()">
+                                                <i class="bi bi-arrow-left"></i> Quay lại Timeline
+                                            </button>
+                                            <button type="button" class="btn btn-outline-primary" onclick="loadReturnsByStatus('all')">
+                                                <i class="bi bi-list-ul"></i> Xem tất cả yêu cầu trả hàng
+                                            </button>
+                                        </div>
+
+                                        <!-- Returns Table -->
+                                        <div id="returns-table-container">
+                                            @if (daChonTrangThaiReturns)
+                                            {
+                                                @if (Model == null || !Model.returnsViewModels.Any())
+                                                {
+                                                    <div class="section-box text-center p-4">
+                                                        <p class="text-muted">Không có yêu cầu trả hàng nào ở trạng thái này.</p>
+                                                        <button type="button" class="btn btn-primary mt-3" onclick="showReturnsTimeline()">Quay lại Timeline</button>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="section-box">
+                                                        <div class="table-responsive">
+                                                            <table class="table table-hover">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="border-right: none; ">Mã Yêu Cầu</th>
+                                                                        <th style="border-right: none; ">Ngày Tạo</th>
+                                                                        <th style="border-right: none; ">Lý Do</th>
+                                                                        <th style="border-right: none; ">Trạng Thái</th>
+                                                                        <th>Hành Động</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    @foreach (var item in Model.returnsViewModels)
+                                                                    {
+                                                                        <tr>
+                                                                            <td style="border-right: none; ">@item.Code</td>
+                                                                            <td style="border-right: none; ">@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                                                                            <td style="border-right: none; ">@(item.Reason.Length > 50 ? item.Reason.Substring(0, 50) + "..." : item.Reason)</td>
+                                                                            <td style="border-right: none; ">
+                                                                                <span class="status-badge">@GetReturnStatusText(item.Status)</span>
+                                                                            </td>
+                                                                            <td>
+                                                                                <button type="button" class="btn btn-outline-primary btn-sm" onclick="loadReturnDetails('@item.ReturnId')">Xem Chi Tiết</button>
+                                                                            </td>
+                                                                        </tr>
+                                                                    }
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+
+                                    <!-- Return Details Section - Hiển thị chi tiết yêu cầu trả hàng -->
+                                    <div id="return-details-section" class="d-none">
+                                        <!-- Back to Returns Button -->
+                                        <div class="mb-3">
+                                            <button type="button" class="btn btn-outline-secondary" onclick="showReturnsList()">
+                                                <i class="bi bi-arrow-left"></i> Quay lại danh sách yêu cầu trả hàng
+                                            </button>
+                                        </div>
+
+                                        <!-- Return Details Container -->
+                                        <div id="return-details-container">
+                                            <!-- Nội dung chi tiết yêu cầu trả hàng sẽ được load ở đây -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- Addresses Tab -->
                             <div class="tab-pane fade" id="addresses">
                                 <div class="section-header" data-aos="fade-up">
@@ -459,93 +695,93 @@
                             </div>
                         </div>
 
-                            <!-- Settings Tab -->
-                            <div class="tab-pane fade" id="settings">
-                                <div class="section-header" data-aos="fade-up">
-                                    <h2>Cài đặt tài khoản</h2>
+                        <!-- Settings Tab -->
+                        <div class="tab-pane fade" id="settings">
+                            <div class="section-header" data-aos="fade-up">
+                                <h2>Cài đặt tài khoản</h2>
+                            </div>
+
+                            <div class="settings-content">
+                                <!-- Personal Information -->
+                                <div class="settings-section" data-aos="fade-up">
+                                    <h3>THÔNG TIN TÀI KHOẢN</h3>
+                                    <form class="php-email-form settings-form">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label for="firstName" class="form-label">Họ và tên</label>
+                                                <input type="text" class="form-control" id="firstName" value="@(Model.User?.HoVaTen ?? "")" readonly>
+
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="email" class="form-label">Email</label>
+                                                <input type="email" class="form-control" id="email" value="@(Model.User?.Email ?? "")" readonly>
+
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="phone" class="form-label">Số điện thoại</label>
+                                                <input type="tel" class="form-control" id="phone" value="@(Model.User?.SoDienThoai ?? "")" readonly>
+                                            </div>
+                                        </div>
+                                    </form>
                                 </div>
 
-                                <div class="settings-content">
-                                    <!-- Personal Information -->
-                                    <div class="settings-section" data-aos="fade-up">
-                                        <h3>THÔNG TIN TÀI KHOẢN</h3>
-                                        <form class="php-email-form settings-form">
-                                            <div class="row g-3">
-                                                <div class="col-md-6">
-                                                    <label for="firstName" class="form-label">Họ và tên</label>
-                                                    <input type="text" class="form-control" id="firstName" value="@(Model.User?.HoVaTen ?? "")" readonly>
-
+                                <!-- Security Settings -->
+                                <div class="settings-section" data-aos="fade-up" data-aos-delay="200">
+                                    @if (TempData["error"] != null)
+                                    {
+                                        <div class="alert alert-danger">@TempData["error"]</div>
+                                    }
+                                    @if (TempData["SuccessMessage"] != null)
+                                    {
+                                        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+                                    }
+                                    <h3>ĐỔI MẬT KHẨU</h3>
+                                    <form asp-action="DoiMatKhau" asp-controller="Account" method="post">
+                                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                        <div class="row g-3">
+                                            <div class="col-md-12">
+                                                <label asp-for="DoiMatKhauRequest.MatKhauHienTai" class="form-label"></label>
+                                                <div class="input-group">
+                                                    <input asp-for="DoiMatKhauRequest.MatKhauHienTai" class="form-control" type="password" id="currentPassword" />
+                                                    <span class="input-group-text" id="toggleCurrentPassword" style="cursor:pointer;">
+                                                        <i class="bi bi-eye-slash" id="toggleCurrentPasswordIcon"></i>
+                                                    </span>
                                                 </div>
-                                                <div class="col-md-6">
-                                                    <label for="email" class="form-label">Email</label>
-                                                    <input type="email" class="form-control" id="email" value="@(Model.User?.Email ?? "")" readonly>
-
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label for="phone" class="form-label">Số điện thoại</label>
-                                                    <input type="tel" class="form-control" id="phone" value="@(Model.User?.SoDienThoai ?? "")" readonly>
-                                                </div>
+                                                <span asp-validation-for="DoiMatKhauRequest.MatKhauHienTai" class="text-danger"></span>
                                             </div>
-                                        </form>
-                                    </div>
-
-                                    <!-- Security Settings -->
-                                    <div class="settings-section" data-aos="fade-up" data-aos-delay="200">
-                                        @if (TempData["error"] != null)
-                                        {
-                                            <div class="alert alert-danger">@TempData["error"]</div>
-                                        }
-                                        @if (TempData["SuccessMessage"] != null)
-                                        {
-                                            <div class="alert alert-success">@TempData["SuccessMessage"]</div>
-                                        }
-                                        <h3>ĐỔI MẬT KHẨU</h3>
-                                        <form asp-action="DoiMatKhau" asp-controller="Account" method="post">
-                                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                                            <div class="row g-3">
-                                                <div class="col-md-12">
-                                                    <label asp-for="DoiMatKhauRequest.MatKhauHienTai" class="form-label"></label>
-                                                    <div class="input-group">
-                                                        <input asp-for="DoiMatKhauRequest.MatKhauHienTai" class="form-control" type="password" id="currentPassword" />
-                                                        <span class="input-group-text" id="toggleCurrentPassword" style="cursor:pointer;">
-                                                            <i class="bi bi-eye-slash" id="toggleCurrentPasswordIcon"></i>
-                                                        </span>
-                                                    </div>
-                                                    <span asp-validation-for="DoiMatKhauRequest.MatKhauHienTai" class="text-danger"></span>
+                                            <div class="col-md-6">
+                                                <label asp-for="DoiMatKhauRequest.MatKhauMoi" class="form-label"></label>
+                                                <div class="input-group">
+                                                    <input asp-for="DoiMatKhauRequest.MatKhauMoi" class="form-control" type="password" id="newPassword" />
+                                                    <span class="input-group-text" id="toggleNewPassword" style="cursor:pointer;">
+                                                        <i class="bi bi-eye-slash" id="toggleNewPasswordIcon"></i>
+                                                    </span>
                                                 </div>
-                                                <div class="col-md-6">
-                                                    <label asp-for="DoiMatKhauRequest.MatKhauMoi" class="form-label"></label>
-                                                    <div class="input-group">
-                                                        <input asp-for="DoiMatKhauRequest.MatKhauMoi" class="form-control" type="password" id="newPassword" />
-                                                        <span class="input-group-text" id="toggleNewPassword" style="cursor:pointer;">
-                                                            <i class="bi bi-eye-slash" id="toggleNewPasswordIcon"></i>
-                                                        </span>
-                                                    </div>
-                                                    <span asp-validation-for="DoiMatKhauRequest.MatKhauMoi" class="text-danger"></span>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label asp-for="DoiMatKhauRequest.XacNhanMatKhau" class="form-label"></label>
-                                                    <div class="input-group">
-                                                        <input asp-for="DoiMatKhauRequest.XacNhanMatKhau" class="form-control" type="password" id="confirmPassword" />
-                                                        <span class="input-group-text" id="toggleConfirmPassword" style="cursor:pointer;">
-                                                            <i class="bi bi-eye-slash" id="toggleConfirmPasswordIcon"></i>
-                                                        </span>
-                                                    </div>
-                                                    <span asp-validation-for="DoiMatKhauRequest.XacNhanMatKhau" class="text-danger"></span>
-                                                </div>
+                                                <span asp-validation-for="DoiMatKhauRequest.MatKhauMoi" class="text-danger"></span>
                                             </div>
-
-                                            <div class="form-buttons">
-                                                <button type="submit" class="btn btn-primary">Save</button>
+                                            <div class="col-md-6">
+                                                <label asp-for="DoiMatKhauRequest.XacNhanMatKhau" class="form-label"></label>
+                                                <div class="input-group">
+                                                    <input asp-for="DoiMatKhauRequest.XacNhanMatKhau" class="form-control" type="password" id="confirmPassword" />
+                                                    <span class="input-group-text" id="toggleConfirmPassword" style="cursor:pointer;">
+                                                        <i class="bi bi-eye-slash" id="toggleConfirmPasswordIcon"></i>
+                                                    </span>
+                                                </div>
+                                                <span asp-validation-for="DoiMatKhauRequest.XacNhanMatKhau" class="text-danger"></span>
                                             </div>
-                                        </form>
-                                    </div>
+                                        </div>
+
+                                        <div class="form-buttons">
+                                            <button type="submit" class="btn btn-primary">Save</button>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
         </div>
 
@@ -558,6 +794,10 @@
     <script>
         // Toggle password visibility for Đổi mật khẩu
         $(document).ready(function () {
+            console.log('Document ready - checking returns data...');
+            console.log('Returns count from model:', @(Model?.returnsViewModels?.Count ?? 0));
+            console.log('Returns status count:', @(Model?.SoLuongTheoTrangThaiReturns?.Count ?? 0));
+
             // Nếu URL có hash #addresses thì mở tab Địa chỉ sau khi load trang
             function showAddressesTab() {
                 try {
@@ -618,8 +858,8 @@
                 }
             });
 
-        // Hiện modal khi bấm nút thêm địa chỉ
-            $('#btnShowAddAddressModal').click(function() {
+            // Hiện modal khi bấm nút thêm địa chỉ
+            $('#btnShowAddAddressModal').click(function () {
                 $('#addAddressModal').modal('show');
                 loadProvinces('#modal-province');
                 $('#modal-district').html('<option value="">Chọn quận / huyện</option>').prop('disabled', true);
@@ -627,11 +867,11 @@
             });
 
             // Sự kiện change cho dropdown trong modal
-            $('#addAddressModal').on('change', '#modal-province', function() {
+            $('#addAddressModal').on('change', '#modal-province', function () {
                 loadDistricts($(this).val(), '#modal-district', '#modal-ward');
             });
 
-            $('#addAddressModal').on('change', '#modal-district', function() {
+            $('#addAddressModal').on('change', '#modal-district', function () {
                 loadWards($(this).val(), '#modal-ward');
             });
 
@@ -644,16 +884,16 @@
             });
 
             // Sự kiện change cho dropdown trong modal chỉnh sửa
-            $('#editAddressModal').on('change', '#edit-province', function() {
+            $('#editAddressModal').on('change', '#edit-province', function () {
                 loadDistricts($(this).val(), '#edit-district', '#edit-ward');
             });
 
-            $('#editAddressModal').on('change', '#edit-district', function() {
+            $('#editAddressModal').on('change', '#edit-district', function () {
                 loadWards($(this).val(), '#edit-ward');
             });
 
             // Xử lý click nút chỉnh sửa địa chỉ
-            $('.btn-edit-address').on('click', function() {
+            $('.btn-edit-address').on('click', function () {
                 const addressId = $(this).data('address-id');
                 $('#editAddressModal').data('address-id', addressId);
                 $('#editAddressModal').modal('show');
@@ -689,7 +929,7 @@
             // Real-time validation for phone number
             // Enhanced phone number validation with auto-0 and number-only input
             // Enhanced phone number validation with auto-0 and number-only input (NO real-time validation)
-            $('#modal-phone-number').on('input', function() {
+            $('#modal-phone-number').on('input', function () {
                 let phone = $(this).val();
 
                 // Remove all non-numeric characters
@@ -717,7 +957,7 @@
             });
 
             // Validation on blur (when user leaves the field)
-            $('#modal-phone-number').on('blur', function() {
+            $('#modal-phone-number').on('blur', function () {
                 const phone = $(this).val();
                 const icon = $('#phone-validation-icon');
 
@@ -744,7 +984,7 @@
             });
 
             // Prevent paste of non-numeric characters
-            $('#modal-phone-number').on('paste', function(e) {
+            $('#modal-phone-number').on('paste', function (e) {
                 e.preventDefault();
                 const pastedText = (e.originalEvent || e).clipboardData.getData('text/plain');
                 const numericOnly = pastedText.replace(/[^0-9]/g, '');
@@ -766,7 +1006,7 @@
             });
 
             // Prevent keydown of non-numeric keys (except navigation keys)
-            $('#modal-phone-number').on('keydown', function(e) {
+            $('#modal-phone-number').on('keydown', function (e) {
                 // Allow: backspace, delete, tab, escape, enter, navigation keys
                 if ([8, 9, 27, 13, 46, 37, 38, 39, 40].indexOf(e.keyCode) !== -1 ||
                     // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
@@ -787,7 +1027,7 @@
             });
 
             // Auto-focus and add 0 when field gets focus
-            $('#modal-phone-number').on('focus', function() {
+            $('#modal-phone-number').on('focus', function () {
                 if ($(this).val().length === 0) {
                     $(this).val('0');
                     $(this).trigger('input');
@@ -795,7 +1035,7 @@
             });
 
             // Real-time validation for required fields
-            $('#modal-receiver-name, #modal-detail-address').on('input', function() {
+            $('#modal-receiver-name, #modal-detail-address').on('input', function () {
                 const value = $(this).val();
                 const fieldId = $(this).attr('id');
 
@@ -807,7 +1047,7 @@
             });
 
             // Validation for dropdowns
-            $('#modal-province, #modal-district, #modal-ward').on('change', function() {
+            $('#modal-province, #modal-district, #modal-ward').on('change', function () {
                 const value = $(this).val();
                 const fieldId = $(this).attr('id');
 
@@ -819,7 +1059,7 @@
             });
 
             // Validation for editAddressModal
-            $('#edit-phone-number').on('input', function() {
+            $('#edit-phone-number').on('input', function () {
                 let phone = $(this).val();
                 phone = phone.replace(/[^0-9]/g, '');
                 if (phone.length === 0) {
@@ -836,7 +1076,7 @@
                 $('#edit-phone-number-error').text('');
             });
 
-            $('#edit-phone-number').on('blur', function() {
+            $('#edit-phone-number').on('blur', function () {
                 const phone = $(this).val();
                 const icon = $('#edit-phone-validation-icon');
                 if (phone.length === 0 || phone === '0') {
@@ -860,7 +1100,7 @@
                 }
             });
 
-            $('#edit-phone-number').on('paste', function(e) {
+            $('#edit-phone-number').on('paste', function (e) {
                 e.preventDefault();
                 const pastedText = (e.originalEvent || e).clipboardData.getData('text/plain');
                 const numericOnly = pastedText.replace(/[^0-9]/g, '');
@@ -877,7 +1117,7 @@
                 $(this).trigger('input');
             });
 
-            $('#edit-phone-number').on('keydown', function(e) {
+            $('#edit-phone-number').on('keydown', function (e) {
                 if ([8, 9, 27, 13, 46, 37, 38, 39, 40].indexOf(e.keyCode) !== -1 ||
                     (e.keyCode === 65 && e.ctrlKey === true) ||
                     (e.keyCode === 67 && e.ctrlKey === true) ||
@@ -891,14 +1131,14 @@
                 e.preventDefault();
             });
 
-            $('#edit-phone-number').on('focus', function() {
+            $('#edit-phone-number').on('focus', function () {
                 if ($(this).val().length === 0) {
                     $(this).val('0');
                     $(this).trigger('input');
                 }
             });
 
-            $('#edit-receiver-name, #edit-detail-address').on('blur', function() {
+            $('#edit-receiver-name, #edit-detail-address').on('blur', function () {
                 const value = $(this).val();
                 const fieldId = $(this).attr('id');
                 if (validateRequired(value, fieldId)) {
@@ -908,7 +1148,7 @@
                 }
             });
 
-            $('#edit-province, #edit-district, #edit-ward').on('change', function() {
+            $('#edit-province, #edit-district, #edit-ward').on('change', function () {
                 const value = $(this).val();
                 const fieldId = $(this).attr('id');
                 if (validateRequired(value, fieldId)) {
@@ -1028,7 +1268,7 @@
             });
 
             // Updated save address function with validation
-            $('#btnSaveAddAddress').click(function() {
+            $('#btnSaveAddAddress').click(function () {
                 clearAllErrors();
 
                 const receiverName = $('#modal-receiver-name').val().trim();
@@ -1113,7 +1353,7 @@
                 });
             });
 
-           // Reset validation when modal is closed
+            // Reset validation when modal is closed
             $('#addAddressModal, #editAddressModal').on('hidden.bs.modal', function () {
                 $('#addAddressForm')[0].reset();
                 clearAllErrors();
@@ -1140,7 +1380,7 @@
                     $(selector).html(options);
                     if (callback) callback();
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     console.error('Lỗi load provinces:', error);
                     console.error('Status:', xhr.status);
                     console.error('Response:', xhr.responseText);
@@ -1170,7 +1410,7 @@
                     $(districtSelector).html(options);
                     if (callback) callback();
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     console.error('Lỗi load districts:', error);
                     console.error('Status:', xhr.status);
                     console.error('Response:', xhr.responseText);
@@ -1199,7 +1439,7 @@
                     $(wardSelector).html(options);
                     if (callback) callback();
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     console.error('Lỗi load wards:', error);
                     console.error('Status:', xhr.status);
                     console.error('Response:', xhr.responseText);
@@ -1309,6 +1549,153 @@
             });
         }
 
+        // Load returns by status
+        function loadReturnsByStatus(trangThai) {
+            console.log('Loading returns with status:', trangThai);
+            console.log('URL:', '@Url.Action("GetReturnsByStatus", "Account")');
+
+            // Hiển thị loading
+            $('#returns-table-container').html('<div class="text-center p-4"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+
+            // Ẩn timeline, hiển thị returns list
+            $('#returns-timeline-section').addClass('d-none');
+            $('#returns-list-section').removeClass('d-none');
+
+            // Gọi AJAX để lấy dữ liệu
+            $.ajax({
+                url: '@Url.Action("GetReturnsByStatus", "Account")',
+                type: 'GET',
+                data: { trangThai: trangThai },
+                success: function (data) {
+                    console.log('Returns data loaded successfully');
+                    console.log('Response data:', data);
+                    console.log('Response data length:', data.length);
+                    $('#returns-table-container').html(data);
+
+                    // Cập nhật trạng thái active cho timeline
+                    updateReturnsTimelineActive(trangThai);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error loading returns:', error);
+                    console.error('Status:', xhr.status);
+                    console.error('Response:', xhr.responseText);
+                    $('#returns-table-container').html('<div class="section-box text-center p-4"><p class="text-muted">Có lỗi xảy ra khi tải dữ liệu.</p><button type="button" class="btn btn-primary mt-3" onclick="showReturnsTimeline()">Quay lại Timeline</button></div>');
+                }
+            });
+        }
+
+        // Cập nhật trạng thái active cho timeline trả hàng
+        function updateReturnsTimelineActive(trangThai) {
+            // Xóa tất cả active-step
+            document.querySelectorAll('#returns-timeline-section .progress-step').forEach(step => {
+                step.classList.remove('active-step');
+            });
+
+            // Thêm active-step cho trạng thái được chọn
+            if (trangThai !== 'all') {
+                const selectedStep = document.querySelector(`#returns-timeline-section .progress-step[onclick*="loadReturnsByStatus('${trangThai}')"]`);
+                if (selectedStep) {
+                    selectedStep.classList.add('active-step');
+                }
+            }
+        }
+
+        // Show returns timeline
+        function showReturnsTimeline() {
+            $('#returns-list-section').addClass('d-none');
+            $('#return-details-section').addClass('d-none');
+            $('#returns-timeline-section').removeClass('d-none');
+        }
+
+        // Show returns list
+        function showReturnsList() {
+            $('#return-details-section').addClass('d-none');
+            $('#returns-list-section').removeClass('d-none');
+        }
+
+        // Load return details
+        function loadReturnDetails(returnId) {
+            // Hiển thị loading
+            $('#return-details-container').html('<div class="text-center p-4"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+
+            // Ẩn returns list, hiển thị return details
+            $('#returns-list-section').addClass('d-none');
+            $('#return-details-section').removeClass('d-none');
+
+            // Gọi AJAX để lấy chi tiết yêu cầu trả hàng
+            $.ajax({
+                url: '@Url.Action("GetReturnDetails", "Account")',
+                type: 'GET',
+                data: { id: returnId },
+                success: function (data) {
+                    $('#return-details-container').html(data);
+                },
+                error: function () {
+                    $('#return-details-container').html('<div class="section-box text-center p-4"><p class="text-muted">Có lỗi xảy ra khi tải chi tiết yêu cầu trả hàng.</p><button type="button" class="btn btn-primary mt-3" onclick="showReturnsList()">Quay lại danh sách</button></div>');
+                }
+            });
+        }
+
+        // Test function để kiểm tra load returns
+        function testLoadReturns() {
+            console.log('Testing load returns...');
+
+            // Hiển thị loading
+            $('#returns-table-container').html('<div class="text-center p-4"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+
+            // Ẩn timeline, hiển thị returns list
+            $('#returns-timeline-section').addClass('d-none');
+            $('#returns-list-section').removeClass('d-none');
+
+            // Gọi AJAX để lấy dữ liệu
+            $.ajax({
+                url: '@Url.Action("GetReturnsByStatus", "Account")',
+                type: 'GET',
+                data: { trangThai: 'all' }, // Lấy tất cả
+                success: function (data) {
+                    console.log('Test returns data loaded successfully');
+                    console.log('Response data:', data);
+                    $('#returns-table-container').html(data);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Test error loading returns:', error);
+                    console.error('Status:', xhr.status);
+                    console.error('Response:', xhr.responseText);
+                    $('#returns-table-container').html('<div class="section-box text-center p-4"><p class="text-muted">Test: Có lỗi xảy ra khi tải dữ liệu.</p><button type="button" class="btn btn-primary mt-3" onclick="showReturnsTimeline()">Quay lại Timeline</button></div>');
+                }
+            });
+        }
+
+        // Test function để gọi trực tiếp API
+        function testDirectCall() {
+            console.log('Testing direct API call...');
+
+            // Hiển thị loading
+            $('#returns-table-container').html('<div class="text-center p-4"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+
+            // Ẩn timeline, hiển thị returns list
+            $('#returns-timeline-section').addClass('d-none');
+            $('#returns-list-section').removeClass('d-none');
+
+            // Gọi AJAX để lấy dữ liệu
+            $.ajax({
+                url: '/Account/GetReturnsByStatus',
+                type: 'GET',
+                data: { trangThai: 'all' }, // Lấy tất cả
+                success: function (data) {
+                    console.log('Direct call success');
+                    console.log('Response data:', data);
+                    $('#returns-table-container').html(data);
+                },
+                error: function (xhr, status, error) {
+                    console.error('Direct call error:', error);
+                    console.error('Status:', xhr.status);
+                    console.error('Response:', xhr.responseText);
+                    $('#returns-table-container').html('<div class="section-box text-center p-4"><p class="text-muted">Direct call failed.</p><button type="button" class="btn btn-primary mt-3" onclick="showReturnsTimeline()">Quay lại Timeline</button></div>');
+                }
+            });
+        }
+
         // Filter orders by status
         function filterOrders(status) {
             // Gửi AJAX để lấy dữ liệu
@@ -1356,6 +1743,26 @@
                 }
             });
         }
+
+        // trả hàng
+        $(".return-status").click(function () {
+            var status = $(this).data("status");
+            loadReturns(status);
+        });
+
+        function loadReturns(status) {
+            $.ajax({
+                url: '/Return/GetByStatus',
+                type: 'GET',
+                data: { status: status },
+                success: function (data) {
+                    $("#ReturnList").html(data);
+                },
+                error: function () {
+                    alert("Không load được danh sách trả hàng");
+                }
+            });
+        }
     </script>
 }
 <style>
@@ -1396,6 +1803,30 @@
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
         margin-bottom: 25px;
         transition: all 0.3s ease;
+    }
+
+    .returns-grid {
+        margin-top: 20px;
+    }
+
+    .returns-timeline-section {
+        margin-top: 20px;
+    }
+
+    .returns-list-section {
+        margin-top: 20px;
+    }
+
+    .return-details-section {
+        margin-top: 20px;
+    }
+
+    .returns-table-container {
+        margin-top: 20px;
+    }
+
+    .return-details-container {
+        margin-top: 20px;
     }
 
     .table {
@@ -1593,6 +2024,27 @@
             background-color: #10b981;
         }
 
+        /* CSS cho arrow-segment của trả hàng */
+        .arrow-segment.warning::before {
+            background-color: #f59e0b;
+        }
+
+        .arrow-segment.info::before {
+            background-color: #3b82f6;
+        }
+
+        .arrow-segment.primary::before {
+            background-color: #8b5cf6;
+        }
+
+        .arrow-segment.success::before {
+            background-color: #10b981;
+        }
+
+        .arrow-segment.danger::before {
+            background-color: #ef4444;
+        }
+
     /* Chấm tròn trắng trên mũi tên */
     .arrow-dot {
         position: absolute;
@@ -1681,6 +2133,47 @@
         background-color: #10b981;
     }
 
+    /* CSS cho trả hàng */
+    .step-icon.warning {
+        background-color: #f59e0b;
+    }
+
+    .step-connector.warning {
+        background-color: #f59e0b;
+    }
+
+    .step-icon.info {
+        background-color: #3b82f6;
+    }
+
+    .step-connector.info {
+        background-color: #3b82f6;
+    }
+
+    .step-icon.primary {
+        background-color: #8b5cf6;
+    }
+
+    .step-connector.primary {
+        background-color: #8b5cf6;
+    }
+
+    .step-icon.success {
+        background-color: #10b981;
+    }
+
+    .step-connector.success {
+        background-color: #10b981;
+    }
+
+    .step-icon.danger {
+        background-color: #ef4444;
+    }
+
+    .step-connector.danger {
+        background-color: #ef4444;
+    }
+
     .step-title {
         font-weight: 600;
         font-size: 16px;
@@ -1747,6 +2240,22 @@
         background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z'/%3E%3C/svg%3E") center/contain no-repeat;
     }
 
+    .icon-close::before {
+        content: "";
+        display: block;
+        width: 24px;
+        height: 24px;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z'/%3E%3C/svg%3E") center/contain no-repeat;
+    }
+
+    .icon-times::before {
+        content: "";
+        display: block;
+        width: 24px;
+        height: 24px;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z'/%3E%3C/svg%3E") center/contain no-repeat;
+    }
+
     .action-buttons {
         position: absolute;
         bottom: 20px;
@@ -1810,16 +2319,59 @@
         position: relative;
     }
 
+    /* CSS cho active step */
+    .active-step .step-icon {
+        transform: scale(1.1);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .active-step .step-title {
+        color: #1f2937;
+        font-weight: 700;
+    }
+
     /* Style cho status badge */
     .status-badge {
-        padding: 4px 8px;
-        border-radius: 12px;
-        font-size: 12px;
-        font-weight: 500;
-        background-color: #e5e7eb;
-        color: #374151;
         display: inline-block;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: white;
+        background-color: #6c757d;
     }
+
+        .status-badge.bg-warning {
+            background-color: #f59e0b !important;
+            color: white !important;
+        }
+
+        .status-badge.bg-info {
+            background-color: #06b6d4 !important;
+            color: white !important;
+        }
+
+        .status-badge.bg-primary {
+            background-color: #3b82f6 !important;
+            color: white !important;
+        }
+
+        .status-badge.bg-success {
+            background-color: #10b981 !important;
+            color: white !important;
+        }
+
+        .status-badge.bg-danger {
+            background-color: #ef4444 !important;
+            color: white !important;
+        }
+
+        .status-badge.bg-secondary {
+            background-color: #6b7280 !important;
+            color: white !important;
+        }
 
     /* CSS cho addresses grid */
     .addresses-grid {
@@ -2024,6 +2576,12 @@
     }
 
     .empty-address {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6b7280;
+    }
+
+    .empty-returns {
         text-align: center;
         padding: 40px 20px;
         color: #6b7280;

@@ -1,0 +1,726 @@
+﻿@model SneakFit.ViewModels.Catalog.TraHang.ReturnViewModel
+@using SneakFit.Data.Enums
+@{
+    ViewData["Title"] = "Chi tiết yêu cầu trả hàng";
+    string S(ReturnStatus s) => s switch
+    {
+        ReturnStatus.ChapNhanDuyetHangHoan => "Chờ duyệt",
+        ReturnStatus.LayHangHoan => "Lấy hàng hoàn",
+        ReturnStatus.HoanHang => "Hoàn hàng (check hàng hoàn)",
+        ReturnStatus.ThanhCong => "Thành công",
+        ReturnStatus.TuChoi => "Từ chối",
+        _ => "Không xác định"
+    };
+
+    string GetStatusColor(ReturnStatus status) => status switch
+    {
+        ReturnStatus.ChapNhanDuyetHangHoan => "warning",
+        ReturnStatus.LayHangHoan => "info",
+        ReturnStatus.HoanHang => "primary",
+        ReturnStatus.ThanhCong => "success",
+        ReturnStatus.TuChoi => "danger",
+        _ => "secondary"
+    };
+
+    // Xác định trạng thái tiếp theo có thể chuyển đến
+    ReturnStatus? GetNextStatus(ReturnStatus currentStatus) => currentStatus switch
+    {
+        ReturnStatus.ChapNhanDuyetHangHoan => ReturnStatus.LayHangHoan,
+        ReturnStatus.LayHangHoan => ReturnStatus.HoanHang,
+        ReturnStatus.HoanHang => ReturnStatus.ThanhCong,
+        _ => null
+    };
+
+    var nextStatus = GetNextStatus(Model.Status);
+    var canChangeStatus = nextStatus.HasValue && Model.Status != ReturnStatus.ThanhCong && Model.Status != ReturnStatus.TuChoi;
+
+    // // Tạo timeline steps cho hoàn hàng
+    // var steps = new[]
+    // {
+    //     new { Status = ReturnStatus.ChapNhanDuyetHangHoan, Color = "warning", Icon = "icon-file", Title = "Chờ duyệt", Time = Model.CreatedAt.ToString("HH:mm:ss dd/MM/yyyy") },
+    //     new { Status = ReturnStatus.LayHangHoan, Color = "info", Icon = "icon-truck", Title = "Lấy hàng hoàn", Time = Model.Status >= ReturnStatus.LayHangHoan ? (Model.UpdatedAt?.ToString("HH:mm:ss dd/MM/yyyy") ?? "Đang xử lý") : "Chưa thực hiện" },
+    //     new { Status = ReturnStatus.HoanHang, Color = "primary", Icon = "icon-delivery", Title = "Hoàn hàng (check hàng hoàn)", Time = Model.Status >= ReturnStatus.HoanHang ? (Model.UpdatedAt?.ToString("HH:mm:ss dd/MM/yyyy") ?? "Đang xử lý") : "Chưa thực hiện" },
+    //     new { Status = ReturnStatus.ThanhCong, Color = "success", Icon = "icon-check", Title = "Thành công", Time = Model.Status == ReturnStatus.ThanhCong ? (Model.UpdatedAt?.ToString("HH:mm:ss dd/MM/yyyy") ?? "Đang xử lý") : "Chưa thực hiện" }
+    // };
+
+    // // Lọc các bước hiển thị
+    // var visibleSteps = steps.Where(s =>
+    //     (int)s.Status <= (int)Model.Status ||
+    //     s.Status == ReturnStatus.ChapNhanDuyetHangHoan // Luôn hiển thị bước đầu tiên
+    // ).Distinct().OrderBy(s => (int)s.Status).ToList();
+    // Tạo timeline steps theo trạng thái
+
+    IEnumerable<dynamic> steps;
+
+    if (Model.Status == ReturnStatus.TuChoi)
+    {
+        // Case bị từ chối: chỉ hiển thị "Chờ duyệt" và "Từ chối"
+        steps = new[]
+        {
+        new {
+            Status = ReturnStatus.ChapNhanDuyetHangHoan,
+            Color = "warning",
+            Icon = "icon-file",
+            Title = "Chờ duyệt",
+            Time = Model.CreatedAt.ToString("HH:mm:ss dd/MM/yyyy")
+        },
+        new {
+            Status = ReturnStatus.TuChoi,
+            Color = "danger",
+            Icon = "icon-times", // thêm icon chéo
+            Title = "Từ chối",
+            Time = Model.Status == ReturnStatus.TuChoi
+                ? (Model.UpdatedAt?.ToString("HH:mm:ss dd/MM/yyyy") ?? "Đang xử lý")
+                : "Chưa thực hiện"
+        }
+    };
+    }
+    else
+    {
+        // Flow bình thường 4 bước
+        steps = new[]
+        {
+        new { Status = ReturnStatus.ChapNhanDuyetHangHoan, Color = "warning", Icon = "icon-file",     Title = "Chờ duyệt",                         Time = Model.CreatedAt.ToString("HH:mm:ss dd/MM/yyyy") },
+        new { Status = ReturnStatus.LayHangHoan,           Color = "info",    Icon = "icon-truck",    Title = "Lấy hàng hoàn",                     Time = Model.Status >= ReturnStatus.LayHangHoan ? (Model.UpdatedAt?.ToString("HH:mm:ss dd/MM/yyyy") ?? "Đang xử lý") : "Chưa thực hiện" },
+        new { Status = ReturnStatus.HoanHang,              Color = "primary", Icon = "icon-delivery", Title = "Hoàn hàng (check hàng hoàn)",       Time = Model.Status >= ReturnStatus.HoanHang    ? (Model.UpdatedAt?.ToString("HH:mm:ss dd/MM/yyyy") ?? "Đang xử lý") : "Chưa thực hiện" },
+        new { Status = ReturnStatus.ThanhCong,             Color = "success", Icon = "icon-check",    Title = "Thành công",                         Time = Model.Status == ReturnStatus.ThanhCong   ? (Model.UpdatedAt?.ToString("HH:mm:ss dd/MM/yyyy") ?? "Đang xử lý") : "Chưa thực hiện" }
+    };
+    }
+
+    // Lọc/Sort hiển thị
+    var visibleSteps = steps
+        .Where(s => (int)s.Status <= (int)Model.Status || s.Status == ReturnStatus.ChapNhanDuyetHangHoan)
+        .Distinct()
+        .OrderBy(s => (int)s.Status)
+        .ToList();
+}
+
+<head>
+    <link rel="stylesheet" href="~/css/trahang.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .progress-container {
+            padding: 40px 20px 80px 20px;
+            background: white;
+            position: relative;
+        }
+
+        .progress-timeline {
+            /* Biến dùng để canh vị trí mũi tên và chiều cao đường nối */
+            --icon-size: 70px; /* Nhỏ lại cho gọn giống _OrderDetails */
+            --icon-gap: 10px; /* Khoảng cách dưới icon */
+            --arrow-top: 110px; /* Vị trí top của dải mũi tên */
+
+            display: flex;
+            align-items: flex-start;
+            position: relative;
+            margin: 0 auto;
+            /* chừa không gian cho chữ hiển thị dưới mũi tên */
+            min-height: calc(var(--arrow-top) + 70px);
+        }
+
+        /* Mũi tên progress bar với màu sắc */
+        .arrow-progress {
+            display: flex;
+            align-items: center;
+            position: absolute;
+            top: var(--arrow-top);
+            left: 0;
+            right: 0;
+            height: 20px;
+            z-index: 1;
+        }
+
+        .arrow-segment {
+            flex: 1;
+            height: 100%;
+            position: relative;
+            margin: 0 2px;
+        }
+
+            .arrow-segment::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 100%;
+                background-color: #e5e7eb;
+                clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%);
+            }
+
+            .arrow-segment.warning::before {
+                background-color: #f59e0b;
+            }
+
+            .arrow-segment.info::before {
+                background-color: #3b82f6;
+            }
+
+            .arrow-segment.primary::before {
+                background-color: #8b5cf6;
+            }
+
+            .arrow-segment.success::before {
+                background-color: #10b981;
+            }
+
+            .arrow-segment.inactive::before {
+                background-color: #e5e7eb;
+            }
+
+            .arrow-segment.danger::before {
+                background-color: #ef4444; 
+            }
+
+        /* Chấm tròn trắng trên mũi tên */
+        .arrow-dot {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: white;
+            border-radius: 50%;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+        }
+
+        .progress-step {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 3;
+        }
+
+        .step-icon {
+            width: var(--icon-size);
+            height: var(--icon-size);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: var(--icon-gap);
+            position: relative;
+            font-size: 24px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+            .step-icon.warning {
+                background-color: #f59e0b;
+            }
+
+            .step-icon.info {
+                background-color: #3b82f6;
+            }
+
+            .step-icon.primary {
+                background-color: #8b5cf6;
+            }
+
+            .step-icon.success {
+                background-color: #10b981;
+            }
+
+            .step-icon.inactive {
+                background-color: #9ca3af;
+            }
+
+            .step-icon.danger {
+                background-color: #ef4444;
+            }
+
+        .step-connector {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            /* Dính sát đáy icon */
+            top: var(--icon-size);
+            /* Vươn tới tâm chấm trắng trên mũi tên (50% của 20px = 10px) */
+            height: calc((var(--arrow-top) + 0px) - var(--icon-size));
+            background-color: #e5e7eb;
+            z-index: 2;
+        }
+
+            .step-connector.warning {
+                background-color: #f59e0b;
+            }
+
+            .step-connector.info {
+                background-color: #3b82f6;
+            }
+
+            .step-connector.primary {
+                background-color: #8b5cf6;
+            }
+
+            .step-connector.success {
+                background-color: #10b981;
+            }
+
+            .step-connector.danger {
+                background-color: #ef4444;
+            }
+
+        .step-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            text-align: center;
+            /* đẩy tiêu đề xuống dưới dải mũi tên, tương tự _OrderDetails */
+            margin-top: 55px;
+            margin-bottom: 6px;
+            max-width: 140px;
+            line-height: 1.3;
+            white-space: nowrap;
+        }
+
+        .step-time {
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+            margin-top: 2px;
+        }
+
+        /* Icons */
+        .icon-file::before {
+            content: "";
+            display: block;
+            width: 24px;
+            height: 24px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z'/%3E%3C/svg%3E") center/contain no-repeat;
+        }
+
+        .icon-truck::before {
+            content: "";
+            display: block;
+            width: 24px;
+            height: 24px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M18,18.5A1.5,1.5 0 0,1 16.5,17A1.5,1.5 0 0,1 18,15.5A1.5,1.5 0 0,1 19.5,17A1.5,1.5 0 0,1 18,18.5M19.5,9.5L21.46,12H17V9.5M6,18.5A1.5,1.5 0 0,1 4.5,17A1.5,1.5 0 0,1 6,15.5A1.5,1.5 0 0,1 7.5,17A1.5,1.5 0 0,1 6,18.5M20,8H17V4H3C1.89,4 1,4.89 1,6V17H3A3,3 0 0,0 6,20A3,3 0 0,0 9,17H15A3,3 0 0,0 18,20A3,3 0 0,0 21,17H23V12L20,8Z'/%3E%3C/svg%3E") center/contain no-repeat;
+        }
+
+        .icon-delivery::before {
+            content: "";
+            display: block;
+            width: 24px;
+            height: 24px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M3,4A2,2 0 0,0 1,6V17H3A3,3 0 0,0 6,20A3,3 0 0,0 9,17H15A3,3 0 0,0 18,20A3,3 0 0,0 21,17H23V12L20,8H17V4M10,6L14,10L10,14V11H4V9H10M6,15.5A1.5,1.5 0 0,1 7.5,17A1.5,1.5 0 0,1 6,18.5A1.5,1.5 0 0,1 4.5,17A1.5,1.5 0 0,1 6,15.5M18,15.5A1.5,1.5 0 0,1 19.5,17A1.5,1.5 0 0,1 18,18.5A1.5,1.5 0 0,1 16.5,17A1.5,1.5 0 0,1 18,15.5Z'/%3E%3C/svg%3E") center/contain no-repeat;
+        }
+
+        .icon-check::before {
+            content: "";
+            display: block;
+            width: 24px;
+            height: 24px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z'/%3E%3C/svg%3E") center/contain no-repeat;
+        }
+
+        .icon-times::before {
+            content: "";
+            display: block;
+            width: 24px;
+            height: 24px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z'/%3E%3C/svg%3E") center/contain no-repeat;
+        }
+
+    </style>
+</head>
+
+<div class="container py-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4>Chi tiết yêu cầu trả hàng #@Model.Code</h4>
+        <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+    </div>
+
+    <!-- Status Timeline -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="progress-timeline">
+                <!-- Mũi tên progress bar với màu sắc -->
+                <div class="arrow-progress">
+                    @foreach (var step in visibleSteps)
+                    {
+                        var isCompleted = (int)step.Status <= (int)Model.Status;
+                        var arrowClass = isCompleted ? step.Color : "inactive";
+
+                        <div class="arrow-segment @arrowClass">
+                            <div class="arrow-dot"></div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Các bước với màu sắc và connector tương ứng -->
+                @foreach (var step in visibleSteps)
+                {
+                    var isCompleted = (int)step.Status <= (int)Model.Status;
+                    var stepClass = isCompleted ? step.Color : "inactive";
+
+                    <div class="progress-step">
+                        <div class="step-icon @stepClass @step.Icon"></div>
+                        <div class="step-connector @stepClass"></div>
+                        <div class="step-title">@step.Title</div>
+                        <div class="step-time">@step.Time</div>
+                    </div>
+                }
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <div>
+                    @if (canChangeStatus)
+                    {
+                        <button type="button" class="btn btn-primary me-2" id="btnChuyenTrangThai">
+                            @* <i class="fas fa-arrow-right me-2"></i>Chuyển sang @S(nextStatus.Value) *@
+                            <i class="fas fa-arrow-right"></i>Xác nhận
+                        </button>
+                    }
+                    else if (Model.Status == ReturnStatus.ThanhCong)
+                    {
+                        <span class="text-success"><i class="fas fa-check-circle me-2"></i>Đã hoàn thành</span>
+                    }
+                    else if (Model.Status == ReturnStatus.TuChoi)
+                    {
+                        <span class="text-danger"><i class="fas fa-times-circle me-2"></i>Đã từ chối</span>
+                    }
+                    @if (Model.Status == ReturnStatus.ChapNhanDuyetHangHoan)
+                    {
+                        <button type="button"
+                                class="btn btn-danger"
+                                id="btnOpenReject"
+                                data-bs-toggle="modal"
+                                data-bs-target="#rejectModal">
+                            <i class="fas fa-times me-1"></i> Từ chối
+                        </button>
+                        <div class="d-none">
+                            @Html.AntiForgeryToken()
+                        </div>
+                    }
+                </div>
+                <div>
+                    <button type="button" class="btn btn-outline-info" id="btnLichSu">
+                        <i class="fas fa-history me-2"></i>Lịch sử
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0">Thông tin yêu cầu</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Mã yêu cầu:</strong> @Model.Code</p>
+                            <p><strong>Hóa đơn:</strong> <a asp-controller="HoaDon" asp-action="Details" asp-route-id="@Model.OrderId" class="text-primary">@(!string.IsNullOrEmpty(Model.MaHoaDon) ? Model.MaHoaDon : Model.OrderId.ToString())</a></p>
+                            <p><strong>Ngày tạo:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Lý do trả hàng:</strong> @Model.Reason</p>
+                            <p><strong>Hình thức hoàn:</strong> Chuyển khoản ngân hàng</p>
+                            @if (!string.IsNullOrEmpty(Model.ShippingCarrier))
+                            {
+                                <p><strong>Đơn vị vận chuyển:</strong> @Model.ShippingCarrier</p>
+                            }
+                            @if (!string.IsNullOrEmpty(Model.ShippingCode))
+                            {
+                                <p><strong>Mã vận đơn:</strong> @Model.ShippingCode</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Trạng thái hiện tại</h5>
+                </div>
+                <div class="card-body text-center">
+                    <span class="badge bg-@GetStatusColor(Model.Status) fs-6 px-3 py-2">@S(Model.Status)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal nhập ghi chú khi chuyển trạng thái -->
+@if (canChangeStatus && nextStatus.HasValue)
+{
+    <div class="modal fade" id="modalGhiChu" tabindex="-1" aria-labelledby="modalGhiChuLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalGhiChuLabel">Chuyển trạng thái</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Trạng thái hiện tại:</label>
+                        <span class="badge bg-@GetStatusColor(Model.Status)">@S(Model.Status)</span>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Trạng thái mới:</label>
+                        <span class="badge bg-@GetStatusColor(nextStatus.Value)">@S(nextStatus.Value)</span>
+                    </div>
+                    <div class="mb-3">
+                        <label for="txtGhiChu" class="form-label">Ghi chú <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="txtGhiChu" rows="3" placeholder="Nhập ghi chú cho việc chuyển trạng thái..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-primary" id="btnXacNhanGhiChu">Xác nhận</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Modal hủy trả hàng -->
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header py-2">
+                <h6 class="modal-title" id="rejectModalLabel">Lý do từ chối</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body">
+                <textarea id="rejectReason" class="form-control" rows="3" placeholder="Nhập lý do..." required></textarea>
+            </div>
+            <div class="modal-footer py-2">
+                <button type="button" class="btn btn-light me-2" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger" id="btnRejectConfirm">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal lịch sử thay đổi trạng thái -->
+<div class="modal fade" id="lichSuModal" tabindex="-1" aria-labelledby="lichSuModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="lichSuModalLabel">Lịch sử thay đổi trạng thái</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th class="text-center">Trạng thái mới</th>
+                                <th class="text-center">Thời gian</th>
+                                <th class="text-center">Người thực hiện</th>
+                                <th class="text-center">Ghi chú</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lichSuTableBody">
+                            <tr><td colspan="4" class="text-center">Đang tải...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Xử lý nút chuyển trạng thái
+            $('#btnChuyenTrangThai').on('click', function () {
+                $('#txtGhiChu').val('');
+                $('#modalGhiChu').modal('show');
+            });
+
+            // Xử lý nút xác nhận ghi chú
+            $('#btnXacNhanGhiChu').on('click', function () {
+                var ghiChu = $('#txtGhiChu').val().trim();
+                if (!ghiChu) {
+                    toastr.error('Vui lòng nhập ghi chú!');
+                    return;
+                }
+
+                var returnId = '@Model.ReturnId';
+        @if (nextStatus.HasValue)
+        {
+            <text>var newStatus = @((int)nextStatus.Value);</text>
+        }
+        else
+        {
+            <text>var newStatus = 0;</text>
+        }
+                var nguoiChinhSua = '@User.Identity.Name';
+
+                $.ajax({
+                    url: '/Returns/UpdateStatusWithLog',
+                    method: 'POST',
+                    data: {
+                        id: returnId,
+                        newStatus: newStatus,
+                        ghiChu: ghiChu,
+                        nguoiChinhSua: nguoiChinhSua
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            toastr.success('Chuyển trạng thái thành công!');
+                            setTimeout(function () { location.reload(); }, 1000);
+                        } else {
+                            toastr.error(response.message || 'Có lỗi xảy ra!');
+                        }
+                        $('#modalGhiChu').modal('hide');
+                    },
+                    error: function (xhr) {
+                        var message = 'Có lỗi xảy ra!';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            message = xhr.responseJSON.message;
+                        }
+                        toastr.error(message);
+                        $('#modalGhiChu').modal('hide');
+                    }
+                });
+            });
+
+            // Xử lý nút lịch sử
+            $('#btnLichSu').on('click', function () {
+                var returnId = '@Model.ReturnId';
+                $('#lichSuTableBody').html('<tr><td colspan="4" class="text-center">Đang tải...</td></tr>');
+
+                $.ajax({
+                    url: '/Returns/GetStatusHistory',
+                    method: 'GET',
+                    data: { id: returnId },
+                    success: function (data) {
+                        if (data && data.length > 0) {
+                            var rows = '';
+                            data.forEach(function (item) {
+                                rows += '<tr class="border-bottom">' +
+                                    '<td class="text-center">' +
+                                        '<span class="badge bg-' + getStatusColor(item.trangThaiMoi) + '">' + getStatusName(item.trangThaiMoi) + '</span>' +
+                                    '</td>' +
+                                    '<td class="text-center">' + formatDateTime(item.ngayTao) + '</td>' +
+                                    '<td class="text-center">' + (item.nguoiChinhSua || '') + '</td>' +
+                                    '<td class="text-center">' + (item.ghiChu || '') + '</td>' +
+                                    '</tr>';
+                            });
+                            $('#lichSuTableBody').html(rows);
+                        } else {
+                            $('#lichSuTableBody').html('<tr><td colspan="4" class="text-center">Không có lịch sử.</td></tr>');
+                        }
+                        $('#lichSuModal').modal('show');
+                    },
+                    error: function () {
+                        $('#lichSuTableBody').html('<tr><td colspan="4" class="text-center">Lỗi khi tải lịch sử.</td></tr>');
+                        $('#lichSuModal').modal('show');
+                    }
+                });
+            });
+
+            // Helper functions
+            function getStatusName(status) {
+                switch (status) {
+                    case 1: return 'Chờ duyệt';
+                    case 2: return 'Lấy hàng hoàn';
+                    case 3: return 'Hoàn hàng (check hàng hoàn)';
+                    case 4: return 'Thành công';
+                    case 5: return 'Từ chối';
+                    default: return 'Không xác định';
+                }
+            }
+
+            function getStatusColor(status) {
+                switch (status) {
+                    case 1: return 'warning';
+                    case 2: return 'info';
+                    case 3: return 'primary';
+                    case 4: return 'success';
+                    case 5: return 'danger';
+                    default: return 'secondary';
+                }
+            }
+
+            function formatDateTime(dateString) {
+                var d = new Date(dateString);
+                var hours = d.getHours().toString().padStart(2, '0');
+                var minutes = d.getMinutes().toString().padStart(2, '0');
+                var seconds = d.getSeconds().toString().padStart(2, '0');
+                var day = d.getDate().toString().padStart(2, '0');
+                var month = (d.getMonth() + 1).toString().padStart(2, '0');
+                var year = d.getFullYear();
+                return hours + ':' + minutes + ':' + seconds + ' ' + day + '/' + month + '/' + year;
+            }
+        });
+
+        // Xử lý từ chối yêu cầu trả hàng
+        $(function () {
+          const rejectUrl = '@Url.Action("Reject", "Returns")';
+          const $confirmBtn = $('#btnRejectConfirm');
+          const $reason = $('#rejectReason');
+
+          // Ctrl/Cmd + Enter để gửi nhanh
+          $reason.on('keydown', function (e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+              e.preventDefault();
+              $confirmBtn.click();
+            }
+          });
+
+          $confirmBtn.on('click', function () {
+            const reason = ($reason.val() || '').trim();
+            if (!reason) {
+              if (window.toastr) toastr.error('Vui lòng nhập lý do từ chối.');
+              else alert('Vui lòng nhập lý do từ chối.');
+              $reason.focus();
+              return;
+            }
+
+            const token = $('input[name="__RequestVerificationToken"]').val();
+            const id = '@Model.ReturnId';
+
+            $confirmBtn.prop('disabled', true);
+
+            $.ajax({
+              url: rejectUrl,
+              type: 'POST',
+              data: {
+                id: id,
+                reason: reason,
+                __RequestVerificationToken: token
+              },
+              success: function () {
+                if (window.toastr) toastr.success('Đã từ chối yêu cầu trả hàng.');
+                // Reload để cập nhật timeline/badge
+                setTimeout(function(){ location.reload(); }, 600);
+              },
+              error: function (xhr) {
+                const msg = (xhr.responseJSON && xhr.responseJSON.message) || 'Có lỗi xảy ra khi từ chối.';
+                if (window.toastr) toastr.error(msg); else alert(msg);
+                $confirmBtn.prop('disabled', false);
+              }
+            });
+          });
+
+          // Reset khi đóng modal
+          $('#rejectModal').on('hidden.bs.modal', function () {
+            $confirmBtn.prop('disabled', false);
+            $reason.val('');
+          });
+        });
+    </script>
+}

@@ -25,6 +25,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.Name = "SneakFit.Admin.Session";
 });
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
@@ -44,6 +45,7 @@ builder.Services.AddScoped<IHoaDonApiClient, HoaDonApiClient>();
 builder.Services.AddScoped<IHoaDonChiTietApiClient, HoaDonChiTietApiClient>();
 builder.Services.AddScoped<IGhnApiClient, GhnApiClient>();
 builder.Services.AddScoped<IDiaChiApiClient, DiaChiApiClient>();
+builder.Services.AddScoped<IAdminReturnsApiClient, AdminReturnsApiClient>();
 
 builder.Services.AddCors(options =>
 {
