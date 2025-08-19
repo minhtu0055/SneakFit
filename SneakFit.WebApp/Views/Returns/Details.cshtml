@@ -4,7 +4,7 @@
     ViewData["Title"] = "Chi tiết yêu cầu trả hàng";
     string S(ReturnStatus s) => s switch
     {
-        ReturnStatus.ChapNhanDuyetHangHoan => "Chấp nhận duyệt hàng hoàn",
+        ReturnStatus.ChapNhanDuyetHangHoan => "Chờ duyệt",
         ReturnStatus.LayHangHoan => "Lấy hàng hoàn",
         ReturnStatus.HoanHang => "Hoàn hàng (check hàng hoàn)",
         ReturnStatus.ThanhCong => "Thành công",
@@ -37,7 +37,7 @@
     // Tạo timeline steps cho hoàn hàng
     var steps = new[]
     {
-        new { Status = ReturnStatus.ChapNhanDuyetHangHoan, Color = "warning", Icon = "icon-file", Title = "Chấp nhận duyệt hàng hoàn", Time = Model.CreatedAt.ToString("HH:mm:ss dd/MM/yyyy") },
+        new { Status = ReturnStatus.ChapNhanDuyetHangHoan, Color = "warning", Icon = "icon-file", Title = "Chờ duyệt", Time = Model.CreatedAt.ToString("HH:mm:ss dd/MM/yyyy") },
         new { Status = ReturnStatus.LayHangHoan, Color = "info", Icon = "icon-truck", Title = "Lấy hàng hoàn", Time = Model.Status >= ReturnStatus.LayHangHoan ? (Model.UpdatedAt?.ToString("HH:mm:ss dd/MM/yyyy") ?? "Đang xử lý") : "Chưa thực hiện" },
         new { Status = ReturnStatus.HoanHang, Color = "primary", Icon = "icon-delivery", Title = "Hoàn hàng (check hàng hoàn)", Time = Model.Status >= ReturnStatus.HoanHang ? (Model.UpdatedAt?.ToString("HH:mm:ss dd/MM/yyyy") ?? "Đang xử lý") : "Chưa thực hiện" },
         new { Status = ReturnStatus.ThanhCong, Color = "success", Icon = "icon-check", Title = "Thành công", Time = Model.Status == ReturnStatus.ThanhCong ? (Model.UpdatedAt?.ToString("HH:mm:ss dd/MM/yyyy") ?? "Đang xử lý") : "Chưa thực hiện" }
@@ -537,7 +537,7 @@
             // Helper functions
             function getStatusName(status) {
                 switch (status) {
-                    case 1: return 'Chấp nhận duyệt hàng hoàn';
+                    case 1: return 'Chờ duyệt';
                     case 2: return 'Lấy hàng hoàn';
                     case 3: return 'Hoàn hàng (check hàng hoàn)';
                     case 4: return 'Thành công';

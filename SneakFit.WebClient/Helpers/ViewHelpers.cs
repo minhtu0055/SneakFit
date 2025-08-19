@@ -10,7 +10,7 @@ namespace SneakFit.WebClient.Helpers
         {
             string text = status switch
             {
-                ReturnStatus.ChapNhanDuyetHangHoan => "Chấp nhận duyệt hàng hoàn",
+                ReturnStatus.ChapNhanDuyetHangHoan => "Chờ duyệt",
                 ReturnStatus.LayHangHoan => "Lấy hàng hoàn",
                 ReturnStatus.HoanHang => "Hoàn hàng (check hàng hoàn)",
                 ReturnStatus.ThanhCong => "Thành công",

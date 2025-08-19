@@ -49,8 +49,8 @@ namespace SneakFit.Application.Catalog.TraHang
                 BankAccountName = request.Bank?.AccountName,
                 BankAccountNumber = request.Bank?.AccountNumber,
                 BankName = request.Bank?.BankName,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now
             };
             if (request.Items != null && request.Items.Count > 0)
             {
@@ -148,7 +148,7 @@ namespace SneakFit.Application.Catalog.TraHang
             if (e == null) return new ApiResult<bool> { IsSuccessed = false, Message = "Không tìm thấy yêu cầu." };
             if (e.Status != ReturnStatus.ChapNhanDuyetHangHoan) return new ApiResult<bool> { IsSuccessed = false, Message = "Chỉ hủy khi còn Chấp nhận duyệt hàng hoàn." };
             e.Status = ReturnStatus.TuChoi;
-            e.UpdatedAt = DateTime.UtcNow;
+            e.UpdatedAt = DateTime.Now;
             await _db.SaveChangesAsync();
             return new ApiResult<bool> { IsSuccessed = true, ResultObj = true };
         }
@@ -162,7 +162,7 @@ namespace SneakFit.Application.Catalog.TraHang
             e.Status = ReturnStatus.LayHangHoan;
             e.ShippingCarrier = carrier;
             e.ShippingCode = shipCode;
-            e.UpdatedAt = DateTime.UtcNow;
+            e.UpdatedAt = DateTime.Now;
             await _db.SaveChangesAsync();
             return new ApiResult<bool> { IsSuccessed = true, ResultObj = true };
         }
@@ -173,7 +173,7 @@ namespace SneakFit.Application.Catalog.TraHang
             if (e == null) return new ApiResult<bool> { IsSuccessed = false, Message = "Không tìm thấy yêu cầu." };
             if (e.Status != ReturnStatus.LayHangHoan) return new ApiResult<bool> { IsSuccessed = false, Message = "Trạng thái không hợp lệ." };
             e.Status = ReturnStatus.HoanHang;
-            e.UpdatedAt = DateTime.UtcNow;
+            e.UpdatedAt = DateTime.Now;
             await _db.SaveChangesAsync();
             return new ApiResult<bool> { IsSuccessed = true, ResultObj = true };
         }
@@ -202,7 +202,7 @@ namespace SneakFit.Application.Catalog.TraHang
             order.TrangThai = TrangThaiHoaDon.TraHang;
 
             e.Status = ReturnStatus.ThanhCong;
-            e.UpdatedAt = DateTime.UtcNow;
+            e.UpdatedAt = DateTime.Now;
 
             await _db.SaveChangesAsync();
             await trx.CommitAsync();
@@ -215,7 +215,7 @@ namespace SneakFit.Application.Catalog.TraHang
             if (e == null) return new ApiResult<bool> { IsSuccessed = false, Message = "Không tìm thấy yêu cầu." };
             if (e.Status != ReturnStatus.ChapNhanDuyetHangHoan) return new ApiResult<bool> { IsSuccessed = false, Message = "Trạng thái không hợp lệ." };
             e.Status = ReturnStatus.TuChoi;
-            e.UpdatedAt = DateTime.UtcNow;
+            e.UpdatedAt = DateTime.Now;
             await _db.SaveChangesAsync();
             return new ApiResult<bool> { IsSuccessed = true, ResultObj = true };
         }
@@ -318,7 +318,7 @@ namespace SneakFit.Application.Catalog.TraHang
                     order.TrangThai = TrangThaiHoaDon.TraHang;
 
                     e.Status = newStatus;
-                    e.UpdatedAt = DateTime.UtcNow;
+                    e.UpdatedAt = DateTime.Now;
 
                     // Lưu lịch sử thay đổi trạng thái
                     var history = new ReturnStatusHistory
@@ -329,7 +329,7 @@ namespace SneakFit.Application.Catalog.TraHang
                         TrangThaiMoi = newStatus,
                         GhiChu = ghiChu,
                         NguoiChinhSua = nguoiChinhSua,
-                        NgayTao = DateTime.UtcNow
+                        NgayTao = DateTime.Now
                     };
                     _db.ReturnStatusHistories.Add(history);
 
@@ -346,7 +346,7 @@ namespace SneakFit.Application.Catalog.TraHang
             else
             {
                 e.Status = newStatus;
-                e.UpdatedAt = DateTime.UtcNow;
+                e.UpdatedAt = DateTime.Now;
 
                 // Lưu lịch sử thay đổi trạng thái
                 var history = new ReturnStatusHistory
@@ -357,7 +357,7 @@ namespace SneakFit.Application.Catalog.TraHang
                     TrangThaiMoi = newStatus,
                     GhiChu = ghiChu,
                     NguoiChinhSua = nguoiChinhSua,
-                    NgayTao = DateTime.UtcNow
+                    NgayTao = DateTime.Now
                 };
                 _db.ReturnStatusHistories.Add(history);
 

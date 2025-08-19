@@ -32,12 +32,12 @@ namespace SneakFit.WebClient.Controllers
             try
             {
                 var userId = GetUserId();
-                var result = await _traHangApiClient.GetMyReturnsAsync(pageIndex, pageSize);
+                var result = await _traHangApiClient.GetMyReturnsAsync( pageIndex, pageSize);
                 return View(result);
             }
             catch (UnauthorizedAccessException)
             {
-                return RedirectToAction("Login", "Account");
+                return RedirectToAction("Index", "Login");
             }
             catch (Exception ex)
             {

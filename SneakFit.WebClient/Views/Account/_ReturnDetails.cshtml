@@ -3,11 +3,11 @@
 
 <div class="section-box">
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-12">
             <div class="card mb-3">
                 <div class="card-header">
                     <h5 class="mb-0">
-                        <i class="bi bi-arrow-return-left text-primary"></i>
+                        @* <i class="bi bi-arrow-return-left text-primary"></i> *@
                         Thông tin yêu cầu trả hàng
                     </h5>
                 </div>
@@ -32,6 +32,10 @@
                             {
                                 <p><strong>Mã vận đơn:</strong> <span class="badge bg-info">@Model.ShippingCode</span></p>
                             }
+                            <p>
+                                <strong>Trạng thái:</strong>
+                                <span class="status-badge bg-@GetReturnStatusColor(Model.Status) fs-6 px-3 py-2" style="font-size: 0.75rem !important;">@GetReturnStatusText(Model.Status)</span>
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -55,7 +59,7 @@
                                 <tr>
                                     <th>Mã hoá đơn</th>
                                     <th>Ngày đặt đơn</th>
-                                    <th>Tổng thanh toán</th>
+                                    <th>Tổng đơn</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -71,7 +75,7 @@
             </div>
         </div>
 
-        <div class="col-md-4">
+        @* <div class="col-md-4">
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0">
@@ -129,7 +133,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> *@
     </div>
 </div>
 
@@ -191,7 +195,7 @@
         switch (status)
         {
             case ReturnStatus.ChapNhanDuyetHangHoan:
-                return "Chấp nhận duyệt hàng hoàn";
+                return "Chờ duyệt";
             case ReturnStatus.LayHangHoan:
                 return "Lấy hàng hoàn";
             case ReturnStatus.HoanHang:

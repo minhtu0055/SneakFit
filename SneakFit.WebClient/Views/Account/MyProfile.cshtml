@@ -35,7 +35,7 @@
         switch (status)
         {
             case ReturnStatus.ChapNhanDuyetHangHoan:
-                return "Chấp nhận duyệt hàng hoàn";
+                return "Chờ duyệt";
             case ReturnStatus.LayHangHoan:
                 return "Lấy hàng hoàn";
             case ReturnStatus.HoanHang:
@@ -358,7 +358,7 @@
                                                                     }
                                                                 </div>
                                                                 <div class="step-connector warning"></div>
-                                                                <div class="step-title">Chấp nhận duyệt</div>
+                                                                <div class="step-title">Chờ duyệt</div>
                                                             </a>
 
                                                             <a class="progress-step text-decoration-none @(selectedTrangThaiReturns == ((int)ReturnStatus.LayHangHoan).ToString() ? "active-step" : "")"
