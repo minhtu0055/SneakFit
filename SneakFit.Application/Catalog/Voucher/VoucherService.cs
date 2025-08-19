@@ -566,24 +566,25 @@ namespace SneakFit.Application.Catalog.Voucher
                                             && v.SoLuong > 0
                                             && v.ThoiGianBatDau <= now
                                             && v.ThoiGianKetThuc >= now
-                                            && v.DieuKienApDung <= tongTienHoaDon // Thêm điều kiện này
-                                         select v).ToListAsync();
+                                            && v.DieuKienApDung <= tongTienHoaDon
+                                            && !vu.IsUsed // Chỉ lấy voucher chưa được sử dụng
+                                         select new { Voucher = v, VoucherUser = vu }).ToListAsync();
 
             // Map sang ViewModel
             var result = privateVouchers.Select(x => new VoucherViewModels
             {
-                Id = x.Id,
-                MaVoucher = x.MaVoucher,
-                LoaiGiamGia = x.LoaiGiamGia,
-                loaiVoucher = x.loaiVoucher,
-                GiaTriGiamGia = x.GiaTriGiamGia,
-                DieuKienApDung = x.DieuKienApDung,
-                GiaTriToiDa = x.GiaTriToiDa,
-                SoLuong = x.SoLuong,
-                NgayTao = x.NgayTao,
-                ThoiGianBatDau = x.ThoiGianBatDau,
-                ThoiGianKetThuc = x.ThoiGianKetThuc,
-                TrangThai = x.TrangThai
+                Id = x.Voucher.Id,
+                MaVoucher = x.Voucher.MaVoucher,
+                LoaiGiamGia = x.Voucher.LoaiGiamGia,
+                loaiVoucher = x.Voucher.loaiVoucher,
+                GiaTriGiamGia = x.Voucher.GiaTriGiamGia,
+                DieuKienApDung = x.Voucher.DieuKienApDung,
+                GiaTriToiDa = x.Voucher.GiaTriToiDa,
+                SoLuong = 1, // Mỗi user chỉ có 1 voucher riêng tư
+                NgayTao = x.Voucher.NgayTao,
+                ThoiGianBatDau = x.Voucher.ThoiGianBatDau,
+                ThoiGianKetThuc = x.Voucher.ThoiGianKetThuc,
+                TrangThai = x.Voucher.TrangThai
             }).ToList();
 
             return result;

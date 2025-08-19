@@ -209,6 +209,18 @@ namespace SneakFit.Application.Catalog.HoaDon
                         voucher.SoLuong--;
                         if (voucher.SoLuong == 0)
                             voucher.TrangThai = TrangThaiGiamGia.HetHan;
+                        
+                        // Nếu là voucher riêng tư, cập nhật trạng thái đã sử dụng
+                        if (voucher.loaiVoucher == SneakFit.Data.Enums.LoaiVoucher.RiengTu && hoaDon.UserId.HasValue)
+                        {
+                            var voucherUser = await _context.VoucherUser
+                                .FirstOrDefaultAsync(vu => vu.VoucherId == voucher.Id && vu.UserId == hoaDon.UserId.Value);
+                            if (voucherUser != null)
+                            {
+                                voucherUser.IsUsed = true;
+                            }
+                        }
+                        
                         await _context.SaveChangesAsync();
                     }
                     else
@@ -393,7 +405,7 @@ namespace SneakFit.Application.Catalog.HoaDon
 
             hoaDon.TrangThai = newStatus;
             // Nếu là hóa dơn online cod 
-            if (hoaDon.LoaiHoaDon == Data.Enums.LoaiHoaDon.Online && hoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD && newStatus == Data.Enums.TrangThaiHoaDon.DaXacNhan)
+            if (hoaDon.LoaiHoaDon == LoaiHoaDon.Online && hoaDon.PhuongThucThanhToan == PhuongThucThanhToan.COD && newStatus == TrangThaiHoaDon.DaXacNhan)
             {
                 if (hoaDon.HoaDonChiTiet != null)
                 {
@@ -414,7 +426,6 @@ namespace SneakFit.Application.Catalog.HoaDon
                             }
                             hdct.SanPhamChiTiet.SoLuong -= hdct.SoLuong;
                         }
-                        // Nếu muốn kiểm tra hết hàng thì có thể thêm logic báo lỗi ở đây
                     }
                 }
             }
@@ -440,6 +451,6 @@ namespace SneakFit.Application.Catalog.HoaDon
 
             await _context.SaveChangesAsync();
             return true;
-        }
+        }    
     }
 }
