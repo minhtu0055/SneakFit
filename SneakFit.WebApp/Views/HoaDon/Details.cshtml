@@ -73,6 +73,15 @@
             new { Status = TrangThaiHoaDon.DaThanhToan, Color = "emerald", Icon = "icon-payment", Title = "Đã thanh toán", Time = GetTimeForStatus(TrangThaiHoaDon.DaThanhToan).ToString("HH:mm:ss dd/MM/yyyy") },
             new { Status = TrangThaiHoaDon.ThanhCong, Color = "emerald", Icon = "icon-check", Title = "Thành công", Time = GetTimeForStatus(TrangThaiHoaDon.ThanhCong).ToString("HH:mm:ss dd/MM/yyyy") }
         };
+
+    // Nếu hóa đơn đã bị hủy, chỉ hiển thị bước "Chờ xác nhận" và "Đã hủy"
+    if (Model.TrangThai == TrangThaiHoaDon.DaHuy || statusTimeMap.ContainsKey(TrangThaiHoaDon.DaHuy))
+    {
+        steps = new[] {
+            new { Status = TrangThaiHoaDon.ChoXacNhan, Color = "royal-blue", Icon = "icon-file", Title = "Chờ xác nhận", Time = GetTimeForStatus(TrangThaiHoaDon.ChoXacNhan).ToString("HH:mm:ss dd/MM/yyyy") },
+            new { Status = TrangThaiHoaDon.DaHuy, Color = "rose", Icon = "icon-cancel", Title = "Đã hủy", Time = GetTimeForStatus(TrangThaiHoaDon.DaHuy).ToString("HH:mm:ss dd/MM/yyyy") }
+        };
+    }
     
     // Lọc bỏ trạng thái "Đã thanh toán" cho hóa đơn cần ẩn trạng thái này
     if (shouldSkipPaidStatus)
@@ -86,6 +95,14 @@
         statusTimeMap.ContainsKey(s.Status) ||
         s.Status == TrangThaiHoaDon.ChoXacNhan // Luôn hiển thị bước đầu tiên
     ).Distinct().OrderBy(s => (int)s.Status).ToList();
+
+    // Nếu trạng thái hiện tại là Đã hủy, chỉ giữ 2 bước: Chờ xác nhận -> Đã hủy
+    if (Model.TrangThai == TrangThaiHoaDon.DaHuy)
+    {
+        visibleSteps = visibleSteps.Where(s => s.Status == TrangThaiHoaDon.ChoXacNhan || s.Status == TrangThaiHoaDon.DaHuy)
+                                   .OrderBy(s => (int)s.Status)
+                                   .ToList();
+    }
     
     // Nếu hóa đơn mới tạo và chưa có lịch sử, chỉ hiển thị bước đầu tiên
     if (lichSuHoaDon.Count == 0 && Model.TrangThai == TrangThaiHoaDon.ChoXacNhan)
@@ -276,6 +293,11 @@
             background-color: #10b981;
         }
 
+        /* Màu cho trạng thái hủy */
+        .arrow-segment.rose::before {
+            background-color: #ef4444;
+        }
+
         /* Chấm tròn trắng trên mũi tên */
         .arrow-dot {
             position: absolute;
@@ -363,6 +385,12 @@
         .step-connector.emerald {
             background-color: #10b981;
         }
+        .step-icon.rose {
+            background-color: #ef4444;
+        }
+        .step-connector.rose {
+            background-color: #ef4444;
+        }
         .step-icon.inactive {
             background-color: #e0e0e0 !important;
             color: #bdbdbd !important;
@@ -449,6 +477,13 @@
             width: 24px;
             height: 24px;
             background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z'/%3E%3C/svg%3E") center/contain no-repeat;
+        }
+        .icon-cancel::before {
+            content: "";
+            display: block;
+            width: 24px;
+            height: 24px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z'/%3E%3C/svg%3E") center/contain no-repeat;
         }
 
         .action-buttons {
@@ -648,7 +683,6 @@
                     </div>                 
                 </div>
             </div>
-
             <!-- Order Items -->
             <div class="card">
                 <div class="card-header">
@@ -858,6 +892,18 @@
                     default: toastr.error('Không thể chuyển trạng thái!'); return;
                 }
                 // Hiển thị modal nhập ghi chú
+                $('#txtGhiChu').val('');
+                $('#modalGhiChu').modal('show');
+            });
+
+            // Xử lý nút Hủy: nếu đang ở trạng thái Chờ xác nhận (0) thì chuyển thẳng sang Đã hủy (6)
+            $('#btnHuy').on('click', function () {
+                var currentStatus = @((int)Model.TrangThai);
+                if (currentStatus !== 0) {
+                    toastr.error('Chỉ có thể hủy khi trạng thái là Chờ xác nhận!');
+                    return;
+                }
+                nextStatus = 6; // Đã hủy
                 $('#txtGhiChu').val('');
                 $('#modalGhiChu').modal('show');
             });
