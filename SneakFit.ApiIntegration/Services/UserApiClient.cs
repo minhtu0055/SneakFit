@@ -171,7 +171,7 @@ namespace SneakFit.ApiIntegration.Services
             var json = JsonConvert.SerializeObject(request);
             var httpContent = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await client.PutAsync($"/api/user/{id}/role", httpContent);
+            var response = await client.PutAsync($"/api/user/{id}/roles", httpContent);
             var result = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)

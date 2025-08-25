@@ -9,7 +9,7 @@ namespace SneakFit.BackEndAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -65,7 +65,7 @@ namespace SneakFit.BackEndAPI.Controllers
 
             return Ok(new ApiSuccessResult<bool>(result));
         }
-        [HttpPut("{id}/role")]
+        [HttpPut("{id}/roles")]
         public async Task<IActionResult> RoleAssign(Guid id, [FromBody] RoleAssignRequest request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
