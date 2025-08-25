@@ -197,6 +197,16 @@ namespace SneakFit.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> RoleAssign(Guid id)
         {
+            // Kiểm tra xem user hiện tại có phải là admin đang cố gắng thay đổi quyền của chính mình không
+            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var isCurrentUserAdmin = User.IsInRole("Admin");
+            
+            if (isCurrentUserAdmin && currentUserId == id.ToString())
+            {
+                TempData["ErrorMessage"] = "Không thể thay đổi quyền của chính mình để tránh mất quyền truy cập!";
+                return RedirectToAction("Index");
+            }
+            
             var roleAssignRequest = await GetRoleAssignRequest(id);
             return View(roleAssignRequest);
         }
@@ -205,6 +215,16 @@ namespace SneakFit.Admin.Controllers
         {
             if (!ModelState.IsValid)
                 return View();
+
+            // Kiểm tra xem user hiện tại có phải là admin đang cố gắng thay đổi quyền của chính mình không
+            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var isCurrentUserAdmin = User.IsInRole("Admin");
+            
+            if (isCurrentUserAdmin && currentUserId == request.Id.ToString())
+            {
+                TempData["ErrorMessage"] = "Không thể thay đổi quyền của chính mình để tránh mất quyền truy cập!";
+                return RedirectToAction("Index");
+            }
 
             var result = await _userApiClient.RoleAssign(request.Id, request);
 

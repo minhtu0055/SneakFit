@@ -630,7 +630,7 @@
                         <button class="btn btn-primary me-2" id="btnXacNhan">Xác nhận</button>
                         <!-- <button class="btn btn-warning me-2" id="btnQuayLai">Quay lại</button> -->
                     }
-                    @if (Model.TrangThai == TrangThaiHoaDon.ChoXacNhan || Model.GiaoHang == true)
+                    @if (Model.TrangThai == TrangThaiHoaDon.ChoXacNhan && (Model.LoaiHoaDon == LoaiHoaDon.Online || Model.GiaoHang == true))
                     {
                         <button class="btn btn-danger" id="btnHuy">Hủy</button>
                     }
