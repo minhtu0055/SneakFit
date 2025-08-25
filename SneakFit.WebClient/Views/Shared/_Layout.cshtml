@@ -30,7 +30,7 @@
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
-    
+
     <style>
         #qr-video {
             transform: scaleX(-1);
@@ -90,8 +90,8 @@
                                         <span>Hồ sơ cá nhân</span>
                                     </a>
                                     <a class="dropdown-item d-flex align-items-center" href="@Url.Action("MyProfile", "Account")">
-                                    <i class="bi bi-bag-check me-2"></i>
-                                    <span>Đơn hàng của tôi</span>
+                                        <i class="bi bi-bag-check me-2"></i>
+                                        <span>Đơn hàng của tôi</span>
                                     </a>
                                 </div>
                                 <div class="dropdown-footer">
@@ -141,10 +141,10 @@
                             <li><a asp-action="index" asp-controller="Home" class="active">Trang chủ</a></li>
                             @* <li><a href="about.html">About</a></li> *@
                             <li><a asp-action="index" asp-controller="SanPham">Sản phẩm</a></li>
-                      @*       <li><a asp-action="index" asp-controller="danhmuc">Danh mục</a></li> *@
+                            @*       <li><a asp-action="index" asp-controller="danhmuc">Danh mục</a></li> *@
                             <li><a asp-action="index" asp-controller="HoaDon">Hóa đơn</a></li>
-                            <li><a asp-action="index" asp-controller="GioHang">Giỏ hàng</a></li>
-                            <li><a asp-action="checkout" asp-controller="ThanhToan">Thanh toán</a></li>
+                            @* <li><a asp-action="index" asp-controller="GioHang">Giỏ hàng</a></li> *@
+                            @* <li><a asp-action="checkout" asp-controller="ThanhToan">Thanh toán</a></li> *@
                             <li><a asp-action="Index" asp-controller="TraHang">Hoàn hàng của tôi</a></li>
                         </ul>
                     </nav>
@@ -173,34 +173,16 @@
     </main>
 
     <footer id="footer" class="footer" style=" background-color: #F5F8FC">
-        <!-- <div class="footer-newsletter">
-            <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-lg-8 text-center">
-                        <h2>Join Our Newsletter</h2>
-                        <p>Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals.</p>
-                        <form action="forms/newsletter.php" method="post" class="php-email-form">
-                            <div class="newsletter-form d-flex">
-                                <input type="email" name="email" placeholder="Your email address" required="">
-                                <button type="submit">Subscribe</button>
-                            </div>
-                            <div class="loading">Loading</div>
-                            <div class="error-message"></div>
-                            <div class="sent-message">Your subscription request has been sent. Thank you!</div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div> -->
         <div class="footer-main">
             <div class="container">
                 <div class="row gy-4">
-                    <div class="col-lg-3 col-md-6 col-sm-12">
+                    <!-- Cột 1: SneakFit -->
+                    <div class="col-lg-4 col-md-6 col-sm-12">
                         <div class="footer-widget footer-about">
                             <a asp-action="Index" asp-controller="Home" class="logo">
                                 <span class="sitename">SneakFit</span>
                             </a>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in nibh vehicula, facilisis magna ut, consectetur lorem.</p>
+                            <p>SneakFit – Cửa hàng thời trang thể thao mang phong cách trẻ trung, năng động.</p>
                             <div class="footer-contact mt-4">
                                 <div class="contact-item">
                                     <i class="bi bi-geo-alt"></i>
@@ -208,7 +190,7 @@
                                 </div>
                                 <div class="contact-item">
                                     <i class="bi bi-telephone"></i>
-                                    <span>+123456789</span>
+                                    <span>+84 123 456 789</span>
                                 </div>
                                 <div class="contact-item">
                                     <i class="bi bi-envelope"></i>
@@ -218,78 +200,92 @@
                         </div>
                     </div>
 
+                    <!-- Cột 2: Lại Gia Kiệt -->
                     <div class="col-lg-2 col-md-6 col-sm-6">
                         <div class="footer-widget">
-                            <h4>Shop</h4>
-                            <ul class="footer-links">
-                                <li><a href="category.html">New Arrivals</a></li>
-                                <li><a href="category.html">Bestsellers</a></li>
-                                <li><a href="category.html">Women's Clothing</a></li>
-                                <li><a href="category.html">Men's Clothing</a></li>
-                                <li><a href="category.html">Accessories</a></li>
-                                <li><a href="category.html">Sale</a></li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-2 col-md-6 col-sm-6">
-                        <div class="footer-widget">
-                            <h4>Support</h4>
-                            <ul class="footer-links">
-                                <li><a href="support.html">Help Center</a></li>
-                                <li><a href="account.html">Order Status</a></li>
-                                <li><a href="shiping-info.html">Shipping Info</a></li>
-                                <li><a href="return-policy.html">Returns &amp; Exchanges</a></li>
-                                <li><a href="#">Size Guide</a></li>
-                                <li><a href="contact.html">Contact Us</a></li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-2 col-md-6 col-sm-6">
-                        <div class="footer-widget">
-                            <h4>Company</h4>
-                            <ul class="footer-links">
-                                <li><a href="about.html">About Us</a></li>
-                                <li><a href="about.html">Careers</a></li>
-                                <li><a href="about.html">Press</a></li>
-                                <li><a href="about.html">Affiliates</a></li>
-                                <li><a href="about.html">Responsibility</a></li>
-                                <li><a href="about.html">Investors</a></li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="col-lg-3 col-md-6 col-sm-6">
-                        <div class="footer-widget">
-                            <h4>Download Our App</h4>
-                            <p>Shop on the go with our mobile app</p>
-                            <div class="app-buttons">
-                                <a href="#" class="app-btn">
-                                    <i class="bi bi-apple"></i>
-                                    <span>App Store</span>
-                                </a>
-                                <a href="#" class="app-btn">
-                                    <i class="bi bi-google-play"></i>
-                                    <span>Google Play</span>
-                                </a>
+                            <h4>Lại Gia Kiệt</h4>
+                            <div class="footer-contact mt-4">
+                                <div class="contact-item">
+                                    <i class="bi bi-geo-alt"></i>
+                                    <span>Chương Mỹ</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="bi bi-telephone"></i>
+                                    <span>+84 383 212 289</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="bi bi-envelope"></i>
+                                    <span>laigiakiet@gmail.com</span>
+                                </div>
                             </div>
-                            <div class="social-links mt-4">
-                                <h5>Follow Us</h5>
-                                <div class="social-icons">
-                                    <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-                                    <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
-                                    <a href="#" aria-label="Twitter"><i class="bi bi-twitter-x"></i></a>
-                                    <a href="#" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>
-                                    <a href="#" aria-label="Pinterest"><i class="bi bi-pinterest"></i></a>
-                                    <a href="#" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+                        </div>
+                    </div>
+
+                    <!-- Cột 3: Phí Minh Tú -->
+                    <div class="col-lg-2 col-md-6 col-sm-6">
+                        <div class="footer-widget">
+                            <h4>Phí Minh Tú</h4>
+                            <div class="footer-contact mt-4">
+                                <div class="contact-item">
+                                    <i class="bi bi-geo-alt"></i>
+                                    <span>Quốc Oai</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="bi bi-telephone"></i>
+                                    <span>+84 912 311 205</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="bi bi-envelope"></i>
+                                    <span>phiminhtu005@gmail.com</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cột 4: Hoàng Văn Thiện -->
+                    <div class="col-lg-2 col-md-6 col-sm-6">
+                        <div class="footer-widget">
+                            <h4>Hoàng Văn Thiện</h4>
+                            <div class="footer-contact mt-4">
+                                <div class="contact-item">
+                                    <i class="bi bi-geo-alt"></i>
+                                    <span>Thanh Hóa</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="bi bi-telephone"></i>
+                                    <span>+84 337 496 175</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="bi bi-envelope"></i>
+                                    <span>thienhvph49820@gmail.com</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cột 5: Phương Công Long -->
+                    <div class="col-lg-2 col-md-6 col-sm-6">
+                        <div class="footer-widget">
+                            <h4>Phương Công Long</h4>
+                            <div class="footer-contact mt-4">
+                                <div class="contact-item">
+                                    <i class="bi bi-geo-alt"></i>
+                                    <span>Ba Vì</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="bi bi-telephone"></i>
+                                    <span>+84 974 988 673</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="bi bi-envelope"></i>
+                                    <span>longpcph49423@gmail.com</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>      
+        </div>
     </footer>
 
     <!-- Scroll Top -->
