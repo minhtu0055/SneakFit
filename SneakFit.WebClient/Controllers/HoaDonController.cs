@@ -67,6 +67,10 @@ namespace SneakFit.WebClient.Controllers
                     .ToList();
                 return View(filtered);
             }
+            catch (UnauthorizedAccessException)
+            {
+                return RedirectToAction("Index", "Login");
+            }
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = $"Lỗi khi lấy danh sách hóa đơn: {ex.Message}";
